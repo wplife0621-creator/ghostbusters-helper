@@ -1,0 +1,17 @@
+# 원본 자료와 대용량 참고 파일은 웹 배포에서 제외
+*.xlsx
+*.xls
+*.mkv
+*.mp4
+*.mov
+*.avi
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# 운영체제/편집기 파일
+.DS_Store
+Thumbs.db
+.vscode/
+

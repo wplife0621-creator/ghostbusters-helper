@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>고스트버스터즈 플레이 도우미</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">고스트버스터즈 플레이 도우미</p>
+      <h1>찾고, 비교하고, 시간 계산까지 한 화면에서</h1>
+    </div>
+    <div class="summary" id="summary"></div>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls">
+      <label class="field wide">
+        <span>통합 검색</span>
+        <input id="searchInput" type="search" placeholder="몬스터, 스탯, 패시브, 번호, 각인 검색">
+      </label>
+      <label class="field">
+        <span>자료</span>
+        <select id="typeFilter"></select>
+      </label>
+      <label class="field">
+        <span>층</span>
+        <select id="floorFilter"></select>
+      </label>
+      <label class="field">
+        <span>추천 캐릭터</span>
+        <select id="characterFilter"></select>
+      </label>
+      <label class="field">
+        <span>정렬</span>
+        <select id="sortFilter">
+          <option value="default">기본</option>
+          <option value="grade">등급 우선</option>
+          <option value="cooldown">쿨타임 짧은 순</option>
+          <option value="cost">비용 낮은 순</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="quick-grid">
+      <article class="panel calculator">
+        <div class="section-title">
+          <h2>시간 계산기</h2>
+          <p>게임 1시간 = 현실 4초 기준</p>
+        </div>
+        <div class="calc-row">
+          <label class="field">
+            <span>게임 시간</span>
+            <input id="gameHours" type="number" min="0" step="0.5" value="24">
+          </label>
+          <label class="field">
+            <span>단위</span>
+            <select id="timeUnit">
+              <option value="hour">시간</option>
+              <option value="condition">컨디션</option>
+            </select>
+          </label>
+        </div>
+        <div class="calc-result" id="timeResult"></div>
+      </article>
+
+      <article class="panel planner">
+        <div class="section-title">
+          <h2>추천 후보</h2>
+          <p>추천 캐릭터가 붙은 정수만 빠르게 보기</p>
+        </div>
+        <div id="recommendations" class="mini-list"></div>
+      </article>
+    </section>
+
+    <section class="panel results-panel">
+      <div class="section-title">
+        <h2>검색 결과</h2>
+        <p id="resultCount">0건</p>
+      </div>
+      <div id="results" class="results"></div>
+    </section>
+  </main>
+
+  <script src="./ghost-data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
