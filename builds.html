@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>빌드 공유 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260521-1">
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>빌드 공유</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <a href="./builds.html" aria-current="page">빌드 공유</a>
+        <a href="./report.html">정보 제보/수정</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout build-layout">
+    <section class="panel build-panel page-panel">
+      <div class="section-title compact-title">
+        <h2>빌드 등록</h2>
+        <p>캐릭터와 레벨을 고르면 레벨만큼 정수 선택 칸이 열립니다. 저장 후 공유 링크를 만들 수 있습니다.</p>
+      </div>
+      <form id="buildForm" class="build-form">
+        <label class="field">
+          <span>빌드명</span>
+          <input id="buildTitle" required placeholder="예: 비요른 초반 탱커 빌드">
+        </label>
+        <label class="field">
+          <span>작성자</span>
+          <input id="buildAuthor" placeholder="닉네임">
+        </label>
+        <label class="field">
+          <span>캐릭터</span>
+          <select id="buildCharacter">
+            <option value="비요른">비요른</option>
+            <option value="에르웬">에르웬</option>
+            <option value="미샤">미샤</option>
+            <option value="아이나르">아이나르</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>레벨</span>
+          <select id="buildLevel">
+            <option value="1">1레벨</option>
+            <option value="2">2레벨</option>
+            <option value="3">3레벨</option>
+            <option value="4">4레벨</option>
+            <option value="5">5레벨</option>
+            <option value="6">6레벨</option>
+          </select>
+        </label>
+        <div id="buildEssenceSlots" class="build-essence-slots"></div>
+        <label class="field build-note">
+          <span>설명</span>
+          <textarea id="buildNote" rows="3" placeholder="운용 팁, 장점, 대체 정수 등을 적어주세요."></textarea>
+        </label>
+        <button class="submit-report" type="submit">빌드 등록</button>
+      </form>
+    </section>
+
+    <section class="panel build-panel page-panel">
+      <div class="review-head">
+        <strong id="buildCount">등록된 빌드 0개</strong>
+        <button id="copyCurrentBuild" type="button">현재 빌드 공유 링크 복사</button>
+      </div>
+      <div id="sharedBuildView" class="shared-build-view"></div>
+      <div id="buildList" class="build-list"></div>
+    </section>
+  </main>
+
+  <script src="./ghost-data.js?v=20260520"></script>
+  <script src="./app.js?v=20260521-1"></script>
+</body>
+</html>

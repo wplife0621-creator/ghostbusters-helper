@@ -137,7 +137,8 @@ body {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 39px;
   border: 1px solid var(--line);
@@ -149,9 +150,16 @@ select {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: var(--brand);
   outline: 3px solid rgba(31, 111, 235, 0.16);
+}
+
+textarea {
+  min-height: 86px;
+  padding: 10px;
+  resize: vertical;
 }
 
 .calc-row {
@@ -178,18 +186,100 @@ select:focus {
   padding: 14px;
 }
 
+.build-panel {
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.build-layout {
+  width: min(1120px, calc(100% - 28px));
+}
+
 .page-panel:first-child {
   margin-top: 0;
 }
 
-.report-form {
+.report-form,
+.build-form {
   display: grid;
   grid-template-columns: repeat(4, minmax(130px, 1fr));
   gap: 10px;
 }
 
-.report-form .wide {
+.report-form .wide,
+.build-note {
   grid-column: span 2;
+}
+
+.build-essence-slots {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.shared-build-view {
+  margin-top: 10px;
+}
+
+.build-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.build-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 12px;
+}
+
+.build-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.build-card strong {
+  display: block;
+  font-size: 15px;
+}
+
+.build-card span,
+.build-card p {
+  color: #44516a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.build-card p {
+  margin: 0;
+}
+
+.build-essence-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.build-essence-list span {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  border-radius: 999px;
+  background: #edf4ff;
+  color: var(--brand-dark);
+  font-weight: 900;
+  padding: 3px 8px;
 }
 
 .admin-row {
@@ -573,6 +663,9 @@ select:focus {
   .tool-strip,
   .controls,
   .report-form,
+  .build-form,
+  .build-essence-slots,
+  .build-list,
   .admin-row,
   .edit-monster-matches,
   .pending-reports {

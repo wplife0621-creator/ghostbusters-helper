@@ -4,6 +4,7 @@ const storageKeys = {
   pending: "dukhubusters.pendingReports",
   approved: "dukhubusters.approvedReports",
   adminUnlocked: "dukhubusters.adminUnlocked",
+  builds: "dukhubusters.sharedBuilds",
 };
 
 const adminCode = "0621";
@@ -41,10 +42,22 @@ const els = {
   adminUnlock: document.querySelector("#adminUnlock"),
   adminLock: document.querySelector("#adminLock"),
   adminStatus: document.querySelector("#adminStatus"),
+  buildForm: document.querySelector("#buildForm"),
+  buildTitle: document.querySelector("#buildTitle"),
+  buildAuthor: document.querySelector("#buildAuthor"),
+  buildCharacter: document.querySelector("#buildCharacter"),
+  buildLevel: document.querySelector("#buildLevel"),
+  buildEssenceSlots: document.querySelector("#buildEssenceSlots"),
+  buildNote: document.querySelector("#buildNote"),
+  buildCount: document.querySelector("#buildCount"),
+  copyCurrentBuild: document.querySelector("#copyCurrentBuild"),
+  sharedBuildView: document.querySelector("#sharedBuildView"),
+  buildList: document.querySelector("#buildList"),
 };
 
 let approvedReports = loadStoredRows(storageKeys.approved);
 let pendingReports = loadStoredRows(storageKeys.pending);
+let savedBuilds = loadStoredRows(storageKeys.builds);
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
 const statNoneLabel = "스탯 선택 안 함";
@@ -148,6 +161,7 @@ function statValue(row, statName) {
 function init() {
   if (els.search) initHome();
   if (els.reportForm) initReport();
+  if (els.buildForm) initBuilds();
 }
 
 function initHome() {
@@ -178,6 +192,171 @@ function initReport() {
   });
   updateAdminUi();
   renderPendingReports();
+}
+
+function initBuilds() {
+  renderBuildSlots();
+  loadBuildFromUrl();
+  els.buildLevel.addEventListener("change", renderBuildSlots);
+  els.buildForm.addEventListener("submit", submitBuild);
+  els.copyCurrentBuild.addEventListener("click", copyCurrentBuildLink);
+  els.buildList.addEventListener("click", handleBuildListClick);
+  renderBuilds();
+}
+
+function essenceOptionList() {
+  return unique(essenceRows.map((row) => row["몬스터"]));
+}
+
+function renderBuildSlots() {
+  const oldValues = [...els.buildEssenceSlots.querySelectorAll("select")].map((select) => select.value);
+  const level = Number(els.buildLevel.value || 1);
+  const options = essenceOptionList()
+    .map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+    .join("");
+  els.buildEssenceSlots.innerHTML = Array.from({ length: level }, (_, index) => `
+    <label class="field">
+      <span>정수 ${index + 1}</span>
+      <select class="build-essence-select" required>
+        <option value="">정수 선택</option>
+        ${options}
+      </select>
+    </label>
+  `).join("");
+  els.buildEssenceSlots.querySelectorAll("select").forEach((select, index) => {
+    if (oldValues[index]) select.value = oldValues[index];
+  });
+}
+
+function readBuildForm() {
+  return {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    title: textOf(els.buildTitle.value),
+    author: textOf(els.buildAuthor.value) || "익명",
+    character: els.buildCharacter.value,
+    level: Number(els.buildLevel.value || 1),
+    essences: [...els.buildEssenceSlots.querySelectorAll("select")].map((select) => select.value).filter(Boolean),
+    note: textOf(els.buildNote.value),
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function submitBuild(event) {
+  event.preventDefault();
+  const build = readBuildForm();
+  if (build.essences.length !== build.level) return;
+  savedBuilds.unshift(build);
+  saveStoredRows(storageKeys.builds, savedBuilds);
+  els.buildForm.reset();
+  renderBuildSlots();
+  renderBuilds();
+}
+
+function applyBuildToForm(build) {
+  if (!build) return;
+  els.buildTitle.value = build.title || "";
+  els.buildAuthor.value = build.author || "";
+  els.buildCharacter.value = build.character || "비요른";
+  els.buildLevel.value = String(build.level || 1);
+  renderBuildSlots();
+  els.buildEssenceSlots.querySelectorAll("select").forEach((select, index) => {
+    select.value = build.essences?.[index] || "";
+  });
+  els.buildNote.value = build.note || "";
+}
+
+function loadBuildFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const encoded = params.get("build");
+  if (!encoded) return;
+  const build = decodeBuild(encoded);
+  if (!build) return;
+  applyBuildToForm(build);
+  els.sharedBuildView.innerHTML = buildCard(build, true);
+}
+
+function encodeBuild(build) {
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(build))));
+  } catch {
+    return "";
+  }
+}
+
+function decodeBuild(encoded) {
+  try {
+    return JSON.parse(decodeURIComponent(escape(atob(encoded))));
+  } catch {
+    return null;
+  }
+}
+
+function shareUrlForBuild(build) {
+  const url = new URL(location.href);
+  url.pathname = url.pathname.replace(/[^/]*$/, "builds.html");
+  url.search = `?build=${encodeBuild(build)}`;
+  return url.toString();
+}
+
+async function copyText(text, button, defaultText) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.textContent = "복사 완료";
+  } catch {
+    button.textContent = "복사 실패";
+  }
+  setTimeout(() => {
+    button.textContent = defaultText;
+  }, 1500);
+}
+
+function copyCurrentBuildLink() {
+  const build = readBuildForm();
+  copyText(shareUrlForBuild(build), els.copyCurrentBuild, "현재 빌드 공유 링크 복사");
+}
+
+function handleBuildListClick(event) {
+  const button = event.target.closest("button[data-build-action]");
+  if (!button) return;
+  const build = savedBuilds.find((item) => item.id === button.closest("[data-build-id]")?.dataset.buildId);
+  if (!build) return;
+  if (button.dataset.buildAction === "share") {
+    copyText(shareUrlForBuild(build), button, "공유 링크 복사");
+  }
+  if (button.dataset.buildAction === "load") {
+    applyBuildToForm(build);
+  }
+}
+
+function renderBuilds() {
+  els.buildCount.textContent = `등록된 빌드 ${savedBuilds.length}개`;
+  els.buildList.innerHTML = savedBuilds.length
+    ? savedBuilds.map((build) => buildCard(build, false)).join("")
+    : `<div class="empty compact-empty">등록된 빌드가 없습니다.</div>`;
+}
+
+function buildCard(build, shared) {
+  return `
+    <article class="build-card" data-build-id="${escapeHtml(build.id || "")}">
+      <div class="build-card-head">
+        <div>
+          <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
+          <span>${escapeHtml(build.character)} · ${escapeHtml(build.level)}레벨 · ${escapeHtml(build.author || "익명")}</span>
+        </div>
+        ${shared ? `<span class="grade-pill">공유 빌드</span>` : ""}
+      </div>
+      <div class="build-essence-list">
+        ${(build.essences || []).map((name, index) => `<span>${index + 1}. ${escapeHtml(name)}</span>`).join("")}
+      </div>
+      ${build.note ? `<p>${escapeHtml(build.note)}</p>` : ""}
+      ${shared ? "" : `
+        <div class="pending-actions">
+          <button type="button" data-build-action="share">공유 링크 복사</button>
+          <button type="button" data-build-action="load">불러오기</button>
+        </div>
+      `}
+    </article>
+  `;
 }
 
 function unlockAdmin() {
