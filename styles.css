@@ -250,7 +250,6 @@ textarea {
 
 .build-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 10px;
 }
@@ -311,6 +310,35 @@ textarea {
 
 .build-member-summary b {
   font-size: 13px;
+}
+
+.build-row {
+  grid-template-columns: minmax(118px, 0.7fr) minmax(150px, 0.9fr) minmax(220px, 1.3fr) minmax(260px, 1.5fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.build-row strong,
+.build-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.build-row-date {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.build-row-summary,
+.build-row-essences {
+  color: #44516a;
+  font-size: 12px;
+}
+
+.build-row .pending-actions {
+  justify-content: flex-end;
 }
 
 .admin-row {
@@ -698,6 +726,7 @@ textarea {
   .build-member-head,
   .build-essence-slots,
   .build-list,
+  .build-row,
   .admin-row,
   .edit-monster-matches,
   .pending-reports {

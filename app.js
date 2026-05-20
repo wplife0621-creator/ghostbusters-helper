@@ -251,7 +251,7 @@ function renderBuildCharacterSlots() {
     const essenceInputs = Array.from({ length: level }, (__, essenceIndex) => `
       <label class="field">
         <span>정수 ${essenceIndex + 1}</span>
-        <input class="build-essence-input" list="buildEssenceOptions" required placeholder="정수 선택 또는 직접 입력" value="${escapeHtml(draft.essences?.[essenceIndex] || "")}">
+        <input class="build-essence-input" list="buildEssenceOptions" placeholder="정수 선택, 직접 입력, 빈칸 가능" value="${escapeHtml(draft.essences?.[essenceIndex] || "")}">
       </label>
     `).join("");
     return `
@@ -291,7 +291,7 @@ function readBuildMembers() {
     return {
       character: card.querySelector(".build-member-character").value,
       level,
-      essences: [...card.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)).filter(Boolean),
+      essences: [...card.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)),
     };
   });
 }
@@ -311,7 +311,6 @@ function readBuildForm() {
 function submitBuild(event) {
   event.preventDefault();
   const build = readBuildForm();
-  if (build.members.some((member) => member.essences.length !== member.level)) return;
   savedBuilds.unshift(build);
   saveStoredRows(storageKeys.builds, savedBuilds);
   els.buildForm.reset();
@@ -411,11 +410,35 @@ function renderBuilds() {
     : `<div class="empty compact-empty">등록된 빌드가 없습니다.</div>`;
 }
 
+function formatBuildDate(value) {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) return "-";
+  const pad = (number) => String(number).padStart(2, "0");
+  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 function buildCard(build, shared) {
   const normalized = normalizeBuild(build);
   const memberSummary = normalized.members
     .map((member) => `${member.character} ${member.level}레벨`)
     .join(" · ");
+  const essenceSummary = normalized.members
+    .map((member) => `${member.character}: ${(member.essences || []).map((name) => name || "빈칸").join(", ")}`)
+    .join(" / ");
+  if (!shared) {
+    return `
+      <article class="build-card build-row" data-build-id="${escapeHtml(build.id || "")}">
+        <span class="build-row-date">${escapeHtml(formatBuildDate(build.createdAt))}</span>
+        <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
+        <span class="build-row-summary">${escapeHtml(memberSummary)} · ${escapeHtml(build.author || "익명")}</span>
+        <span class="build-row-essences">${escapeHtml(essenceSummary)}</span>
+        <div class="pending-actions">
+          <button type="button" data-build-action="share">공유 링크 복사</button>
+          <button type="button" data-build-action="load">불러오기</button>
+        </div>
+      </article>
+    `;
+  }
   return `
     <article class="build-card" data-build-id="${escapeHtml(build.id || "")}">
       <div class="build-card-head">
@@ -429,7 +452,7 @@ function buildCard(build, shared) {
         <div class="build-member-summary">
           <b>${escapeHtml(member.character)} ${escapeHtml(member.level)}레벨</b>
           <div class="build-essence-list">
-            ${(member.essences || []).map((name, index) => `<span>${index + 1}. ${escapeHtml(name)}</span>`).join("")}
+            ${(member.essences || []).map((name, index) => `<span>${index + 1}. ${escapeHtml(name || "빈칸")}</span>`).join("")}
           </div>
         </div>
       `).join("")}
