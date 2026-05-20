@@ -47,6 +47,7 @@ const els = {
   buildAuthor: document.querySelector("#buildAuthor"),
   buildCharacter: document.querySelector("#buildCharacter"),
   buildLevel: document.querySelector("#buildLevel"),
+  buildEssenceOptions: document.querySelector("#buildEssenceOptions"),
   buildEssenceSlots: document.querySelector("#buildEssenceSlots"),
   buildNote: document.querySelector("#buildNote"),
   buildCount: document.querySelector("#buildCount"),
@@ -195,6 +196,7 @@ function initReport() {
 }
 
 function initBuilds() {
+  fillBuildEssenceOptions();
   renderBuildSlots();
   loadBuildFromUrl();
   els.buildLevel.addEventListener("change", renderBuildSlots);
@@ -208,23 +210,23 @@ function essenceOptionList() {
   return unique(essenceRows.map((row) => row["몬스터"]));
 }
 
-function renderBuildSlots() {
-  const oldValues = [...els.buildEssenceSlots.querySelectorAll("select")].map((select) => select.value);
-  const level = Number(els.buildLevel.value || 1);
-  const options = essenceOptionList()
-    .map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+function fillBuildEssenceOptions() {
+  els.buildEssenceOptions.innerHTML = essenceOptionList()
+    .map((name) => `<option value="${escapeHtml(name)}"></option>`)
     .join("");
+}
+
+function renderBuildSlots() {
+  const oldValues = [...els.buildEssenceSlots.querySelectorAll(".build-essence-input")].map((input) => input.value);
+  const level = Number(els.buildLevel.value || 1);
   els.buildEssenceSlots.innerHTML = Array.from({ length: level }, (_, index) => `
     <label class="field">
       <span>정수 ${index + 1}</span>
-      <select class="build-essence-select" required>
-        <option value="">정수 선택</option>
-        ${options}
-      </select>
+      <input class="build-essence-input" list="buildEssenceOptions" required placeholder="정수 선택 또는 직접 입력">
     </label>
   `).join("");
-  els.buildEssenceSlots.querySelectorAll("select").forEach((select, index) => {
-    if (oldValues[index]) select.value = oldValues[index];
+  els.buildEssenceSlots.querySelectorAll(".build-essence-input").forEach((input, index) => {
+    if (oldValues[index]) input.value = oldValues[index];
   });
 }
 
@@ -235,7 +237,7 @@ function readBuildForm() {
     author: textOf(els.buildAuthor.value) || "익명",
     character: els.buildCharacter.value,
     level: Number(els.buildLevel.value || 1),
-    essences: [...els.buildEssenceSlots.querySelectorAll("select")].map((select) => select.value).filter(Boolean),
+    essences: [...els.buildEssenceSlots.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)).filter(Boolean),
     note: textOf(els.buildNote.value),
     createdAt: new Date().toISOString(),
   };
@@ -259,8 +261,8 @@ function applyBuildToForm(build) {
   els.buildCharacter.value = build.character || "비요른";
   els.buildLevel.value = String(build.level || 1);
   renderBuildSlots();
-  els.buildEssenceSlots.querySelectorAll("select").forEach((select, index) => {
-    select.value = build.essences?.[index] || "";
+  els.buildEssenceSlots.querySelectorAll(".build-essence-input").forEach((input, index) => {
+    input.value = build.essences?.[index] || "";
   });
   els.buildNote.value = build.note || "";
 }
