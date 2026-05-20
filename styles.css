@@ -199,6 +199,10 @@ select:focus {
   margin: 16px 0;
 }
 
+.quick-grid.single-tool {
+  grid-template-columns: minmax(280px, 520px);
+}
+
 .calculator,
 .planner,
 .results-panel {

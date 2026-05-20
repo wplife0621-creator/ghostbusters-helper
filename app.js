@@ -14,7 +14,6 @@ const els = {
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
-  recommendations: document.querySelector("#recommendations"),
   gameDays: document.querySelector("#gameDays"),
   gameHours: document.querySelector("#gameHours"),
   timeResult: document.querySelector("#timeResult"),
@@ -280,7 +279,6 @@ function render() {
       : rows.slice(0, 120).map(cardTemplate).join("")
     : `<div class="empty">검색 결과가 없습니다. 필터를 조금 넓혀보세요.</div>`;
 
-  renderRecommendations();
   renderTime();
 }
 
@@ -419,19 +417,6 @@ function detailFor(type, row) {
 
 function line(label, value) {
   return `<span class="label">${escapeHtml(label)}</span> ${escapeHtml(value || "-")}`;
-}
-
-function renderRecommendations() {
-  const picks = essenceRows
-    .filter((row) => textOf(row["추천 캐릭터"]))
-    .slice(0, 8);
-
-  els.recommendations.innerHTML = picks.map((row) => `
-    <div class="mini-item">
-      <strong>${escapeHtml(row["몬스터"])} <span class="tag">${escapeHtml(row["추천 캐릭터"])}</span></strong>
-      <div class="detail">${escapeHtml(row["층"])} ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"])}</div>
-    </div>
-  `).join("");
 }
 
 function renderTime() {
