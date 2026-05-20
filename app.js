@@ -1,9 +1,7 @@
 const data = window.GHOST_DATA || {};
 
 const els = {
-  summary: document.querySelector("#summary"),
   search: document.querySelector("#searchInput"),
-  type: document.querySelector("#typeFilter"),
   floor: document.querySelector("#floorFilter"),
   area: document.querySelector("#areaFilter"),
   character: document.querySelector("#characterFilter"),
@@ -11,22 +9,16 @@ const els = {
   statSort: document.querySelector("#statSortFilter"),
   statChips: document.querySelector("#statChips"),
   statSortSummary: document.querySelector("#statSortSummary"),
-  homeSummary: document.querySelector("#homeSummary"),
-  homeEssencePreview: document.querySelector("#homeEssencePreview"),
-  openEssence: document.querySelector("#openEssence"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
   gameDays: document.querySelector("#gameDays"),
   gameHours: document.querySelector("#gameHours"),
   timeResult: document.querySelector("#timeResult"),
-  tabs: document.querySelectorAll(".tab"),
 };
 
-const types = ["전체", "정수", "넘버스", "미샤", "균열", "스탯", "각인"];
 const essenceRows = data["정수"] || [];
 const statNoneLabel = "스탯 선택 안 함";
-let currentView = "all";
 
 function textOf(value) {
   return String(value ?? "").trim();
@@ -69,6 +61,11 @@ function cleanStatName(value) {
   return textOf(value).replace(/^[[(]+|[\])]+$/g, "").trim();
 }
 
+function excludedStatName(name) {
+  const normalized = cleanStatName(name).toLowerCase();
+  return normalized === "경험치" || normalized === "hp";
+}
+
 function statNames() {
   const fromStatSheet = (data["스탯"] || []).map((row) => cleanStatName(row["이름"]));
   const fromEssence = essenceRows.flatMap((row) =>
@@ -80,13 +77,8 @@ function statNames() {
   return unique([...fromStatSheet, ...fromEssence]).filter((name) => !excludedStatName(name));
 }
 
-function excludedStatName(name) {
-  const normalized = cleanStatName(name).toLowerCase();
-  return normalized === "경험치" || normalized === "hp";
-}
-
 function statValue(row, statName) {
-  if (!statName || statName === "스탯 선택 안 함") return 0;
+  if (!statName || statName === statNoneLabel) return 0;
   const parts = textOf(row["주요 스탯"]).split(",");
   for (const part of parts) {
     const match = part.trim().match(/^(.+?)\s+(-?\d+)/);
@@ -96,74 +88,18 @@ function statValue(row, statName) {
 }
 
 function init() {
-  optionList(els.type, types.slice(1), "전체");
-  optionList(els.floor, unique(Object.values(data).flat().map((row) => row["층"])), "전체 층");
+  optionList(els.floor, unique(essenceRows.map((row) => row["층"])), "전체 층");
   optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
   optionList(els.character, unique(essenceRows.map((row) => row["추천 캐릭터"])), "전체 캐릭터");
   optionList(els.statSort, statNames(), statNoneLabel);
   renderStatChips();
-
-  els.summary.innerHTML = Object.entries(data)
-    .map(([name, rows]) => `<span>${name} ${rows.length}</span>`)
-    .join("");
-  els.homeSummary.innerHTML = Object.entries(data)
-    .map(([name, rows]) => `
-      <div class="home-summary-item">
-        <strong>${escapeHtml(rows.length)}</strong>
-        <span>${escapeHtml(name)}</span>
-      </div>
-    `)
-    .join("");
-  renderHomeEssencePreview();
 
   document.querySelectorAll("input, select").forEach((el) => {
     el.addEventListener("input", render);
     el.addEventListener("change", render);
   });
 
-  els.statSort.addEventListener("change", () => {
-    render();
-  });
-
-  els.openEssence.addEventListener("click", () => {
-    switchView("essence");
-  });
-
-  els.tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      switchView(tab.dataset.view);
-      render();
-    });
-  });
-
-  document.body.dataset.view = currentView;
   render();
-}
-
-function switchView(view) {
-  currentView = view;
-  els.tabs.forEach((item) => item.classList.toggle("active", item.dataset.view === view));
-  document.body.dataset.view = currentView;
-}
-
-function renderHomeEssencePreview() {
-  const picks = essenceRows
-    .filter((row) => textOf(row["추천 캐릭터"]))
-    .slice(0, 8);
-
-  els.homeEssencePreview.innerHTML = picks.map((row) => `
-    <article class="home-essence-card">
-      <div>
-        <strong>${escapeHtml(row["몬스터"])}</strong>
-        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
-      </div>
-      <div class="home-essence-meta">
-        <span>${escapeHtml(row["등급"])}</span>
-        <span>${escapeHtml(row["추천 캐릭터"])}</span>
-      </div>
-      <p>${statBadges(row["주요 스탯"])}</p>
-    </article>
-  `).join("");
 }
 
 function selectedStatName() {
@@ -184,9 +120,7 @@ function renderStatChips() {
   els.statChips.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-stat]");
     if (!button) return;
-
-    const nextStat = button.dataset.stat;
-    els.statSort.value = nextStat;
+    els.statSort.value = button.dataset.stat;
     render();
   });
 }
@@ -199,8 +133,7 @@ function updateStatSortUi() {
     if (button.dataset.stat === statNoneLabel) {
       button.textContent = statNoneLabel;
     } else {
-      const marker = isActive ? " ↓" : " ↕";
-      button.textContent = `${button.dataset.stat}${marker}`;
+      button.textContent = `${button.dataset.stat}${isActive ? " ↓" : " ↕"}`;
     }
   });
 
@@ -209,70 +142,32 @@ function updateStatSortUi() {
     : "스탯을 누르면 높은 순으로 정렬됩니다.";
 }
 
-function collectRows() {
-  if (currentView === "essence") return collectEssenceRows();
-
-  const selectedType = els.type.value;
-  const groups = selectedType === "전체"
-    ? Object.entries(data).filter(([name]) => types.includes(name))
-    : [[selectedType, data[selectedType] || []]];
-
-  let rows = groups.flatMap(([type, rows]) => rows.map((row) => ({ type, row })));
-  rows = applyCommonFilters(rows);
-  return sortRows(rows);
-}
-
 function collectEssenceRows() {
   let rows = essenceRows.map((row) => ({ type: "정수", row }));
-  rows = applyCommonFilters(rows);
+  rows = applyFilters(rows);
+  return sortEssenceRows(rows);
+}
+
+function applyFilters(rows) {
+  const query = textOf(els.search.value).toLowerCase();
+
+  if (els.floor.value !== "전체 층") {
+    rows = rows.filter(({ row }) => textOf(row["층"]) === els.floor.value);
+  }
 
   if (els.area.value !== "전체 구역") {
     rows = rows.filter(({ row }) => textOf(row["구역"]) === els.area.value);
   }
 
-  return sortEssenceRows(rows);
-}
-
-function applyCommonFilters(rows) {
-  const query = textOf(els.search.value).toLowerCase();
-  const floor = els.floor.value;
-  const character = els.character.value;
-
-  if (floor !== "전체 층") {
-    rows = rows.filter(({ row }) => textOf(row["층"]) === floor);
-  }
-
-  if (character !== "전체 캐릭터") {
-    rows = rows.filter(({ row }) => textOf(row["추천 캐릭터"]) === character);
+  if (els.character.value !== "전체 캐릭터") {
+    rows = rows.filter(({ row }) => textOf(row["추천 캐릭터"]) === els.character.value);
   }
 
   if (query) {
-    rows = rows.filter(({ type, row }) => {
-      const haystack = [type, ...Object.values(row)].join(" ").toLowerCase();
-      return haystack.includes(query);
-    });
+    rows = rows.filter(({ row }) => Object.values(row).join(" ").toLowerCase().includes(query));
   }
 
   return rows;
-}
-
-function sortRows(rows) {
-  const mode = els.sort.value;
-  const copy = [...rows];
-
-  if (mode === "grade") {
-    return copy.sort((a, b) => numberFrom(a.row["등급"]) - numberFrom(b.row["등급"]));
-  }
-
-  if (mode === "cooldown") {
-    return copy.sort((a, b) => cooldownOf(a.row) - cooldownOf(b.row));
-  }
-
-  if (mode === "cost") {
-    return copy.sort((a, b) => numberFrom(a.row["비용"]) - numberFrom(b.row["비용"]));
-  }
-
-  return copy;
 }
 
 function sortEssenceRows(rows) {
@@ -281,7 +176,7 @@ function sortEssenceRows(rows) {
   const filteredRows = hasStatSort()
     ? rows.filter(({ row }) => statValue(row, statName) !== 0)
     : rows;
-  const copy = sortRows(filteredRows);
+  const copy = [...filteredRows];
 
   if (hasStatSort()) {
     return copy.sort((a, b) => {
@@ -291,11 +186,15 @@ function sortEssenceRows(rows) {
     });
   }
 
-  if (mode === "default") {
-    return copy.sort(floorAreaMonsterSort);
+  if (mode === "grade") {
+    return copy.sort((a, b) => numberFrom(a.row["등급"]) - numberFrom(b.row["등급"]) || floorAreaMonsterSort(a, b));
   }
 
-  return copy;
+  if (mode === "cooldown") {
+    return copy.sort((a, b) => cooldownOf(a.row) - cooldownOf(b.row) || floorAreaMonsterSort(a, b));
+  }
+
+  return copy.sort(floorAreaMonsterSort);
 }
 
 function floorAreaMonsterSort(a, b) {
@@ -306,27 +205,20 @@ function floorAreaMonsterSort(a, b) {
 }
 
 function render() {
-  const rows = collectRows();
+  const rows = collectEssenceRows();
   updateStatSortUi();
-  els.resultTitle.textContent = currentView === "essence" ? "정수 목록" : "검색 결과";
+  els.resultTitle.textContent = hasStatSort() ? `${selectedStatName()} 정렬` : "정수 목록";
   els.resultCount.textContent = `${rows.length}건`;
-  els.results.className = currentView === "essence" ? "essence-results" : "results";
   els.results.innerHTML = rows.length
-    ? currentView === "essence"
-      ? essenceTemplate(rows)
-      : rows.slice(0, 120).map(cardTemplate).join("")
-    : `<div class="empty">검색 결과가 없습니다. 필터를 조금 넓혀보세요.</div>`;
+    ? essenceTemplate(rows)
+    : `<div class="empty">조건에 맞는 정수가 없습니다. 필터를 조금 넓혀보세요.</div>`;
 
   renderTime();
 }
 
 function essenceTemplate(rows) {
   if (hasStatSort()) {
-    return `
-      <div class="essence-table-wrap">
-        ${essenceTable(rows)}
-      </div>
-    `;
+    return `<div class="essence-table-wrap">${essenceTable(rows)}</div>`;
   }
 
   const groups = new Map();
@@ -344,9 +236,7 @@ function essenceTemplate(rows) {
           <h3>${escapeHtml(floor)} · ${escapeHtml(area)}</h3>
           <span>${items.length}마리</span>
         </div>
-        <div class="essence-table-wrap">
-          ${essenceTable(items)}
-        </div>
+        <div class="essence-table-wrap">${essenceTable(items)}</div>
       </section>
     `;
   }).join("");
@@ -411,66 +301,6 @@ function skillText(value) {
   const [name, ...rest] = text.split(":");
   if (!rest.length) return escapeHtml(text);
   return `<b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}`;
-}
-
-function cardTemplate({ type, row }) {
-  const title = titleFor(type, row);
-  const detail = detailFor(type, row);
-  const meta = metaFor(type, row);
-  const statMeta = currentView === "essence" && type === "정수" && hasStatSort()
-    ? [`${selectedStatName()} ${statValue(row, selectedStatName())}`]
-    : [];
-
-  return `
-    <article class="card">
-      <div class="card-head">
-        <h3 class="card-title">${escapeHtml(title)}</h3>
-        <span class="badge">${escapeHtml(type)}</span>
-      </div>
-      <div class="meta">${[...meta, ...statMeta].map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
-      <p class="detail">${detail}</p>
-    </article>
-  `;
-}
-
-function titleFor(type, row) {
-  if (type === "정수") return row["몬스터"];
-  if (type === "넘버스") return `${row["번호"]} ${row["이름"]}`;
-  if (type === "미샤") return row["이름"];
-  if (type === "균열") return row["균열"] || "균열 없음";
-  if (type === "스탯") return row["이름"];
-  if (type === "각인") return row["각인"];
-  return Object.values(row).find(Boolean) || type;
-}
-
-function metaFor(type, row) {
-  if (type === "정수") return [row["층"], row["구역"], row["등급"], row["추천 캐릭터"]].filter(Boolean);
-  if (type === "넘버스") return [`Lv ${row["아이템 레벨(Lv)"]}`];
-  if (type === "균열") return [row["층"], row["구역"]].filter(Boolean);
-  if (type === "스탯") return [row["육체"]].filter(Boolean);
-  if (type === "각인") return [`비용 ${Number(row["비용"] || 0).toLocaleString("ko-KR")}`];
-  return [];
-}
-
-function detailFor(type, row) {
-  if (type === "정수") {
-    return [
-      line("주요 스탯", row["주요 스탯"]),
-      line("패시브", row["패시브"]),
-      line("액티브", row["액티브"]),
-    ].join("\n");
-  }
-
-  if (type === "넘버스") return line("효과", row["효과"]);
-  if (type === "미샤") return [line("설명", row["설명"]), line("능력치", row["능력치"]), line("스킬", row["스킬"])].join("\n");
-  if (type === "균열") return `${row["층"]} ${row["구역"]}에서 연결`;
-  if (type === "스탯") return line("설명", row["설명"]);
-  if (type === "각인") return line("능력치", row["능력치"] || "미기록");
-  return Object.values(row).map(escapeHtml).join("\n");
-}
-
-function line(label, value) {
-  return `<span class="label">${escapeHtml(label)}</span> ${escapeHtml(value || "-")}`;
 }
 
 function renderTime() {

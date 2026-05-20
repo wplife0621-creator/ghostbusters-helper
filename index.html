@@ -3,73 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>고스트버스터즈 플레이 도우미</title>
-  <link rel="stylesheet" href="./styles.css?v=20260520-2">
+  <title>덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260520-3">
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">고스트버스터즈 플레이 도우미</p>
-      <h1>찾고, 비교하고, 시간 계산까지 한 화면에서</h1>
-    </div>
-    <div class="summary" id="summary"></div>
+  <header class="topbar compact">
+    <h1>덕후버스터즈</h1>
   </header>
 
-  <main class="layout">
-    <nav class="tabs" aria-label="도구 화면 선택">
-      <button class="tab active" type="button" data-view="all">홈</button>
-      <button class="tab" type="button" data-view="essence">정수</button>
-    </nav>
-
-    <section class="panel controls tool-controls">
-      <label class="field wide">
-        <span>검색</span>
-        <input id="searchInput" type="search" placeholder="몬스터, 스탯, 패시브, 번호, 각인 검색">
-      </label>
-      <label class="field all-only">
-        <span>자료</span>
-        <select id="typeFilter"></select>
-      </label>
-      <label class="field">
-        <span>층</span>
-        <select id="floorFilter"></select>
-      </label>
-      <label class="field essence-only">
-        <span>구역</span>
-        <select id="areaFilter"></select>
-      </label>
-      <label class="field">
-        <span>추천 캐릭터</span>
-        <select id="characterFilter"></select>
-      </label>
-      <label class="field">
-        <span>정렬</span>
-        <select id="sortFilter">
-          <option value="default">기본</option>
-          <option value="grade">등급 우선</option>
-          <option value="cooldown">쿨타임 짧은 순</option>
-          <option value="cost">비용 낮은 순</option>
-        </select>
-      </label>
-      <label class="field essence-only">
-        <span>주요 스탯 정렬</span>
-        <select id="statSortFilter"></select>
-      </label>
-    </section>
-
-    <section class="panel stat-panel essence-only">
-      <div class="section-title">
-        <h2>스탯 정렬</h2>
-        <p id="statSortSummary">스탯을 누르면 높은 순으로 정렬됩니다.</p>
-      </div>
-      <div id="statChips" class="stat-chip-row"></div>
-    </section>
-
-    <section class="home-grid all-screen">
-      <article class="panel calculator">
+  <main class="layout compact-layout">
+    <section class="tool-strip">
+      <article class="panel calculator compact-card">
         <div class="section-title">
           <h2>시간 계산기</h2>
-          <p>게임 일수와 시간을 현실 시간으로 변환</p>
         </div>
         <div class="calc-row">
           <label class="field">
@@ -84,46 +30,56 @@
         <div class="calc-result" id="timeResult"></div>
       </article>
 
-      <article class="panel home-card">
-        <div class="section-title">
-          <h2>정수 도감</h2>
-          <p>층, 구역, 스탯 기준으로 몬스터 비교</p>
-        </div>
-        <button class="home-action" type="button" id="openEssence">정수 화면 열기</button>
-        <div class="home-points">
-          <span>층/구역별 정렬</span>
-          <span>스탯 높은 순 정렬</span>
-          <span>패시브/액티브 비교</span>
-        </div>
-      </article>
-
-      <article class="panel home-card summary-card">
-        <div class="section-title">
-          <h2>수집 데이터</h2>
-          <p>현재 사이트에 들어간 자료</p>
-        </div>
-        <div id="homeSummary" class="home-summary"></div>
-      </article>
+      <section class="panel controls compact-card">
+        <label class="field wide">
+          <span>정수 검색</span>
+          <input id="searchInput" type="search" placeholder="몬스터, 스탯, 패시브, 액티브 검색">
+        </label>
+        <label class="field">
+          <span>층</span>
+          <select id="floorFilter"></select>
+        </label>
+        <label class="field">
+          <span>구역</span>
+          <select id="areaFilter"></select>
+        </label>
+        <label class="field">
+          <span>추천 캐릭터</span>
+          <select id="characterFilter"></select>
+        </label>
+        <label class="field">
+          <span>정렬</span>
+          <select id="sortFilter">
+            <option value="default">층/구역순</option>
+            <option value="grade">등급 우선</option>
+            <option value="cooldown">쿨타임 짧은 순</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>스탯 선택</span>
+          <select id="statSortFilter"></select>
+        </label>
+      </section>
     </section>
 
-    <section class="panel home-essence-panel all-screen">
-      <div class="section-title">
-        <h2>정수 미리보기</h2>
-        <p>추천 캐릭터가 기록된 정수를 먼저 보여줍니다.</p>
+    <section class="panel stat-panel">
+      <div class="section-title compact-title">
+        <h2>스탯 정렬</h2>
+        <p id="statSortSummary">스탯을 누르면 높은 순으로 정렬됩니다.</p>
       </div>
-      <div id="homeEssencePreview" class="home-essence-grid"></div>
+      <div id="statChips" class="stat-chip-row"></div>
     </section>
 
-    <section class="panel results-panel result-screen">
-      <div class="section-title">
-        <h2 id="resultTitle">검색 결과</h2>
+    <section class="panel results-panel">
+      <div class="section-title compact-title">
+        <h2 id="resultTitle">정수 목록</h2>
         <p id="resultCount">0건</p>
       </div>
-      <div id="results" class="results"></div>
+      <div id="results" class="essence-results"></div>
     </section>
   </main>
 
   <script src="./ghost-data.js?v=20260520"></script>
-  <script src="./app.js?v=20260520-9"></script>
+  <script src="./app.js?v=20260520-10"></script>
 </body>
 </html>
