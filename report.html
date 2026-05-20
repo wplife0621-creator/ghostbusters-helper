@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정보 제보/수정 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260520-4">
+  <link rel="stylesheet" href="./styles.css?v=20260520-5">
 </head>
 <body>
   <header class="topbar compact">
@@ -33,8 +33,10 @@
         </label>
         <label class="field">
           <span>몬스터명</span>
-          <input id="reportMonster" required placeholder="예: 얼음 와이번">
+          <input id="reportMonster" required list="monsterOptions" placeholder="예: 얼음 와이번">
+          <datalist id="monsterOptions"></datalist>
         </label>
+        <div id="editMonsterMatches" class="edit-monster-matches" hidden></div>
         <label class="field">
           <span>등급</span>
           <input id="reportGrade" required placeholder="예: 6등급">
@@ -73,6 +75,6 @@
   </main>
 
   <script src="./ghost-data.js?v=20260520"></script>
-  <script src="./app.js?v=20260520-12"></script>
+  <script src="./app.js?v=20260520-13"></script>
 </body>
 </html>

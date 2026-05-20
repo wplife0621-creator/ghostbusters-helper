@@ -29,6 +29,8 @@ const els = {
   reportStats: document.querySelector("#reportStats"),
   reportPassive: document.querySelector("#reportPassive"),
   reportActive: document.querySelector("#reportActive"),
+  monsterOptions: document.querySelector("#monsterOptions"),
+  editMonsterMatches: document.querySelector("#editMonsterMatches"),
   pendingCount: document.querySelector("#pendingCount"),
   pendingReports: document.querySelector("#pendingReports"),
   copyApproved: document.querySelector("#copyApproved"),
@@ -153,10 +155,90 @@ function initHome() {
 }
 
 function initReport() {
+  fillMonsterOptions();
+  updateReportMode();
+  els.reportMode.addEventListener("change", updateReportMode);
+  els.reportMonster.addEventListener("input", handleReportMonsterInput);
+  els.editMonsterMatches.addEventListener("click", handleEditMonsterClick);
   els.reportForm.addEventListener("submit", submitReport);
   els.pendingReports.addEventListener("click", handlePendingAction);
   els.copyApproved.addEventListener("click", copyApprovedRows);
   renderPendingReports();
+}
+
+function fillMonsterOptions() {
+  els.monsterOptions.innerHTML = unique(essenceRows.map((row) => row["몬스터"]))
+    .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+    .join("");
+}
+
+function updateReportMode() {
+  const editMode = els.reportMode.value === "edit";
+  els.reportMonster.placeholder = editMode ? "수정할 몬스터명을 검색하세요" : "예: 얼음 와이번";
+  els.editMonsterMatches.hidden = !editMode;
+  if (editMode) {
+    renderEditMonsterMatches();
+    fillReportFromExactMonster();
+  } else {
+    els.editMonsterMatches.innerHTML = "";
+    els.editMonsterMatches.hidden = true;
+  }
+}
+
+function handleReportMonsterInput() {
+  if (els.reportMode.value !== "edit") return;
+  renderEditMonsterMatches();
+  fillReportFromExactMonster();
+}
+
+function handleEditMonsterClick(event) {
+  const button = event.target.closest("button[data-monster]");
+  if (!button) return;
+  fillReportFromRow(findMonsterRow(button.dataset.monster));
+}
+
+function findMonsterRow(monsterName) {
+  const target = textOf(monsterName).toLowerCase();
+  return essenceRows.find((row) => textOf(row["몬스터"]).toLowerCase() === target);
+}
+
+function fillReportFromExactMonster() {
+  const row = findMonsterRow(els.reportMonster.value);
+  if (row) fillReportFromRow(row);
+}
+
+function fillReportFromRow(row) {
+  if (!row) return;
+  els.reportMonster.value = textOf(row["몬스터"]);
+  els.reportGrade.value = textOf(row["등급"]);
+  els.reportFloor.value = textOf(row["층"]);
+  els.reportArea.value = textOf(row["구역"]);
+  els.reportStats.value = textOf(row["주요 스탯"]);
+  els.reportPassive.value = textOf(row["패시브"]);
+  els.reportActive.value = textOf(row["액티브"]);
+  renderEditMonsterMatches();
+}
+
+function renderEditMonsterMatches() {
+  const query = textOf(els.reportMonster.value).toLowerCase();
+  const rows = essenceRows
+    .filter((row) => {
+      if (!query) return true;
+      return textOf(row["몬스터"]).toLowerCase().includes(query)
+        || textOf(row["층"]).toLowerCase().includes(query)
+        || textOf(row["구역"]).toLowerCase().includes(query);
+    })
+    .slice(0, 8);
+
+  els.editMonsterMatches.hidden = els.reportMode.value !== "edit";
+  els.editMonsterMatches.innerHTML = rows.length
+    ? rows.map((row) => `
+      <button type="button" data-monster="${escapeHtml(row["몬스터"])}">
+        <strong>${escapeHtml(row["몬스터"])}</strong>
+        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"] || "-")}</span>
+      </button>
+    `).join("")
+    : `<div class="edit-match-empty">일치하는 몬스터가 없습니다.</div>`;
 }
 
 function refreshControls() {
@@ -400,6 +482,7 @@ function submitReport(event) {
   pendingReports.unshift(report);
   saveStoredRows(storageKeys.pending, pendingReports);
   els.reportForm.reset();
+  if (els.reportMode) updateReportMode();
   if (els.search) render();
   else renderPendingReports();
 }

@@ -192,6 +192,55 @@ select:focus {
   grid-column: span 2;
 }
 
+.edit-monster-matches {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.edit-monster-matches[hidden] {
+  display: none;
+}
+
+.edit-monster-matches button {
+  display: grid;
+  gap: 3px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.edit-monster-matches button:hover {
+  border-color: var(--brand);
+  background: #edf4ff;
+}
+
+.edit-monster-matches strong {
+  font-size: 13px;
+}
+
+.edit-monster-matches span,
+.edit-match-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.edit-match-empty {
+  grid-column: 1 / -1;
+  padding: 8px;
+}
+
 .submit-report {
   align-self: end;
   min-height: 39px;
@@ -489,6 +538,7 @@ select:focus {
   .tool-strip,
   .controls,
   .report-form,
+  .edit-monster-matches,
   .pending-reports {
     grid-template-columns: 1fr;
   }
