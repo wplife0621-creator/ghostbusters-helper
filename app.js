@@ -299,6 +299,14 @@ function render() {
 }
 
 function essenceTemplate(rows) {
+  if (hasStatSort()) {
+    return `
+      <div class="essence-table-wrap">
+        ${essenceTable(rows)}
+      </div>
+    `;
+  }
+
   const groups = new Map();
   rows.forEach((item) => {
     const key = `${item.row["층"] || "미기록"}|${item.row["구역"] || "미기록"}`;
@@ -315,23 +323,29 @@ function essenceTemplate(rows) {
           <span>${items.length}마리</span>
         </div>
         <div class="essence-table-wrap">
-          <table class="essence-table">
-            <thead>
-              <tr>
-                <th>몬스터</th>
-                <th>등급</th>
-                <th>추천</th>
-                <th>주요 스탯</th>
-                <th>패시브</th>
-                <th>액티브</th>
-              </tr>
-            </thead>
-            <tbody>${items.map(({ row }) => essenceRowTemplate(row)).join("")}</tbody>
-          </table>
+          ${essenceTable(items)}
         </div>
       </section>
     `;
   }).join("");
+}
+
+function essenceTable(items) {
+  return `
+    <table class="essence-table">
+      <thead>
+        <tr>
+          <th>몬스터</th>
+          <th>등급</th>
+          <th>추천</th>
+          <th>주요 스탯</th>
+          <th>패시브</th>
+          <th>액티브</th>
+        </tr>
+      </thead>
+      <tbody>${items.map(({ row }) => essenceRowTemplate(row)).join("")}</tbody>
+    </table>
+  `;
 }
 
 function essenceRowTemplate(row) {
