@@ -289,6 +289,129 @@ select:focus {
   font-weight: 800;
 }
 
+.essence-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.essence-table {
+  width: 100%;
+  min-width: 1040px;
+  border-collapse: collapse;
+}
+
+.essence-table th,
+.essence-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 11px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.essence-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8fbff;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.essence-table tbody tr:hover {
+  background: #fbfdff;
+}
+
+.essence-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.monster-name {
+  display: block;
+  min-width: 120px;
+  font-size: 15px;
+}
+
+.mobile-meta {
+  display: none;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.grade-pill,
+.character-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.grade-pill {
+  background: #edf4ff;
+  color: var(--brand-dark);
+}
+
+.character-pill {
+  background: #ecfdf5;
+  color: var(--good);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.sorted-stat {
+  display: inline-flex;
+  margin-bottom: 7px;
+  border-radius: 7px;
+  background: #102440;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 4px 7px;
+}
+
+.stat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 230px;
+}
+
+.stat-list span {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  min-height: 23px;
+  border-radius: 6px;
+  background: #f1f4f9;
+  color: #44516a;
+  font-size: 12px;
+  padding: 3px 6px;
+}
+
+.stat-list b {
+  color: var(--text);
+}
+
+.skill-cell {
+  max-width: 300px;
+  color: #323b4f;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.skill-cell b {
+  color: var(--text);
+}
+
 .card {
   display: grid;
   gap: 10px;
@@ -382,5 +505,41 @@ select:focus {
 
   .mini-list {
     grid-template-columns: 1fr;
+  }
+
+  .essence-table {
+    min-width: 0;
+  }
+
+  .essence-table thead {
+    display: none;
+  }
+
+  .essence-table,
+  .essence-table tbody,
+  .essence-table tr,
+  .essence-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .essence-table tr {
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .essence-table td {
+    border-bottom: 0;
+    padding: 5px 0;
+  }
+
+  .mobile-meta {
+    display: block;
+  }
+
+  .skill-cell,
+  .stat-list {
+    max-width: none;
+    min-width: 0;
   }
 }

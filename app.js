@@ -300,10 +300,65 @@ function essenceTemplate(rows) {
           <h3>${escapeHtml(floor)} · ${escapeHtml(area)}</h3>
           <span>${items.length}마리</span>
         </div>
-        <div class="results">${items.map(cardTemplate).join("")}</div>
+        <div class="essence-table-wrap">
+          <table class="essence-table">
+            <thead>
+              <tr>
+                <th>몬스터</th>
+                <th>등급</th>
+                <th>추천</th>
+                <th>주요 스탯</th>
+                <th>패시브</th>
+                <th>액티브</th>
+              </tr>
+            </thead>
+            <tbody>${items.map(({ row }) => essenceRowTemplate(row)).join("")}</tbody>
+          </table>
+        </div>
       </section>
     `;
   }).join("");
+}
+
+function essenceRowTemplate(row) {
+  const activeStat = hasStatSort() ? selectedStatName() : "";
+  const highlightValue = activeStat ? statValue(row, activeStat) : 0;
+  return `
+    <tr>
+      <td>
+        <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
+        <span class="mobile-meta">${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
+      </td>
+      <td><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
+      <td>${row["추천 캐릭터"] ? `<span class="character-pill">${escapeHtml(row["추천 캐릭터"])}</span>` : `<span class="muted">-</span>`}</td>
+      <td>
+        ${activeStat ? `<div class="sorted-stat">${escapeHtml(activeStat)} ${highlightValue}</div>` : ""}
+        <div class="stat-list">${statBadges(row["주요 스탯"])}</div>
+      </td>
+      <td class="skill-cell">${skillText(row["패시브"])}</td>
+      <td class="skill-cell">${skillText(row["액티브"])}</td>
+    </tr>
+  `;
+}
+
+function statBadges(value) {
+  return textOf(value)
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const match = part.match(/^(.+?)\s+(-?\d+)/);
+      if (!match) return `<span>${escapeHtml(part)}</span>`;
+      return `<span><b>${escapeHtml(cleanStatName(match[1]))}</b> ${escapeHtml(match[2])}</span>`;
+    })
+    .join("");
+}
+
+function skillText(value) {
+  const text = textOf(value) || "-";
+  const [name, ...rest] = text.split(":");
+  if (!rest.length) return escapeHtml(text);
+  return `<b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}`;
 }
 
 function cardTemplate({ type, row }) {
