@@ -53,6 +53,12 @@ const els = {
   copyCurrentBuild: document.querySelector("#copyCurrentBuild"),
   sharedBuildView: document.querySelector("#sharedBuildView"),
   buildList: document.querySelector("#buildList"),
+  essencePickerModal: document.querySelector("#essencePickerModal"),
+  essencePickerClose: document.querySelector("#essencePickerClose"),
+  essencePickerSearch: document.querySelector("#essencePickerSearch"),
+  essencePickerFloor: document.querySelector("#essencePickerFloor"),
+  essencePickerArea: document.querySelector("#essencePickerArea"),
+  essencePickerTable: document.querySelector("#essencePickerTable"),
 };
 
 let approvedReports = loadStoredRows(storageKeys.approved);
@@ -60,6 +66,7 @@ let pendingReports = loadStoredRows(storageKeys.pending);
 let savedBuilds = loadStoredRows(storageKeys.builds);
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
+let activeEssenceInput = null;
 const statNoneLabel = "스탯 선택 안 함";
 
 function textOf(value) {
@@ -196,16 +203,108 @@ function initReport() {
 
 function initBuilds() {
   fillBuildEssenceOptions();
+  initEssencePicker();
   renderBuildCharacterSlots();
   loadBuildFromUrl();
   els.buildCharacterCount.addEventListener("change", renderBuildCharacterSlots);
   els.buildCharacterSlots.addEventListener("change", (event) => {
     if (event.target.matches(".build-member-level")) renderBuildCharacterSlots();
   });
+  els.buildCharacterSlots.addEventListener("click", handleBuildSlotClick);
   els.buildForm.addEventListener("submit", submitBuild);
   els.copyCurrentBuild.addEventListener("click", copyCurrentBuildLink);
   els.buildList.addEventListener("click", handleBuildListClick);
   renderBuilds();
+}
+
+function initEssencePicker() {
+  optionList(els.essencePickerFloor, unique(essenceRows.map((row) => row["층"])), "전체 층");
+  optionList(els.essencePickerArea, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
+  els.essencePickerClose.addEventListener("click", closeEssencePicker);
+  els.essencePickerModal.addEventListener("click", (event) => {
+    if (event.target === els.essencePickerModal) closeEssencePicker();
+  });
+  els.essencePickerSearch.addEventListener("input", renderEssencePickerTable);
+  els.essencePickerFloor.addEventListener("change", renderEssencePickerTable);
+  els.essencePickerArea.addEventListener("change", renderEssencePickerTable);
+  els.essencePickerTable.addEventListener("click", (event) => {
+    const row = event.target.closest("tr[data-monster]");
+    if (!row || !activeEssenceInput) return;
+    activeEssenceInput.value = row.dataset.monster;
+    closeEssencePicker();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.essencePickerModal.hidden) closeEssencePicker();
+  });
+  renderEssencePickerTable();
+}
+
+function handleBuildSlotClick(event) {
+  const button = event.target.closest(".open-essence-picker");
+  if (!button) return;
+  activeEssenceInput = button.closest(".essence-input-row")?.querySelector(".build-essence-input") || null;
+  openEssencePicker();
+}
+
+function openEssencePicker() {
+  els.essencePickerModal.hidden = false;
+  document.body.classList.add("modal-open");
+  els.essencePickerSearch.value = "";
+  els.essencePickerFloor.value = "전체 층";
+  els.essencePickerArea.value = "전체 구역";
+  renderEssencePickerTable();
+  setTimeout(() => els.essencePickerSearch.focus(), 20);
+}
+
+function closeEssencePicker() {
+  els.essencePickerModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+function essencePickerRows() {
+  const query = textOf(els.essencePickerSearch.value).toLowerCase();
+  return essenceRows.filter((row) => {
+    if (els.essencePickerFloor.value !== "전체 층" && textOf(row["층"]) !== els.essencePickerFloor.value) return false;
+    if (els.essencePickerArea.value !== "전체 구역" && textOf(row["구역"]) !== els.essencePickerArea.value) return false;
+    if (!query) return true;
+    return [
+      row["몬스터"],
+      row["등급"],
+      row["층"],
+      row["구역"],
+      row["주요 스탯"],
+      row["패시브"],
+      row["액티브"],
+    ].some((value) => textOf(value).toLowerCase().includes(query));
+  });
+}
+
+function renderEssencePickerTable() {
+  const rows = essencePickerRows();
+  els.essencePickerTable.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>몬스터</th>
+          <th>등급</th>
+          <th>위치</th>
+          <th>주요 스탯</th>
+          <th>패시브</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((row) => `
+          <tr data-monster="${escapeHtml(row["몬스터"])}">
+            <td><strong>${escapeHtml(row["몬스터"])}</strong></td>
+            <td>${escapeHtml(row["등급"] || "-")}</td>
+            <td>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</td>
+            <td>${escapeHtml(row["주요 스탯"] || "-")}</td>
+            <td>${escapeHtml(row["패시브"] || "-")}</td>
+          </tr>
+        `).join("") || `<tr><td colspan="5">조건에 맞는 정수가 없습니다.</td></tr>`}
+      </tbody>
+    </table>
+  `;
 }
 
 const buildCharacters = ["비요른", "에르웬", "미샤", "아이나르", "레이븐"];
@@ -251,7 +350,10 @@ function renderBuildCharacterSlots() {
     const essenceInputs = Array.from({ length: level }, (__, essenceIndex) => `
       <label class="field">
         <span>정수 ${essenceIndex + 1}</span>
-        <input class="build-essence-input" list="buildEssenceOptions" placeholder="정수 선택, 직접 입력, 빈칸 가능" value="${escapeHtml(draft.essences?.[essenceIndex] || "")}">
+        <span class="essence-input-row">
+          <input class="build-essence-input" list="buildEssenceOptions" placeholder="정수 선택, 직접 입력, 빈칸 가능" value="${escapeHtml(draft.essences?.[essenceIndex] || "")}">
+          <button class="open-essence-picker" type="button">선택</button>
+        </span>
       </label>
     `).join("");
     return `
