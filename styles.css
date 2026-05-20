@@ -192,7 +192,7 @@ textarea {
 }
 
 .essence-picker-dialog {
-  width: min(1080px, 100%);
+  width: min(1160px, 100%);
   max-height: min(820px, calc(100vh - 44px));
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -250,7 +250,7 @@ textarea {
 
 .essence-picker-table table {
   width: 100%;
-  min-width: 920px;
+  min-width: 980px;
   border-collapse: collapse;
 }
 
@@ -261,6 +261,7 @@ textarea {
   text-align: left;
   vertical-align: top;
   font-size: 13px;
+  line-height: 1.45;
 }
 
 .essence-picker-table th {
@@ -278,6 +279,23 @@ textarea {
 
 .essence-picker-table tbody tr:hover {
   background: #edf4ff;
+}
+
+.essence-picker-table th:nth-child(1),
+.essence-picker-table td:nth-child(1) {
+  width: 16%;
+}
+
+.essence-picker-table th:nth-child(2),
+.essence-picker-table td:nth-child(2) {
+  width: 25%;
+}
+
+.essence-picker-table th:nth-child(3),
+.essence-picker-table td:nth-child(3),
+.essence-picker-table th:nth-child(4),
+.essence-picker-table td:nth-child(4) {
+  width: 29.5%;
 }
 
 input:focus,
@@ -908,6 +926,69 @@ textarea {
 
   .site-nav {
     justify-content: flex-start;
+  }
+
+  .essence-picker-modal {
+    align-items: stretch;
+    padding: 10px;
+  }
+
+  .essence-picker-dialog {
+    max-height: calc(100vh - 20px);
+  }
+
+  .essence-picker-head,
+  .essence-picker-controls {
+    padding: 12px;
+  }
+
+  .essence-picker-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .essence-picker-table table,
+  .essence-picker-table tbody,
+  .essence-picker-table tr,
+  .essence-picker-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .essence-picker-table thead {
+    display: none;
+  }
+
+  .essence-picker-table tbody {
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+    background: #f5f7fb;
+  }
+
+  .essence-picker-table tr {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .essence-picker-table td {
+    border-bottom: 1px solid var(--line);
+    padding: 9px 11px;
+  }
+
+  .essence-picker-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .essence-picker-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
   }
 
   .essence-table {

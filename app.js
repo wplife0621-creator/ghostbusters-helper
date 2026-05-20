@@ -286,22 +286,20 @@ function renderEssencePickerTable() {
       <thead>
         <tr>
           <th>몬스터</th>
-          <th>등급</th>
-          <th>위치</th>
           <th>주요 스탯</th>
           <th>패시브</th>
+          <th>액티브</th>
         </tr>
       </thead>
       <tbody>
         ${rows.map((row) => `
           <tr data-monster="${escapeHtml(row["몬스터"])}">
-            <td><strong>${escapeHtml(row["몬스터"])}</strong></td>
-            <td>${escapeHtml(row["등급"] || "-")}</td>
-            <td>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</td>
-            <td>${escapeHtml(row["주요 스탯"] || "-")}</td>
-            <td>${escapeHtml(row["패시브"] || "-")}</td>
+            <td data-label="몬스터"><strong>${escapeHtml(row["몬스터"])}</strong></td>
+            <td data-label="주요 스탯">${escapeHtml(row["주요 스탯"] || "-")}</td>
+            <td data-label="패시브">${escapeHtml(row["패시브"] || "-")}</td>
+            <td data-label="액티브">${escapeHtml(row["액티브"] || "-")}</td>
           </tr>
-        `).join("") || `<tr><td colspan="5">조건에 맞는 정수가 없습니다.</td></tr>`}
+        `).join("") || `<tr><td colspan="4">조건에 맞는 정수가 없습니다.</td></tr>`}
       </tbody>
     </table>
   `;
