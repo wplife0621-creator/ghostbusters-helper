@@ -60,12 +60,16 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+function cleanStatName(value) {
+  return textOf(value).replace(/^[[(]+|[\])]+$/g, "").trim();
+}
+
 function statNames() {
-  const fromStatSheet = (data["스탯"] || []).map((row) => row["이름"]);
+  const fromStatSheet = (data["스탯"] || []).map((row) => cleanStatName(row["이름"]));
   const fromEssence = essenceRows.flatMap((row) =>
     textOf(row["주요 스탯"])
       .split(",")
-      .map((part) => part.trim().match(/^(.+?)\s+\d+/)?.[1])
+      .map((part) => cleanStatName(part.trim().match(/^(.+?)\s+\d+/)?.[1]))
       .filter(Boolean)
   );
   return unique([...fromStatSheet, ...fromEssence]);
@@ -76,7 +80,7 @@ function statValue(row, statName) {
   const parts = textOf(row["주요 스탯"]).split(",");
   for (const part of parts) {
     const match = part.trim().match(/^(.+?)\s+(-?\d+)/);
-    if (match && match[1].trim() === statName) return Number(match[2]);
+    if (match && cleanStatName(match[1]) === statName) return Number(match[2]);
   }
   return 0;
 }
