@@ -211,6 +211,7 @@ select:focus {
 
 .calculator,
 .home-card,
+.home-essence-panel,
 .planner,
 .results-panel {
   padding: 18px;
@@ -321,6 +322,60 @@ select:focus {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
+}
+
+.home-essence-panel {
+  margin: 16px 0;
+}
+
+.home-essence-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-essence-card {
+  display: grid;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 12px;
+}
+
+.home-essence-card strong {
+  display: block;
+  font-size: 15px;
+}
+
+.home-essence-card div > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.home-essence-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.home-essence-meta span {
+  display: inline-flex;
+  min-height: 23px;
+  align-items: center;
+  border-radius: 999px;
+  background: #edf4ff;
+  color: var(--brand-dark);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 3px 7px;
+}
+
+.home-essence-card p {
+  margin: 0;
 }
 
 .results {
@@ -578,6 +633,7 @@ select:focus {
   .controls,
   .quick-grid,
   .home-grid,
+  .home-essence-grid,
   .results {
     grid-template-columns: 1fr;
   }

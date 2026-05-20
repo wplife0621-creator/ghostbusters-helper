@@ -12,6 +12,7 @@ const els = {
   statChips: document.querySelector("#statChips"),
   statSortSummary: document.querySelector("#statSortSummary"),
   homeSummary: document.querySelector("#homeSummary"),
+  homeEssencePreview: document.querySelector("#homeEssencePreview"),
   openEssence: document.querySelector("#openEssence"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
@@ -113,6 +114,7 @@ function init() {
       </div>
     `)
     .join("");
+  renderHomeEssencePreview();
 
   document.querySelectorAll("input, select").forEach((el) => {
     el.addEventListener("input", render);
@@ -142,6 +144,26 @@ function switchView(view) {
   currentView = view;
   els.tabs.forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   document.body.dataset.view = currentView;
+}
+
+function renderHomeEssencePreview() {
+  const picks = essenceRows
+    .filter((row) => textOf(row["추천 캐릭터"]))
+    .slice(0, 8);
+
+  els.homeEssencePreview.innerHTML = picks.map((row) => `
+    <article class="home-essence-card">
+      <div>
+        <strong>${escapeHtml(row["몬스터"])}</strong>
+        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
+      </div>
+      <div class="home-essence-meta">
+        <span>${escapeHtml(row["등급"])}</span>
+        <span>${escapeHtml(row["추천 캐릭터"])}</span>
+      </div>
+      <p>${statBadges(row["주요 스탯"])}</p>
+    </article>
+  `).join("");
 }
 
 function selectedStatName() {
