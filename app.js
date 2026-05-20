@@ -11,6 +11,8 @@ const els = {
   statSort: document.querySelector("#statSortFilter"),
   statChips: document.querySelector("#statChips"),
   statSortSummary: document.querySelector("#statSortSummary"),
+  homeSummary: document.querySelector("#homeSummary"),
+  openEssence: document.querySelector("#openEssence"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
@@ -24,7 +26,6 @@ const types = ["전체", "정수", "넘버스", "미샤", "균열", "스탯", "�
 const essenceRows = data["정수"] || [];
 const statNoneLabel = "스탯 선택 안 함";
 let currentView = "all";
-let statSortDirection = "desc";
 
 function textOf(value) {
   return String(value ?? "").trim();
@@ -104,6 +105,14 @@ function init() {
   els.summary.innerHTML = Object.entries(data)
     .map(([name, rows]) => `<span>${name} ${rows.length}</span>`)
     .join("");
+  els.homeSummary.innerHTML = Object.entries(data)
+    .map(([name, rows]) => `
+      <div class="home-summary-item">
+        <strong>${escapeHtml(rows.length)}</strong>
+        <span>${escapeHtml(name)}</span>
+      </div>
+    `)
+    .join("");
 
   document.querySelectorAll("input, select").forEach((el) => {
     el.addEventListener("input", render);
@@ -111,21 +120,28 @@ function init() {
   });
 
   els.statSort.addEventListener("change", () => {
-    statSortDirection = "desc";
     render();
+  });
+
+  els.openEssence.addEventListener("click", () => {
+    switchView("essence");
   });
 
   els.tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
-      currentView = tab.dataset.view;
-      els.tabs.forEach((item) => item.classList.toggle("active", item === tab));
-      document.body.dataset.view = currentView;
+      switchView(tab.dataset.view);
       render();
     });
   });
 
   document.body.dataset.view = currentView;
   render();
+}
+
+function switchView(view) {
+  currentView = view;
+  els.tabs.forEach((item) => item.classList.toggle("active", item.dataset.view === view));
+  document.body.dataset.view = currentView;
 }
 
 function selectedStatName() {
@@ -148,12 +164,6 @@ function renderStatChips() {
     if (!button) return;
 
     const nextStat = button.dataset.stat;
-    if (selectedStatName() === nextStat && nextStat !== statNoneLabel) {
-      statSortDirection = statSortDirection === "desc" ? "asc" : "desc";
-    } else {
-      statSortDirection = "desc";
-    }
-
     els.statSort.value = nextStat;
     render();
   });
@@ -167,13 +177,13 @@ function updateStatSortUi() {
     if (button.dataset.stat === statNoneLabel) {
       button.textContent = statNoneLabel;
     } else {
-      const marker = isActive ? (statSortDirection === "desc" ? " ↓" : " ↑") : " ↕";
+      const marker = isActive ? " ↓" : " ↕";
       button.textContent = `${button.dataset.stat}${marker}`;
     }
   });
 
   els.statSortSummary.textContent = hasStatSort()
-    ? `${activeStat} ${statSortDirection === "desc" ? "높은 순" : "낮은 순"}으로 정렬 중`
+    ? `${activeStat} 높은 순으로 정렬 중`
     : "스탯을 누르면 높은 순으로 정렬됩니다.";
 }
 
@@ -253,9 +263,7 @@ function sortEssenceRows(rows) {
 
   if (hasStatSort()) {
     return copy.sort((a, b) => {
-      const statDiff = statSortDirection === "desc"
-        ? statValue(b.row, statName) - statValue(a.row, statName)
-        : statValue(a.row, statName) - statValue(b.row, statName);
+      const statDiff = statValue(b.row, statName) - statValue(a.row, statName);
       if (statDiff) return statDiff;
       return floorAreaMonsterSort(a, b);
     });
@@ -332,8 +340,10 @@ function essenceRowTemplate(row) {
   return `
     <tr>
       <td>
-        <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
-        <span class="mobile-meta">${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
+        <div class="monster-title-line">
+          <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
+          <span class="location-pill">${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
+        </div>
       </td>
       <td><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
       <td>${row["추천 캐릭터"] ? `<span class="character-pill">${escapeHtml(row["추천 캐릭터"])}</span>` : `<span class="muted">-</span>`}</td>

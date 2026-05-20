@@ -159,7 +159,9 @@ h2 {
 
 body[data-view="all"] .essence-only,
 body[data-view="essence"] .all-only,
-body[data-view="essence"] .all-screen {
+body[data-view="essence"] .all-screen,
+body[data-view="all"] .tool-controls,
+body[data-view="all"] .result-screen {
   display: none;
 }
 
@@ -192,18 +194,23 @@ select:focus {
   outline: 3px solid rgba(31, 111, 235, 0.16);
 }
 
-.quick-grid {
+.quick-grid,
+.home-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 0.75fr) minmax(320px, 1.25fr);
   gap: 16px;
   margin: 16px 0;
 }
 
-.quick-grid.single-tool {
-  grid-template-columns: minmax(280px, 520px);
+.quick-grid {
+  grid-template-columns: minmax(280px, 0.75fr) minmax(320px, 1.25fr);
+}
+
+.home-grid {
+  grid-template-columns: minmax(320px, 520px) minmax(280px, 1fr) minmax(240px, 0.75fr);
 }
 
 .calculator,
+.home-card,
 .planner,
 .results-panel {
   padding: 18px;
@@ -254,6 +261,66 @@ select:focus {
 .mini-item strong {
   display: block;
   margin-bottom: 5px;
+}
+
+.home-action {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.home-action:hover {
+  background: var(--brand-dark);
+}
+
+.home-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.home-points span {
+  border-radius: 999px;
+  background: #f1f4f9;
+  color: #44516a;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 8px;
+}
+
+.home-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-summary-item {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.home-summary-item strong {
+  display: block;
+  color: var(--brand-dark);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.home-summary-item span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .results {
@@ -333,16 +400,28 @@ select:focus {
 }
 
 .monster-name {
-  display: block;
-  min-width: 120px;
+  min-width: 0;
   font-size: 15px;
 }
 
-.mobile-meta {
-  display: none;
-  margin-top: 4px;
-  color: var(--muted);
+.monster-title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  min-width: 180px;
+}
+
+.location-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  border-radius: 999px;
+  background: #f1f4f9;
+  color: #44516a;
   font-size: 12px;
+  font-weight: 800;
+  padding: 3px 7px;
 }
 
 .grade-pill,
@@ -498,6 +577,7 @@ select:focus {
 
   .controls,
   .quick-grid,
+  .home-grid,
   .results {
     grid-template-columns: 1fr;
   }
@@ -535,10 +615,6 @@ select:focus {
   .essence-table td {
     border-bottom: 0;
     padding: 5px 0;
-  }
-
-  .mobile-meta {
-    display: block;
   }
 
   .skill-cell,

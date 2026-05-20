@@ -17,11 +17,11 @@
 
   <main class="layout">
     <nav class="tabs" aria-label="도구 화면 선택">
-      <button class="tab active" type="button" data-view="all">전체 검색</button>
+      <button class="tab active" type="button" data-view="all">홈</button>
       <button class="tab" type="button" data-view="essence">정수</button>
     </nav>
 
-    <section class="panel controls">
+    <section class="panel controls tool-controls">
       <label class="field wide">
         <span>검색</span>
         <input id="searchInput" type="search" placeholder="몬스터, 스탯, 패시브, 번호, 각인 검색">
@@ -65,10 +65,11 @@
       <div id="statChips" class="stat-chip-row"></div>
     </section>
 
-    <section class="quick-grid all-screen single-tool">
+    <section class="home-grid all-screen">
       <article class="panel calculator">
         <div class="section-title">
           <h2>시간 계산기</h2>
+          <p>게임 일수와 시간을 현실 시간으로 변환</p>
         </div>
         <div class="calc-row">
           <label class="field">
@@ -82,9 +83,30 @@
         </div>
         <div class="calc-result" id="timeResult"></div>
       </article>
+
+      <article class="panel home-card">
+        <div class="section-title">
+          <h2>정수 도감</h2>
+          <p>층, 구역, 스탯 기준으로 몬스터 비교</p>
+        </div>
+        <button class="home-action" type="button" id="openEssence">정수 화면 열기</button>
+        <div class="home-points">
+          <span>층/구역별 정렬</span>
+          <span>스탯 높은 순 정렬</span>
+          <span>패시브/액티브 비교</span>
+        </div>
+      </article>
+
+      <article class="panel home-card summary-card">
+        <div class="section-title">
+          <h2>수집 데이터</h2>
+          <p>현재 사이트에 들어간 자료</p>
+        </div>
+        <div id="homeSummary" class="home-summary"></div>
+      </article>
     </section>
 
-    <section class="panel results-panel">
+    <section class="panel results-panel result-screen">
       <div class="section-title">
         <h2 id="resultTitle">검색 결과</h2>
         <p id="resultCount">0건</p>
@@ -94,6 +116,6 @@
   </main>
 
   <script src="./ghost-data.js?v=20260520"></script>
-  <script src="./app.js?v=20260520-6"></script>
+  <script src="./app.js?v=20260520-7"></script>
 </body>
 </html>
