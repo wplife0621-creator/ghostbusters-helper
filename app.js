@@ -1,5 +1,10 @@
 const data = window.GHOST_DATA || {};
 
+const storageKeys = {
+  pending: "dukhubusters.pendingReports",
+  approved: "dukhubusters.approvedReports",
+};
+
 const els = {
   search: document.querySelector("#searchInput"),
   floor: document.querySelector("#floorFilter"),
@@ -15,13 +20,39 @@ const els = {
   gameDays: document.querySelector("#gameDays"),
   gameHours: document.querySelector("#gameHours"),
   timeResult: document.querySelector("#timeResult"),
+  reportForm: document.querySelector("#reportForm"),
+  reportMonster: document.querySelector("#reportMonster"),
+  reportGrade: document.querySelector("#reportGrade"),
+  reportFloor: document.querySelector("#reportFloor"),
+  reportArea: document.querySelector("#reportArea"),
+  reportStats: document.querySelector("#reportStats"),
+  reportPassive: document.querySelector("#reportPassive"),
+  reportActive: document.querySelector("#reportActive"),
+  pendingCount: document.querySelector("#pendingCount"),
+  pendingReports: document.querySelector("#pendingReports"),
+  copyApproved: document.querySelector("#copyApproved"),
 };
 
-const essenceRows = data["정수"] || [];
+let approvedReports = loadStoredRows(storageKeys.approved);
+let pendingReports = loadStoredRows(storageKeys.pending);
+let essenceRows = [...(data["정수"] || []), ...approvedReports];
 const statNoneLabel = "스탯 선택 안 함";
 
 function textOf(value) {
   return String(value ?? "").trim();
+}
+
+function loadStoredRows(key) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveStoredRows(key, rows) {
+  localStorage.setItem(key, JSON.stringify(rows));
 }
 
 function numberFrom(value) {
@@ -44,9 +75,11 @@ function unique(values) {
 }
 
 function optionList(select, values, allLabel) {
+  const current = select.value;
   select.innerHTML = [allLabel, ...values]
     .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
     .join("");
+  if ([...select.options].some((option) => option.value === current)) select.value = current;
 }
 
 function escapeHtml(value) {
@@ -88,10 +121,7 @@ function statValue(row, statName) {
 }
 
 function init() {
-  optionList(els.floor, unique(essenceRows.map((row) => row["층"])), "전체 층");
-  optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
-  optionList(els.character, unique(essenceRows.map((row) => row["추천 캐릭터"])), "전체 캐릭터");
-  optionList(els.statSort, statNames(), statNoneLabel);
+  refreshControls();
   renderStatChips();
 
   document.querySelectorAll("input, select").forEach((el) => {
@@ -99,7 +129,18 @@ function init() {
     el.addEventListener("change", render);
   });
 
+  els.reportForm.addEventListener("submit", submitReport);
+  els.pendingReports.addEventListener("click", handlePendingAction);
+  els.copyApproved.addEventListener("click", copyApprovedRows);
+
   render();
+}
+
+function refreshControls() {
+  optionList(els.floor, unique(essenceRows.map((row) => row["층"])), "전체 층");
+  optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
+  optionList(els.character, unique(essenceRows.map((row) => row["추천 캐릭터"])), "전체 캐릭터");
+  optionList(els.statSort, statNames(), statNoneLabel);
 }
 
 function selectedStatName() {
@@ -111,18 +152,19 @@ function hasStatSort() {
 }
 
 function renderStatChips() {
-  const names = statNames();
+  const active = selectedStatName() || statNoneLabel;
   els.statChips.innerHTML = [
-    `<button type="button" class="stat-chip is-active" data-stat="${escapeHtml(statNoneLabel)}">${escapeHtml(statNoneLabel)}</button>`,
-    ...names.map((name) => `<button type="button" class="stat-chip" data-stat="${escapeHtml(name)}">${escapeHtml(name)} ↕</button>`),
+    `<button type="button" class="stat-chip" data-stat="${escapeHtml(statNoneLabel)}">${escapeHtml(statNoneLabel)}</button>`,
+    ...statNames().map((name) => `<button type="button" class="stat-chip" data-stat="${escapeHtml(name)}">${escapeHtml(name)} ↕</button>`),
   ].join("");
+  els.statSort.value = active;
 
-  els.statChips.addEventListener("click", (event) => {
+  els.statChips.onclick = (event) => {
     const button = event.target.closest("button[data-stat]");
     if (!button) return;
     els.statSort.value = button.dataset.stat;
     render();
-  });
+  };
 }
 
 function updateStatSortUi() {
@@ -207,6 +249,7 @@ function floorAreaMonsterSort(a, b) {
 function render() {
   const rows = collectEssenceRows();
   updateStatSortUi();
+  renderPendingReports();
   els.resultTitle.textContent = hasStatSort() ? `${selectedStatName()} 정렬` : "정수 목록";
   els.resultCount.textContent = `${rows.length}건`;
   els.results.innerHTML = rows.length
@@ -301,6 +344,96 @@ function skillText(value) {
   const [name, ...rest] = text.split(":");
   if (!rest.length) return escapeHtml(text);
   return `<b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}`;
+}
+
+function reportToRow(report) {
+  return {
+    "층": report.floor,
+    "구역": report.area,
+    "몬스터": report.monster,
+    "등급": report.grade,
+    "주요 스탯": report.stats,
+    "패시브": report.passive,
+    "액티브": report.active,
+    "추천 캐릭터": "",
+    "출처": "제보 승인",
+    "승인일": new Date().toISOString(),
+  };
+}
+
+function submitReport(event) {
+  event.preventDefault();
+  const report = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    monster: textOf(els.reportMonster.value),
+    grade: textOf(els.reportGrade.value),
+    floor: textOf(els.reportFloor.value),
+    area: textOf(els.reportArea.value),
+    stats: textOf(els.reportStats.value),
+    passive: textOf(els.reportPassive.value),
+    active: textOf(els.reportActive.value),
+    createdAt: new Date().toISOString(),
+  };
+  pendingReports.unshift(report);
+  saveStoredRows(storageKeys.pending, pendingReports);
+  els.reportForm.reset();
+  render();
+}
+
+function handlePendingAction(event) {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+  const id = button.closest("[data-report-id]")?.dataset.reportId;
+  const report = pendingReports.find((item) => item.id === id);
+  if (!report) return;
+
+  pendingReports = pendingReports.filter((item) => item.id !== id);
+  saveStoredRows(storageKeys.pending, pendingReports);
+
+  if (button.dataset.action === "approve") {
+    const row = reportToRow(report);
+    approvedReports.unshift(row);
+    essenceRows = [row, ...essenceRows];
+    saveStoredRows(storageKeys.approved, approvedReports);
+    refreshControls();
+    renderStatChips();
+  }
+
+  render();
+}
+
+function renderPendingReports() {
+  els.pendingCount.textContent = `검수 대기 ${pendingReports.length}건`;
+  els.pendingReports.innerHTML = pendingReports.length
+    ? pendingReports.map((report) => `
+      <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
+        <div>
+          <strong>${escapeHtml(report.monster)}</strong>
+          <span>${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
+        </div>
+        <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
+        <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
+        <p><b>액티브</b> ${escapeHtml(report.active)}</p>
+        <div class="pending-actions">
+          <button type="button" data-action="approve">승인해서 추가</button>
+          <button type="button" data-action="reject">반려</button>
+        </div>
+      </article>
+    `).join("")
+    : `<div class="empty compact-empty">검수 대기 제보가 없습니다.</div>`;
+}
+
+async function copyApprovedRows() {
+  const text = JSON.stringify(approvedReports, null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    els.copyApproved.textContent = "복사 완료";
+  } catch {
+    els.copyApproved.textContent = "복사 실패";
+  }
+  setTimeout(() => {
+    els.copyApproved.textContent = "승인 데이터 복사";
+  }, 1500);
 }
 
 function renderTime() {

@@ -136,6 +136,116 @@ select:focus {
   margin-top: 12px;
 }
 
+.report-panel {
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.report-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.report-form .wide {
+  grid-column: span 2;
+}
+
+.submit-report {
+  align-self: end;
+  min-height: 39px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--brand);
+  color: #fff;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.submit-report:hover {
+  background: var(--brand-dark);
+}
+
+.review-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.review-head strong {
+  font-size: 14px;
+}
+
+.review-head button,
+.pending-actions button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: #44516a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.review-head button:hover,
+.pending-actions button:hover {
+  border-color: var(--brand);
+  color: var(--brand-dark);
+}
+
+.pending-reports {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pending-card {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 12px;
+}
+
+.pending-card strong {
+  display: block;
+}
+
+.pending-card span,
+.pending-card p {
+  color: #44516a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.pending-card p {
+  margin: 0;
+}
+
+.pending-card b {
+  color: var(--text);
+}
+
+.pending-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.compact-empty {
+  padding: 16px;
+}
+
 .stat-chip-row {
   display: flex;
   flex-wrap: wrap;
@@ -336,8 +446,14 @@ select:focus {
 
 @media (max-width: 1080px) {
   .tool-strip,
-  .controls {
+  .controls,
+  .report-form,
+  .pending-reports {
     grid-template-columns: 1fr;
+  }
+
+  .report-form .wide {
+    grid-column: auto;
   }
 
   .section-title {
