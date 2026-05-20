@@ -313,22 +313,43 @@ textarea {
 }
 
 .build-row {
-  grid-template-columns: minmax(118px, 0.7fr) minmax(150px, 0.9fr) minmax(220px, 1.3fr) minmax(260px, 1.5fr) auto;
+  grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.2fr) minmax(280px, 1.6fr) auto minmax(118px, 0.65fr);
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.build-row strong,
-.build-row span {
+.build-row-title,
+.build-row-summary,
+.build-row-essences,
+.build-row-date {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.build-row-title {
+  display: grid;
+  gap: 3px;
+}
+
+.build-row-title strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.build-row-title span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .build-row-date {
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
+  text-align: right;
 }
 
 .build-row-summary,
@@ -339,6 +360,7 @@ textarea {
 
 .build-row .pending-actions {
   justify-content: flex-end;
+  flex-wrap: nowrap;
 }
 
 .admin-row {

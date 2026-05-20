@@ -428,14 +428,17 @@ function buildCard(build, shared) {
   if (!shared) {
     return `
       <article class="build-card build-row" data-build-id="${escapeHtml(build.id || "")}">
-        <span class="build-row-date">${escapeHtml(formatBuildDate(build.createdAt))}</span>
-        <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
-        <span class="build-row-summary">${escapeHtml(memberSummary)} · ${escapeHtml(build.author || "익명")}</span>
+        <div class="build-row-title">
+          <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
+          <span>${escapeHtml(build.author || "익명")}</span>
+        </div>
+        <span class="build-row-summary">${escapeHtml(memberSummary)}</span>
         <span class="build-row-essences">${escapeHtml(essenceSummary)}</span>
         <div class="pending-actions">
           <button type="button" data-build-action="share">공유 링크 복사</button>
           <button type="button" data-build-action="load">불러오기</button>
         </div>
+        <span class="build-row-date">${escapeHtml(formatBuildDate(build.createdAt))}</span>
       </article>
     `;
   }
