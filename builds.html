@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>빌드 공유 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260521-2">
+  <link rel="stylesheet" href="./styles.css?v=20260521-3">
 </head>
 <body>
   <header class="topbar compact">
@@ -22,7 +22,7 @@
     <section class="panel build-panel page-panel">
       <div class="section-title compact-title">
         <h2>빌드 등록</h2>
-        <p>캐릭터와 레벨을 고르면 레벨만큼 정수 선택 칸이 열립니다. 저장 후 공유 링크를 만들 수 있습니다.</p>
+        <p>캐릭터를 1명부터 5명까지 넣고, 각 캐릭터 레벨만큼 정수를 선택하거나 직접 입력할 수 있습니다.</p>
       </div>
       <form id="buildForm" class="build-form">
         <label class="field">
@@ -34,27 +34,17 @@
           <input id="buildAuthor" placeholder="닉네임">
         </label>
         <label class="field">
-          <span>캐릭터</span>
-          <select id="buildCharacter">
-            <option value="비요른">비요른</option>
-            <option value="에르웬">에르웬</option>
-            <option value="미샤">미샤</option>
-            <option value="아이나르">아이나르</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>레벨</span>
-          <select id="buildLevel">
-            <option value="1">1레벨</option>
-            <option value="2">2레벨</option>
-            <option value="3">3레벨</option>
-            <option value="4">4레벨</option>
-            <option value="5">5레벨</option>
-            <option value="6">6레벨</option>
+          <span>캐릭터 수</span>
+          <select id="buildCharacterCount">
+            <option value="1">1명</option>
+            <option value="2">2명</option>
+            <option value="3">3명</option>
+            <option value="4">4명</option>
+            <option value="5">5명</option>
           </select>
         </label>
         <datalist id="buildEssenceOptions"></datalist>
-        <div id="buildEssenceSlots" class="build-essence-slots"></div>
+        <div id="buildCharacterSlots" class="build-character-slots"></div>
         <label class="field build-note">
           <span>설명</span>
           <textarea id="buildNote" rows="3" placeholder="운용 팁, 장점, 대체 정수 등을 적어주세요."></textarea>
@@ -74,6 +64,6 @@
   </main>
 
   <script src="./ghost-data.js?v=20260520"></script>
-  <script src="./app.js?v=20260521-2"></script>
+  <script src="./app.js?v=20260521-3"></script>
 </body>
 </html>

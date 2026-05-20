@@ -211,15 +211,37 @@ textarea {
   grid-column: span 2;
 }
 
-.build-essence-slots {
+.build-character-slots {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.build-member-card {
+  display: grid;
   gap: 10px;
-  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #f8fbff;
+  padding: 12px;
+}
+
+.build-member-head {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.7fr) repeat(2, minmax(140px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.build-member-head strong {
+  align-self: center;
+  font-size: 15px;
+}
+
+.build-essence-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 10px;
 }
 
 .shared-build-view {
@@ -280,6 +302,15 @@ textarea {
   color: var(--brand-dark);
   font-weight: 900;
   padding: 3px 8px;
+}
+
+.build-member-summary {
+  display: grid;
+  gap: 6px;
+}
+
+.build-member-summary b {
+  font-size: 13px;
 }
 
 .admin-row {
@@ -664,6 +695,7 @@ textarea {
   .controls,
   .report-form,
   .build-form,
+  .build-member-head,
   .build-essence-slots,
   .build-list,
   .admin-row,

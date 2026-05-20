@@ -45,10 +45,9 @@ const els = {
   buildForm: document.querySelector("#buildForm"),
   buildTitle: document.querySelector("#buildTitle"),
   buildAuthor: document.querySelector("#buildAuthor"),
-  buildCharacter: document.querySelector("#buildCharacter"),
-  buildLevel: document.querySelector("#buildLevel"),
+  buildCharacterCount: document.querySelector("#buildCharacterCount"),
   buildEssenceOptions: document.querySelector("#buildEssenceOptions"),
-  buildEssenceSlots: document.querySelector("#buildEssenceSlots"),
+  buildCharacterSlots: document.querySelector("#buildCharacterSlots"),
   buildNote: document.querySelector("#buildNote"),
   buildCount: document.querySelector("#buildCount"),
   copyCurrentBuild: document.querySelector("#copyCurrentBuild"),
@@ -197,14 +196,19 @@ function initReport() {
 
 function initBuilds() {
   fillBuildEssenceOptions();
-  renderBuildSlots();
+  renderBuildCharacterSlots();
   loadBuildFromUrl();
-  els.buildLevel.addEventListener("change", renderBuildSlots);
+  els.buildCharacterCount.addEventListener("change", renderBuildCharacterSlots);
+  els.buildCharacterSlots.addEventListener("change", (event) => {
+    if (event.target.matches(".build-member-level")) renderBuildCharacterSlots();
+  });
   els.buildForm.addEventListener("submit", submitBuild);
   els.copyCurrentBuild.addEventListener("click", copyCurrentBuildLink);
   els.buildList.addEventListener("click", handleBuildListClick);
   renderBuilds();
 }
+
+const buildCharacters = ["비요른", "에르웬", "미샤", "아이나르", "레이븐"];
 
 function essenceOptionList() {
   return unique(essenceRows.map((row) => row["몬스터"]));
@@ -216,28 +220,89 @@ function fillBuildEssenceOptions() {
     .join("");
 }
 
-function renderBuildSlots() {
-  const oldValues = [...els.buildEssenceSlots.querySelectorAll(".build-essence-input")].map((input) => input.value);
-  const level = Number(els.buildLevel.value || 1);
-  els.buildEssenceSlots.innerHTML = Array.from({ length: level }, (_, index) => `
-    <label class="field">
-      <span>정수 ${index + 1}</span>
-      <input class="build-essence-input" list="buildEssenceOptions" required placeholder="정수 선택 또는 직접 입력">
-    </label>
-  `).join("");
-  els.buildEssenceSlots.querySelectorAll(".build-essence-input").forEach((input, index) => {
-    if (oldValues[index]) input.value = oldValues[index];
+function readMemberDrafts() {
+  const cards = [...els.buildCharacterSlots.querySelectorAll(".build-member-card")];
+  return cards.map((card) => ({
+    character: card.querySelector(".build-member-character")?.value || "",
+    level: Number(card.querySelector(".build-member-level")?.value || 1),
+    essences: [...card.querySelectorAll(".build-essence-input")].map((input) => input.value),
+  }));
+}
+
+function levelOptions(selected = 1) {
+  return [1, 2, 3, 4, 5, 6]
+    .map((level) => `<option value="${level}"${Number(selected) === level ? " selected" : ""}>${level}레벨</option>`)
+    .join("");
+}
+
+function characterOptions(selected = "") {
+  return buildCharacters
+    .map((name) => `<option value="${escapeHtml(name)}"${selected === name ? " selected" : ""}>${escapeHtml(name)}</option>`)
+    .join("");
+}
+
+function renderBuildCharacterSlots() {
+  const drafts = readMemberDrafts();
+  const count = Number(els.buildCharacterCount.value || 1);
+  els.buildCharacterSlots.innerHTML = Array.from({ length: count }, (_, index) => {
+    const draft = drafts[index] || {};
+    const character = draft.character || buildCharacters[index] || buildCharacters[0];
+    const level = Number(draft.level || 1);
+    const essenceInputs = Array.from({ length: level }, (__, essenceIndex) => `
+      <label class="field">
+        <span>정수 ${essenceIndex + 1}</span>
+        <input class="build-essence-input" list="buildEssenceOptions" required placeholder="정수 선택 또는 직접 입력" value="${escapeHtml(draft.essences?.[essenceIndex] || "")}">
+      </label>
+    `).join("");
+    return `
+      <section class="build-member-card">
+        <div class="build-member-head">
+          <strong>캐릭터 ${index + 1}</strong>
+          <label class="field">
+            <span>캐릭터</span>
+            <select class="build-member-character">${characterOptions(character)}</select>
+          </label>
+          <label class="field">
+            <span>레벨</span>
+            <select class="build-member-level">${levelOptions(level)}</select>
+          </label>
+        </div>
+        <div class="build-essence-slots">${essenceInputs}</div>
+      </section>
+    `;
+  }).join("");
+}
+
+function normalizeBuild(build) {
+  if (Array.isArray(build.members)) return build;
+  return {
+    ...build,
+    members: [{
+      character: build.character || "비요른",
+      level: Number(build.level || 1),
+      essences: build.essences || [],
+    }],
+  };
+}
+
+function readBuildMembers() {
+  return [...els.buildCharacterSlots.querySelectorAll(".build-member-card")].map((card) => {
+    const level = Number(card.querySelector(".build-member-level").value || 1);
+    return {
+      character: card.querySelector(".build-member-character").value,
+      level,
+      essences: [...card.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)).filter(Boolean),
+    };
   });
 }
 
 function readBuildForm() {
+  const members = readBuildMembers();
   return {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     title: textOf(els.buildTitle.value),
     author: textOf(els.buildAuthor.value) || "익명",
-    character: els.buildCharacter.value,
-    level: Number(els.buildLevel.value || 1),
-    essences: [...els.buildEssenceSlots.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)).filter(Boolean),
+    members,
     note: textOf(els.buildNote.value),
     createdAt: new Date().toISOString(),
   };
@@ -246,23 +311,32 @@ function readBuildForm() {
 function submitBuild(event) {
   event.preventDefault();
   const build = readBuildForm();
-  if (build.essences.length !== build.level) return;
+  if (build.members.some((member) => member.essences.length !== member.level)) return;
   savedBuilds.unshift(build);
   saveStoredRows(storageKeys.builds, savedBuilds);
   els.buildForm.reset();
-  renderBuildSlots();
+  renderBuildCharacterSlots();
   renderBuilds();
 }
 
 function applyBuildToForm(build) {
   if (!build) return;
+  const normalized = normalizeBuild(build);
   els.buildTitle.value = build.title || "";
   els.buildAuthor.value = build.author || "";
-  els.buildCharacter.value = build.character || "비요른";
-  els.buildLevel.value = String(build.level || 1);
-  renderBuildSlots();
-  els.buildEssenceSlots.querySelectorAll(".build-essence-input").forEach((input, index) => {
-    input.value = build.essences?.[index] || "";
+  els.buildCharacterCount.value = String(Math.min(Math.max(normalized.members.length, 1), 5));
+  renderBuildCharacterSlots();
+  els.buildCharacterSlots.querySelectorAll(".build-member-card").forEach((card, index) => {
+    const member = normalized.members[index] || {};
+    card.querySelector(".build-member-character").value = member.character || buildCharacters[index] || buildCharacters[0];
+    card.querySelector(".build-member-level").value = String(member.level || 1);
+  });
+  renderBuildCharacterSlots();
+  els.buildCharacterSlots.querySelectorAll(".build-member-card").forEach((card, index) => {
+    const member = normalized.members[index] || {};
+    card.querySelectorAll(".build-essence-input").forEach((input, essenceIndex) => {
+      input.value = member.essences?.[essenceIndex] || "";
+    });
   });
   els.buildNote.value = build.note || "";
 }
@@ -338,18 +412,27 @@ function renderBuilds() {
 }
 
 function buildCard(build, shared) {
+  const normalized = normalizeBuild(build);
+  const memberSummary = normalized.members
+    .map((member) => `${member.character} ${member.level}레벨`)
+    .join(" · ");
   return `
     <article class="build-card" data-build-id="${escapeHtml(build.id || "")}">
       <div class="build-card-head">
         <div>
           <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
-          <span>${escapeHtml(build.character)} · ${escapeHtml(build.level)}레벨 · ${escapeHtml(build.author || "익명")}</span>
+          <span>${escapeHtml(memberSummary)} · ${escapeHtml(build.author || "익명")}</span>
         </div>
         ${shared ? `<span class="grade-pill">공유 빌드</span>` : ""}
       </div>
-      <div class="build-essence-list">
-        ${(build.essences || []).map((name, index) => `<span>${index + 1}. ${escapeHtml(name)}</span>`).join("")}
-      </div>
+      ${normalized.members.map((member) => `
+        <div class="build-member-summary">
+          <b>${escapeHtml(member.character)} ${escapeHtml(member.level)}레벨</b>
+          <div class="build-essence-list">
+            ${(member.essences || []).map((name, index) => `<span>${index + 1}. ${escapeHtml(name)}</span>`).join("")}
+          </div>
+        </div>
+      `).join("")}
       ${build.note ? `<p>${escapeHtml(build.note)}</p>` : ""}
       ${shared ? "" : `
         <div class="pending-actions">
