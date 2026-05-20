@@ -75,7 +75,12 @@ function statNames() {
       .map((part) => cleanStatName(part.trim().match(/^(.+?)\s+\d+/)?.[1]))
       .filter(Boolean)
   );
-  return unique([...fromStatSheet, ...fromEssence]);
+  return unique([...fromStatSheet, ...fromEssence]).filter((name) => !excludedStatName(name));
+}
+
+function excludedStatName(name) {
+  const normalized = cleanStatName(name).toLowerCase();
+  return normalized === "경험치" || normalized === "hp";
 }
 
 function statValue(row, statName) {
@@ -241,7 +246,10 @@ function sortRows(rows) {
 function sortEssenceRows(rows) {
   const statName = selectedStatName();
   const mode = els.sort.value;
-  const copy = sortRows(rows);
+  const filteredRows = hasStatSort()
+    ? rows.filter(({ row }) => statValue(row, statName) !== 0)
+    : rows;
+  const copy = sortRows(filteredRows);
 
   if (hasStatSort()) {
     return copy.sort((a, b) => {
