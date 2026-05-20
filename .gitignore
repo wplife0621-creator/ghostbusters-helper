@@ -9,9 +9,9 @@
 *.jpg
 *.jpeg
 *.webp
+*.zip
 
 # 운영체제/편집기 파일
 .DS_Store
 Thumbs.db
 .vscode/
-

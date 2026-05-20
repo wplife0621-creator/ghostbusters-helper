@@ -5,18 +5,23 @@ const els = {
   search: document.querySelector("#searchInput"),
   type: document.querySelector("#typeFilter"),
   floor: document.querySelector("#floorFilter"),
+  area: document.querySelector("#areaFilter"),
   character: document.querySelector("#characterFilter"),
   sort: document.querySelector("#sortFilter"),
+  statSort: document.querySelector("#statSortFilter"),
   results: document.querySelector("#results"),
+  resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
   recommendations: document.querySelector("#recommendations"),
+  gameDays: document.querySelector("#gameDays"),
   gameHours: document.querySelector("#gameHours"),
-  timeUnit: document.querySelector("#timeUnit"),
   timeResult: document.querySelector("#timeResult"),
+  tabs: document.querySelectorAll(".tab"),
 };
 
 const types = ["전체", "정수", "넘버스", "미샤", "균열", "스탯", "각인"];
 const essenceRows = data["정수"] || [];
+let currentView = "all";
 
 function textOf(value) {
   return String(value ?? "").trim();
@@ -30,6 +35,11 @@ function numberFrom(value) {
 function cooldownOf(row) {
   const match = textOf(row["액티브"]).match(/(\d+)\s*s/i);
   return match ? Number(match[1]) : Infinity;
+}
+
+function floorRank(value) {
+  const match = textOf(value).match(/\d+/);
+  return match ? Number(match[0]) : 999;
 }
 
 function unique(values) {
@@ -50,10 +60,33 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+function statNames() {
+  const fromStatSheet = (data["스탯"] || []).map((row) => row["이름"]);
+  const fromEssence = essenceRows.flatMap((row) =>
+    textOf(row["주요 스탯"])
+      .split(",")
+      .map((part) => part.trim().match(/^(.+?)\s+\d+/)?.[1])
+      .filter(Boolean)
+  );
+  return unique([...fromStatSheet, ...fromEssence]);
+}
+
+function statValue(row, statName) {
+  if (!statName || statName === "스탯 선택 안 함") return 0;
+  const parts = textOf(row["주요 스탯"]).split(",");
+  for (const part of parts) {
+    const match = part.trim().match(/^(.+?)\s+(-?\d+)/);
+    if (match && match[1].trim() === statName) return Number(match[2]);
+  }
+  return 0;
+}
+
 function init() {
   optionList(els.type, types.slice(1), "전체");
   optionList(els.floor, unique(Object.values(data).flat().map((row) => row["층"])), "전체 층");
+  optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
   optionList(els.character, unique(essenceRows.map((row) => row["추천 캐릭터"])), "전체 캐릭터");
+  optionList(els.statSort, statNames(), "스탯 선택 안 함");
 
   els.summary.innerHTML = Object.entries(data)
     .map(([name, rows]) => `<span>${name} ${rows.length}</span>`)
@@ -64,20 +97,47 @@ function init() {
     el.addEventListener("change", render);
   });
 
+  els.tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      currentView = tab.dataset.view;
+      els.tabs.forEach((item) => item.classList.toggle("active", item === tab));
+      document.body.dataset.view = currentView;
+      render();
+    });
+  });
+
+  document.body.dataset.view = currentView;
   render();
 }
 
 function collectRows() {
+  if (currentView === "essence") return collectEssenceRows();
+
   const selectedType = els.type.value;
   const groups = selectedType === "전체"
     ? Object.entries(data).filter(([name]) => types.includes(name))
     : [[selectedType, data[selectedType] || []]];
 
+  let rows = groups.flatMap(([type, rows]) => rows.map((row) => ({ type, row })));
+  rows = applyCommonFilters(rows);
+  return sortRows(rows);
+}
+
+function collectEssenceRows() {
+  let rows = essenceRows.map((row) => ({ type: "정수", row }));
+  rows = applyCommonFilters(rows);
+
+  if (els.area.value !== "전체 구역") {
+    rows = rows.filter(({ row }) => textOf(row["구역"]) === els.area.value);
+  }
+
+  return sortEssenceRows(rows);
+}
+
+function applyCommonFilters(rows) {
   const query = textOf(els.search.value).toLowerCase();
   const floor = els.floor.value;
   const character = els.character.value;
-
-  let rows = groups.flatMap(([type, rows]) => rows.map((row) => ({ type, row })));
 
   if (floor !== "전체 층") {
     rows = rows.filter(({ row }) => textOf(row["층"]) === floor);
@@ -94,7 +154,7 @@ function collectRows() {
     });
   }
 
-  return sortRows(rows);
+  return rows;
 }
 
 function sortRows(rows) {
@@ -116,15 +176,68 @@ function sortRows(rows) {
   return copy;
 }
 
+function sortEssenceRows(rows) {
+  const statName = els.statSort.value;
+  const mode = els.sort.value;
+  const copy = sortRows(rows);
+
+  if (statName !== "스탯 선택 안 함") {
+    return copy.sort((a, b) => {
+      const statDiff = statValue(b.row, statName) - statValue(a.row, statName);
+      if (statDiff) return statDiff;
+      return floorAreaMonsterSort(a, b);
+    });
+  }
+
+  if (mode === "default") {
+    return copy.sort(floorAreaMonsterSort);
+  }
+
+  return copy;
+}
+
+function floorAreaMonsterSort(a, b) {
+  return floorRank(a.row["층"]) - floorRank(b.row["층"])
+    || textOf(a.row["층"]).localeCompare(textOf(b.row["층"]), "ko")
+    || textOf(a.row["구역"]).localeCompare(textOf(b.row["구역"]), "ko")
+    || textOf(a.row["몬스터"]).localeCompare(textOf(b.row["몬스터"]), "ko");
+}
+
 function render() {
   const rows = collectRows();
+  els.resultTitle.textContent = currentView === "essence" ? "정수 목록" : "검색 결과";
   els.resultCount.textContent = `${rows.length}건`;
+  els.results.className = currentView === "essence" ? "essence-results" : "results";
   els.results.innerHTML = rows.length
-    ? rows.slice(0, 120).map(cardTemplate).join("")
+    ? currentView === "essence"
+      ? essenceTemplate(rows)
+      : rows.slice(0, 120).map(cardTemplate).join("")
     : `<div class="empty">검색 결과가 없습니다. 필터를 조금 넓혀보세요.</div>`;
 
   renderRecommendations();
   renderTime();
+}
+
+function essenceTemplate(rows) {
+  const groups = new Map();
+  rows.forEach((item) => {
+    const key = `${item.row["층"] || "미기록"}|${item.row["구역"] || "미기록"}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  });
+
+  return [...groups.entries()].map(([key, items]) => {
+    const [floor, area] = key.split("|");
+    return `
+      <section class="essence-group">
+        <div class="group-title">
+          <h3>${escapeHtml(floor)} · ${escapeHtml(area)}</h3>
+          <span>${items.length}마리</span>
+        </div>
+        <div class="results">${items.map(cardTemplate).join("")}</div>
+      </section>
+    `;
+  }).join("");
 }
 
 function cardTemplate({ type, row }) {
@@ -198,11 +311,22 @@ function renderRecommendations() {
 }
 
 function renderTime() {
-  const amount = Number(els.gameHours.value || 0);
-  const seconds = els.timeUnit.value === "condition" ? amount * 8 : amount * 4;
-  const minutes = Math.floor(seconds / 60);
-  const remain = Math.round(seconds % 60);
-  els.timeResult.textContent = `${minutes}분 ${remain}초`;
+  const days = Math.max(0, Number(els.gameDays.value || 0));
+  const hours = Math.max(0, Number(els.gameHours.value || 0));
+  const totalGameHours = (days * 24) + hours;
+  const seconds = Math.round(totalGameHours * 4);
+  els.timeResult.textContent = `현실 시간 ${formatSeconds(seconds)}`;
+}
+
+function formatSeconds(totalSeconds) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const parts = [];
+  if (hours) parts.push(`${hours}시간`);
+  if (minutes) parts.push(`${minutes}분`);
+  parts.push(`${seconds}초`);
+  return parts.join(" ");
 }
 
 init();
