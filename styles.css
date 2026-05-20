@@ -192,6 +192,41 @@ select:focus {
   grid-column: span 2;
 }
 
+.admin-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.admin-row > button {
+  min-height: 39px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: #44516a;
+  font: inherit;
+  font-weight: 900;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.admin-row > button:hover {
+  border-color: var(--brand);
+  color: var(--brand-dark);
+}
+
+.admin-row > button[hidden] {
+  display: none;
+}
+
+.admin-status {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .edit-monster-matches {
   grid-column: 1 / -1;
   display: grid;
@@ -538,6 +573,7 @@ select:focus {
   .tool-strip,
   .controls,
   .report-form,
+  .admin-row,
   .edit-monster-matches,
   .pending-reports {
     grid-template-columns: 1fr;

@@ -3,7 +3,10 @@ const data = window.GHOST_DATA || {};
 const storageKeys = {
   pending: "dukhubusters.pendingReports",
   approved: "dukhubusters.approvedReports",
+  adminUnlocked: "dukhubusters.adminUnlocked",
 };
+
+const adminCode = "0621";
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -34,11 +37,16 @@ const els = {
   pendingCount: document.querySelector("#pendingCount"),
   pendingReports: document.querySelector("#pendingReports"),
   copyApproved: document.querySelector("#copyApproved"),
+  adminCodeInput: document.querySelector("#adminCodeInput"),
+  adminUnlock: document.querySelector("#adminUnlock"),
+  adminLock: document.querySelector("#adminLock"),
+  adminStatus: document.querySelector("#adminStatus"),
 };
 
 let approvedReports = loadStoredRows(storageKeys.approved);
 let pendingReports = loadStoredRows(storageKeys.pending);
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
+let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
 const statNoneLabel = "스탯 선택 안 함";
 
 function textOf(value) {
@@ -163,7 +171,42 @@ function initReport() {
   els.reportForm.addEventListener("submit", submitReport);
   els.pendingReports.addEventListener("click", handlePendingAction);
   els.copyApproved.addEventListener("click", copyApprovedRows);
+  els.adminUnlock.addEventListener("click", unlockAdmin);
+  els.adminLock.addEventListener("click", lockAdmin);
+  els.adminCodeInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") unlockAdmin();
+  });
+  updateAdminUi();
   renderPendingReports();
+}
+
+function unlockAdmin() {
+  if (textOf(els.adminCodeInput.value) !== adminCode) {
+    els.adminStatus.textContent = "관리자 코드가 맞지 않습니다.";
+    return;
+  }
+  adminUnlocked = true;
+  localStorage.setItem(storageKeys.adminUnlocked, "1");
+  els.adminCodeInput.value = "";
+  updateAdminUi();
+  renderPendingReports();
+}
+
+function lockAdmin() {
+  adminUnlocked = false;
+  localStorage.removeItem(storageKeys.adminUnlocked);
+  updateAdminUi();
+  renderPendingReports();
+}
+
+function updateAdminUi() {
+  els.adminStatus.textContent = adminUnlocked
+    ? "관리자 모드가 열려 있습니다. 검수 승인과 반려가 가능합니다."
+    : "관리자 모드가 잠겨 있습니다.";
+  els.adminUnlock.hidden = adminUnlocked;
+  els.adminLock.hidden = !adminUnlocked;
+  els.adminCodeInput.disabled = adminUnlocked;
+  els.copyApproved.hidden = !adminUnlocked;
 }
 
 function fillMonsterOptions() {
@@ -488,6 +531,7 @@ function submitReport(event) {
 }
 
 function handlePendingAction(event) {
+  if (!adminUnlocked) return;
   const button = event.target.closest("button[data-action]");
   if (!button) return;
   const id = button.closest("[data-report-id]")?.dataset.reportId;
@@ -514,6 +558,10 @@ function handlePendingAction(event) {
 
 function renderPendingReports() {
   els.pendingCount.textContent = `검수 대기 ${pendingReports.length}건`;
+  if (!adminUnlocked) {
+    els.pendingReports.innerHTML = `<div class="empty compact-empty">관리자 모드를 열면 검수 대기 목록이 표시됩니다.</div>`;
+    return;
+  }
   els.pendingReports.innerHTML = pendingReports.length
     ? pendingReports.map((report) => `
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
@@ -534,6 +582,13 @@ function renderPendingReports() {
 }
 
 async function copyApprovedRows() {
+  if (!adminUnlocked) {
+    els.copyApproved.textContent = "관리자 전용";
+    setTimeout(() => {
+      els.copyApproved.textContent = "승인 데이터 복사";
+    }, 1500);
+    return;
+  }
   const text = JSON.stringify(approvedReports, null, 2);
   try {
     await navigator.clipboard.writeText(text);
