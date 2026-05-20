@@ -9,6 +9,8 @@ const els = {
   character: document.querySelector("#characterFilter"),
   sort: document.querySelector("#sortFilter"),
   statSort: document.querySelector("#statSortFilter"),
+  statChips: document.querySelector("#statChips"),
+  statSortSummary: document.querySelector("#statSortSummary"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
@@ -21,7 +23,9 @@ const els = {
 
 const types = ["전체", "정수", "넘버스", "미샤", "균열", "스탯", "각인"];
 const essenceRows = data["정수"] || [];
+const statNoneLabel = "스탯 선택 안 함";
 let currentView = "all";
+let statSortDirection = "desc";
 
 function textOf(value) {
   return String(value ?? "").trim();
@@ -90,7 +94,8 @@ function init() {
   optionList(els.floor, unique(Object.values(data).flat().map((row) => row["층"])), "전체 층");
   optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
   optionList(els.character, unique(essenceRows.map((row) => row["추천 캐릭터"])), "전체 캐릭터");
-  optionList(els.statSort, statNames(), "스탯 선택 안 함");
+  optionList(els.statSort, statNames(), statNoneLabel);
+  renderStatChips();
 
   els.summary.innerHTML = Object.entries(data)
     .map(([name, rows]) => `<span>${name} ${rows.length}</span>`)
@@ -99,6 +104,11 @@ function init() {
   document.querySelectorAll("input, select").forEach((el) => {
     el.addEventListener("input", render);
     el.addEventListener("change", render);
+  });
+
+  els.statSort.addEventListener("change", () => {
+    statSortDirection = "desc";
+    render();
   });
 
   els.tabs.forEach((tab) => {
@@ -112,6 +122,55 @@ function init() {
 
   document.body.dataset.view = currentView;
   render();
+}
+
+function selectedStatName() {
+  return els.statSort.value;
+}
+
+function hasStatSort() {
+  return selectedStatName() !== statNoneLabel;
+}
+
+function renderStatChips() {
+  const names = statNames();
+  els.statChips.innerHTML = [
+    `<button type="button" class="stat-chip is-active" data-stat="${escapeHtml(statNoneLabel)}">${escapeHtml(statNoneLabel)}</button>`,
+    ...names.map((name) => `<button type="button" class="stat-chip" data-stat="${escapeHtml(name)}">${escapeHtml(name)} ↕</button>`),
+  ].join("");
+
+  els.statChips.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-stat]");
+    if (!button) return;
+
+    const nextStat = button.dataset.stat;
+    if (selectedStatName() === nextStat && nextStat !== statNoneLabel) {
+      statSortDirection = statSortDirection === "desc" ? "asc" : "desc";
+    } else {
+      statSortDirection = "desc";
+    }
+
+    els.statSort.value = nextStat;
+    render();
+  });
+}
+
+function updateStatSortUi() {
+  const activeStat = selectedStatName();
+  els.statChips.querySelectorAll("button[data-stat]").forEach((button) => {
+    const isActive = button.dataset.stat === activeStat;
+    button.classList.toggle("is-active", isActive);
+    if (button.dataset.stat === statNoneLabel) {
+      button.textContent = statNoneLabel;
+    } else {
+      const marker = isActive ? (statSortDirection === "desc" ? " ↓" : " ↑") : " ↕";
+      button.textContent = `${button.dataset.stat}${marker}`;
+    }
+  });
+
+  els.statSortSummary.textContent = hasStatSort()
+    ? `${activeStat} ${statSortDirection === "desc" ? "높은 순" : "낮은 순"}으로 정렬 중`
+    : "스탯을 누르면 높은 순으로 정렬됩니다.";
 }
 
 function collectRows() {
@@ -181,13 +240,15 @@ function sortRows(rows) {
 }
 
 function sortEssenceRows(rows) {
-  const statName = els.statSort.value;
+  const statName = selectedStatName();
   const mode = els.sort.value;
   const copy = sortRows(rows);
 
-  if (statName !== "스탯 선택 안 함") {
+  if (hasStatSort()) {
     return copy.sort((a, b) => {
-      const statDiff = statValue(b.row, statName) - statValue(a.row, statName);
+      const statDiff = statSortDirection === "desc"
+        ? statValue(b.row, statName) - statValue(a.row, statName)
+        : statValue(a.row, statName) - statValue(b.row, statName);
       if (statDiff) return statDiff;
       return floorAreaMonsterSort(a, b);
     });
@@ -209,6 +270,7 @@ function floorAreaMonsterSort(a, b) {
 
 function render() {
   const rows = collectRows();
+  updateStatSortUi();
   els.resultTitle.textContent = currentView === "essence" ? "정수 목록" : "검색 결과";
   els.resultCount.textContent = `${rows.length}건`;
   els.results.className = currentView === "essence" ? "essence-results" : "results";
@@ -248,6 +310,9 @@ function cardTemplate({ type, row }) {
   const title = titleFor(type, row);
   const detail = detailFor(type, row);
   const meta = metaFor(type, row);
+  const statMeta = currentView === "essence" && type === "정수" && hasStatSort()
+    ? [`${selectedStatName()} ${statValue(row, selectedStatName())}`]
+    : [];
 
   return `
     <article class="card">
@@ -255,7 +320,7 @@ function cardTemplate({ type, row }) {
         <h3 class="card-title">${escapeHtml(title)}</h3>
         <span class="badge">${escapeHtml(type)}</span>
       </div>
-      <div class="meta">${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
+      <div class="meta">${[...meta, ...statMeta].map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
       <p class="detail">${detail}</p>
     </article>
   `;
