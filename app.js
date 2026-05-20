@@ -21,6 +21,7 @@ const els = {
   gameHours: document.querySelector("#gameHours"),
   timeResult: document.querySelector("#timeResult"),
   reportForm: document.querySelector("#reportForm"),
+  reportMode: document.querySelector("#reportMode"),
   reportMonster: document.querySelector("#reportMonster"),
   reportGrade: document.querySelector("#reportGrade"),
   reportFloor: document.querySelector("#reportFloor"),
@@ -35,7 +36,7 @@ const els = {
 
 let approvedReports = loadStoredRows(storageKeys.approved);
 let pendingReports = loadStoredRows(storageKeys.pending);
-let essenceRows = [...(data["정수"] || []), ...approvedReports];
+let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
 const statNoneLabel = "스탯 선택 안 함";
 
 function textOf(value) {
@@ -53,6 +54,20 @@ function loadStoredRows(key) {
 
 function saveStoredRows(key, rows) {
   localStorage.setItem(key, JSON.stringify(rows));
+}
+
+function mergeApprovedRows(baseRows, approvedRows) {
+  const merged = [...baseRows];
+  approvedRows.forEach((row) => {
+    const monster = textOf(row["몬스터"]);
+    const index = merged.findIndex((item) => textOf(item["몬스터"]) === monster);
+    if (index >= 0) {
+      merged[index] = { ...merged[index], ...row };
+    } else {
+      merged.unshift(row);
+    }
+  });
+  return merged;
 }
 
 function numberFrom(value) {
@@ -121,19 +136,27 @@ function statValue(row, statName) {
 }
 
 function init() {
+  if (els.search) initHome();
+  if (els.reportForm) initReport();
+}
+
+function initHome() {
   refreshControls();
   renderStatChips();
 
-  document.querySelectorAll("input, select").forEach((el) => {
+  document.querySelectorAll(".compact-layout input, .compact-layout select").forEach((el) => {
     el.addEventListener("input", render);
     el.addEventListener("change", render);
   });
 
+  render();
+}
+
+function initReport() {
   els.reportForm.addEventListener("submit", submitReport);
   els.pendingReports.addEventListener("click", handlePendingAction);
   els.copyApproved.addEventListener("click", copyApprovedRows);
-
-  render();
+  renderPendingReports();
 }
 
 function refreshControls() {
@@ -249,7 +272,6 @@ function floorAreaMonsterSort(a, b) {
 function render() {
   const rows = collectEssenceRows();
   updateStatSortUi();
-  renderPendingReports();
   els.resultTitle.textContent = hasStatSort() ? `${selectedStatName()} 정렬` : "정수 목록";
   els.resultCount.textContent = `${rows.length}건`;
   els.results.innerHTML = rows.length
@@ -356,7 +378,7 @@ function reportToRow(report) {
     "패시브": report.passive,
     "액티브": report.active,
     "추천 캐릭터": "",
-    "출처": "제보 승인",
+    "출처": report.mode === "edit" ? "수정 승인" : "제보 승인",
     "승인일": new Date().toISOString(),
   };
 }
@@ -365,6 +387,7 @@ function submitReport(event) {
   event.preventDefault();
   const report = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    mode: els.reportMode.value,
     monster: textOf(els.reportMonster.value),
     grade: textOf(els.reportGrade.value),
     floor: textOf(els.reportFloor.value),
@@ -377,7 +400,8 @@ function submitReport(event) {
   pendingReports.unshift(report);
   saveStoredRows(storageKeys.pending, pendingReports);
   els.reportForm.reset();
-  render();
+  if (els.search) render();
+  else renderPendingReports();
 }
 
 function handlePendingAction(event) {
@@ -393,13 +417,16 @@ function handlePendingAction(event) {
   if (button.dataset.action === "approve") {
     const row = reportToRow(report);
     approvedReports.unshift(row);
-    essenceRows = [row, ...essenceRows];
     saveStoredRows(storageKeys.approved, approvedReports);
-    refreshControls();
-    renderStatChips();
+    essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
+    if (els.search) {
+      refreshControls();
+      renderStatChips();
+    }
   }
 
-  render();
+  if (els.search) render();
+  else renderPendingReports();
 }
 
 function renderPendingReports() {
@@ -409,7 +436,7 @@ function renderPendingReports() {
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong>${escapeHtml(report.monster)}</strong>
-          <span>${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
+          <span>${report.mode === "edit" ? "수정" : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
