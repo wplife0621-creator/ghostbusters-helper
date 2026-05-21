@@ -99,6 +99,7 @@ let savedBuilds = loadStoredRows(storageKeys.builds);
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
 let activeEssenceInput = null;
+let activeStatNames = [];
 const statNoneLabel = "스탯 선택 안 함";
 
 function textOf(value) {
@@ -206,6 +207,12 @@ function init() {
 function initHome() {
   refreshControls();
   renderStatChips();
+
+  els.statSort.addEventListener("change", () => {
+    const value = els.statSort.value;
+    activeStatNames = value && value !== statNoneLabel ? [value] : [];
+    render();
+  });
 
   document.querySelectorAll(".compact-layout input, .compact-layout select").forEach((el) => {
     el.addEventListener("input", render);
@@ -821,44 +828,64 @@ function refreshControls() {
 }
 
 function selectedStatName() {
-  return els.statSort.value;
+  return selectedStatNames()[0] || statNoneLabel;
+}
+
+function selectedStatNames() {
+  const validStats = statNames();
+  activeStatNames = activeStatNames.filter((name) => validStats.includes(name));
+  return [...activeStatNames];
 }
 
 function hasStatSort() {
-  return selectedStatName() !== statNoneLabel;
+  return selectedStatNames().length > 0;
 }
 
 function renderStatChips() {
-  const active = selectedStatName() || statNoneLabel;
+  selectedStatNames();
   els.statChips.innerHTML = [
     `<button type="button" class="stat-chip" data-stat="${escapeHtml(statNoneLabel)}">${escapeHtml(statNoneLabel)}</button>`,
-    ...statNames().map((name) => `<button type="button" class="stat-chip" data-stat="${escapeHtml(name)}">${escapeHtml(name)} ↕</button>`),
+    ...statNames().map((name) => `<button type="button" class="stat-chip" data-stat="${escapeHtml(name)}">${escapeHtml(name)}</button>`),
   ].join("");
-  els.statSort.value = active;
+  els.statSort.value = activeStatNames[0] || statNoneLabel;
 
   els.statChips.onclick = (event) => {
     const button = event.target.closest("button[data-stat]");
     if (!button) return;
-    els.statSort.value = button.dataset.stat;
+    const statName = button.dataset.stat;
+    if (statName === statNoneLabel) {
+      activeStatNames = [];
+    } else if (activeStatNames.includes(statName)) {
+      activeStatNames = activeStatNames.filter((name) => name !== statName);
+    } else {
+      activeStatNames = [...activeStatNames, statName];
+    }
+    els.statSort.value = activeStatNames[0] || statNoneLabel;
     render();
   };
 }
 
 function updateStatSortUi() {
-  const activeStat = selectedStatName();
+  const activeStats = selectedStatNames();
   els.statChips.querySelectorAll("button[data-stat]").forEach((button) => {
-    const isActive = button.dataset.stat === activeStat;
+    const isActive = button.dataset.stat === statNoneLabel
+      ? activeStats.length === 0
+      : activeStats.includes(button.dataset.stat);
     button.classList.toggle("is-active", isActive);
     if (button.dataset.stat === statNoneLabel) {
       button.textContent = statNoneLabel;
     } else {
-      button.textContent = `${button.dataset.stat}${isActive ? " ↓" : " ↕"}`;
+      button.textContent = `${button.dataset.stat}${isActive ? " 선택됨" : " +"}`;
     }
   });
 
-  els.statSortSummary.textContent = hasStatSort()
-    ? `${activeStat} 높은 순으로 정렬 중`
-    : "스탯을 누르면 높은 순으로 정렬됩니다.";
+  if (!activeStats.length) {
+    els.statSortSummary.textContent = "스탯을 누르면 높은 순으로 정렬합니다.";
+  } else if (activeStats.length === 1) {
+    els.statSortSummary.textContent = `${activeStats[0]} 높은 순으로 정렬 중`;
+  } else {
+    els.statSortSummary.textContent = `선택 스탯 합산 높은 순으로 정렬 중: ${activeStats.join(", ")}`;
+  }
 }
 
 function collectEssenceRows() {
@@ -890,17 +917,21 @@ function applyFilters(rows) {
 }
 
 function sortEssenceRows(rows) {
-  const statName = selectedStatName();
+  const selectedStats = selectedStatNames();
   const mode = els.sort.value;
-  const filteredRows = hasStatSort()
-    ? rows.filter(({ row }) => statValue(row, statName) !== 0)
+  const filteredRows = selectedStats.length
+    ? rows.filter(({ row }) => hasAllSelectedStats(row, selectedStats))
     : rows;
   const copy = [...filteredRows];
 
-  if (hasStatSort()) {
+  if (selectedStats.length) {
     return copy.sort((a, b) => {
-      const statDiff = statValue(b.row, statName) - statValue(a.row, statName);
-      if (statDiff) return statDiff;
+      const scoreDiff = selectedStatScore(b.row, selectedStats) - selectedStatScore(a.row, selectedStats);
+      if (scoreDiff) return scoreDiff;
+      for (const statName of selectedStats) {
+        const statDiff = statValue(b.row, statName) - statValue(a.row, statName);
+        if (statDiff) return statDiff;
+      }
       return floorAreaMonsterSort(a, b);
     });
   }
@@ -916,6 +947,14 @@ function sortEssenceRows(rows) {
   return copy.sort(floorAreaMonsterSort);
 }
 
+function hasAllSelectedStats(row, selectedStats = selectedStatNames()) {
+  return selectedStats.every((statName) => statValue(row, statName) !== 0);
+}
+
+function selectedStatScore(row, selectedStats = selectedStatNames()) {
+  return selectedStats.reduce((total, statName) => total + statValue(row, statName), 0);
+}
+
 function floorAreaMonsterSort(a, b) {
   return floorRank(a.row["층"]) - floorRank(b.row["층"])
     || textOf(a.row["층"]).localeCompare(textOf(b.row["층"]), "ko")
@@ -925,8 +964,11 @@ function floorAreaMonsterSort(a, b) {
 
 function render() {
   const rows = collectEssenceRows();
+  const selectedStats = selectedStatNames();
   updateStatSortUi();
-  els.resultTitle.textContent = hasStatSort() ? `${selectedStatName()} 정렬` : "정수 목록";
+  els.resultTitle.textContent = selectedStats.length > 1
+    ? "스탯 조합 정렬"
+    : hasStatSort() ? `${selectedStats[0]} 정렬` : "정수 목록";
   els.resultCount.textContent = `${rows.length}건`;
   els.results.innerHTML = rows.length
     ? essenceTemplate(rows)
@@ -980,8 +1022,11 @@ function essenceTable(items) {
 }
 
 function essenceRowTemplate(row) {
-  const activeStat = hasStatSort() ? selectedStatName() : "";
-  const highlightValue = activeStat ? statValue(row, activeStat) : 0;
+  const activeStats = hasStatSort() ? selectedStatNames() : [];
+  const highlightText = activeStats.length
+    ? activeStats.map((statName) => `${statName} ${statValue(row, statName)}`).join(" · ")
+    : "";
+  const scoreText = activeStats.length > 1 ? `합산 ${selectedStatScore(row, activeStats)} · ` : "";
   return `
     <tr>
       <td>
@@ -993,7 +1038,7 @@ function essenceRowTemplate(row) {
       <td><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
       <td>${row["추천 캐릭터"] ? `<span class="character-pill">${escapeHtml(row["추천 캐릭터"])}</span>` : `<span class="muted">-</span>`}</td>
       <td>
-        ${activeStat ? `<div class="sorted-stat">${escapeHtml(activeStat)} ${highlightValue}</div>` : ""}
+        ${activeStats.length ? `<div class="sorted-stat">${escapeHtml(scoreText + highlightText)}</div>` : ""}
         <div class="stat-list">${statBadges(row["주요 스탯"])}</div>
       </td>
       <td class="skill-cell">${skillText(row["패시브"])}</td>
