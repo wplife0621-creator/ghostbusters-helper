@@ -31,10 +31,10 @@ body {
 }
 
 .topbar-inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   width: min(1380px, 100%);
   margin: 0 auto;
-  justify-content: space-between;
   align-items: center;
   gap: 16px;
 }
@@ -50,6 +50,8 @@ body {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .site-nav a {
@@ -456,6 +458,30 @@ textarea {
   font-size: 12px;
   font-weight: 900;
   text-align: right;
+}
+
+.topbar-visitors {
+  grid-column: 1 / -1;
+  justify-self: end;
+  width: auto;
+  max-width: 100%;
+  margin-top: -6px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+  padding: 7px 9px;
+}
+
+.topbar-visitors .visitor-counts span {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.topbar-visitors .visitor-counts strong,
+.topbar-visitors p {
+  color: #fff;
 }
 
 .build-card {
@@ -976,11 +1002,25 @@ textarea {
 @media (max-width: 720px) {
   .topbar-inner {
     align-items: flex-start;
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .site-nav {
+    grid-column: 1;
+    grid-row: auto;
     justify-content: flex-start;
+  }
+
+  .topbar-visitors {
+    justify-self: stretch;
+    margin-top: 0;
+    border-radius: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .topbar-visitors p {
+    text-align: left;
   }
 
   .essence-picker-modal {
