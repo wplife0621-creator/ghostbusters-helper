@@ -403,6 +403,21 @@ textarea {
   margin-top: 10px;
 }
 
+.build-sync-status {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.build-sync-status.is-online {
+  color: #187047;
+}
+
+.build-sync-status.is-offline {
+  color: #8a5a00;
+}
+
 .build-card {
   display: grid;
   gap: 10px;

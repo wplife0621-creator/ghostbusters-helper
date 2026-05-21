@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>빌드 공유 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260521-7">
+  <link rel="stylesheet" href="./styles.css?v=20260521-8">
 </head>
 <body>
   <header class="topbar compact">
@@ -58,6 +58,7 @@
         <strong id="buildCount">등록된 빌드 0개</strong>
         <button id="copyCurrentBuild" type="button">현재 빌드 공유 링크 복사</button>
       </div>
+      <p id="buildSyncStatus" class="build-sync-status"></p>
       <div id="sharedBuildView" class="shared-build-view"></div>
       <div id="buildList" class="build-list"></div>
     </section>
@@ -91,6 +92,14 @@
   </div>
 
   <script src="./ghost-data.js?v=20260520"></script>
-  <script src="./app.js?v=20260521-7"></script>
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      buildTable: "builds",
+    };
+  </script>
+  <script src="./config.js?v=20260521-8"></script>
+  <script src="./app.js?v=20260521-8"></script>
 </body>
 </html>

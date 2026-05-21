@@ -8,6 +8,12 @@ const storageKeys = {
 };
 
 const adminCode = "0621";
+const siteConfig = window.DUKHUBUSTERS_CONFIG || {};
+const buildBackend = {
+  url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
+  anonKey: textOf(siteConfig.supabaseAnonKey),
+  table: textOf(siteConfig.buildTable) || "builds",
+};
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -50,6 +56,7 @@ const els = {
   buildCharacterSlots: document.querySelector("#buildCharacterSlots"),
   buildNote: document.querySelector("#buildNote"),
   buildCount: document.querySelector("#buildCount"),
+  buildSyncStatus: document.querySelector("#buildSyncStatus"),
   copyCurrentBuild: document.querySelector("#copyCurrentBuild"),
   sharedBuildView: document.querySelector("#sharedBuildView"),
   buildList: document.querySelector("#buildList"),
@@ -215,6 +222,7 @@ function initBuilds() {
   els.copyCurrentBuild.addEventListener("click", copyCurrentBuildLink);
   els.buildList.addEventListener("click", handleBuildListClick);
   renderBuilds();
+  loadPublicBuilds();
 }
 
 function initEssencePicker() {
@@ -396,6 +404,85 @@ function readBuildMembers() {
   });
 }
 
+function hasPublicBuildStore() {
+  return Boolean(buildBackend.url && buildBackend.anonKey);
+}
+
+function buildStoreHeaders(extra = {}) {
+  return {
+    apikey: buildBackend.anonKey,
+    Authorization: `Bearer ${buildBackend.anonKey}`,
+    "Content-Type": "application/json",
+    ...extra,
+  };
+}
+
+function buildStoreUrl(query = "") {
+  return `${buildBackend.url}/rest/v1/${buildBackend.table}${query}`;
+}
+
+function setBuildSyncStatus(message, mode = "") {
+  if (!els.buildSyncStatus) return;
+  els.buildSyncStatus.textContent = message;
+  els.buildSyncStatus.className = `build-sync-status ${mode}`.trim();
+}
+
+function normalizeRemoteBuild(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    author: row.author || "익명",
+    members: Array.isArray(row.members) ? row.members : [],
+    note: row.note || "",
+    createdAt: row.created_at || row.createdAt || new Date().toISOString(),
+  };
+}
+
+function prependBuild(build) {
+  savedBuilds = [build, ...savedBuilds.filter((item) => item.id !== build.id)]
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  saveStoredRows(storageKeys.builds, savedBuilds);
+}
+
+async function loadPublicBuilds() {
+  if (!hasPublicBuildStore()) {
+    setBuildSyncStatus("공개 저장소 연결 전입니다. 지금 등록한 빌드는 이 브라우저에만 임시 저장됩니다.", "is-offline");
+    return;
+  }
+  setBuildSyncStatus("공개 빌드 목록을 불러오는 중입니다.", "is-online");
+  try {
+    const response = await fetch(buildStoreUrl("?select=*&order=created_at.desc"), {
+      headers: buildStoreHeaders(),
+    });
+    if (!response.ok) throw new Error(`load failed: ${response.status}`);
+    savedBuilds = (await response.json()).map(normalizeRemoteBuild);
+    saveStoredRows(storageKeys.builds, savedBuilds);
+    renderBuilds();
+    setBuildSyncStatus("공개 저장소에 연결되었습니다. 등록한 빌드는 모든 방문자에게 표시됩니다.", "is-online");
+  } catch {
+    setBuildSyncStatus("공개 저장소 연결에 실패해 임시 저장 목록을 보여줍니다.", "is-offline");
+    renderBuilds();
+  }
+}
+
+async function savePublicBuild(build) {
+  const response = await fetch(buildStoreUrl(), {
+    method: "POST",
+    headers: buildStoreHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify({
+      id: build.id,
+      title: build.title,
+      author: build.author,
+      members: build.members,
+      note: build.note,
+      created_at: build.createdAt,
+    }),
+  });
+  if (!response.ok) throw new Error(`save failed: ${response.status}`);
+  const rows = await response.json();
+  return normalizeRemoteBuild(rows[0] || build);
+}
+
 function readBuildForm() {
   const members = readBuildMembers();
   return {
@@ -408,14 +495,30 @@ function readBuildForm() {
   };
 }
 
-function submitBuild(event) {
+async function submitBuild(event) {
   event.preventDefault();
   const build = readBuildForm();
-  savedBuilds.unshift(build);
-  saveStoredRows(storageKeys.builds, savedBuilds);
-  els.buildForm.reset();
-  renderBuildCharacterSlots();
-  renderBuilds();
+  const submitButton = els.buildForm.querySelector("[type='submit']");
+  if (submitButton) submitButton.disabled = true;
+  try {
+    const saved = hasPublicBuildStore() ? await savePublicBuild(build) : build;
+    prependBuild(saved);
+    els.buildForm.reset();
+    renderBuildCharacterSlots();
+    renderBuilds();
+    setBuildSyncStatus(
+      hasPublicBuildStore()
+        ? "빌드가 공개 저장소에 등록되었습니다."
+        : "공개 저장소 연결 전이라 이 브라우저에 임시 저장했습니다.",
+      hasPublicBuildStore() ? "is-online" : "is-offline"
+    );
+  } catch {
+    prependBuild(build);
+    renderBuilds();
+    setBuildSyncStatus("공개 저장소 저장에 실패해 이 브라우저에 임시 저장했습니다.", "is-offline");
+  } finally {
+    if (submitButton) submitButton.disabled = false;
+  }
 }
 
 function applyBuildToForm(build) {
@@ -504,7 +607,7 @@ function handleBuildListClick(event) {
 }
 
 function renderBuilds() {
-  els.buildCount.textContent = `등록된 빌드 ${savedBuilds.length}개`;
+  els.buildCount.textContent = `${hasPublicBuildStore() ? "공개 빌드" : "등록된 빌드"} ${savedBuilds.length}개`;
   els.buildList.innerHTML = savedBuilds.length
     ? savedBuilds.map((build) => buildCard(build, false)).join("")
     : `<div class="empty compact-empty">등록된 빌드가 없습니다.</div>`;
