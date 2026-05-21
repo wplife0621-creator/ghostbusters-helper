@@ -28,6 +28,10 @@ const visitorBackend = {
   visitorTable: textOf(siteConfig.visitorTable) || "site_visitors",
   dailyTable: textOf(siteConfig.dailyVisitorTable) || "daily_visitors",
 };
+const visitorBuildMarkers = {
+  total: "__visitor_total__",
+  daily: "__visitor_daily__",
+};
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -464,6 +468,10 @@ function normalizeRemoteBuild(row) {
   };
 }
 
+function isVisitorBuild(build) {
+  return build?.title === visitorBuildMarkers.total || build?.title === visitorBuildMarkers.daily;
+}
+
 function prependBuild(build) {
   savedBuilds = [build, ...savedBuilds.filter((item) => item.id !== build.id)]
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -481,7 +489,7 @@ async function loadPublicBuilds() {
       headers: buildStoreHeaders(),
     });
     if (!response.ok) throw new Error(`load failed: ${response.status}`);
-    savedBuilds = (await response.json()).map(normalizeRemoteBuild);
+    savedBuilds = (await response.json()).map(normalizeRemoteBuild).filter((build) => !isVisitorBuild(build));
     saveStoredRows(storageKeys.builds, savedBuilds);
     renderBuilds();
     setBuildSyncStatus("공개 저장소에 연결되었습니다. 등록한 빌드는 모든 방문자에게 표시됩니다.", "is-online");
@@ -1095,6 +1103,72 @@ async function recordVisit() {
     const [today, total] = await Promise.all([
       countRows(visitorBackend.dailyTable, `select=visitor_id&visit_date=eq.${date}`),
       countRows(visitorBackend.visitorTable, "select=visitor_id"),
+    ]);
+    els.visitorToday.textContent = today;
+    els.visitorTotal.textContent = total;
+    setVisitorStatus("방문자 수는 하루 1회 기준으로 집계됩니다.");
+  } catch {
+    els.visitorToday.textContent = "-";
+    els.visitorTotal.textContent = "-";
+    setVisitorStatus("방문자 수 저장소 연결을 확인 중입니다.");
+  }
+}
+
+function hasVisitorStore() {
+  return hasPublicBuildStore();
+}
+
+async function insertVisitorBuild(row) {
+  const response = await fetch(buildStoreUrl(), {
+    method: "POST",
+    headers: buildStoreHeaders({ Prefer: "resolution=ignore-duplicates,return=minimal" }),
+    body: JSON.stringify(row),
+  });
+  if (!response.ok && response.status !== 409) throw new Error(`visitor build save failed: ${response.status}`);
+}
+
+async function countBuildRows(query = "") {
+  const response = await fetch(buildStoreUrl(`${query ? `?${query}` : ""}`), {
+    headers: buildStoreHeaders({
+      Prefer: "count=exact",
+      Range: "0-0",
+    }),
+  });
+  if (!response.ok) throw new Error(`visitor count failed: ${response.status}`);
+  return countFromRange(response.headers.get("content-range"));
+}
+
+async function recordVisit() {
+  if (!els.visitorToday || !els.visitorTotal) return;
+  if (!hasVisitorStore()) {
+    setVisitorStatus("방문자 저장소 연결 전입니다.");
+    return;
+  }
+  const visitorId = getVisitorId();
+  const date = todayKey();
+  try {
+    if (localStorage.getItem(storageKeys.lastVisitDate) !== date) {
+      await insertVisitorBuild({
+        id: `visitor-total-${visitorId}`,
+        title: visitorBuildMarkers.total,
+        author: "system",
+        members: [],
+        note: "total",
+        created_at: new Date().toISOString(),
+      });
+      await insertVisitorBuild({
+        id: `visitor-daily-${date}-${visitorId}`,
+        title: visitorBuildMarkers.daily,
+        author: "system",
+        members: [],
+        note: date,
+        created_at: new Date().toISOString(),
+      });
+      localStorage.setItem(storageKeys.lastVisitDate, date);
+    }
+    const [today, total] = await Promise.all([
+      countBuildRows(`select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.daily)}&note=eq.${date}`),
+      countBuildRows(`select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.total)}`),
     ]);
     els.visitorToday.textContent = today;
     els.visitorTotal.textContent = total;
