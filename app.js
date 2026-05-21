@@ -884,7 +884,7 @@ function updateStatSortUi() {
   } else if (activeStats.length === 1) {
     els.statSortSummary.textContent = `${activeStats[0]} 높은 순으로 정렬 중`;
   } else {
-    els.statSortSummary.textContent = `선택 스탯 합산 높은 순으로 정렬 중: ${activeStats.join(", ")}`;
+    els.statSortSummary.textContent = `선택 순서대로 높은 순 정렬 중: ${activeStats.join(", ")}`;
   }
 }
 
@@ -926,8 +926,6 @@ function sortEssenceRows(rows) {
 
   if (selectedStats.length) {
     return copy.sort((a, b) => {
-      const scoreDiff = selectedStatScore(b.row, selectedStats) - selectedStatScore(a.row, selectedStats);
-      if (scoreDiff) return scoreDiff;
       for (const statName of selectedStats) {
         const statDiff = statValue(b.row, statName) - statValue(a.row, statName);
         if (statDiff) return statDiff;
@@ -949,10 +947,6 @@ function sortEssenceRows(rows) {
 
 function hasAllSelectedStats(row, selectedStats = selectedStatNames()) {
   return selectedStats.every((statName) => statValue(row, statName) !== 0);
-}
-
-function selectedStatScore(row, selectedStats = selectedStatNames()) {
-  return selectedStats.reduce((total, statName) => total + statValue(row, statName), 0);
 }
 
 function floorAreaMonsterSort(a, b) {
@@ -1026,7 +1020,6 @@ function essenceRowTemplate(row) {
   const highlightText = activeStats.length
     ? activeStats.map((statName) => `${statName} ${statValue(row, statName)}`).join(" · ")
     : "";
-  const scoreText = activeStats.length > 1 ? `합산 ${selectedStatScore(row, activeStats)} · ` : "";
   return `
     <tr>
       <td>
@@ -1038,7 +1031,7 @@ function essenceRowTemplate(row) {
       <td><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
       <td>${row["추천 캐릭터"] ? `<span class="character-pill">${escapeHtml(row["추천 캐릭터"])}</span>` : `<span class="muted">-</span>`}</td>
       <td>
-        ${activeStats.length ? `<div class="sorted-stat">${escapeHtml(scoreText + highlightText)}</div>` : ""}
+        ${activeStats.length ? `<div class="sorted-stat">${escapeHtml(highlightText)}</div>` : ""}
         <div class="stat-list">${statBadges(row["주요 스탯"])}</div>
       </td>
       <td class="skill-cell">${skillText(row["패시브"])}</td>
