@@ -3,4 +3,6 @@ window.DUKHUBUSTERS_CONFIG = {
   supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
   buildTable: "builds",
   reportTable: "monster_reports",
+  visitorTable: "site_visitors",
+  dailyVisitorTable: "daily_visitors",
 };

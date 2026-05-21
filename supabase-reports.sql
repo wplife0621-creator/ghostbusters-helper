@@ -53,3 +53,10 @@ on public.monster_reports for update
 to anon
 using (status = 'pending')
 with check (status in ('approved', 'rejected'));
+
+drop policy if exists "Reviewer UI can delete approved reports" on public.monster_reports;
+create policy "Reviewer UI can delete approved reports"
+on public.monster_reports for update
+to anon
+using (status = 'approved')
+with check (status = 'deleted');

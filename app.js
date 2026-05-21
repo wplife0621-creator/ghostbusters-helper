@@ -3,8 +3,11 @@ const data = window.GHOST_DATA || {};
 const storageKeys = {
   pending: "dukhubusters.pendingReports",
   approved: "dukhubusters.approvedReports",
+  approvedReportItems: "dukhubusters.approvedReportItems",
   adminUnlocked: "dukhubusters.adminUnlocked",
   builds: "dukhubusters.sharedBuilds",
+  visitorId: "dukhubusters.visitorId",
+  lastVisitDate: "dukhubusters.lastVisitDate",
 };
 
 const adminCode = "0621";
@@ -19,6 +22,12 @@ const reportBackend = {
   anonKey: textOf(siteConfig.supabaseAnonKey),
   table: textOf(siteConfig.reportTable) || "monster_reports",
 };
+const visitorBackend = {
+  url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
+  anonKey: textOf(siteConfig.supabaseAnonKey),
+  visitorTable: textOf(siteConfig.visitorTable) || "site_visitors",
+  dailyTable: textOf(siteConfig.dailyVisitorTable) || "daily_visitors",
+};
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -29,6 +38,9 @@ const els = {
   statSort: document.querySelector("#statSortFilter"),
   statChips: document.querySelector("#statChips"),
   statSortSummary: document.querySelector("#statSortSummary"),
+  visitorToday: document.querySelector("#visitorToday"),
+  visitorTotal: document.querySelector("#visitorTotal"),
+  visitorStatus: document.querySelector("#visitorStatus"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
@@ -49,6 +61,8 @@ const els = {
   reportSyncStatus: document.querySelector("#reportSyncStatus"),
   pendingCount: document.querySelector("#pendingCount"),
   pendingReports: document.querySelector("#pendingReports"),
+  approvedCount: document.querySelector("#approvedCount"),
+  approvedReports: document.querySelector("#approvedReports"),
   copyApproved: document.querySelector("#copyApproved"),
   adminCodeInput: document.querySelector("#adminCodeInput"),
   adminUnlock: document.querySelector("#adminUnlock"),
@@ -75,6 +89,7 @@ const els = {
 };
 
 let approvedReports = loadStoredRows(storageKeys.approved);
+let approvedReportItems = loadStoredRows(storageKeys.approvedReportItems);
 let pendingReports = loadStoredRows(storageKeys.pending);
 let savedBuilds = loadStoredRows(storageKeys.builds);
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
@@ -195,6 +210,7 @@ function initHome() {
 
   render();
   loadPublicApprovedReports();
+  recordVisit();
 }
 
 function initReport() {
@@ -205,6 +221,7 @@ function initReport() {
   els.editMonsterMatches.addEventListener("click", handleEditMonsterClick);
   els.reportForm.addEventListener("submit", submitReport);
   els.pendingReports.addEventListener("click", handlePendingAction);
+  els.approvedReports?.addEventListener("click", handleApprovedAction);
   els.copyApproved.addEventListener("click", copyApprovedRows);
   els.adminUnlock.addEventListener("click", unlockAdmin);
   els.adminLock.addEventListener("click", lockAdmin);
@@ -213,6 +230,7 @@ function initReport() {
   });
   updateAdminUi();
   renderPendingReports();
+  renderApprovedReports();
   loadPublicReports();
 }
 
@@ -691,6 +709,7 @@ function unlockAdmin() {
   els.adminCodeInput.value = "";
   updateAdminUi();
   renderPendingReports();
+  renderApprovedReports();
 }
 
 function lockAdmin() {
@@ -698,6 +717,7 @@ function lockAdmin() {
   localStorage.removeItem(storageKeys.adminUnlocked);
   updateAdminUi();
   renderPendingReports();
+  renderApprovedReports();
 }
 
 function updateAdminUi() {
@@ -994,6 +1014,98 @@ function skillText(value) {
   return `<b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}`;
 }
 
+function hasVisitorStore() {
+  return Boolean(visitorBackend.url && visitorBackend.anonKey);
+}
+
+function visitorHeaders(extra = {}) {
+  return {
+    apikey: visitorBackend.anonKey,
+    Authorization: `Bearer ${visitorBackend.anonKey}`,
+    "Content-Type": "application/json",
+    ...extra,
+  };
+}
+
+function visitorUrl(table, query = "") {
+  return `${visitorBackend.url}/rest/v1/${table}${query}`;
+}
+
+function todayKey() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function getVisitorId() {
+  let id = localStorage.getItem(storageKeys.visitorId);
+  if (!id) {
+    id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(storageKeys.visitorId, id);
+  }
+  return id;
+}
+
+function countFromRange(value) {
+  const match = textOf(value).match(/\/(\d+)$/);
+  return match ? Number(match[1]).toLocaleString("ko-KR") : "-";
+}
+
+function setVisitorStatus(message) {
+  if (els.visitorStatus) els.visitorStatus.textContent = message;
+}
+
+async function upsertVisit(table, body, onConflict) {
+  const response = await fetch(visitorUrl(table, `?on_conflict=${encodeURIComponent(onConflict)}`), {
+    method: "POST",
+    headers: visitorHeaders({ Prefer: "resolution=ignore-duplicates,return=minimal" }),
+    body: JSON.stringify(body),
+  });
+  if (!response.ok && response.status !== 409) throw new Error(`visit save failed: ${response.status}`);
+}
+
+async function countRows(table, query = "") {
+  const response = await fetch(visitorUrl(table, `${query ? `?${query}` : ""}`), {
+    headers: visitorHeaders({
+      Prefer: "count=exact",
+      Range: "0-0",
+    }),
+  });
+  if (!response.ok) throw new Error(`visit count failed: ${response.status}`);
+  return countFromRange(response.headers.get("content-range"));
+}
+
+async function recordVisit() {
+  if (!els.visitorToday || !els.visitorTotal) return;
+  if (!hasVisitorStore()) {
+    setVisitorStatus("방문자 저장소 연결 전입니다.");
+    return;
+  }
+  const visitorId = getVisitorId();
+  const date = todayKey();
+  try {
+    if (localStorage.getItem(storageKeys.lastVisitDate) !== date) {
+      await upsertVisit(visitorBackend.visitorTable, { visitor_id: visitorId, first_seen: date }, "visitor_id");
+      await upsertVisit(visitorBackend.dailyTable, { visitor_id: visitorId, visit_date: date }, "visitor_id,visit_date");
+      localStorage.setItem(storageKeys.lastVisitDate, date);
+    }
+    const [today, total] = await Promise.all([
+      countRows(visitorBackend.dailyTable, `select=visitor_id&visit_date=eq.${date}`),
+      countRows(visitorBackend.visitorTable, "select=visitor_id"),
+    ]);
+    els.visitorToday.textContent = today;
+    els.visitorTotal.textContent = total;
+    setVisitorStatus("방문자 수는 하루 1회 기준으로 집계됩니다.");
+  } catch {
+    els.visitorToday.textContent = "-";
+    els.visitorTotal.textContent = "-";
+    setVisitorStatus("방문자 수 저장소 연결을 확인 중입니다.");
+  }
+}
+
 function hasPublicReportStore() {
   return Boolean(reportBackend.url && reportBackend.anonKey);
 }
@@ -1038,17 +1150,23 @@ function sortReportsByDate(rows) {
   return rows.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
 
-function updateApprovedFromReports(reports) {
-  const rows = reports.filter((report) => report.status === "approved").map(reportToRow);
-  approvedReports = rows;
+function syncApprovedRows() {
+  approvedReports = approvedReportItems.map(reportToRow);
+  saveStoredRows(storageKeys.approvedReportItems, approvedReportItems);
   saveStoredRows(storageKeys.approved, approvedReports);
   essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
+  if (els.monsterOptions) fillMonsterOptions();
+}
+
+function updateApprovedFromReports(reports) {
+  approvedReportItems = sortReportsByDate(reports.filter((report) => report.status === "approved"));
+  syncApprovedRows();
   if (els.search) {
     refreshControls();
     renderStatChips();
     render();
   }
-  if (els.monsterOptions) fillMonsterOptions();
+  renderApprovedReports();
 }
 
 async function loadPublicApprovedReports() {
@@ -1126,6 +1244,7 @@ async function updatePublicReportStatus(id, status) {
 
 function reportToRow(report) {
   return {
+    "_reportId": report.id,
     "층": report.floor,
     "구역": report.area,
     "몬스터": report.monster,
@@ -1199,10 +1318,9 @@ async function handlePendingAction(event) {
   saveStoredRows(storageKeys.pending, pendingReports);
 
   if (button.dataset.action === "approve") {
-    const row = reportToRow(report);
-    approvedReports.unshift(row);
-    saveStoredRows(storageKeys.approved, approvedReports);
-    essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
+    const approvedReport = { ...report, status: "approved", reviewedAt: new Date().toISOString() };
+    approvedReportItems = sortReportsByDate([approvedReport, ...approvedReportItems.filter((item) => item.id !== id)]);
+    syncApprovedRows();
     if (els.search) {
       refreshControls();
       renderStatChips();
@@ -1210,7 +1328,10 @@ async function handlePendingAction(event) {
   }
 
   if (els.search) render();
-  else renderPendingReports();
+  else {
+    renderPendingReports();
+    renderApprovedReports();
+  }
 }
 
 function renderPendingReports() {
@@ -1236,6 +1357,57 @@ function renderPendingReports() {
       </article>
     `).join("")
     : `<div class="empty compact-empty">검수 대기 제보가 없습니다.</div>`;
+}
+
+async function handleApprovedAction(event) {
+  if (!adminUnlocked) return;
+  const button = event.target.closest("button[data-approved-action]");
+  if (!button) return;
+  const id = button.closest("[data-approved-id]")?.dataset.approvedId;
+  const report = approvedReportItems.find((item) => item.id === id);
+  if (!report) return;
+  button.disabled = true;
+
+  try {
+    if (hasPublicReportStore()) await updatePublicReportStatus(id, "deleted");
+    approvedReportItems = approvedReportItems.filter((item) => item.id !== id);
+    syncApprovedRows();
+    if (els.search) {
+      refreshControls();
+      renderStatChips();
+      render();
+    }
+    renderApprovedReports();
+    setReportSyncStatus("등록된 정수를 삭제 처리했습니다.", "is-online");
+  } catch {
+    button.disabled = false;
+    setReportSyncStatus("등록된 정수 삭제에 실패했습니다.", "is-offline");
+  }
+}
+
+function renderApprovedReports() {
+  if (!els.approvedReports || !els.approvedCount) return;
+  els.approvedCount.textContent = `등록된 정수 ${approvedReportItems.length}건`;
+  if (!adminUnlocked) {
+    els.approvedReports.innerHTML = `<div class="empty compact-empty">관리자 모드를 열면 등록된 정수 삭제 목록이 표시됩니다.</div>`;
+    return;
+  }
+  els.approvedReports.innerHTML = approvedReportItems.length
+    ? approvedReportItems.map((report) => `
+      <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
+        <div>
+          <strong>${escapeHtml(report.monster)}</strong>
+          <span>${report.mode === "edit" ? "수정 승인" : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
+        </div>
+        <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
+        <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
+        <p><b>액티브</b> ${escapeHtml(report.active)}</p>
+        <div class="pending-actions">
+          <button type="button" data-approved-action="delete">등록 정수 삭제</button>
+        </div>
+      </article>
+    `).join("")
+    : `<div class="empty compact-empty">승인되어 등록된 제보 정수가 없습니다.</div>`;
 }
 
 async function copyApprovedRows() {
