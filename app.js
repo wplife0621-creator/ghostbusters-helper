@@ -14,6 +14,11 @@ const buildBackend = {
   anonKey: textOf(siteConfig.supabaseAnonKey),
   table: textOf(siteConfig.buildTable) || "builds",
 };
+const reportBackend = {
+  url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
+  anonKey: textOf(siteConfig.supabaseAnonKey),
+  table: textOf(siteConfig.reportTable) || "monster_reports",
+};
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -41,6 +46,7 @@ const els = {
   reportActive: document.querySelector("#reportActive"),
   monsterOptions: document.querySelector("#monsterOptions"),
   editMonsterMatches: document.querySelector("#editMonsterMatches"),
+  reportSyncStatus: document.querySelector("#reportSyncStatus"),
   pendingCount: document.querySelector("#pendingCount"),
   pendingReports: document.querySelector("#pendingReports"),
   copyApproved: document.querySelector("#copyApproved"),
@@ -188,6 +194,7 @@ function initHome() {
   });
 
   render();
+  loadPublicApprovedReports();
 }
 
 function initReport() {
@@ -206,6 +213,7 @@ function initReport() {
   });
   updateAdminUi();
   renderPendingReports();
+  loadPublicReports();
 }
 
 function initBuilds() {
@@ -986,6 +994,136 @@ function skillText(value) {
   return `<b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}`;
 }
 
+function hasPublicReportStore() {
+  return Boolean(reportBackend.url && reportBackend.anonKey);
+}
+
+function reportStoreHeaders(extra = {}) {
+  return {
+    apikey: reportBackend.anonKey,
+    Authorization: `Bearer ${reportBackend.anonKey}`,
+    "Content-Type": "application/json",
+    ...extra,
+  };
+}
+
+function reportStoreUrl(query = "") {
+  return `${reportBackend.url}/rest/v1/${reportBackend.table}${query}`;
+}
+
+function setReportSyncStatus(message, mode = "") {
+  if (!els.reportSyncStatus) return;
+  els.reportSyncStatus.textContent = message;
+  els.reportSyncStatus.className = `build-sync-status ${mode}`.trim();
+}
+
+function normalizeRemoteReport(row) {
+  return {
+    id: row.id,
+    mode: row.mode || "new",
+    monster: row.monster || "",
+    grade: row.grade || "",
+    floor: row.floor || "",
+    area: row.area || "",
+    stats: row.stats || "",
+    passive: row.passive || "",
+    active: row.active || "",
+    status: row.status || "pending",
+    createdAt: row.created_at || row.createdAt || new Date().toISOString(),
+    reviewedAt: row.reviewed_at || row.reviewedAt || "",
+  };
+}
+
+function sortReportsByDate(rows) {
+  return rows.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+function updateApprovedFromReports(reports) {
+  const rows = reports.filter((report) => report.status === "approved").map(reportToRow);
+  approvedReports = rows;
+  saveStoredRows(storageKeys.approved, approvedReports);
+  essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
+  if (els.search) {
+    refreshControls();
+    renderStatChips();
+    render();
+  }
+  if (els.monsterOptions) fillMonsterOptions();
+}
+
+async function loadPublicApprovedReports() {
+  if (!hasPublicReportStore()) return;
+  try {
+    const response = await fetch(reportStoreUrl("?select=*&status=eq.approved&order=reviewed_at.desc"), {
+      headers: reportStoreHeaders(),
+    });
+    if (!response.ok) throw new Error(`approved load failed: ${response.status}`);
+    updateApprovedFromReports((await response.json()).map(normalizeRemoteReport));
+  } catch {
+    if (els.reportSyncStatus) setReportSyncStatus("승인 데이터 저장소 연결에 실패해 임시 승인 목록을 사용합니다.", "is-offline");
+  }
+}
+
+async function loadPublicReports() {
+  if (!hasPublicReportStore()) {
+    setReportSyncStatus("공개 저장소 연결 전입니다. 지금 제보한 내용은 이 브라우저의 검수 대기에 임시 저장됩니다.", "is-offline");
+    return;
+  }
+  setReportSyncStatus("제보 저장소를 불러오는 중입니다.", "is-online");
+  try {
+    const response = await fetch(reportStoreUrl("?select=*&status=in.(pending,approved)&order=created_at.desc"), {
+      headers: reportStoreHeaders(),
+    });
+    if (!response.ok) throw new Error(`report load failed: ${response.status}`);
+    const reports = (await response.json()).map(normalizeRemoteReport);
+    pendingReports = sortReportsByDate(reports.filter((report) => report.status === "pending"));
+    saveStoredRows(storageKeys.pending, pendingReports);
+    updateApprovedFromReports(reports);
+    renderPendingReports();
+    setReportSyncStatus("제보 저장소에 연결되었습니다. 새 제보는 검수 대기에 공개 저장됩니다.", "is-online");
+  } catch {
+    setReportSyncStatus("제보 저장소 연결에 실패해 이 브라우저의 임시 목록을 사용합니다.", "is-offline");
+    renderPendingReports();
+  }
+}
+
+async function savePublicReport(report) {
+  const response = await fetch(reportStoreUrl(), {
+    method: "POST",
+    headers: reportStoreHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify({
+      id: report.id,
+      mode: report.mode,
+      monster: report.monster,
+      grade: report.grade,
+      floor: report.floor,
+      area: report.area,
+      stats: report.stats,
+      passive: report.passive,
+      active: report.active,
+      status: "pending",
+      created_at: report.createdAt,
+    }),
+  });
+  if (!response.ok) throw new Error(`report save failed: ${response.status}`);
+  const rows = await response.json();
+  return normalizeRemoteReport(rows[0] || report);
+}
+
+async function updatePublicReportStatus(id, status) {
+  const response = await fetch(reportStoreUrl(`?id=eq.${encodeURIComponent(id)}`), {
+    method: "PATCH",
+    headers: reportStoreHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify({
+      status,
+      reviewed_at: new Date().toISOString(),
+    }),
+  });
+  if (!response.ok) throw new Error(`report update failed: ${response.status}`);
+  const rows = await response.json();
+  return rows[0] ? normalizeRemoteReport(rows[0]) : null;
+}
+
 function reportToRow(report) {
   return {
     "층": report.floor,
@@ -1001,7 +1139,7 @@ function reportToRow(report) {
   };
 }
 
-function submitReport(event) {
+async function submitReport(event) {
   event.preventDefault();
   const report = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
@@ -1015,21 +1153,47 @@ function submitReport(event) {
     active: textOf(els.reportActive.value),
     createdAt: new Date().toISOString(),
   };
-  pendingReports.unshift(report);
-  saveStoredRows(storageKeys.pending, pendingReports);
-  els.reportForm.reset();
-  if (els.reportMode) updateReportMode();
-  if (els.search) render();
-  else renderPendingReports();
+  const submitButton = els.reportForm.querySelector("[type='submit']");
+  if (submitButton) submitButton.disabled = true;
+  try {
+    const saved = hasPublicReportStore() ? await savePublicReport(report) : report;
+    pendingReports = sortReportsByDate([saved, ...pendingReports.filter((item) => item.id !== saved.id)]);
+    saveStoredRows(storageKeys.pending, pendingReports);
+    els.reportForm.reset();
+    if (els.reportMode) updateReportMode();
+    renderPendingReports();
+    setReportSyncStatus(
+      hasPublicReportStore()
+        ? "제보가 공개 저장소의 검수 대기에 등록되었습니다."
+        : "공개 저장소 연결 전이라 이 브라우저의 검수 대기에 임시 저장했습니다.",
+      hasPublicReportStore() ? "is-online" : "is-offline"
+    );
+  } catch {
+    pendingReports = sortReportsByDate([report, ...pendingReports.filter((item) => item.id !== report.id)]);
+    saveStoredRows(storageKeys.pending, pendingReports);
+    renderPendingReports();
+    setReportSyncStatus("제보 저장소 저장에 실패해 이 브라우저의 검수 대기에 임시 저장했습니다.", "is-offline");
+  } finally {
+    if (submitButton) submitButton.disabled = false;
+  }
 }
 
-function handlePendingAction(event) {
+async function handlePendingAction(event) {
   if (!adminUnlocked) return;
   const button = event.target.closest("button[data-action]");
   if (!button) return;
   const id = button.closest("[data-report-id]")?.dataset.reportId;
   const report = pendingReports.find((item) => item.id === id);
   if (!report) return;
+  button.disabled = true;
+
+  try {
+    if (hasPublicReportStore()) {
+      await updatePublicReportStatus(id, button.dataset.action === "approve" ? "approved" : "rejected");
+    }
+  } catch {
+    setReportSyncStatus("공개 저장소 검수 상태 업데이트에 실패했습니다. 임시 목록만 변경합니다.", "is-offline");
+  }
 
   pendingReports = pendingReports.filter((item) => item.id !== id);
   saveStoredRows(storageKeys.pending, pendingReports);
