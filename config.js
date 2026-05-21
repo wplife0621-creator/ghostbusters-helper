@@ -1,6 +1,6 @@
 window.DUKHUBUSTERS_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: "",
+  supabaseUrl: "https://bjlykfxfminmjfgilowj.supabase.co",
+  supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
   buildTable: "builds",
   reportTable: "monster_reports",
 };
