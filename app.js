@@ -1144,7 +1144,7 @@ async function recordVisit() {
     ]);
     els.visitorToday.textContent = today;
     els.visitorTotal.textContent = total;
-    setVisitorStatus("오늘은 오늘 방문자, 전체는 일별 방문자 누적입니다.");
+    setVisitorStatus("");
   } catch {
     els.visitorToday.textContent = "-";
     els.visitorTotal.textContent = "-";
@@ -1202,7 +1202,7 @@ async function recordVisit() {
     ]);
     els.visitorToday.textContent = today;
     els.visitorTotal.textContent = total;
-    setVisitorStatus("오늘은 오늘 방문자, 전체는 일별 방문자 누적입니다.");
+    setVisitorStatus("");
   } catch {
     els.visitorToday.textContent = "-";
     els.visitorTotal.textContent = "-";
