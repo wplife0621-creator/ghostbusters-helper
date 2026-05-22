@@ -1140,11 +1140,11 @@ async function recordVisit() {
     }
     const [today, total] = await Promise.all([
       countRows(visitorBackend.dailyTable, `select=visitor_id&visit_date=eq.${date}`),
-      countRows(visitorBackend.visitorTable, "select=visitor_id"),
+      countRows(visitorBackend.dailyTable, "select=visitor_id"),
     ]);
     els.visitorToday.textContent = today;
     els.visitorTotal.textContent = total;
-    setVisitorStatus("방문자 수는 하루 1회 기준으로 집계됩니다.");
+    setVisitorStatus("오늘은 오늘 방문자, 전체는 일별 방문자 누적입니다.");
   } catch {
     els.visitorToday.textContent = "-";
     els.visitorTotal.textContent = "-";
@@ -1187,14 +1187,6 @@ async function recordVisit() {
   try {
     if (localStorage.getItem(storageKeys.lastVisitDate) !== date) {
       await insertVisitorBuild({
-        id: `visitor-total-${visitorId}`,
-        title: visitorBuildMarkers.total,
-        author: "system",
-        members: [],
-        note: "total",
-        created_at: new Date().toISOString(),
-      });
-      await insertVisitorBuild({
         id: `visitor-daily-${date}-${visitorId}`,
         title: visitorBuildMarkers.daily,
         author: "system",
@@ -1206,11 +1198,11 @@ async function recordVisit() {
     }
     const [today, total] = await Promise.all([
       countBuildRows(`select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.daily)}&note=eq.${date}`),
-      countBuildRows(`select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.total)}`),
+      countBuildRows(`select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.daily)}`),
     ]);
     els.visitorToday.textContent = today;
     els.visitorTotal.textContent = total;
-    setVisitorStatus("방문자 수는 하루 1회 기준으로 집계됩니다.");
+    setVisitorStatus("오늘은 오늘 방문자, 전체는 일별 방문자 누적입니다.");
   } catch {
     els.visitorToday.textContent = "-";
     els.visitorTotal.textContent = "-";
