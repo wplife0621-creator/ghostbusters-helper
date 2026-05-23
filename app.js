@@ -139,8 +139,8 @@ function numberFrom(value) {
 }
 
 function cooldownOf(row) {
-  const match = textOf(row["액티브"]).match(/(\d+)\s*s/i);
-  return match ? Number(match[1]) : Infinity;
+  const cooldowns = [...textOf(row["액티브"]).matchAll(/(\d+)\s*s/gi)].map((match) => Number(match[1]));
+  return cooldowns.length ? Math.min(...cooldowns) : Infinity;
 }
 
 function floorRank(value) {
@@ -341,8 +341,8 @@ function renderEssencePickerTable() {
           <tr data-monster="${escapeHtml(row["몬스터"])}">
             <td data-label="몬스터"><strong>${escapeHtml(row["몬스터"])}</strong></td>
             <td data-label="주요 스탯">${escapeHtml(row["주요 스탯"] || "-")}</td>
-            <td data-label="패시브">${escapeHtml(row["패시브"] || "-")}</td>
-            <td data-label="액티브">${escapeHtml(row["액티브"] || "-")}</td>
+            <td data-label="패시브">${skillText(row["패시브"])}</td>
+            <td data-label="액티브">${skillText(row["액티브"])}</td>
           </tr>
         `).join("") || `<tr><td colspan="4">조건에 맞는 정수가 없습니다.</td></tr>`}
       </tbody>
@@ -942,6 +942,10 @@ function sortEssenceRows(rows) {
     return copy.sort((a, b) => cooldownOf(a.row) - cooldownOf(b.row) || floorAreaMonsterSort(a, b));
   }
 
+  if (mode === "floor-desc") {
+    return copy.sort(floorAreaMonsterSortDescending);
+  }
+
   return copy.sort(floorAreaMonsterSort);
 }
 
@@ -952,6 +956,13 @@ function hasAllSelectedStats(row, selectedStats = selectedStatNames()) {
 function floorAreaMonsterSort(a, b) {
   return floorRank(a.row["층"]) - floorRank(b.row["층"])
     || textOf(a.row["층"]).localeCompare(textOf(b.row["층"]), "ko")
+    || textOf(a.row["구역"]).localeCompare(textOf(b.row["구역"]), "ko")
+    || textOf(a.row["몬스터"]).localeCompare(textOf(b.row["몬스터"]), "ko");
+}
+
+function floorAreaMonsterSortDescending(a, b) {
+  return floorRank(b.row["층"]) - floorRank(a.row["층"])
+    || textOf(b.row["층"]).localeCompare(textOf(a.row["층"]), "ko")
     || textOf(a.row["구역"]).localeCompare(textOf(b.row["구역"]), "ko")
     || textOf(a.row["몬스터"]).localeCompare(textOf(b.row["몬스터"]), "ko");
 }
@@ -1055,9 +1066,13 @@ function statBadges(value) {
 
 function skillText(value) {
   const text = textOf(value) || "-";
-  const [name, ...rest] = text.split(":");
-  if (!rest.length) return escapeHtml(text);
-  return `<b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}`;
+  if (text === "-") return escapeHtml(text);
+  const skills = text.split(/\r?\n+/).map((skill) => skill.trim()).filter(Boolean);
+  return `<div class="skill-list">${skills.map((skill) => {
+    const [name, ...rest] = skill.split(":");
+    if (!rest.length) return `<span>${escapeHtml(skill)}</span>`;
+    return `<span><b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}</span>`;
+  }).join("")}</div>`;
 }
 
 function hasVisitorStore() {
@@ -1453,7 +1468,7 @@ function renderPendingReports() {
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
-        <p><b>액티브</b> ${escapeHtml(report.active)}</p>
+        <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active)}</p>
         <div class="pending-actions">
           <button type="button" data-action="approve">승인해서 추가</button>
           <button type="button" data-action="reject">반려</button>
@@ -1505,7 +1520,7 @@ function renderApprovedReports() {
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
-        <p><b>액티브</b> ${escapeHtml(report.active)}</p>
+        <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active)}</p>
         <div class="pending-actions">
           <button type="button" data-approved-action="delete">등록 정수 삭제</button>
         </div>

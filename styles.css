@@ -758,6 +758,10 @@ textarea {
   margin: 0;
 }
 
+.pending-card .multi-skill {
+  white-space: pre-line;
+}
+
 .pending-card b {
   color: var(--text);
 }
@@ -960,6 +964,15 @@ textarea {
 
 .skill-cell b {
   color: var(--text);
+}
+
+.skill-list {
+  display: grid;
+  gap: 6px;
+}
+
+.skill-list span {
+  display: block;
 }
 
 .empty {
