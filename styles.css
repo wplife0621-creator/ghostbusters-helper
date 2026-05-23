@@ -766,6 +766,41 @@ textarea {
   color: var(--text);
 }
 
+.active-skill-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+.active-skill-fields legend {
+  padding: 0 6px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.active-skill-fields legend small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.active-skill-fields .field span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.active-skill-fields em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--muted);
+}
+
 .pending-actions {
   display: flex;
   flex-wrap: wrap;

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정보 제보/수정 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260524-1">
+  <link rel="stylesheet" href="./styles.css?v=20260524-2">
 </head>
 <body>
   <header class="topbar compact">
@@ -58,10 +58,21 @@
           <span>패시브</span>
           <input id="reportPassive" required placeholder="예: 동상: 공격 시 빙결 스택 부여">
         </label>
-        <label class="field wide">
-          <span>액티브</span>
-          <textarea id="reportActive" required rows="3" placeholder="예: 냉기 폭발(25s): 냉기 폭발 + 둔화&#10;빙결 창(30s): 관통 빙결 공격"></textarea>
-        </label>
+        <fieldset class="active-skill-fields wide">
+          <legend>액티브 <small>최대 3개</small></legend>
+          <label class="field">
+            <span>액티브 1 <em>필수</em></span>
+            <input id="reportActive" required placeholder="예: 냉기 폭발(25s): 냉기 폭발 + 둔화">
+          </label>
+          <label class="field">
+            <span>액티브 2 <em>선택</em></span>
+            <input id="reportActive2" placeholder="두 번째 액티브가 있으면 입력">
+          </label>
+          <label class="field">
+            <span>액티브 3 <em>선택</em></span>
+            <input id="reportActive3" placeholder="세 번째 액티브가 있으면 입력">
+          </label>
+        </fieldset>
         <button class="submit-report" type="submit">검수 대기에 등록</button>
       </form>
       <p id="reportSyncStatus" class="build-sync-status"></p>
@@ -110,7 +121,7 @@
       dailyVisitorTable: "daily_visitors",
     };
   </script>
-  <script src="./config.js?v=20260524-1"></script>
-  <script src="./app.js?v=20260524-1"></script>
+  <script src="./config.js?v=20260524-2"></script>
+  <script src="./app.js?v=20260524-2"></script>
 </body>
 </html>

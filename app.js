@@ -60,6 +60,8 @@ const els = {
   reportStats: document.querySelector("#reportStats"),
   reportPassive: document.querySelector("#reportPassive"),
   reportActive: document.querySelector("#reportActive"),
+  reportActive2: document.querySelector("#reportActive2"),
+  reportActive3: document.querySelector("#reportActive3"),
   monsterOptions: document.querySelector("#monsterOptions"),
   editMonsterMatches: document.querySelector("#editMonsterMatches"),
   reportSyncStatus: document.querySelector("#reportSyncStatus"),
@@ -794,7 +796,10 @@ function fillReportFromRow(row) {
   els.reportArea.value = textOf(row["구역"]);
   els.reportStats.value = textOf(row["주요 스탯"]);
   els.reportPassive.value = textOf(row["패시브"]);
-  els.reportActive.value = textOf(row["액티브"]);
+  const activeSkills = splitSkills(row["액티브"]);
+  els.reportActive.value = activeSkills[0] || "";
+  els.reportActive2.value = activeSkills[1] || "";
+  els.reportActive3.value = activeSkills[2] || "";
   renderEditMonsterMatches();
 }
 
@@ -938,6 +943,10 @@ function sortEssenceRows(rows) {
     return copy.sort((a, b) => numberFrom(a.row["등급"]) - numberFrom(b.row["등급"]) || floorAreaMonsterSort(a, b));
   }
 
+  if (mode === "grade-desc") {
+    return copy.sort((a, b) => gradeDescendingSort(a, b));
+  }
+
   if (mode === "cooldown") {
     return copy.sort((a, b) => cooldownOf(a.row) - cooldownOf(b.row) || floorAreaMonsterSort(a, b));
   }
@@ -965,6 +974,14 @@ function floorAreaMonsterSortDescending(a, b) {
     || textOf(b.row["층"]).localeCompare(textOf(a.row["층"]), "ko")
     || textOf(a.row["구역"]).localeCompare(textOf(b.row["구역"]), "ko")
     || textOf(a.row["몬스터"]).localeCompare(textOf(b.row["몬스터"]), "ko");
+}
+
+function gradeDescendingSort(a, b) {
+  const aGrade = numberFrom(a.row["등급"]);
+  const bGrade = numberFrom(b.row["등급"]);
+  if (!Number.isFinite(aGrade)) return Number.isFinite(bGrade) ? 1 : floorAreaMonsterSort(a, b);
+  if (!Number.isFinite(bGrade)) return -1;
+  return bGrade - aGrade || floorAreaMonsterSort(a, b);
 }
 
 function render() {
@@ -1067,12 +1084,16 @@ function statBadges(value) {
 function skillText(value) {
   const text = textOf(value) || "-";
   if (text === "-") return escapeHtml(text);
-  const skills = text.split(/\r?\n+/).map((skill) => skill.trim()).filter(Boolean);
+  const skills = splitSkills(text);
   return `<div class="skill-list">${skills.map((skill) => {
     const [name, ...rest] = skill.split(":");
     if (!rest.length) return `<span>${escapeHtml(skill)}</span>`;
     return `<span><b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}</span>`;
   }).join("")}</div>`;
+}
+
+function splitSkills(value) {
+  return textOf(value).split(/\r?\n+/).map((skill) => skill.trim()).filter(Boolean);
 }
 
 function hasVisitorStore() {
@@ -1388,7 +1409,10 @@ async function submitReport(event) {
     area: textOf(els.reportArea.value),
     stats: textOf(els.reportStats.value),
     passive: textOf(els.reportPassive.value),
-    active: textOf(els.reportActive.value),
+    active: [els.reportActive, els.reportActive2, els.reportActive3]
+      .map((field) => textOf(field.value))
+      .filter(Boolean)
+      .join("\n"),
     createdAt: new Date().toISOString(),
   };
   const submitButton = els.reportForm.querySelector("[type='submit']");
