@@ -37,6 +37,7 @@ const els = {
   search: document.querySelector("#searchInput"),
   floor: document.querySelector("#floorFilter"),
   area: document.querySelector("#areaFilter"),
+  grade: document.querySelector("#gradeFilter"),
   character: document.querySelector("#characterFilter"),
   sort: document.querySelector("#sortFilter"),
   statSort: document.querySelector("#statSortFilter"),
@@ -828,6 +829,7 @@ function renderEditMonsterMatches() {
 function refreshControls() {
   optionList(els.floor, unique(essenceRows.map((row) => row["층"])), "전체 층");
   optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
+  optionList(els.grade, ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급"], "전체 등급");
   optionList(els.character, unique(essenceRows.map((row) => row["추천 캐릭터"])), "전체 캐릭터");
   optionList(els.statSort, statNames(), statNoneLabel);
 }
@@ -910,6 +912,10 @@ function applyFilters(rows) {
     rows = rows.filter(({ row }) => textOf(row["구역"]) === els.area.value);
   }
 
+  if (els.grade.value !== "전체 등급") {
+    rows = rows.filter(({ row }) => `${numberFrom(row["등급"])}등급` === els.grade.value);
+  }
+
   if (els.character.value !== "전체 캐릭터") {
     rows = rows.filter(({ row }) => textOf(row["추천 캐릭터"]) === els.character.value);
   }
@@ -939,14 +945,6 @@ function sortEssenceRows(rows) {
     });
   }
 
-  if (mode === "grade") {
-    return copy.sort((a, b) => numberFrom(a.row["등급"]) - numberFrom(b.row["등급"]) || floorAreaMonsterSort(a, b));
-  }
-
-  if (mode === "grade-desc") {
-    return copy.sort((a, b) => gradeDescendingSort(a, b));
-  }
-
   if (mode === "cooldown") {
     return copy.sort((a, b) => cooldownOf(a.row) - cooldownOf(b.row) || floorAreaMonsterSort(a, b));
   }
@@ -974,14 +972,6 @@ function floorAreaMonsterSortDescending(a, b) {
     || textOf(b.row["층"]).localeCompare(textOf(a.row["층"]), "ko")
     || textOf(a.row["구역"]).localeCompare(textOf(b.row["구역"]), "ko")
     || textOf(a.row["몬스터"]).localeCompare(textOf(b.row["몬스터"]), "ko");
-}
-
-function gradeDescendingSort(a, b) {
-  const aGrade = numberFrom(a.row["등급"]);
-  const bGrade = numberFrom(b.row["등급"]);
-  if (!Number.isFinite(aGrade)) return Number.isFinite(bGrade) ? 1 : floorAreaMonsterSort(a, b);
-  if (!Number.isFinite(bGrade)) return -1;
-  return bGrade - aGrade || floorAreaMonsterSort(a, b);
 }
 
 function render() {
@@ -1093,7 +1083,7 @@ function skillText(value) {
 }
 
 function splitSkills(value) {
-  return textOf(value).split(/\r?\n+/).map((skill) => skill.trim()).filter(Boolean);
+  return textOf(value).split(/\r?\n+/).map((skill) => skill.trim()).filter((skill) => skill && skill !== "-");
 }
 
 function hasVisitorStore() {
@@ -1412,7 +1402,7 @@ async function submitReport(event) {
     active: [els.reportActive, els.reportActive2, els.reportActive3]
       .map((field) => textOf(field.value))
       .filter(Boolean)
-      .join("\n"),
+      .join("\n") || "-",
     createdAt: new Date().toISOString(),
   };
   const submitButton = els.reportForm.querySelector("[type='submit']");
