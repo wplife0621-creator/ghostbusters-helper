@@ -442,6 +442,14 @@ textarea {
   grid-column: 10 / -1;
 }
 
+.compact-report-form .active-skill-fields {
+  grid-column: 1 / -1;
+}
+
+.compact-report-form:has(.essence-report-field:not([hidden])) .report-submit {
+  grid-column: 1 / span 3;
+}
+
 .build-character-slots {
   grid-column: 1 / -1;
   display: grid;
