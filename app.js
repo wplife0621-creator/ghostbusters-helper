@@ -32,6 +32,7 @@ const visitorBuildMarkers = {
   total: "__visitor_total__",
   daily: "__visitor_daily__",
 };
+const numbersReportPrefix = "__numbers__:";
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -52,7 +53,13 @@ const els = {
   gameDays: document.querySelector("#gameDays"),
   gameHours: document.querySelector("#gameHours"),
   timeResult: document.querySelector("#timeResult"),
+  numbersSearch: document.querySelector("#numbersSearch"),
+  numbersLevel: document.querySelector("#numbersLevel"),
+  numbersSort: document.querySelector("#numbersSort"),
+  numbersCount: document.querySelector("#numbersCount"),
+  numbersResults: document.querySelector("#numbersResults"),
   reportForm: document.querySelector("#reportForm"),
+  reportDataset: document.querySelector("#reportDataset"),
   reportMode: document.querySelector("#reportMode"),
   reportMonster: document.querySelector("#reportMonster"),
   reportGrade: document.querySelector("#reportGrade"),
@@ -63,8 +70,14 @@ const els = {
   reportActive: document.querySelector("#reportActive"),
   reportActive2: document.querySelector("#reportActive2"),
   reportActive3: document.querySelector("#reportActive3"),
+  reportNumberName: document.querySelector("#reportNumberName"),
+  reportNumberCode: document.querySelector("#reportNumberCode"),
+  reportNumberLevel: document.querySelector("#reportNumberLevel"),
+  reportNumberEffect: document.querySelector("#reportNumberEffect"),
   monsterOptions: document.querySelector("#monsterOptions"),
+  numberOptions: document.querySelector("#numberOptions"),
   editMonsterMatches: document.querySelector("#editMonsterMatches"),
+  editNumberMatches: document.querySelector("#editNumberMatches"),
   reportSyncStatus: document.querySelector("#reportSyncStatus"),
   pendingCount: document.querySelector("#pendingCount"),
   pendingReports: document.querySelector("#pendingReports"),
@@ -100,6 +113,7 @@ let approvedReportItems = loadStoredRows(storageKeys.approvedReportItems);
 let pendingReports = loadStoredRows(storageKeys.pending);
 let savedBuilds = loadStoredRows(storageKeys.builds);
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
+let numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems);
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
 let activeEssenceInput = null;
 let activeStatNames = [];
@@ -132,6 +146,35 @@ function mergeApprovedRows(baseRows, approvedRows) {
     } else {
       merged.unshift(row);
     }
+  });
+  return merged;
+}
+
+function isNumbersReport(report) {
+  return textOf(report?.monster).startsWith(numbersReportPrefix);
+}
+
+function visibleReportName(report) {
+  return isNumbersReport(report) ? textOf(report.monster).slice(numbersReportPrefix.length) : textOf(report.monster);
+}
+
+function numbersReportToRow(report) {
+  return {
+    "_reportId": report.id,
+    "번호": report.floor,
+    "이름": visibleReportName(report),
+    "효과": report.stats,
+    "아이템 레벨(Lv)": report.grade,
+  };
+}
+
+function mergeNumbersRows(baseRows, reports) {
+  const merged = [...baseRows];
+  reports.filter((report) => report.status === "approved" && isNumbersReport(report)).forEach((report) => {
+    const row = numbersReportToRow(report);
+    const index = merged.findIndex((item) => textOf(item["이름"]) === textOf(row["이름"]));
+    if (index >= 0) merged[index] = { ...merged[index], ...row };
+    else merged.unshift(row);
   });
   return merged;
 }
@@ -203,8 +246,18 @@ function statValue(row, statName) {
 
 function init() {
   if (els.search) initHome();
+  if (els.numbersResults) initNumbers();
   if (els.reportForm) initReport();
   if (els.buildForm) initBuilds();
+}
+
+function initNumbers() {
+  optionList(els.numbersLevel, unique(numbersRows.map((row) => row["아이템 레벨(Lv)"])), "전체 레벨");
+  els.numbersSearch.addEventListener("input", renderNumbers);
+  els.numbersLevel.addEventListener("change", renderNumbers);
+  els.numbersSort.addEventListener("change", renderNumbers);
+  renderNumbers();
+  loadPublicApprovedReports();
 }
 
 function initHome() {
@@ -229,10 +282,13 @@ function initHome() {
 
 function initReport() {
   fillMonsterOptions();
-  updateReportMode();
+  updateReportDataset();
+  els.reportDataset.addEventListener("change", updateReportDataset);
   els.reportMode.addEventListener("change", updateReportMode);
   els.reportMonster.addEventListener("input", handleReportMonsterInput);
+  els.reportNumberName.addEventListener("input", handleReportNumberInput);
   els.editMonsterMatches.addEventListener("click", handleEditMonsterClick);
+  els.editNumberMatches.addEventListener("click", handleEditNumberClick);
   els.reportForm.addEventListener("submit", submitReport);
   els.pendingReports.addEventListener("click", handlePendingAction);
   els.approvedReports?.addEventListener("click", handleApprovedAction);
@@ -752,31 +808,80 @@ function fillMonsterOptions() {
   els.monsterOptions.innerHTML = unique(essenceRows.map((row) => row["몬스터"]))
     .map((name) => `<option value="${escapeHtml(name)}"></option>`)
     .join("");
+  els.numberOptions.innerHTML = unique(numbersRows.map((row) => row["이름"]))
+    .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+    .join("");
+}
+
+function isNumbersReportMode() {
+  return els.reportDataset?.value === "numbers";
+}
+
+function updateReportDataset() {
+  const numbersMode = isNumbersReportMode();
+  document.querySelectorAll(".essence-report-field").forEach((element) => {
+    element.hidden = numbersMode;
+  });
+  document.querySelectorAll(".numbers-report-field").forEach((element) => {
+    element.hidden = !numbersMode;
+  });
+  [els.reportMonster, els.reportGrade, els.reportFloor, els.reportArea, els.reportStats, els.reportPassive].forEach((field) => {
+    field.required = !numbersMode;
+    field.disabled = numbersMode;
+  });
+  [els.reportActive, els.reportActive2, els.reportActive3].forEach((field) => {
+    field.disabled = numbersMode;
+  });
+  [els.reportNumberName, els.reportNumberCode, els.reportNumberLevel, els.reportNumberEffect].forEach((field) => {
+    field.required = numbersMode;
+    field.disabled = !numbersMode;
+  });
+  updateReportMode();
 }
 
 function updateReportMode() {
   const editMode = els.reportMode.value === "edit";
+  const numbersMode = isNumbersReportMode();
   els.reportMonster.placeholder = editMode ? "수정할 몬스터명을 검색하세요" : "예: 얼음 와이번";
-  els.editMonsterMatches.hidden = !editMode;
-  if (editMode) {
+  els.reportNumberName.placeholder = editMode ? "수정할 넘버스를 검색하세요" : "예: 차원 자루";
+  els.editMonsterMatches.hidden = !editMode || numbersMode;
+  els.editNumberMatches.hidden = !editMode || !numbersMode;
+  if (editMode && numbersMode) {
+    renderEditNumberMatches();
+    fillNumberFromExactName();
+  } else if (editMode) {
     renderEditMonsterMatches();
     fillReportFromExactMonster();
   } else {
     els.editMonsterMatches.innerHTML = "";
     els.editMonsterMatches.hidden = true;
+    els.editNumberMatches.innerHTML = "";
+    els.editNumberMatches.hidden = true;
   }
 }
 
 function handleReportMonsterInput() {
-  if (els.reportMode.value !== "edit") return;
+  if (els.reportMode.value !== "edit" || isNumbersReportMode()) return;
   renderEditMonsterMatches();
   fillReportFromExactMonster();
+}
+
+function handleReportNumberInput() {
+  if (els.reportMode.value !== "edit" || !isNumbersReportMode()) return;
+  renderEditNumberMatches();
+  fillNumberFromExactName();
 }
 
 function handleEditMonsterClick(event) {
   const button = event.target.closest("button[data-monster]");
   if (!button) return;
   fillReportFromRow(findMonsterRow(button.dataset.monster));
+}
+
+function handleEditNumberClick(event) {
+  const button = event.target.closest("button[data-number-name]");
+  if (!button) return;
+  fillNumberFromRow(findNumberRow(button.dataset.numberName));
 }
 
 function findMonsterRow(monsterName) {
@@ -804,6 +909,25 @@ function fillReportFromRow(row) {
   renderEditMonsterMatches();
 }
 
+function findNumberRow(name) {
+  const target = textOf(name).toLowerCase();
+  return numbersRows.find((row) => textOf(row["이름"]).toLowerCase() === target);
+}
+
+function fillNumberFromExactName() {
+  const row = findNumberRow(els.reportNumberName.value);
+  if (row) fillNumberFromRow(row);
+}
+
+function fillNumberFromRow(row) {
+  if (!row) return;
+  els.reportNumberName.value = textOf(row["이름"]);
+  els.reportNumberCode.value = textOf(row["번호"]);
+  els.reportNumberLevel.value = textOf(row["아이템 레벨(Lv)"]);
+  els.reportNumberEffect.value = textOf(row["효과"]);
+  renderEditNumberMatches();
+}
+
 function renderEditMonsterMatches() {
   const query = textOf(els.reportMonster.value).toLowerCase();
   const rows = essenceRows
@@ -824,6 +948,22 @@ function renderEditMonsterMatches() {
       </button>
     `).join("")
     : `<div class="edit-match-empty">일치하는 몬스터가 없습니다.</div>`;
+}
+
+function renderEditNumberMatches() {
+  const query = textOf(els.reportNumberName.value).toLowerCase();
+  const rows = numbersRows
+    .filter((row) => !query || textOf(row["이름"]).toLowerCase().includes(query) || textOf(row["효과"]).toLowerCase().includes(query))
+    .slice(0, 8);
+  els.editNumberMatches.hidden = els.reportMode.value !== "edit" || !isNumbersReportMode();
+  els.editNumberMatches.innerHTML = rows.length
+    ? rows.map((row) => `
+      <button type="button" data-number-name="${escapeHtml(row["이름"])}">
+        <strong>${escapeHtml(row["이름"])}</strong>
+        <span>#${escapeHtml(row["번호"])} · Lv ${escapeHtml(row["아이템 레벨(Lv)"])}</span>
+      </button>
+    `).join("")
+    : `<div class="edit-match-empty">일치하는 넘버스가 없습니다.</div>`;
 }
 
 function refreshControls() {
@@ -1086,6 +1226,40 @@ function splitSkills(value) {
   return textOf(value).split(/\r?\n+/).map((skill) => skill.trim()).filter((skill) => skill && skill !== "-");
 }
 
+function renderNumbers() {
+  const query = textOf(els.numbersSearch.value).toLowerCase();
+  const level = els.numbersLevel.value;
+  const sort = els.numbersSort.value;
+  let rows = numbersRows.filter((row) => {
+    if (level !== "전체 레벨" && textOf(row["아이템 레벨(Lv)"]) !== level) return false;
+    if (!query) return true;
+    return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"]]
+      .some((value) => textOf(value).toLowerCase().includes(query));
+  });
+  rows = [...rows].sort((a, b) => {
+    if (sort === "level-desc") return numberFrom(b["아이템 레벨(Lv)"]) - numberFrom(a["아이템 레벨(Lv)"]);
+    if (sort === "level-asc") return numberFrom(a["아이템 레벨(Lv)"]) - numberFrom(b["아이템 레벨(Lv)"]);
+    return numberFrom(a["번호"]) - numberFrom(b["번호"]);
+  });
+  els.numbersCount.textContent = `${rows.length}건`;
+  els.numbersResults.innerHTML = rows.length
+    ? `
+      <div class="numbers-table-wrap">
+        <table class="numbers-table">
+          <thead><tr><th>번호</th><th>이름</th><th>아이템 레벨</th><th>효과</th></tr></thead>
+          <tbody>${rows.map((row) => `
+            <tr>
+              <td data-label="번호"><span class="number-code">#${escapeHtml(row["번호"])}</span></td>
+              <td data-label="이름"><strong>${escapeHtml(row["이름"])}</strong></td>
+              <td data-label="아이템 레벨"><span class="grade-pill">Lv ${escapeHtml(row["아이템 레벨(Lv)"])}</span></td>
+              <td data-label="효과">${escapeHtml(row["효과"] || "-")}</td>
+            </tr>
+          `).join("")}</tbody>
+        </table>
+      </div>`
+    : `<div class="empty">조건에 맞는 넘버스 정보가 없습니다.</div>`;
+}
+
 function hasVisitorStore() {
   return Boolean(visitorBackend.url && visitorBackend.anonKey);
 }
@@ -1281,11 +1455,16 @@ function sortReportsByDate(rows) {
 }
 
 function syncApprovedRows() {
-  approvedReports = approvedReportItems.map(reportToRow);
+  approvedReports = approvedReportItems.filter((report) => !isNumbersReport(report)).map(reportToRow);
   saveStoredRows(storageKeys.approvedReportItems, approvedReportItems);
   saveStoredRows(storageKeys.approved, approvedReports);
   essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
+  numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems);
   if (els.monsterOptions) fillMonsterOptions();
+  if (els.numbersResults) {
+    optionList(els.numbersLevel, unique(numbersRows.map((row) => row["아이템 레벨(Lv)"])), "전체 레벨");
+    renderNumbers();
+  }
 }
 
 function updateApprovedFromReports(reports) {
@@ -1390,7 +1569,19 @@ function reportToRow(report) {
 
 async function submitReport(event) {
   event.preventDefault();
-  const report = {
+  const numbersMode = isNumbersReportMode();
+  const report = numbersMode ? {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    mode: els.reportMode.value,
+    monster: `${numbersReportPrefix}${textOf(els.reportNumberName.value)}`,
+    grade: textOf(els.reportNumberLevel.value),
+    floor: textOf(els.reportNumberCode.value),
+    area: "-",
+    stats: textOf(els.reportNumberEffect.value),
+    passive: "-",
+    active: "-",
+    createdAt: new Date().toISOString(),
+  } : {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
     monster: textOf(els.reportMonster.value),
@@ -1412,7 +1603,7 @@ async function submitReport(event) {
     pendingReports = sortReportsByDate([saved, ...pendingReports.filter((item) => item.id !== saved.id)]);
     saveStoredRows(storageKeys.pending, pendingReports);
     els.reportForm.reset();
-    if (els.reportMode) updateReportMode();
+    if (els.reportDataset) updateReportDataset();
     renderPendingReports();
     setReportSyncStatus(
       hasPublicReportStore()
@@ -1474,10 +1665,22 @@ function renderPendingReports() {
     return;
   }
   els.pendingReports.innerHTML = pendingReports.length
-    ? pendingReports.map((report) => `
+    ? pendingReports.map((report) => isNumbersReport(report) ? `
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
-          <strong>${escapeHtml(report.monster)}</strong>
+          <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
+          <span>${report.mode === "edit" ? "수정" : "신규"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+        </div>
+        <p><b>효과</b> ${escapeHtml(report.stats)}</p>
+        <div class="pending-actions">
+          <button type="button" data-action="approve">승인해서 추가</button>
+          <button type="button" data-action="reject">반려</button>
+        </div>
+      </article>
+    ` : `
+      <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
+        <div>
+          <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
           <span>${report.mode === "edit" ? "수정" : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
@@ -1520,16 +1723,27 @@ async function handleApprovedAction(event) {
 
 function renderApprovedReports() {
   if (!els.approvedReports || !els.approvedCount) return;
-  els.approvedCount.textContent = `등록된 정수 ${approvedReportItems.length}건`;
+  els.approvedCount.textContent = `등록된 정보 ${approvedReportItems.length}건`;
   if (!adminUnlocked) {
     els.approvedReports.innerHTML = `<div class="empty compact-empty">관리자 모드를 열면 등록된 정수 삭제 목록이 표시됩니다.</div>`;
     return;
   }
   els.approvedReports.innerHTML = approvedReportItems.length
-    ? approvedReportItems.map((report) => `
+    ? approvedReportItems.map((report) => isNumbersReport(report) ? `
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
-          <strong>${escapeHtml(report.monster)}</strong>
+          <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
+          <span>${report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+        </div>
+        <p><b>효과</b> ${escapeHtml(report.stats)}</p>
+        <div class="pending-actions">
+          <button type="button" data-approved-action="delete">등록 정보 삭제</button>
+        </div>
+      </article>
+    ` : `
+      <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
+        <div>
+          <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
           <span>${report.mode === "edit" ? "수정 승인" : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>

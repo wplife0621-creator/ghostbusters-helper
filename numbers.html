@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>넘버스 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260524-4">
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>넘버스</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <a href="./numbers.html" aria-current="page">넘버스</a>
+        <a href="./builds.html">빌드 공유</a>
+        <a href="./report.html">정보 제보/수정</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout numbers-layout">
+    <section class="panel numbers-panel">
+      <div class="section-title compact-title">
+        <h2>넘버스 정보</h2>
+        <p>번호, 이름, 효과, 아이템 레벨을 확인하세요.</p>
+      </div>
+      <div class="numbers-controls">
+        <label class="field wide">
+          <span>검색</span>
+          <input id="numbersSearch" type="search" placeholder="이름, 번호, 효과 검색">
+        </label>
+        <label class="field">
+          <span>아이템 레벨</span>
+          <select id="numbersLevel"></select>
+        </label>
+        <label class="field">
+          <span>정렬</span>
+          <select id="numbersSort">
+            <option value="number">번호 순</option>
+            <option value="level-desc">레벨 높은 순</option>
+            <option value="level-asc">레벨 낮은 순</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel numbers-panel">
+      <div class="section-title compact-title">
+        <h2>목록</h2>
+        <p id="numbersCount">0건</p>
+      </div>
+      <div id="numbersResults"></div>
+    </section>
+  </main>
+
+  <script src="./ghost-data.js?v=20260520"></script>
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      buildTable: "builds",
+      reportTable: "monster_reports",
+      visitorTable: "site_visitors",
+      dailyVisitorTable: "daily_visitors",
+    };
+  </script>
+  <script src="./config.js?v=20260524-4"></script>
+  <script src="./app.js?v=20260524-4"></script>
+</body>
+</html>
