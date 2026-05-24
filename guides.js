@@ -9,6 +9,7 @@ const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
 const commentTitlePrefix = "__guide_comment__:";
 const viewCounterKind = "guide-view-counter";
+const passwordKind = "guide-password";
 const fields = {
   form: document.querySelector("#guideForm"),
   editor: document.querySelector("#guideEditor"),
@@ -18,6 +19,7 @@ const fields = {
   title: document.querySelector("#guideTitle"),
   author: document.querySelector("#guideAuthor"),
   category: document.querySelector("#guideCategory"),
+  password: document.querySelector("#guidePassword"),
   content: document.querySelector("#guideContent"),
   media: document.querySelector("#guideMedia"),
   existingMedia: document.querySelector("#guideExistingMedia"),
@@ -112,9 +114,44 @@ function viewCount(media) {
   return Number(counter?.views || 0);
 }
 
+function passwordRecord(media) {
+  return (Array.isArray(media) ? media : []).find((item) => item?.kind === passwordKind) || null;
+}
+
+function visibleMedia(media) {
+  return (Array.isArray(media) ? media : [])
+    .filter((item) => item?.kind !== viewCounterKind && item?.kind !== passwordKind);
+}
+
 function storedMedia(post) {
-  const visibleMedia = post.media.filter((item) => item?.kind !== viewCounterKind);
-  return post.views ? [...visibleMedia, { kind: viewCounterKind, views: post.views }] : visibleMedia;
+  const metadata = [];
+  if (post.views) metadata.push({ kind: viewCounterKind, views: post.views });
+  if (post.password) metadata.push(post.password);
+  return [...post.media, ...metadata];
+}
+
+async function hashPassword(password, salt) {
+  const bytes = new TextEncoder().encode(`${salt}:${password}`);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function makePasswordRecord(password) {
+  const salt = idValue();
+  return {
+    kind: passwordKind,
+    salt,
+    digest: await hashPassword(password, salt),
+  };
+}
+
+async function verifyPassword(item, action) {
+  if (!item.password) return true;
+  const password = window.prompt(`${action} 비밀번호를 입력하세요.`);
+  if (!password) return false;
+  const valid = await hashPassword(password, item.password.salt) === item.password.digest;
+  if (!valid) setStatus("비밀번호가 일치하지 않습니다.", "is-offline");
+  return valid;
 }
 
 function parsedTitle(row) {
@@ -134,8 +171,9 @@ function normalizePost(row) {
     author: row.author || "익명",
     category: parsed.category,
     content: row.content || "",
-    media: (Array.isArray(row.media) ? row.media : []).filter((item) => item?.kind !== viewCounterKind),
+    media: visibleMedia(row.media),
     views: Number(row.views || viewCount(row.media)),
+    password: passwordRecord(row.media),
     commentCount: Number(row.commentCount || 0),
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
     updatedAt: row.updated_at || row.updatedAt || row.created_at || new Date().toISOString(),
@@ -148,6 +186,7 @@ function normalizeComment(row) {
     postId: row.post_id || row.postId || String(row.title || "").slice(commentTitlePrefix.length),
     author: row.author || "익명",
     content: row.content || "",
+    password: passwordRecord(row.media),
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
   };
 }
@@ -258,6 +297,7 @@ async function submitPost(event) {
     media: [...retainedMedia],
     views: previous?.views || 0,
     commentCount: previous?.commentCount || 0,
+    password: previous?.password || await makePasswordRecord(fields.password.value),
     createdAt: previous?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -373,6 +413,10 @@ function renderViewer() {
           <span>댓글 내용</span>
           <textarea id="guideCommentContent" required maxlength="500" rows="2" placeholder="댓글을 입력하세요."></textarea>
         </label>
+        <label class="field">
+          <span>삭제용 비밀번호</span>
+          <input id="guideCommentPassword" type="password" required minlength="4" maxlength="40" autocomplete="new-password" placeholder="4자 이상 입력">
+        </label>
         <button class="submit-report" type="submit">댓글 등록</button>
       </form>
       <div id="guideCommentList" class="guide-comment-list"></div>
@@ -440,6 +484,7 @@ async function submitComment(event) {
     postId,
     author: document.querySelector("#guideCommentAuthor").value.trim() || "익명",
     content: document.querySelector("#guideCommentContent").value.trim(),
+    password: await makePasswordRecord(document.querySelector("#guideCommentPassword").value),
     createdAt: new Date().toISOString(),
   };
   try {
@@ -452,7 +497,7 @@ async function submitComment(event) {
           title: `${commentTitlePrefix}${comment.postId}`,
           author: comment.author,
           content: comment.content,
-          media: [],
+          media: [comment.password],
           created_at: comment.createdAt,
           updated_at: comment.createdAt,
         }),
@@ -474,7 +519,7 @@ async function submitComment(event) {
 
 async function deleteComment(commentId) {
   const comment = comments.find((item) => item.id === commentId);
-  if (!comment || !window.confirm("댓글을 삭제할까요?")) return;
+  if (!comment || !(await verifyPassword(comment, "댓글 삭제")) || !window.confirm("댓글을 삭제할까요?")) return;
   try {
     if (hasPublicStore()) {
       const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?id=eq.${encodeURIComponent(commentId)}`, {
@@ -501,13 +546,18 @@ function showRetainedMedia() {
     : "";
 }
 
-function startEdit(post) {
+async function startEdit(post) {
+  if (!(await verifyPassword(post, "글 수정"))) return;
   fields.editor.hidden = false;
   fields.formTitle.textContent = "공략글 수정";
   fields.editId.value = post.id;
   fields.title.value = post.title;
   fields.author.value = post.author === "익명" ? "" : post.author;
   fields.category.value = post.category || "일반";
+  fields.password.value = "";
+  fields.password.required = !post.password;
+  fields.password.disabled = Boolean(post.password);
+  fields.password.placeholder = post.password ? "기존 비밀번호 유지" : "4자 이상 입력";
   fields.content.value = post.content;
   retainedMedia = [...post.media];
   fields.submit.textContent = "수정 완료";
@@ -524,12 +574,15 @@ function resetForm() {
   fields.formTitle.textContent = "공략글 작성";
   fields.submit.textContent = "공략글 등록";
   fields.cancel.hidden = true;
+  fields.password.disabled = false;
+  fields.password.required = true;
+  fields.password.placeholder = "4자 이상 입력";
   fields.editor.hidden = true;
   showRetainedMedia();
 }
 
 async function deletePost(post) {
-  if (!window.confirm(`"${post.title}" 글을 삭제할까요?`)) return;
+  if (!(await verifyPassword(post, "글 삭제")) || !window.confirm(`"${post.title}" 글을 삭제할까요?`)) return;
   try {
     if (hasPublicStore()) {
       const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?id=eq.${encodeURIComponent(post.id)}`, {

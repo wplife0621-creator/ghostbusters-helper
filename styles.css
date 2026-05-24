@@ -808,7 +808,7 @@ textarea {
 
 .guide-comment-form {
   display: grid;
-  grid-template-columns: 150px minmax(0, 1fr) auto;
+  grid-template-columns: 125px minmax(0, 1fr) 160px auto;
   align-items: end;
   gap: 8px;
   margin-bottom: 17px;
@@ -864,7 +864,7 @@ textarea {
 
 .guide-form {
   display: grid;
-  grid-template-columns: 1fr minmax(140px, 210px) minmax(120px, 160px);
+  grid-template-columns: 1fr minmax(130px, 180px) minmax(110px, 150px) minmax(150px, 190px);
   gap: 12px;
 }
 
