@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정보 제보/수정 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260524-6">
+  <link rel="stylesheet" href="./styles.css?v=20260524-9">
 </head>
 <body>
   <header class="topbar compact">
@@ -12,9 +12,12 @@
       <h1>정보 제보/수정</h1>
       <nav class="site-nav" aria-label="주요 메뉴">
         <a href="./index.html">홈</a>
+        <a href="./essences.html">정수</a>
         <a href="./numbers.html">넘버스</a>
         <a href="./builds.html">빌드 공유</a>
+        <a href="./guides.html">공략글</a>
         <a href="./report.html" aria-current="page">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
       </nav>
     </div>
   </header>
@@ -23,7 +26,7 @@
     <section class="panel report-panel page-panel">
       <div class="section-title compact-title">
         <h2>정보 제보/수정</h2>
-        <p>정수 또는 넘버스 정보를 등록하고, 검수 후 승인하면 해당 정보 페이지에 반영됩니다.</p>
+        <p>정수 또는 넘버스 정보를 등록하고, 검수 후 승인하면 해당 정보 페이지에 반영됩니다. 정수 수정 시 몬스터명도 변경할 수 있습니다.</p>
       </div>
       <form id="reportForm" class="report-form compact-report-form">
         <label class="field report-control">
@@ -41,9 +44,13 @@
           </select>
         </label>
         <label class="field essence-report-field report-name-field">
-          <span>몬스터명</span>
+          <span>몬스터명 <em id="editNameHint" class="edit-name-hint" hidden>수정 가능</em></span>
           <input id="reportMonster" required list="monsterOptions" placeholder="예: 얼음 와이번">
           <datalist id="monsterOptions"></datalist>
+        </label>
+        <label id="reportOriginalMonsterField" class="field essence-report-field report-original-field" hidden>
+          <span>수정 대상</span>
+          <input id="reportOriginalMonster" readonly placeholder="아래 목록에서 수정할 몬스터 선택">
         </label>
         <label class="field essence-report-field report-short-field">
           <span>등급</span>
@@ -99,6 +106,14 @@
           <span>효과</span>
           <textarea id="reportNumberEffect" rows="3" placeholder="예: 무게 +30"></textarea>
         </label>
+        <label class="field numbers-report-field report-number-extra" hidden>
+          <span>착용부위</span>
+          <input id="reportNumberSlot" placeholder="예: 장신구">
+        </label>
+        <label class="field numbers-report-field report-number-extra" hidden>
+          <span>획득처</span>
+          <input id="reportNumberSource" placeholder="예: 4층 보스 드랍">
+        </label>
         <button class="submit-report report-submit" type="submit">검수 대기에 등록</button>
       </form>
       <p id="reportSyncStatus" class="build-sync-status"></p>
@@ -147,7 +162,7 @@
       dailyVisitorTable: "daily_visitors",
     };
   </script>
-  <script src="./config.js?v=20260524-4"></script>
-  <script src="./app.js?v=20260524-4"></script>
+  <script src="./config.js?v=20260524-8"></script>
+  <script src="./app.js?v=20260524-9"></script>
 </body>
 </html>

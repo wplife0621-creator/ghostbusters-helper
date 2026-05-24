@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>미궁 시간 계산기 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260524-8">
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>미궁 시간 계산기</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <a href="./essences.html">정수</a>
+        <a href="./numbers.html">넘버스</a>
+        <a href="./builds.html">빌드 공유</a>
+        <a href="./guides.html">공략글</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html" aria-current="page">미궁 시간 계산기</a>
+      </nav>
+    </div>
+  </header>
+  <main class="layout calculator-layout">
+    <section class="panel maze-calculator">
+      <div class="section-title compact-title">
+        <h2>게임 진행 시간</h2>
+        <p>게임 시간 2시간마다 컨디션이 1 감소합니다.</p>
+      </div>
+      <div class="maze-inputs">
+        <label class="field">
+          <span>게임 일</span>
+          <input id="gameDays" type="number" min="0" step="1" value="1">
+        </label>
+        <label class="field">
+          <span>게임 시간</span>
+          <input id="gameHours" type="number" min="0" step="1" value="0">
+        </label>
+        <label class="field">
+          <span>현재 컨디션</span>
+          <input id="currentCondition" type="number" min="0" max="100" step="1" value="100">
+        </label>
+      </div>
+      <div class="maze-results">
+        <div class="calc-result" id="timeResult"></div>
+        <div class="condition-result">
+          <span>필요 컨디션</span>
+          <strong id="neededCondition">0</strong>
+          <small id="conditionGuide"></small>
+        </div>
+        <div class="condition-result remaining">
+          <span>진행 후 컨디션</span>
+          <strong id="remainingCondition">100</strong>
+          <small>컨디션은 0 미만으로 내려가지 않습니다.</small>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="./app.js?v=20260524-9"></script>
+</body>
+</html>

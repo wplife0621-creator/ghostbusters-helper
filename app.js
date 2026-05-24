@@ -53,6 +53,10 @@ const els = {
   gameDays: document.querySelector("#gameDays"),
   gameHours: document.querySelector("#gameHours"),
   timeResult: document.querySelector("#timeResult"),
+  currentCondition: document.querySelector("#currentCondition"),
+  neededCondition: document.querySelector("#neededCondition"),
+  remainingCondition: document.querySelector("#remainingCondition"),
+  conditionGuide: document.querySelector("#conditionGuide"),
   numbersSearch: document.querySelector("#numbersSearch"),
   numbersLevel: document.querySelector("#numbersLevel"),
   numbersSort: document.querySelector("#numbersSort"),
@@ -62,6 +66,9 @@ const els = {
   reportDataset: document.querySelector("#reportDataset"),
   reportMode: document.querySelector("#reportMode"),
   reportMonster: document.querySelector("#reportMonster"),
+  editNameHint: document.querySelector("#editNameHint"),
+  reportOriginalMonsterField: document.querySelector("#reportOriginalMonsterField"),
+  reportOriginalMonster: document.querySelector("#reportOriginalMonster"),
   reportGrade: document.querySelector("#reportGrade"),
   reportFloor: document.querySelector("#reportFloor"),
   reportArea: document.querySelector("#reportArea"),
@@ -74,6 +81,8 @@ const els = {
   reportNumberCode: document.querySelector("#reportNumberCode"),
   reportNumberLevel: document.querySelector("#reportNumberLevel"),
   reportNumberEffect: document.querySelector("#reportNumberEffect"),
+  reportNumberSlot: document.querySelector("#reportNumberSlot"),
+  reportNumberSource: document.querySelector("#reportNumberSource"),
   monsterOptions: document.querySelector("#monsterOptions"),
   numberOptions: document.querySelector("#numberOptions"),
   editMonsterMatches: document.querySelector("#editMonsterMatches"),
@@ -119,6 +128,12 @@ let activeEssenceInput = null;
 let activeStatNames = [];
 const statNoneLabel = "스탯 선택 안 함";
 
+function revealCurrentNavItem() {
+  const current = document.querySelector(".site-nav [aria-current='page']");
+  if (!current || window.innerWidth > 720) return;
+  current.scrollIntoView({ block: "nearest", inline: "center" });
+}
+
 function textOf(value) {
   return String(value ?? "").trim();
 }
@@ -138,9 +153,13 @@ function saveStoredRows(key, rows) {
 
 function mergeApprovedRows(baseRows, approvedRows) {
   const merged = [...baseRows];
-  approvedRows.forEach((row) => {
+  [...approvedRows].reverse().forEach((row) => {
     const monster = textOf(row["몬스터"]);
-    const index = merged.findIndex((item) => textOf(item["몬스터"]) === monster);
+    const originalMonster = textOf(row["_originalMonster"]) || monster;
+    const originalIndex = merged.findIndex((item) => textOf(item["몬스터"]) === originalMonster);
+    const index = originalIndex >= 0
+      ? originalIndex
+      : merged.findIndex((item) => textOf(item["몬스터"]) === monster);
     if (index >= 0) {
       merged[index] = { ...merged[index], ...row };
     } else {
@@ -165,6 +184,8 @@ function numbersReportToRow(report) {
     "이름": visibleReportName(report),
     "효과": report.stats,
     "아이템 레벨(Lv)": report.grade,
+    "착용부위": report.area === "-" ? "" : report.area,
+    "획득처": report.passive === "-" ? "" : report.passive,
   };
 }
 
@@ -182,6 +203,16 @@ function mergeNumbersRows(baseRows, reports) {
 function numberFrom(value) {
   const match = textOf(value).replace(/,/g, "").match(/\d+/);
   return match ? Number(match[0]) : Infinity;
+}
+
+function displayNumber(value) {
+  const number = textOf(value);
+  return /^\d+$/.test(number) ? `#${number}` : number || "미확인";
+}
+
+function displayLevel(value) {
+  const level = textOf(value);
+  return level ? `Lv ${level}` : "미확인";
 }
 
 function cooldownOf(row) {
@@ -245,10 +276,13 @@ function statValue(row, statName) {
 }
 
 function init() {
-  if (els.search) initHome();
+  revealCurrentNavItem();
+  if (els.search) initEssences();
   if (els.numbersResults) initNumbers();
   if (els.reportForm) initReport();
   if (els.buildForm) initBuilds();
+  if (els.timeResult) initMazeTime();
+  if (els.visitorToday) recordVisit();
 }
 
 function initNumbers() {
@@ -260,7 +294,7 @@ function initNumbers() {
   loadPublicApprovedReports();
 }
 
-function initHome() {
+function initEssences() {
   refreshControls();
   renderStatChips();
 
@@ -277,7 +311,14 @@ function initHome() {
 
   render();
   loadPublicApprovedReports();
-  recordVisit();
+}
+
+function initMazeTime() {
+  [els.gameDays, els.gameHours, els.currentCondition].forEach((field) => {
+    field.addEventListener("input", renderTime);
+    field.addEventListener("change", renderTime);
+  });
+  renderTime();
 }
 
 function initReport() {
@@ -836,13 +877,18 @@ function updateReportDataset() {
     field.required = numbersMode;
     field.disabled = !numbersMode;
   });
+  [els.reportNumberSlot, els.reportNumberSource].forEach((field) => {
+    field.disabled = !numbersMode;
+  });
   updateReportMode();
 }
 
 function updateReportMode() {
   const editMode = els.reportMode.value === "edit";
   const numbersMode = isNumbersReportMode();
-  els.reportMonster.placeholder = editMode ? "수정할 몬스터명을 검색하세요" : "예: 얼음 와이번";
+  els.reportOriginalMonsterField.hidden = !editMode || numbersMode;
+  els.editNameHint.hidden = !editMode || numbersMode;
+  els.reportMonster.placeholder = editMode ? "새 몬스터명 입력 가능" : "예: 얼음 와이번";
   els.reportNumberName.placeholder = editMode ? "수정할 넘버스를 검색하세요" : "예: 차원 자루";
   els.editMonsterMatches.hidden = !editMode || numbersMode;
   els.editNumberMatches.hidden = !editMode || !numbersMode;
@@ -858,12 +904,12 @@ function updateReportMode() {
     els.editNumberMatches.innerHTML = "";
     els.editNumberMatches.hidden = true;
   }
+  if (!editMode || numbersMode) els.reportOriginalMonster.value = "";
 }
 
 function handleReportMonsterInput() {
   if (els.reportMode.value !== "edit" || isNumbersReportMode()) return;
   renderEditMonsterMatches();
-  fillReportFromExactMonster();
 }
 
 function handleReportNumberInput() {
@@ -896,6 +942,7 @@ function fillReportFromExactMonster() {
 
 function fillReportFromRow(row) {
   if (!row) return;
+  els.reportOriginalMonster.value = textOf(row["몬스터"]);
   els.reportMonster.value = textOf(row["몬스터"]);
   els.reportGrade.value = textOf(row["등급"]);
   els.reportFloor.value = textOf(row["층"]);
@@ -925,6 +972,8 @@ function fillNumberFromRow(row) {
   els.reportNumberCode.value = textOf(row["번호"]);
   els.reportNumberLevel.value = textOf(row["아이템 레벨(Lv)"]);
   els.reportNumberEffect.value = textOf(row["효과"]);
+  els.reportNumberSlot.value = textOf(row["착용부위"]);
+  els.reportNumberSource.value = textOf(row["획득처"]);
   renderEditNumberMatches();
 }
 
@@ -960,7 +1009,7 @@ function renderEditNumberMatches() {
     ? rows.map((row) => `
       <button type="button" data-number-name="${escapeHtml(row["이름"])}">
         <strong>${escapeHtml(row["이름"])}</strong>
-        <span>#${escapeHtml(row["번호"])} · Lv ${escapeHtml(row["아이템 레벨(Lv)"])}</span>
+        <span>${escapeHtml(displayNumber(row["번호"]))} · ${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span>
       </button>
     `).join("")
     : `<div class="edit-match-empty">일치하는 넘버스가 없습니다.</div>`;
@@ -1126,7 +1175,6 @@ function render() {
     ? essenceTemplate(rows)
     : `<div class="empty">조건에 맞는 정수가 없습니다. 필터를 조금 넓혀보세요.</div>`;
 
-  renderTime();
 }
 
 function essenceTemplate(rows) {
@@ -1180,20 +1228,20 @@ function essenceRowTemplate(row) {
     : "";
   return `
     <tr>
-      <td>
+      <td data-label="몬스터">
         <div class="monster-title-line">
           <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
           <span class="location-pill">${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
         </div>
       </td>
-      <td><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
-      <td>${row["추천 캐릭터"] ? `<span class="character-pill">${escapeHtml(row["추천 캐릭터"])}</span>` : `<span class="muted">-</span>`}</td>
-      <td>
+      <td data-label="등급"><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
+      <td data-label="추천">${row["추천 캐릭터"] ? `<span class="character-pill">${escapeHtml(row["추천 캐릭터"])}</span>` : `<span class="muted">-</span>`}</td>
+      <td data-label="주요 스탯">
         ${activeStats.length ? `<div class="sorted-stat">${escapeHtml(highlightText)}</div>` : ""}
         <div class="stat-list">${statBadges(row["주요 스탯"])}</div>
       </td>
-      <td class="skill-cell">${skillText(row["패시브"])}</td>
-      <td class="skill-cell">${skillText(row["액티브"])}</td>
+      <td data-label="패시브" class="skill-cell">${skillText(row["패시브"])}</td>
+      <td data-label="액티브" class="skill-cell">${skillText(row["액티브"])}</td>
     </tr>
   `;
 }
@@ -1233,7 +1281,7 @@ function renderNumbers() {
   let rows = numbersRows.filter((row) => {
     if (level !== "전체 레벨" && textOf(row["아이템 레벨(Lv)"]) !== level) return false;
     if (!query) return true;
-    return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"]]
+    return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"], row["착용부위"], row["획득처"]]
       .some((value) => textOf(value).toLowerCase().includes(query));
   });
   rows = [...rows].sort((a, b) => {
@@ -1246,12 +1294,14 @@ function renderNumbers() {
     ? `
       <div class="numbers-table-wrap">
         <table class="numbers-table">
-          <thead><tr><th>번호</th><th>이름</th><th>아이템 레벨</th><th>효과</th></tr></thead>
+          <thead><tr><th>번호</th><th>이름</th><th>아이템 레벨</th><th>착용부위</th><th>획득처</th><th>효과</th></tr></thead>
           <tbody>${rows.map((row) => `
             <tr>
-              <td data-label="번호"><span class="number-code">#${escapeHtml(row["번호"])}</span></td>
+              <td data-label="번호"><span class="number-code">${escapeHtml(displayNumber(row["번호"]))}</span></td>
               <td data-label="이름"><strong>${escapeHtml(row["이름"])}</strong></td>
-              <td data-label="아이템 레벨"><span class="grade-pill">Lv ${escapeHtml(row["아이템 레벨(Lv)"])}</span></td>
+              <td data-label="아이템 레벨"><span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span></td>
+              <td data-label="착용부위">${escapeHtml(row["착용부위"] || "-")}</td>
+              <td data-label="획득처">${escapeHtml(row["획득처"] || "-")}</td>
               <td data-label="효과">${escapeHtml(row["효과"] || "-")}</td>
             </tr>
           `).join("")}</tbody>
@@ -1438,6 +1488,7 @@ function normalizeRemoteReport(row) {
     id: row.id,
     mode: row.mode || "new",
     monster: row.monster || "",
+    originalMonster: row.original_monster || row.originalMonster || "",
     grade: row.grade || "",
     floor: row.floor || "",
     area: row.area || "",
@@ -1522,6 +1573,7 @@ async function savePublicReport(report) {
       id: report.id,
       mode: report.mode,
       monster: report.monster,
+      original_monster: report.originalMonster || "",
       grade: report.grade,
       floor: report.floor,
       area: report.area,
@@ -1554,6 +1606,7 @@ async function updatePublicReportStatus(id, status) {
 function reportToRow(report) {
   return {
     "_reportId": report.id,
+    "_originalMonster": report.originalMonster || "",
     "층": report.floor,
     "구역": report.area,
     "몬스터": report.monster,
@@ -1570,21 +1623,26 @@ function reportToRow(report) {
 async function submitReport(event) {
   event.preventDefault();
   const numbersMode = isNumbersReportMode();
+  if (!numbersMode && els.reportMode.value === "edit" && !textOf(els.reportOriginalMonster.value)) {
+    setReportSyncStatus("수정할 기존 몬스터를 목록에서 먼저 선택해주세요.", "is-offline");
+    return;
+  }
   const report = numbersMode ? {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
     monster: `${numbersReportPrefix}${textOf(els.reportNumberName.value)}`,
     grade: textOf(els.reportNumberLevel.value),
     floor: textOf(els.reportNumberCode.value),
-    area: "-",
+    area: textOf(els.reportNumberSlot.value) || "-",
     stats: textOf(els.reportNumberEffect.value),
-    passive: "-",
+    passive: textOf(els.reportNumberSource.value) || "-",
     active: "-",
     createdAt: new Date().toISOString(),
   } : {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
     monster: textOf(els.reportMonster.value),
+    originalMonster: els.reportMode.value === "edit" ? textOf(els.reportOriginalMonster.value) : "",
     grade: textOf(els.reportGrade.value),
     floor: textOf(els.reportFloor.value),
     area: textOf(els.reportArea.value),
@@ -1672,6 +1730,7 @@ function renderPendingReports() {
           <span>${report.mode === "edit" ? "수정" : "신규"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
         </div>
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
+        <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
         <div class="pending-actions">
           <button type="button" data-action="approve">승인해서 추가</button>
           <button type="button" data-action="reject">반려</button>
@@ -1681,7 +1740,7 @@ function renderPendingReports() {
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? "수정" : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
+          <span>${report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
@@ -1736,6 +1795,7 @@ function renderApprovedReports() {
           <span>${report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
         </div>
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
+        <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
         <div class="pending-actions">
           <button type="button" data-approved-action="delete">등록 정보 삭제</button>
         </div>
@@ -1744,7 +1804,7 @@ function renderApprovedReports() {
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? "수정 승인" : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
+          <span>${report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
@@ -1783,6 +1843,14 @@ function renderTime() {
   const totalGameHours = (days * 24) + hours;
   const seconds = Math.round(totalGameHours * 4);
   els.timeResult.textContent = `현실 시간 ${formatSeconds(seconds)}`;
+  const neededCondition = Math.floor(totalGameHours / 2);
+  const currentCondition = Math.min(100, Math.max(0, Number(els.currentCondition.value || 0)));
+  const remainingCondition = Math.max(0, currentCondition - neededCondition);
+  els.neededCondition.textContent = String(neededCondition);
+  els.remainingCondition.textContent = String(remainingCondition);
+  els.conditionGuide.textContent = neededCondition > currentCondition
+    ? `현재 컨디션보다 ${neededCondition - currentCondition} 부족합니다.`
+    : "현재 컨디션으로 진행할 수 있습니다.";
 }
 
 function formatSeconds(totalSeconds) {

@@ -5,4 +5,6 @@ window.DUKHUBUSTERS_CONFIG = {
   reportTable: "monster_reports",
   visitorTable: "site_visitors",
   dailyVisitorTable: "daily_visitors",
+  guideTable: "guide_posts",
+  guideBucket: "guide-media",
 };
