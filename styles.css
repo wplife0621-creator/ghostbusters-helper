@@ -1734,6 +1734,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .build-note {
+    grid-column: 1 / -1;
+  }
+
   .section-title {
     display: block;
   }
@@ -1906,6 +1910,56 @@ textarea {
 
   .topbar-visitors p {
     text-align: left;
+  }
+
+  .build-form {
+    gap: 12px;
+  }
+
+  .build-form > .submit-report {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .build-member-card {
+    gap: 12px;
+    padding: 12px 10px;
+  }
+
+  .build-member-head {
+    gap: 9px;
+  }
+
+  .build-member-head strong {
+    padding-bottom: 2px;
+    color: var(--brand-dark);
+  }
+
+  .build-essence-slots {
+    gap: 9px;
+  }
+
+  .essence-input-row {
+    grid-template-columns: minmax(0, 1fr) 58px;
+  }
+
+  .build-essence-input {
+    min-width: 0;
+  }
+
+  .open-essence-picker {
+    width: 58px;
+    padding: 4px;
+  }
+
+  .build-panel .review-head {
+    display: grid;
+    gap: 10px;
+  }
+
+  .build-panel .review-head button {
+    width: 100%;
+    min-height: 44px;
   }
 
   .guide-form {
@@ -2086,7 +2140,32 @@ textarea {
   }
 
   .build-row .pending-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-content: stretch;
+  }
+
+  .build-row .pending-actions button {
+    width: 100%;
+  }
+
+  .build-row {
+    gap: 9px;
+    padding: 12px 10px;
+  }
+
+  .build-row-title strong {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .build-row-summary,
+  .build-row-essences {
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  .build-sync-status {
+    line-height: 1.55;
   }
 
   .essence-controls {
@@ -2287,6 +2366,22 @@ textarea {
   }
 
   .guide-viewer-head .pending-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .build-member-card {
+    padding: 11px 9px;
+  }
+
+  .essence-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .open-essence-picker {
+    width: 100%;
+  }
+
+  .build-row .pending-actions {
     grid-template-columns: 1fr;
   }
 }
