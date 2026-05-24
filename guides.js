@@ -374,7 +374,7 @@ function renderPosts() {
       </button>
       <span class="guide-row-author">${escapeHtml(post.author)}</span>
       <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
-      <span class="guide-row-views">${post.views}</span>
+      <span class="guide-row-views">조회 ${post.views}</span>
     </article>
   `).join("") : `<div class="empty compact-empty">조건에 맞는 공략글이 없습니다.</div>`;
   renderViewer();
