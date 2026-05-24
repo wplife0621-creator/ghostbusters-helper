@@ -1165,6 +1165,10 @@ function sortEssenceRows(rows) {
     return copy.sort((a, b) => cooldownOf(a.row) - cooldownOf(b.row) || floorAreaMonsterSort(a, b));
   }
 
+  if (mode === "sailing") {
+    return copy.sort((a, b) => Number(isSailingRow(b.row)) - Number(isSailingRow(a.row)) || floorAreaMonsterSort(a, b));
+  }
+
   if (mode === "floor-desc") {
     return copy.sort(floorAreaMonsterSortDescending);
   }
