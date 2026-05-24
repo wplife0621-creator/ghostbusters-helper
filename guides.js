@@ -36,7 +36,9 @@ let posts = sortPosts(readLocalPosts().map(normalizePost));
 let comments = readLocalComments();
 let retainedMedia = [];
 let activeCategory = "전체";
-let selectedPostId = "";
+const linkedPostId = new URLSearchParams(window.location.search).get("post") || "";
+let selectedPostId = linkedPostId;
+let pendingLinkedView = linkedPostId;
 
 function revealCurrentNavItem() {
   const current = document.querySelector(".site-nav [aria-current='page']");
@@ -99,6 +101,49 @@ function setStatus(message, mode = "") {
 
 function idValue() {
   return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function postUrl(postId) {
+  const url = new URL(window.location.href);
+  if (postId) url.searchParams.set("post", postId);
+  else url.searchParams.delete("post");
+  return url;
+}
+
+function updatePostUrl(postId, replace = false) {
+  const url = postUrl(postId);
+  window.history[replace ? "replaceState" : "pushState"]({}, "", url);
+}
+
+function openLinkedPostIfAvailable() {
+  if (!pendingLinkedView) return;
+  const post = posts.find((item) => item.id === pendingLinkedView);
+  if (!post) return;
+  pendingLinkedView = "";
+  incrementViews(post);
+  renderViewer();
+  fields.viewer.scrollIntoView({ block: "start" });
+}
+
+async function sharePostLink(post, button) {
+  const url = postUrl(post.id).toString();
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: post.title, text: "공략글 보기", url });
+      return;
+    } catch (error) {
+      if (error.name === "AbortError") return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    button.textContent = "링크 복사됨";
+    setTimeout(() => {
+      if (selectedPostId === post.id) renderViewer();
+    }, 1300);
+  } catch {
+    window.prompt("공략글 링크를 복사하세요.", url);
+  }
 }
 
 function savedTitle(post) {
@@ -198,6 +243,7 @@ function sortPosts(rows) {
 async function loadPosts() {
   renderPosts();
   if (!hasPublicStore()) {
+    openLinkedPostIfAvailable();
     setStatus("공개 게시판 연결 전입니다. 이 기기에 임시 저장됩니다.", "is-offline");
     return;
   }
@@ -211,8 +257,10 @@ async function loadPosts() {
     posts = sortPosts(rows.filter((row) => !isStoredComment(row)).map(normalizePost));
     loadCommentCounts();
     renderPosts();
+    openLinkedPostIfAvailable();
     setStatus("공개 공략 게시판에 연결되었습니다.", "is-online");
   } catch {
+    openLinkedPostIfAvailable();
     setStatus("게시판 설정이 아직 적용되지 않아 이 기기의 임시 목록을 표시합니다.", "is-offline");
   }
 }
@@ -394,7 +442,8 @@ function renderViewer() {
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))} · 조회 ${post.views} · 댓글 ${post.commentCount}</p>
       </div>
-      <div class="pending-actions">
+      <div class="pending-actions guide-viewer-actions">
+        <button type="button" data-guide-action="share">공유</button>
         <button type="button" data-guide-action="edit">수정</button>
         <button type="button" data-guide-action="delete">삭제</button>
         <button type="button" data-guide-action="close">닫기</button>
@@ -592,7 +641,10 @@ async function deletePost(post) {
       if (!response.ok) throw new Error("delete");
     }
     posts = posts.filter((item) => item.id !== post.id);
-    if (selectedPostId === post.id) selectedPostId = "";
+    if (selectedPostId === post.id) {
+      selectedPostId = "";
+      updatePostUrl("", true);
+    }
     saveLocalPosts();
     if (fields.editId.value === post.id) resetForm();
     renderPosts();
@@ -633,6 +685,7 @@ fields.posts.addEventListener("click", (event) => {
   if (!post) return;
   if (button.dataset.guideAction === "view") {
     selectedPostId = post.id;
+    updatePostUrl(post.id);
     incrementViews(post);
     renderViewer();
   }
@@ -650,15 +703,21 @@ fields.viewer.addEventListener("click", (event) => {
   const post = posts.find((item) => item.id === button.closest("[data-guide-id]").dataset.guideId);
   if (button.dataset.guideAction === "close") {
     selectedPostId = "";
+    updatePostUrl("");
     renderViewer();
     return;
   }
   if (!post) return;
+  if (button.dataset.guideAction === "share") sharePostLink(post, button);
   if (button.dataset.guideAction === "edit") startEdit(post);
   if (button.dataset.guideAction === "delete") deletePost(post);
 });
 fields.viewer.addEventListener("submit", (event) => {
   if (event.target.matches("#guideCommentForm")) submitComment(event);
+});
+window.addEventListener("popstate", () => {
+  selectedPostId = new URLSearchParams(window.location.search).get("post") || "";
+  renderViewer();
 });
 revealCurrentNavItem();
 loadPosts();
