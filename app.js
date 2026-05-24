@@ -33,6 +33,7 @@ const visitorBuildMarkers = {
   daily: "__visitor_daily__",
 };
 const numbersReportPrefix = "__numbers__:";
+const sailingMarker = "__sailing__";
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -40,6 +41,7 @@ const els = {
   area: document.querySelector("#areaFilter"),
   grade: document.querySelector("#gradeFilter"),
   character: document.querySelector("#characterFilter"),
+  sailingFilter: document.querySelector("#sailingFilter"),
   sort: document.querySelector("#sortFilter"),
   statSort: document.querySelector("#statSortFilter"),
   statChips: document.querySelector("#statChips"),
@@ -72,6 +74,7 @@ const els = {
   reportGrade: document.querySelector("#reportGrade"),
   reportFloor: document.querySelector("#reportFloor"),
   reportArea: document.querySelector("#reportArea"),
+  reportSailing: document.querySelector("#reportSailing"),
   reportStats: document.querySelector("#reportStats"),
   reportPassive: document.querySelector("#reportPassive"),
   reportActive: document.querySelector("#reportActive"),
@@ -136,6 +139,24 @@ function revealCurrentNavItem() {
 
 function textOf(value) {
   return String(value ?? "").trim();
+}
+
+function sailingValue(value) {
+  return ["1", "true", "yes", "y", "o", "항해"].includes(textOf(value).toLowerCase());
+}
+
+function activeSkillsWithoutSailing(value) {
+  return splitSkills(value).filter((skill) => skill !== sailingMarker).join("\n") || "-";
+}
+
+function isSailingRow(row) {
+  return sailingValue(row?.["항해"]) || splitSkills(row?.["액티브"]).includes(sailingMarker);
+}
+
+function reportActiveForStorage(report) {
+  const skills = splitSkills(report.active).filter((skill) => skill !== sailingMarker);
+  if (report.sailing) skills.push(sailingMarker);
+  return skills.join("\n") || "-";
 }
 
 function loadStoredRows(key) {
@@ -420,6 +441,7 @@ function essencePickerRows() {
       row["주요 스탯"],
       row["패시브"],
       row["액티브"],
+      isSailingRow(row) ? "항해" : "",
     ].some((value) => textOf(value).toLowerCase().includes(query));
   });
 }
@@ -439,7 +461,7 @@ function renderEssencePickerTable() {
       <tbody>
         ${rows.map((row) => `
           <tr data-monster="${escapeHtml(row["몬스터"])}">
-            <td data-label="몬스터"><strong>${escapeHtml(row["몬스터"])}</strong></td>
+            <td data-label="몬스터"><strong>${escapeHtml(row["몬스터"])}</strong>${isSailingRow(row) ? `<span class="sailing-pill">항해</span>` : ""}</td>
             <td data-label="주요 스탯">${escapeHtml(row["주요 스탯"] || "-")}</td>
             <td data-label="패시브">${skillText(row["패시브"])}</td>
             <td data-label="액티브">${skillText(row["액티브"])}</td>
@@ -870,7 +892,7 @@ function updateReportDataset() {
     field.required = !numbersMode;
     field.disabled = numbersMode;
   });
-  [els.reportActive, els.reportActive2, els.reportActive3].forEach((field) => {
+  [els.reportActive, els.reportActive2, els.reportActive3, els.reportSailing].forEach((field) => {
     field.disabled = numbersMode;
   });
   [els.reportNumberName, els.reportNumberCode, els.reportNumberLevel, els.reportNumberEffect].forEach((field) => {
@@ -949,7 +971,8 @@ function fillReportFromRow(row) {
   els.reportArea.value = textOf(row["구역"]);
   els.reportStats.value = textOf(row["주요 스탯"]);
   els.reportPassive.value = textOf(row["패시브"]);
-  const activeSkills = splitSkills(row["액티브"]);
+  els.reportSailing.checked = isSailingRow(row);
+  const activeSkills = splitSkills(activeSkillsWithoutSailing(row["액티브"]));
   els.reportActive.value = activeSkills[0] || "";
   els.reportActive2.value = activeSkills[1] || "";
   els.reportActive3.value = activeSkills[2] || "";
@@ -993,7 +1016,7 @@ function renderEditMonsterMatches() {
     ? rows.map((row) => `
       <button type="button" data-monster="${escapeHtml(row["몬스터"])}">
         <strong>${escapeHtml(row["몬스터"])}</strong>
-        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"] || "-")}</span>
+        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"] || "-")}${isSailingRow(row) ? " · 항해" : ""}</span>
       </button>
     `).join("")
     : `<div class="edit-match-empty">일치하는 몬스터가 없습니다.</div>`;
@@ -1107,6 +1130,10 @@ function applyFilters(rows) {
 
   if (els.character.value !== "전체 캐릭터") {
     rows = rows.filter(({ row }) => textOf(row["추천 캐릭터"]) === els.character.value);
+  }
+
+  if (els.sailingFilter?.checked) {
+    rows = rows.filter(({ row }) => isSailingRow(row));
   }
 
   if (query) {
@@ -1231,6 +1258,7 @@ function essenceRowTemplate(row) {
       <td data-label="몬스터">
         <div class="monster-title-line">
           <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
+          ${isSailingRow(row) ? `<span class="sailing-pill">항해</span>` : ""}
           <span class="location-pill">${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
         </div>
       </td>
@@ -1494,7 +1522,8 @@ function normalizeRemoteReport(row) {
     area: row.area || "",
     stats: row.stats || "",
     passive: row.passive || "",
-    active: row.active || "",
+    active: activeSkillsWithoutSailing(row.active || ""),
+    sailing: splitSkills(row.active || "").includes(sailingMarker),
     status: row.status || "pending",
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
     reviewedAt: row.reviewed_at || row.reviewedAt || "",
@@ -1579,7 +1608,7 @@ async function savePublicReport(report) {
       area: report.area,
       stats: report.stats,
       passive: report.passive,
-      active: report.active,
+      active: reportActiveForStorage(report),
       status: "pending",
       created_at: report.createdAt,
     }),
@@ -1614,6 +1643,7 @@ function reportToRow(report) {
     "주요 스탯": report.stats,
     "패시브": report.passive,
     "액티브": report.active,
+    "항해": report.sailing ? "Y" : "",
     "추천 캐릭터": "",
     "출처": report.mode === "edit" ? "수정 승인" : "제보 승인",
     "승인일": new Date().toISOString(),
@@ -1648,6 +1678,7 @@ async function submitReport(event) {
     area: textOf(els.reportArea.value),
     stats: textOf(els.reportStats.value),
     passive: textOf(els.reportPassive.value),
+    sailing: Boolean(els.reportSailing.checked),
     active: [els.reportActive, els.reportActive2, els.reportActive3]
       .map((field) => textOf(field.value))
       .filter(Boolean)
@@ -1740,7 +1771,7 @@ function renderPendingReports() {
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
+          <span>${report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
@@ -1804,7 +1835,7 @@ function renderApprovedReports() {
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)}</span>
+          <span>${report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>

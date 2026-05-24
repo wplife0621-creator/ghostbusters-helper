@@ -283,6 +283,32 @@ textarea {
   padding: 0 10px;
 }
 
+.check-control {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  min-height: 39px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--text) !important;
+  padding: 0 10px;
+}
+
+.check-control input {
+  flex: 0 0 auto;
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+.check-control strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
 .essence-input-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -1622,7 +1648,8 @@ textarea {
 
 .location-pill,
 .grade-pill,
-.character-pill {
+.character-pill,
+.sailing-pill {
   display: inline-flex;
   align-items: center;
   min-height: 23px;
@@ -1646,6 +1673,12 @@ textarea {
 .character-pill {
   background: #ecfdf5;
   color: var(--good);
+}
+
+.sailing-pill {
+  margin-left: 5px;
+  background: #e3f6ff;
+  color: #067098 !important;
 }
 
 .muted {
@@ -1803,6 +1836,16 @@ textarea {
   select,
   textarea {
     font-size: 16px;
+  }
+
+  .check-control {
+    min-height: 44px;
+  }
+
+  .check-control input {
+    min-height: 20px;
+    height: 20px;
+    width: 20px;
   }
 
   .home-hero {
@@ -2357,6 +2400,10 @@ textarea {
   .home-highlights span {
     flex: 1 1 auto;
     text-align: center;
+  }
+
+  .essence-controls {
+    grid-template-columns: 1fr;
   }
 
   .numbers-table td,
