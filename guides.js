@@ -6,6 +6,9 @@ const guideBackend = {
   bucket: String(config.guideBucket || "guide-media"),
 };
 const guideStorageKey = "dukhubusters.guidePosts";
+const guideCommentStorageKey = "dukhubusters.guideComments";
+const commentTitlePrefix = "__guide_comment__:";
+const viewCounterKind = "guide-view-counter";
 const fields = {
   form: document.querySelector("#guideForm"),
   editor: document.querySelector("#guideEditor"),
@@ -28,6 +31,7 @@ const fields = {
   categories: document.querySelector(".guide-categories"),
 };
 let posts = sortPosts(readLocalPosts().map(normalizePost));
+let comments = readLocalComments();
 let retainedMedia = [];
 let activeCategory = "전체";
 let selectedPostId = "";
@@ -73,6 +77,19 @@ function saveLocalPosts() {
   localStorage.setItem(guideStorageKey, JSON.stringify(posts));
 }
 
+function readLocalComments() {
+  try {
+    const rows = JSON.parse(localStorage.getItem(guideCommentStorageKey) || "[]");
+    return Array.isArray(rows) ? rows.map(normalizeComment) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalComments() {
+  localStorage.setItem(guideCommentStorageKey, JSON.stringify(comments));
+}
+
 function setStatus(message, mode = "") {
   fields.status.textContent = message;
   fields.status.className = `build-sync-status ${mode}`.trim();
@@ -84,6 +101,20 @@ function idValue() {
 
 function savedTitle(post) {
   return post.category !== "일반" ? `[${post.category}] ${post.title}` : post.title;
+}
+
+function isStoredComment(row) {
+  return String(row.title || "").startsWith(commentTitlePrefix);
+}
+
+function viewCount(media) {
+  const counter = (Array.isArray(media) ? media : []).find((item) => item?.kind === viewCounterKind);
+  return Number(counter?.views || 0);
+}
+
+function storedMedia(post) {
+  const visibleMedia = post.media.filter((item) => item?.kind !== viewCounterKind);
+  return post.views ? [...visibleMedia, { kind: viewCounterKind, views: post.views }] : visibleMedia;
 }
 
 function parsedTitle(row) {
@@ -103,9 +134,21 @@ function normalizePost(row) {
     author: row.author || "익명",
     category: parsed.category,
     content: row.content || "",
-    media: Array.isArray(row.media) ? row.media : [],
+    media: (Array.isArray(row.media) ? row.media : []).filter((item) => item?.kind !== viewCounterKind),
+    views: Number(row.views || viewCount(row.media)),
+    commentCount: Number(row.commentCount || 0),
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
     updatedAt: row.updated_at || row.updatedAt || row.created_at || new Date().toISOString(),
+  };
+}
+
+function normalizeComment(row) {
+  return {
+    id: row.id,
+    postId: row.post_id || row.postId || String(row.title || "").slice(commentTitlePrefix.length),
+    author: row.author || "익명",
+    content: row.content || "",
+    createdAt: row.created_at || row.createdAt || new Date().toISOString(),
   };
 }
 
@@ -124,12 +167,21 @@ async function loadPosts() {
       headers: authHeaders(),
     });
     if (!response.ok) throw new Error("load");
-    posts = sortPosts((await response.json()).map(normalizePost));
+    const rows = await response.json();
+    comments = rows.filter(isStoredComment).map(normalizeComment);
+    posts = sortPosts(rows.filter((row) => !isStoredComment(row)).map(normalizePost));
+    loadCommentCounts();
     renderPosts();
     setStatus("공개 공략 게시판에 연결되었습니다.", "is-online");
   } catch {
     setStatus("게시판 설정이 아직 적용되지 않아 이 기기의 임시 목록을 표시합니다.", "is-offline");
   }
+}
+
+function loadCommentCounts() {
+  posts.forEach((post) => {
+    post.commentCount = comments.filter((comment) => comment.postId === post.id).length;
+  });
 }
 
 async function filesToTemporaryMedia(files) {
@@ -170,7 +222,7 @@ async function saveRemotePost(post, editing) {
     title: savedTitle(post),
     author: post.author,
     content: post.content,
-    media: post.media,
+    media: storedMedia(post),
     created_at: post.createdAt,
     updated_at: post.updatedAt,
   };
@@ -204,6 +256,8 @@ async function submitPost(event) {
     category,
     content: fields.content.value.trim(),
     media: [...retainedMedia],
+    views: previous?.views || 0,
+    commentCount: previous?.commentCount || 0,
     createdAt: previous?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -246,7 +300,7 @@ function mediaMarkup(media) {
     const url = escapeHtml(item.url);
     const label = escapeHtml(item.name || "첨부 파일");
     if (String(item.type).startsWith("video/")) {
-      return `<video controls preload="metadata" src="${url}" aria-label="${label}"></video>`;
+      return `<video class="guide-video" controls preload="metadata" src="${url}" aria-label="${label}"></video>`;
     }
     return `<img loading="lazy" src="${url}" alt="${label}">`;
   }).join("");
@@ -276,9 +330,11 @@ function renderPosts() {
       <button type="button" class="guide-row-title" data-guide-action="view">
         ${escapeHtml(post.title)}
         ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
+        ${post.commentCount ? `<small>댓글 ${post.commentCount}</small>` : ""}
       </button>
       <span class="guide-row-author">${escapeHtml(post.author)}</span>
       <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
+      <span class="guide-row-views">${post.views}</span>
     </article>
   `).join("") : `<div class="empty compact-empty">조건에 맞는 공략글이 없습니다.</div>`;
   renderViewer();
@@ -296,7 +352,7 @@ function renderViewer() {
       <div>
         <span class="guide-row-category">${escapeHtml(post.category)}</span>
         <h3>${escapeHtml(post.title)}</h3>
-        <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))}</p>
+        <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))} · 조회 ${post.views} · 댓글 ${post.commentCount}</p>
       </div>
       <div class="pending-actions">
         <button type="button" data-guide-action="edit">수정</button>
@@ -306,7 +362,134 @@ function renderViewer() {
     </div>
     <div class="guide-viewer-content">${escapeHtml(post.content).replaceAll("\n", "<br>")}</div>
     ${post.media.length ? `<div class="guide-gallery">${mediaMarkup(post.media)}</div>` : ""}
+    <section class="guide-comments">
+      <h4>댓글 <span id="guideCommentCount">${post.commentCount}</span></h4>
+      <form class="guide-comment-form" id="guideCommentForm">
+        <label class="field">
+          <span>작성자</span>
+          <input id="guideCommentAuthor" maxlength="40" placeholder="닉네임">
+        </label>
+        <label class="field guide-comment-content">
+          <span>댓글 내용</span>
+          <textarea id="guideCommentContent" required maxlength="500" rows="2" placeholder="댓글을 입력하세요."></textarea>
+        </label>
+        <button class="submit-report" type="submit">댓글 등록</button>
+      </form>
+      <div id="guideCommentList" class="guide-comment-list"></div>
+    </section>
   `;
+  loadComments(post.id);
+}
+
+async function incrementViews(post) {
+  post.views += 1;
+  renderPosts();
+  if (!hasPublicStore()) {
+    saveLocalPosts();
+    return;
+  }
+  try {
+    const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?id=eq.${encodeURIComponent(post.id)}`, {
+      method: "PATCH",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ media: storedMedia(post) }),
+    });
+    if (!response.ok) throw new Error("view");
+  } catch {
+    post.views -= 1;
+    renderPosts();
+  }
+}
+
+function commentsForPost(postId) {
+  return comments
+    .filter((comment) => comment.postId === postId)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+}
+
+function renderComments(postId) {
+  const list = document.querySelector("#guideCommentList");
+  const count = document.querySelector("#guideCommentCount");
+  if (!list || !count || selectedPostId !== postId) return;
+  const rows = commentsForPost(postId);
+  count.textContent = String(rows.length);
+  const post = posts.find((item) => item.id === postId);
+  if (post) post.commentCount = rows.length;
+  list.innerHTML = rows.length ? rows.map((comment) => `
+    <article class="guide-comment" data-comment-id="${escapeHtml(comment.id)}">
+      <div>
+        <strong>${escapeHtml(comment.author)}</strong>
+        <span>${escapeHtml(new Date(comment.createdAt).toLocaleString("ko-KR"))}</span>
+        <button type="button" data-comment-action="delete">삭제</button>
+      </div>
+      <p>${escapeHtml(comment.content).replaceAll("\n", "<br>")}</p>
+    </article>
+  `).join("") : `<div class="empty compact-empty">첫 댓글을 남겨보세요.</div>`;
+}
+
+async function loadComments(postId) {
+  renderComments(postId);
+}
+
+async function submitComment(event) {
+  event.preventDefault();
+  const postId = selectedPostId;
+  if (!postId) return;
+  const comment = {
+    id: idValue(),
+    postId,
+    author: document.querySelector("#guideCommentAuthor").value.trim() || "익명",
+    content: document.querySelector("#guideCommentContent").value.trim(),
+    createdAt: new Date().toISOString(),
+  };
+  try {
+    if (hasPublicStore()) {
+      const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}`, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json", Prefer: "return=representation" }),
+        body: JSON.stringify({
+          id: comment.id,
+          title: `${commentTitlePrefix}${comment.postId}`,
+          author: comment.author,
+          content: comment.content,
+          media: [],
+          created_at: comment.createdAt,
+          updated_at: comment.createdAt,
+        }),
+      });
+      if (!response.ok) throw new Error("comment-save");
+      const rows = await response.json();
+      comments.push(normalizeComment(rows[0] || comment));
+    } else {
+      comments.push(comment);
+      saveLocalComments();
+    }
+    event.target.reset();
+    renderComments(postId);
+    renderPosts();
+  } catch {
+    setStatus("댓글 저장에 실패했습니다. 게시판 저장소 설정을 확인해주세요.", "is-offline");
+  }
+}
+
+async function deleteComment(commentId) {
+  const comment = comments.find((item) => item.id === commentId);
+  if (!comment || !window.confirm("댓글을 삭제할까요?")) return;
+  try {
+    if (hasPublicStore()) {
+      const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?id=eq.${encodeURIComponent(commentId)}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (!response.ok) throw new Error("comment-delete");
+    }
+    comments = comments.filter((item) => item.id !== commentId);
+    saveLocalComments();
+    renderComments(comment.postId);
+    renderPosts();
+  } catch {
+    setStatus("댓글 삭제에 실패했습니다.", "is-offline");
+  }
 }
 
 function showRetainedMedia() {
@@ -397,12 +580,18 @@ fields.posts.addEventListener("click", (event) => {
   if (!post) return;
   if (button.dataset.guideAction === "view") {
     selectedPostId = post.id;
+    incrementViews(post);
     renderViewer();
   }
   if (button.dataset.guideAction === "edit") startEdit(post);
   if (button.dataset.guideAction === "delete") deletePost(post);
 });
 fields.viewer.addEventListener("click", (event) => {
+  const commentButton = event.target.closest("button[data-comment-action]");
+  if (commentButton) {
+    deleteComment(commentButton.closest("[data-comment-id]").dataset.commentId);
+    return;
+  }
   const button = event.target.closest("button[data-guide-action]");
   if (!button) return;
   const post = posts.find((item) => item.id === button.closest("[data-guide-id]").dataset.guideId);
@@ -414,6 +603,9 @@ fields.viewer.addEventListener("click", (event) => {
   if (!post) return;
   if (button.dataset.guideAction === "edit") startEdit(post);
   if (button.dataset.guideAction === "delete") deletePost(post);
+});
+fields.viewer.addEventListener("submit", (event) => {
+  if (event.target.matches("#guideCommentForm")) submitComment(event);
 });
 revealCurrentNavItem();
 loadPosts();

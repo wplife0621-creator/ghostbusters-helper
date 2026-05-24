@@ -677,7 +677,7 @@ textarea {
 .guide-list-head,
 .guide-row {
   display: grid;
-  grid-template-columns: 54px 78px minmax(0, 1fr) 122px 92px;
+  grid-template-columns: 54px 78px minmax(0, 1fr) 122px 92px 58px;
   align-items: center;
   text-align: center;
 }
@@ -745,7 +745,8 @@ textarea {
 
 .guide-row-author,
 .guide-row-date,
-.guide-row-number {
+.guide-row-number,
+.guide-row-views {
   color: #63738d;
   font-size: 12px;
 }
@@ -786,6 +787,74 @@ textarea {
 
 .guide-viewer .guide-gallery {
   padding: 0 14px 18px;
+}
+
+.guide-viewer .guide-video {
+  grid-column: 1 / -1;
+  max-height: min(70vh, 680px);
+  aspect-ratio: 16 / 9;
+}
+
+.guide-comments {
+  border-top: 1px solid var(--line);
+  padding: 18px 14px;
+}
+
+.guide-comments h4 {
+  margin: 0 0 15px;
+  color: #192940;
+  font-size: 17px;
+}
+
+.guide-comment-form {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+  margin-bottom: 17px;
+}
+
+.guide-comment-form .submit-report {
+  min-height: 44px;
+}
+
+.guide-comment-list {
+  display: grid;
+}
+
+.guide-comment {
+  padding: 13px 4px;
+  border-top: 1px solid #e1e6ef;
+}
+
+.guide-comment > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.guide-comment strong {
+  color: #273850;
+  font-size: 13px;
+}
+
+.guide-comment span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.guide-comment button {
+  border: 0;
+  background: transparent;
+  color: #728198;
+  font-size: 12px;
+}
+
+.guide-comment p {
+  margin: 9px 0 0;
+  color: #293952;
+  font-size: 14px;
+  line-height: 1.65;
 }
 
 .guide-editor[hidden],
@@ -1883,6 +1952,12 @@ textarea {
     grid-row: 2;
   }
 
+  .guide-row-views {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+  }
+
   .guide-viewer-head {
     display: grid;
     padding: 13px 10px;
@@ -1896,6 +1971,14 @@ textarea {
 
   .guide-viewer-content {
     padding: 18px 10px;
+  }
+
+  .guide-comments {
+    padding: 16px 10px;
+  }
+
+  .guide-comment-form {
+    grid-template-columns: 1fr;
   }
 
   .guide-form-actions {
@@ -1917,6 +2000,10 @@ textarea {
   .guide-gallery img,
   .guide-gallery video {
     max-height: 260px;
+  }
+
+  .guide-viewer .guide-video {
+    max-height: none;
   }
 
   .review-head {
