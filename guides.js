@@ -82,12 +82,26 @@ function idValue() {
   return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function savedTitle(post) {
+  return post.category !== "일반" ? `[${post.category}] ${post.title}` : post.title;
+}
+
+function parsedTitle(row) {
+  const title = row.title || "";
+  const match = title.match(/^\[(보스|파밍|빌드|정보)\]\s*/);
+  return {
+    title: match ? title.slice(match[0].length) : title,
+    category: row.category || match?.[1] || "일반",
+  };
+}
+
 function normalizePost(row) {
+  const parsed = parsedTitle(row);
   return {
     id: row.id,
-    title: row.title || "",
+    title: parsed.title,
     author: row.author || "익명",
-    category: row.category || "일반",
+    category: parsed.category,
     content: row.content || "",
     media: Array.isArray(row.media) ? row.media : [],
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
@@ -153,9 +167,8 @@ async function uploadMedia(files, postId) {
 async function saveRemotePost(post, editing) {
   const body = {
     id: post.id,
-    title: post.title,
+    title: savedTitle(post),
     author: post.author,
-    category: post.category,
     content: post.content,
     media: post.media,
     created_at: post.createdAt,
@@ -178,11 +191,17 @@ async function submitPost(event) {
   const editing = Boolean(previous);
   const id = editing ? previous.id : idValue();
   const selectedFiles = [...fields.media.files];
+  const category = fields.category.value || "일반";
+  const title = fields.title.value.trim();
+  if (savedTitle({ title, category }).length > 100) {
+    setStatus("말머리를 포함한 제목은 100자 이내로 입력해주세요.", "is-offline");
+    return;
+  }
   const basePost = {
     id,
-    title: fields.title.value.trim(),
+    title,
     author: fields.author.value.trim() || "익명",
-    category: fields.category.value || "일반",
+    category,
     content: fields.content.value.trim(),
     media: [...retainedMedia],
     createdAt: previous?.createdAt || new Date().toISOString(),
