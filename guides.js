@@ -8,10 +8,13 @@ const guideBackend = {
 const guideStorageKey = "dukhubusters.guidePosts";
 const fields = {
   form: document.querySelector("#guideForm"),
+  editor: document.querySelector("#guideEditor"),
+  openEditor: document.querySelector("#guideOpenEditor"),
   formTitle: document.querySelector("#guideFormTitle"),
   editId: document.querySelector("#guideEditId"),
   title: document.querySelector("#guideTitle"),
   author: document.querySelector("#guideAuthor"),
+  category: document.querySelector("#guideCategory"),
   content: document.querySelector("#guideContent"),
   media: document.querySelector("#guideMedia"),
   existingMedia: document.querySelector("#guideExistingMedia"),
@@ -20,9 +23,14 @@ const fields = {
   status: document.querySelector("#guideStatus"),
   count: document.querySelector("#guideCount"),
   posts: document.querySelector("#guidePosts"),
+  viewer: document.querySelector("#guideViewer"),
+  search: document.querySelector("#guideSearch"),
+  categories: document.querySelector(".guide-categories"),
 };
-let posts = readLocalPosts();
+let posts = sortPosts(readLocalPosts().map(normalizePost));
 let retainedMedia = [];
+let activeCategory = "전체";
+let selectedPostId = "";
 
 function revealCurrentNavItem() {
   const current = document.querySelector(".site-nav [aria-current='page']");
@@ -79,6 +87,7 @@ function normalizePost(row) {
     id: row.id,
     title: row.title || "",
     author: row.author || "익명",
+    category: row.category || "일반",
     content: row.content || "",
     media: Array.isArray(row.media) ? row.media : [],
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
@@ -146,6 +155,7 @@ async function saveRemotePost(post, editing) {
     id: post.id,
     title: post.title,
     author: post.author,
+    category: post.category,
     content: post.content,
     media: post.media,
     created_at: post.createdAt,
@@ -172,6 +182,7 @@ async function submitPost(event) {
     id,
     title: fields.title.value.trim(),
     author: fields.author.value.trim() || "익명",
+    category: fields.category.value || "일반",
     content: fields.content.value.trim(),
     media: [...retainedMedia],
     createdAt: previous?.createdAt || new Date().toISOString(),
@@ -222,24 +233,61 @@ function mediaMarkup(media) {
   }).join("");
 }
 
+function dateLabel(value) {
+  return new Date(value).toLocaleDateString("ko-KR", { year: "2-digit", month: "2-digit", day: "2-digit" });
+}
+
+function filteredPosts() {
+  const query = fields.search.value.trim().toLowerCase();
+  return posts.filter((post) => {
+    if (activeCategory !== "전체" && post.category !== activeCategory) return false;
+    if (!query) return true;
+    return [post.title, post.author, post.content]
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
+}
+
 function renderPosts() {
-  fields.count.textContent = `등록된 글 ${posts.length}개`;
-  fields.posts.innerHTML = posts.length ? posts.map((post) => `
-    <article class="guide-post" data-guide-id="${escapeHtml(post.id)}">
-      <div class="guide-post-head">
-        <div>
-          <h3>${escapeHtml(post.title)}</h3>
-          <span>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))}</span>
-        </div>
-        <div class="pending-actions">
-          <button type="button" data-guide-action="edit">수정</button>
-          <button type="button" data-guide-action="delete">삭제</button>
-        </div>
-      </div>
-      <p>${escapeHtml(post.content).replaceAll("\n", "<br>")}</p>
-      ${post.media.length ? `<div class="guide-gallery">${mediaMarkup(post.media)}</div>` : ""}
+  const visiblePosts = filteredPosts();
+  fields.count.textContent = `${activeCategory === "전체" ? "전체글" : activeCategory} ${visiblePosts.length}개`;
+  fields.posts.innerHTML = visiblePosts.length ? visiblePosts.map((post) => `
+    <article class="guide-row" data-guide-id="${escapeHtml(post.id)}">
+      <span class="guide-row-number">${posts.length - posts.indexOf(post)}</span>
+      <span class="guide-row-category">${escapeHtml(post.category)}</span>
+      <button type="button" class="guide-row-title" data-guide-action="view">
+        ${escapeHtml(post.title)}
+        ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
+      </button>
+      <span class="guide-row-author">${escapeHtml(post.author)}</span>
+      <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
     </article>
-  `).join("") : `<div class="empty compact-empty">아직 등록된 공략글이 없습니다. 첫 공략을 공유해보세요.</div>`;
+  `).join("") : `<div class="empty compact-empty">조건에 맞는 공략글이 없습니다.</div>`;
+  renderViewer();
+}
+
+function renderViewer() {
+  const post = posts.find((item) => item.id === selectedPostId);
+  fields.viewer.hidden = !post;
+  if (!post) {
+    fields.viewer.innerHTML = "";
+    return;
+  }
+  fields.viewer.innerHTML = `
+    <div class="guide-viewer-head" data-guide-id="${escapeHtml(post.id)}">
+      <div>
+        <span class="guide-row-category">${escapeHtml(post.category)}</span>
+        <h3>${escapeHtml(post.title)}</h3>
+        <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))}</p>
+      </div>
+      <div class="pending-actions">
+        <button type="button" data-guide-action="edit">수정</button>
+        <button type="button" data-guide-action="delete">삭제</button>
+        <button type="button" data-guide-action="close">닫기</button>
+      </div>
+    </div>
+    <div class="guide-viewer-content">${escapeHtml(post.content).replaceAll("\n", "<br>")}</div>
+    ${post.media.length ? `<div class="guide-gallery">${mediaMarkup(post.media)}</div>` : ""}
+  `;
 }
 
 function showRetainedMedia() {
@@ -252,10 +300,12 @@ function showRetainedMedia() {
 }
 
 function startEdit(post) {
+  fields.editor.hidden = false;
   fields.formTitle.textContent = "공략글 수정";
   fields.editId.value = post.id;
   fields.title.value = post.title;
   fields.author.value = post.author === "익명" ? "" : post.author;
+  fields.category.value = post.category || "일반";
   fields.content.value = post.content;
   retainedMedia = [...post.media];
   fields.submit.textContent = "수정 완료";
@@ -272,6 +322,7 @@ function resetForm() {
   fields.formTitle.textContent = "공략글 작성";
   fields.submit.textContent = "공략글 등록";
   fields.cancel.hidden = true;
+  fields.editor.hidden = true;
   showRetainedMedia();
 }
 
@@ -286,6 +337,7 @@ async function deletePost(post) {
       if (!response.ok) throw new Error("delete");
     }
     posts = posts.filter((item) => item.id !== post.id);
+    if (selectedPostId === post.id) selectedPostId = "";
     saveLocalPosts();
     if (fields.editId.value === post.id) resetForm();
     renderPosts();
@@ -297,6 +349,22 @@ async function deletePost(post) {
 
 fields.form.addEventListener("submit", submitPost);
 fields.cancel.addEventListener("click", resetForm);
+fields.openEditor.addEventListener("click", () => {
+  resetForm();
+  fields.editor.hidden = false;
+  fields.title.focus();
+  fields.editor.scrollIntoView({ block: "start", behavior: "smooth" });
+});
+fields.search.addEventListener("input", renderPosts);
+fields.categories.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-guide-category]");
+  if (!button) return;
+  activeCategory = button.dataset.guideCategory;
+  fields.categories.querySelectorAll("button").forEach((item) => {
+    item.classList.toggle("is-active", item === button);
+  });
+  renderPosts();
+});
 fields.existingMedia.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-remove-media]");
   if (!button) return;
@@ -307,6 +375,23 @@ fields.posts.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-guide-action]");
   if (!button) return;
   const post = posts.find((item) => item.id === button.closest("[data-guide-id]").dataset.guideId);
+  if (!post) return;
+  if (button.dataset.guideAction === "view") {
+    selectedPostId = post.id;
+    renderViewer();
+  }
+  if (button.dataset.guideAction === "edit") startEdit(post);
+  if (button.dataset.guideAction === "delete") deletePost(post);
+});
+fields.viewer.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-guide-action]");
+  if (!button) return;
+  const post = posts.find((item) => item.id === button.closest("[data-guide-id]").dataset.guideId);
+  if (button.dataset.guideAction === "close") {
+    selectedPostId = "";
+    renderViewer();
+    return;
+  }
   if (!post) return;
   if (button.dataset.guideAction === "edit") startEdit(post);
   if (button.dataset.guideAction === "delete") deletePost(post);

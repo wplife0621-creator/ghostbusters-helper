@@ -133,11 +133,15 @@ create table if not exists public.guide_posts (
   id text primary key,
   title text not null,
   author text not null default '익명',
+  category text not null default '일반',
   content text not null,
   media jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.guide_posts
+add column if not exists category text not null default '일반';
 
 alter table public.guide_posts enable row level security;
 
@@ -151,6 +155,7 @@ on public.guide_posts for insert to anon
 with check (
   char_length(title) between 1 and 100
   and char_length(author) between 1 and 40
+  and category in ('일반', '보스', '파밍', '빌드', '정보')
   and char_length(content) between 1 and 5000
   and jsonb_typeof(media) = 'array'
 );
@@ -162,6 +167,7 @@ using (true)
 with check (
   char_length(title) between 1 and 100
   and char_length(author) between 1 and 40
+  and category in ('일반', '보스', '파밍', '빌드', '정보')
   and char_length(content) between 1 and 5000
   and jsonb_typeof(media) = 'array'
 );
