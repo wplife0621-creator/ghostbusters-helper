@@ -1630,6 +1630,23 @@ textarea {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 8px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.build-member-loadout-head::-webkit-details-marker {
+  display: none;
+}
+
+.build-member-loadout-head::after {
+  content: "상세 보기";
+  color: var(--brand-dark);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.build-member-detail-toggle[open] .build-member-loadout-head::after {
+  content: "접기";
 }
 
 .build-member-loadout-head strong {
@@ -1644,6 +1661,7 @@ textarea {
   font-size: 11px;
   font-weight: 900;
   padding: 3px 8px;
+  margin-left: auto;
 }
 
 .build-loadout-essences {
@@ -1713,6 +1731,86 @@ textarea {
 .build-loadout-essences .is-empty > span {
   color: #7a8799;
   background: #f3f5f8;
+}
+
+.build-member-details {
+  display: grid;
+  gap: 8px;
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px dashed #dce5f2;
+}
+
+.build-essence-detail {
+  min-width: 0;
+  border: 1px solid #e2e9f4;
+  border-radius: 8px;
+  background: #fff;
+  padding: 9px;
+}
+
+.build-detail-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-bottom: 7px;
+}
+
+.build-detail-title h4 {
+  margin: 0;
+  color: #142a4b;
+  font-size: 13px;
+}
+
+.build-detail-title span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.build-essence-detail dl {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 6px 7px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.build-essence-detail dt {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.build-essence-detail dd {
+  min-width: 0;
+  margin: 0;
+  color: #334762;
+  overflow-wrap: anywhere;
+}
+
+.build-detail-skills {
+  display: grid;
+  gap: 4px;
+}
+
+.build-detail-skills span {
+  display: flex;
+  align-items: start;
+  gap: 5px;
+  color: #334762;
+}
+
+.build-detail-skills .build-active-state {
+  flex: 0 0 auto;
+}
+
+.build-detail-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .build-row {

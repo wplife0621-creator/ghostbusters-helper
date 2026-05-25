@@ -1088,15 +1088,71 @@ function formatBuildDate(value) {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function buildEssenceRow(name) {
+  return essenceRows.find((row) => textOf(row["몬스터"]) === textOf(name));
+}
+
+function buildConfiguredSkillList(row, states = []) {
+  const skills = row ? activeSkillsForEssence(row["몬스터"]) : [];
+  if (!skills.length) return `<span class="muted">없음</span>`;
+  return `
+    <div class="build-detail-skills">
+      ${skills.map((skill, index) => `
+        <span>
+          ${escapeHtml(skill)}
+          ${states[index] ? `<i class="build-active-state is-${escapeHtml(states[index])}">${states[index] === "off" ? "OFF" : "ON"}</i>` : ""}
+        </span>
+      `).join("")}
+    </div>
+  `;
+}
+
+function buildMemberDetails(member) {
+  const filledEssences = (member.essences || []).map((name, index) => ({ name, index })).filter(({ name }) => name);
+  if (!filledEssences.length) return `<p class="build-detail-empty">장착된 정수가 없습니다.</p>`;
+  return `
+    <div class="build-member-details">
+      ${filledEssences.map(({ name, index }) => {
+        const row = buildEssenceRow(name);
+        const skills = row ? activeSkillsForEssence(row["몬스터"]) : [];
+        const states = member.activeSkillStates?.[index]
+          || skills.map(() => member.activeStates?.[index] || "");
+        if (!row) return `
+          <article class="build-essence-detail">
+            <h4>${escapeHtml(name)}</h4>
+            <p class="build-detail-empty">등록된 상세 정보가 없습니다.</p>
+          </article>
+        `;
+        return `
+          <article class="build-essence-detail">
+            <div class="build-detail-title">
+              <h4>${escapeHtml(name)}</h4>
+              <span>${escapeHtml(row["층"] || "-")} · ${escapeHtml(row["구역"] || "-")} · ${escapeHtml(row["등급"] || "-")}</span>
+            </div>
+            <dl>
+              <dt>주요 스탯</dt><dd>${escapeHtml(row["주요 스탯"] || "-")}</dd>
+              <dt>패시브</dt><dd>${escapeHtml(row["패시브"] || "-")}</dd>
+              <dt>액티브</dt><dd>${buildConfiguredSkillList(row, states)}</dd>
+            </dl>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
 function buildMemberBoard(members, className = "") {
   return `
     <div class="build-member-board${className ? ` ${className}` : ""}">
       ${members.map((member) => `
         <section class="build-member-loadout">
-          <div class="build-member-loadout-head">
-            <strong>${escapeHtml(member.character)}</strong>
-            <span>Lv.${escapeHtml(member.level)}</span>
-          </div>
+          <details class="build-member-detail-toggle">
+            <summary class="build-member-loadout-head">
+              <strong>${escapeHtml(member.character)}</strong>
+              <span>Lv.${escapeHtml(member.level)}</span>
+            </summary>
+            ${buildMemberDetails(member)}
+          </details>
           <div class="build-loadout-essences">
             ${(member.essences || []).map((name, index) => {
               const skills = activeSkillsForEssence(name);
