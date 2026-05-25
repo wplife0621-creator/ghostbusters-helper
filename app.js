@@ -1109,7 +1109,12 @@ function buildMemberStatTotals(member) {
 function buildMemberStatSummary(member) {
   const totals = buildMemberStatTotals(member);
   if (!totals.length) return `<span class="build-total-empty">정수 스탯 없음</span>`;
-  return totals.map(([name, value]) => `<span><b>${escapeHtml(name)}</b> ${value > 0 ? "+" : ""}${escapeHtml(value)}</span>`).join("");
+  return totals.map(([name, value]) => `
+    <span class="build-total-stat">
+      <b>${escapeHtml(name)}</b>
+      <strong>${value > 0 ? "+" : ""}${escapeHtml(value)}</strong>
+    </span>
+  `).join("");
 }
 
 function buildConfiguredSkillList(row, states = []) {
@@ -1168,14 +1173,17 @@ function buildMemberBoard(members, className = "") {
         <section class="build-member-loadout">
           <details class="build-member-detail-toggle">
             <summary class="build-member-loadout-head">
-              <div class="build-member-identity">
+              <div class="build-member-top">
                 <strong>${escapeHtml(member.character)}</strong>
+                <span class="build-member-level">Lv.${escapeHtml(member.level)}</span>
+                <span class="build-detail-action">상세 보기</span>
+              </div>
+              <div class="build-total-panel">
+                <small>정수 스탯 합계</small>
                 <div class="build-total-stats" aria-label="착용 정수 총 스탯">
-                  <small>총 스탯</small>
                   ${buildMemberStatSummary(member)}
                 </div>
               </div>
-              <span>Lv.${escapeHtml(member.level)}</span>
             </summary>
             ${buildMemberDetails(member)}
           </details>

@@ -1625,10 +1625,8 @@ textarea {
 }
 
 .build-member-loadout-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  gap: 10px;
   margin-bottom: 8px;
   list-style: none;
   cursor: pointer;
@@ -1638,79 +1636,97 @@ textarea {
   display: none;
 }
 
-.build-member-loadout-head::after {
-  content: "상세 보기";
-  color: var(--brand-dark);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.build-member-detail-toggle[open] .build-member-loadout-head::after {
-  content: "접기";
-}
-
 .build-member-detail-toggle[open] + .build-loadout-essences {
   display: none;
 }
 
-.build-member-loadout-head strong {
-  color: #142a4b;
-  font-size: 14px;
-}
-
-.build-member-identity {
-  display: grid;
-  min-width: 0;
-  flex: 1 1 auto;
+.build-member-top {
+  display: flex;
+  align-items: center;
   gap: 7px;
 }
 
-.build-total-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+.build-member-top > strong {
+  color: #142a4b;
+  font-size: 16px;
 }
 
-.build-total-stats small {
-  display: inline-flex;
-  align-items: center;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 900;
-  padding-right: 2px;
-}
-
-.build-total-stats span {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  border: 1px solid #d8e5f8;
-  border-radius: 999px;
-  background: #fff;
-  color: #344a68;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 3px 7px;
-}
-
-.build-total-stats b {
-  color: var(--brand-dark);
-}
-
-.build-total-stats .build-total-empty {
-  color: var(--muted);
-  font-weight: 700;
-}
-
-.build-member-loadout-head span {
+.build-member-level {
+  flex: 0 0 auto;
   border-radius: 999px;
   background: #e4efff;
   color: var(--brand-dark);
   font-size: 11px;
   font-weight: 900;
   padding: 3px 8px;
-  margin-left: auto;
+}
+
+.build-detail-action {
   flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--brand-dark);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.build-member-detail-toggle[open] .build-detail-action {
+  font-size: 0;
+}
+
+.build-member-detail-toggle[open] .build-detail-action::after {
+  content: "접기";
+  font-size: 11px;
+}
+
+.build-total-panel {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #dce7f6;
+  border-radius: 8px;
+  background: #eef5ff;
+  padding: 8px;
+}
+
+.build-total-panel > small {
+  color: #53647d;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.build-total-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.build-total-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  border-radius: 6px;
+  background: #fff;
+  color: #344a68;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 7px;
+}
+
+.build-total-stat b {
+  color: var(--brand-dark);
+}
+
+.build-total-stat strong {
+  color: #142a4b;
+  font-size: 12px;
+}
+
+.build-total-stats .build-total-empty {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 11px;
+  padding: 5px 2px;
 }
 
 .build-loadout-essences {
