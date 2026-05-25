@@ -118,6 +118,11 @@ const els = {
   openBuildForm: document.querySelector("#openBuildForm"),
   closeBuildForm: document.querySelector("#closeBuildForm"),
   buildFormModal: document.querySelector("#buildFormModal"),
+  buildDeleteModal: document.querySelector("#buildDeleteModal"),
+  buildDeletePassword: document.querySelector("#buildDeletePassword"),
+  buildDeleteStatus: document.querySelector("#buildDeleteStatus"),
+  cancelBuildDelete: document.querySelector("#cancelBuildDelete"),
+  confirmBuildDelete: document.querySelector("#confirmBuildDelete"),
   copyCurrentBuild: document.querySelector("#copyCurrentBuild"),
   sharedBuildView: document.querySelector("#sharedBuildView"),
   buildList: document.querySelector("#buildList"),
@@ -137,6 +142,7 @@ let buildLikes = new Map();
 let buildLikeRecordIds = new Set();
 let likedBuildIds = new Set();
 let buildLikeIpPromise = null;
+let pendingDeleteBuild = null;
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
 let numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems);
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
@@ -418,6 +424,14 @@ function initBuilds() {
   els.buildFormModal.addEventListener("click", (event) => {
     if (event.target === els.buildFormModal) closeBuildFormModal();
   });
+  els.buildDeleteModal.addEventListener("click", (event) => {
+    if (event.target === els.buildDeleteModal) closeBuildDeleteModal();
+  });
+  els.cancelBuildDelete.addEventListener("click", closeBuildDeleteModal);
+  els.confirmBuildDelete.addEventListener("click", confirmBuildDelete);
+  els.buildDeletePassword.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") confirmBuildDelete();
+  });
   els.buildList.addEventListener("click", handleBuildListClick);
   renderBuilds();
   loadPublicBuilds();
@@ -431,7 +445,7 @@ function openBuildFormModal() {
 
 function closeBuildFormModal() {
   els.buildFormModal.hidden = true;
-  if (els.essencePickerModal.hidden) document.body.classList.remove("modal-open");
+  if (els.essencePickerModal.hidden && els.buildDeleteModal.hidden) document.body.classList.remove("modal-open");
 }
 
 function initEssencePicker() {
@@ -454,6 +468,7 @@ function initEssencePicker() {
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     if (!els.essencePickerModal.hidden) closeEssencePicker();
+    else if (!els.buildDeleteModal.hidden) closeBuildDeleteModal();
     else if (!els.buildFormModal.hidden) closeBuildFormModal();
   });
   renderEssencePickerTable();
@@ -478,7 +493,7 @@ function openEssencePicker() {
 
 function closeEssencePicker() {
   els.essencePickerModal.hidden = true;
-  if (els.buildFormModal.hidden) document.body.classList.remove("modal-open");
+  if (els.buildFormModal.hidden && els.buildDeleteModal.hidden) document.body.classList.remove("modal-open");
 }
 
 function essencePickerRows() {
@@ -961,16 +976,26 @@ function copyCurrentBuildLink() {
   copyText(shareUrlForBuild(build), els.copyCurrentBuild, "현재 빌드 공유 링크 복사");
 }
 
-async function deleteBuild(build) {
-  if (!build.deleteHash) {
-    setBuildSyncStatus("이 기능 추가 전에 등록된 빌드는 삭제용 비밀번호 정보가 없습니다.", "is-offline");
-    return;
-  }
-  const password = window.prompt("빌드 등록 시 입력한 삭제용 비밀번호를 입력하세요.");
-  if (password === null) return;
+function openBuildDeleteModal(build) {
+  pendingDeleteBuild = build;
+  els.buildDeletePassword.value = "";
+  els.buildDeleteStatus.textContent = "";
+  els.buildDeleteModal.hidden = false;
+  document.body.classList.add("modal-open");
+  setTimeout(() => els.buildDeletePassword.focus(), 20);
+}
+
+function closeBuildDeleteModal() {
+  pendingDeleteBuild = null;
+  els.buildDeleteModal.hidden = true;
+  if (els.buildFormModal.hidden && els.essencePickerModal.hidden) document.body.classList.remove("modal-open");
+}
+
+async function deleteBuild(build, password) {
   if (await buildDeleteHash(build.id, textOf(password)) !== build.deleteHash) {
-    setBuildSyncStatus("삭제용 비밀번호가 맞지 않습니다.", "is-offline");
-    return;
+    els.buildDeleteStatus.textContent = "삭제용 비밀번호가 맞지 않습니다.";
+    els.buildDeleteStatus.className = "build-sync-status is-offline";
+    return false;
   }
   if (hasPublicBuildStore()) {
     const deletion = {
@@ -991,6 +1016,22 @@ async function deleteBuild(build) {
     hasPublicBuildStore() ? "빌드가 삭제되었습니다." : "이 브라우저의 임시 빌드를 삭제했습니다.",
     hasPublicBuildStore() ? "is-online" : "is-offline"
   );
+  closeBuildDeleteModal();
+  return true;
+}
+
+async function confirmBuildDelete() {
+  if (!pendingDeleteBuild) return;
+  const button = els.confirmBuildDelete;
+  button.disabled = true;
+  try {
+    await deleteBuild(pendingDeleteBuild, els.buildDeletePassword.value);
+  } catch {
+    els.buildDeleteStatus.textContent = "빌드 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.";
+    els.buildDeleteStatus.className = "build-sync-status is-offline";
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function handleBuildListClick(event) {
@@ -1017,14 +1058,11 @@ async function handleBuildListClick(event) {
     });
   }
   if (button.dataset.buildAction === "delete") {
-    button.disabled = true;
-    try {
-      await deleteBuild(build);
-      if (savedBuilds.some((item) => item.id === build.id)) button.disabled = false;
-    } catch {
-      button.disabled = false;
-      setBuildSyncStatus("빌드 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
+    if (!build.deleteHash) {
+      setBuildSyncStatus("이 기능 추가 전에 등록된 빌드는 삭제용 비밀번호 정보가 없습니다.", "is-offline");
+      return;
     }
+    openBuildDeleteModal(build);
   }
 }
 

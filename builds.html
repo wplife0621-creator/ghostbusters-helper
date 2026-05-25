@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>빌드 공유 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260525-26">
+  <link rel="stylesheet" href="./styles.css?v=20260525-27">
 </head>
 <body>
   <header class="topbar compact">
@@ -119,6 +119,22 @@
     </section>
   </div>
 
+  <div id="buildDeleteModal" class="build-delete-modal" hidden>
+    <section class="build-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="buildDeleteTitle">
+      <h2 id="buildDeleteTitle">빌드 삭제</h2>
+      <p>등록할 때 입력한 삭제용 비밀번호를 입력하세요.</p>
+      <label class="field">
+        <span>삭제용 비밀번호</span>
+        <input id="buildDeletePassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력">
+      </label>
+      <p id="buildDeleteStatus" class="build-sync-status"></p>
+      <div class="build-delete-actions">
+        <button id="cancelBuildDelete" type="button">취소</button>
+        <button id="confirmBuildDelete" class="submit-report" type="button">삭제하기</button>
+      </div>
+    </section>
+  </div>
+
   <script src="./ghost-data.js?v=20260520"></script>
   <script>
     window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
@@ -131,6 +147,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260525-16"></script>
+  <script src="./app.js?v=20260525-17"></script>
 </body>
 </html>

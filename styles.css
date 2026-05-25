@@ -384,7 +384,8 @@ textarea {
   display: none;
 }
 
-.build-form-modal {
+.build-form-modal,
+.build-delete-modal {
   position: fixed;
   inset: 0;
   z-index: 45;
@@ -394,7 +395,8 @@ textarea {
   padding: 22px;
 }
 
-.build-form-modal[hidden] {
+.build-form-modal[hidden],
+.build-delete-modal[hidden] {
   display: none;
 }
 
@@ -407,6 +409,48 @@ textarea {
   background: #fff;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
   padding: 16px;
+}
+
+.build-delete-dialog {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  padding: 18px;
+}
+
+.build-delete-dialog h2,
+.build-delete-dialog p {
+  margin: 0;
+}
+
+.build-delete-dialog > p:not(.build-sync-status) {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.build-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.build-delete-actions button {
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.build-delete-actions > button:first-child {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--brand-dark);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .build-form-head {
@@ -2469,6 +2513,11 @@ textarea {
   .build-form-modal {
     align-items: stretch;
     padding: 8px;
+  }
+
+  .build-delete-modal {
+    align-items: center;
+    padding: 14px;
   }
 
   .build-form-dialog {
