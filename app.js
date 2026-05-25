@@ -1092,6 +1092,26 @@ function buildEssenceRow(name) {
   return essenceRows.find((row) => textOf(row["몬스터"]) === textOf(name));
 }
 
+function buildMemberStatTotals(member) {
+  const totals = new Map();
+  (member.essences || []).forEach((name) => {
+    const row = buildEssenceRow(name);
+    textOf(row?.["주요 스탯"]).split(",").forEach((part) => {
+      const match = part.trim().match(/^(.+?)\s+(-?\d+)/);
+      if (!match) return;
+      const statName = cleanStatName(match[1]);
+      totals.set(statName, (totals.get(statName) || 0) + Number(match[2]));
+    });
+  });
+  return [...totals.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"));
+}
+
+function buildMemberStatSummary(member) {
+  const totals = buildMemberStatTotals(member);
+  if (!totals.length) return `<span class="build-total-empty">정수 스탯 없음</span>`;
+  return totals.map(([name, value]) => `<span><b>${escapeHtml(name)}</b> ${value > 0 ? "+" : ""}${escapeHtml(value)}</span>`).join("");
+}
+
 function buildConfiguredSkillList(row, states = []) {
   const skills = row ? activeSkillsForEssence(row["몬스터"]) : [];
   if (!skills.length) return `<span class="muted">없음</span>`;
@@ -1148,7 +1168,13 @@ function buildMemberBoard(members, className = "") {
         <section class="build-member-loadout">
           <details class="build-member-detail-toggle">
             <summary class="build-member-loadout-head">
-              <strong>${escapeHtml(member.character)}</strong>
+              <div class="build-member-identity">
+                <strong>${escapeHtml(member.character)}</strong>
+                <div class="build-total-stats" aria-label="착용 정수 총 스탯">
+                  <small>총 스탯</small>
+                  ${buildMemberStatSummary(member)}
+                </div>
+              </div>
               <span>Lv.${escapeHtml(member.level)}</span>
             </summary>
             ${buildMemberDetails(member)}

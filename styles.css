@@ -1626,7 +1626,7 @@ textarea {
 
 .build-member-loadout-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 8px;
@@ -1658,6 +1658,50 @@ textarea {
   font-size: 14px;
 }
 
+.build-member-identity {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 7px;
+}
+
+.build-total-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.build-total-stats small {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  padding-right: 2px;
+}
+
+.build-total-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid #d8e5f8;
+  border-radius: 999px;
+  background: #fff;
+  color: #344a68;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 7px;
+}
+
+.build-total-stats b {
+  color: var(--brand-dark);
+}
+
+.build-total-stats .build-total-empty {
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .build-member-loadout-head span {
   border-radius: 999px;
   background: #e4efff;
@@ -1666,6 +1710,7 @@ textarea {
   font-weight: 900;
   padding: 3px 8px;
   margin-left: auto;
+  flex: 0 0 auto;
 }
 
 .build-loadout-essences {
