@@ -35,6 +35,7 @@ const visitorBuildMarkers = {
 const buildLikeMarker = "__build_like__";
 const numbersReportPrefix = "__numbers__:";
 const sailingMarker = "__sailing__";
+const recommendationMarkerPrefix = "__recommended_character__:";
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -76,6 +77,7 @@ const els = {
   reportFloor: document.querySelector("#reportFloor"),
   reportArea: document.querySelector("#reportArea"),
   reportSailing: document.querySelector("#reportSailing"),
+  reportRecommendations: document.querySelectorAll(".report-recommendation"),
   reportStats: document.querySelector("#reportStats"),
   reportPassive: document.querySelector("#reportPassive"),
   reportActive: document.querySelector("#reportActive"),
@@ -155,16 +157,33 @@ function sailingValue(value) {
 }
 
 function activeSkillsWithoutSailing(value) {
-  return splitSkills(value).filter((skill) => skill !== sailingMarker).join("\n") || "-";
+  return splitSkills(value)
+    .filter((skill) => skill !== sailingMarker && !skill.startsWith(recommendationMarkerPrefix))
+    .join("\n") || "-";
 }
 
 function isSailingRow(row) {
   return sailingValue(row?.["항해"]) || splitSkills(row?.["액티브"]).includes(sailingMarker);
 }
 
+function recommendedCharactersFrom(value) {
+  return textOf(value).split(",").map(textOf).filter(Boolean);
+}
+
+function recommendedCharacterFromActive(value) {
+  const marker = splitSkills(value).find((skill) => skill.startsWith(recommendationMarkerPrefix));
+  return marker ? marker.slice(recommendationMarkerPrefix.length) : "";
+}
+
+function isRecommendedFor(row, character) {
+  return recommendedCharactersFrom(row?.["추천 캐릭터"]).includes(character);
+}
+
 function reportActiveForStorage(report) {
-  const skills = splitSkills(report.active).filter((skill) => skill !== sailingMarker);
+  const skills = splitSkills(report.active)
+    .filter((skill) => skill !== sailingMarker && !skill.startsWith(recommendationMarkerPrefix));
   if (report.sailing) skills.push(sailingMarker);
+  if (report.recommendedCharacters) skills.push(`${recommendationMarkerPrefix}${report.recommendedCharacters}`);
   return skills.join("\n") || "-";
 }
 
@@ -1031,7 +1050,7 @@ function updateReportDataset() {
     field.required = !numbersMode;
     field.disabled = numbersMode;
   });
-  [els.reportActive, els.reportActive2, els.reportActive3, els.reportSailing].forEach((field) => {
+  [els.reportActive, els.reportActive2, els.reportActive3, els.reportSailing, ...els.reportRecommendations].forEach((field) => {
     field.disabled = numbersMode;
   });
   [els.reportNumberName, els.reportNumberCode, els.reportNumberLevel, els.reportNumberEffect].forEach((field) => {
@@ -1111,6 +1130,10 @@ function fillReportFromRow(row) {
   els.reportStats.value = textOf(row["주요 스탯"]);
   els.reportPassive.value = textOf(row["패시브"]);
   els.reportSailing.checked = isSailingRow(row);
+  const recommendedCharacters = recommendedCharactersFrom(row["추천 캐릭터"]);
+  els.reportRecommendations.forEach((field) => {
+    field.checked = recommendedCharacters.includes(field.value);
+  });
   const activeSkills = splitSkills(activeSkillsWithoutSailing(row["액티브"]));
   els.reportActive.value = activeSkills[0] || "";
   els.reportActive2.value = activeSkills[1] || "";
@@ -1181,7 +1204,7 @@ function refreshControls() {
   optionList(els.floor, unique(essenceRows.map((row) => row["층"])), "전체 층");
   optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
   optionList(els.grade, ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급"], "전체 등급");
-  optionList(els.character, unique(essenceRows.map((row) => row["추천 캐릭터"])), "전체 캐릭터");
+  optionList(els.character, unique(essenceRows.flatMap((row) => recommendedCharactersFrom(row["추천 캐릭터"]))), "전체 캐릭터");
   optionList(els.statSort, statNames(), statNoneLabel);
 }
 
@@ -1268,7 +1291,7 @@ function applyFilters(rows) {
   }
 
   if (els.character.value !== "전체 캐릭터") {
-    rows = rows.filter(({ row }) => textOf(row["추천 캐릭터"]) === els.character.value);
+    rows = rows.filter(({ row }) => isRecommendedFor(row, els.character.value));
   }
 
   if (els.sailingFilter?.checked) {
@@ -1308,6 +1331,11 @@ function sortEssenceRows(rows) {
     return copy.sort((a, b) => Number(isSailingRow(b.row)) - Number(isSailingRow(a.row)) || floorAreaMonsterSort(a, b));
   }
 
+  if (mode.startsWith("recommend:")) {
+    const character = mode.slice("recommend:".length);
+    return copy.sort((a, b) => Number(isRecommendedFor(b.row, character)) - Number(isRecommendedFor(a.row, character)) || floorAreaMonsterSort(a, b));
+  }
+
   if (mode === "floor-desc") {
     return copy.sort(floorAreaMonsterSortDescending);
   }
@@ -1336,10 +1364,13 @@ function floorAreaMonsterSortDescending(a, b) {
 function render() {
   const rows = collectEssenceRows();
   const selectedStats = selectedStatNames();
+  const recommendedSortCharacter = els.sort.value.startsWith("recommend:") ? els.sort.value.slice("recommend:".length) : "";
   updateStatSortUi();
   els.resultTitle.textContent = selectedStats.length > 1
     ? "스탯 조합 정렬"
-    : hasStatSort() ? `${selectedStats[0]} 정렬` : "정수 목록";
+    : hasStatSort() ? `${selectedStats[0]} 정렬`
+      : recommendedSortCharacter ? `${recommendedSortCharacter} 추천 정수`
+        : "정수 목록";
   els.resultCount.textContent = `${rows.length}건`;
   els.results.innerHTML = rows.length
     ? essenceTemplate(rows)
@@ -1667,6 +1698,7 @@ function normalizeRemoteReport(row) {
     passive: row.passive || "",
     active: activeSkillsWithoutSailing(row.active || ""),
     sailing: splitSkills(row.active || "").includes(sailingMarker),
+    recommendedCharacters: recommendedCharacterFromActive(row.active || ""),
     status: row.status || "pending",
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
     reviewedAt: row.reviewed_at || row.reviewedAt || "",
@@ -1787,7 +1819,7 @@ function reportToRow(report) {
     "패시브": report.passive,
     "액티브": report.active,
     "항해": report.sailing ? "Y" : "",
-    "추천 캐릭터": "",
+    "추천 캐릭터": report.recommendedCharacters || "",
     "출처": report.mode === "edit" ? "수정 승인" : "제보 승인",
     "승인일": new Date().toISOString(),
   };
@@ -1822,6 +1854,10 @@ async function submitReport(event) {
     stats: textOf(els.reportStats.value),
     passive: textOf(els.reportPassive.value),
     sailing: Boolean(els.reportSailing.checked),
+    recommendedCharacters: [...els.reportRecommendations]
+      .filter((field) => field.checked)
+      .map((field) => field.value)
+      .join(", "),
     active: [els.reportActive, els.reportActive2, els.reportActive3]
       .map((field) => textOf(field.value))
       .filter(Boolean)
@@ -1914,7 +1950,7 @@ function renderPendingReports() {
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""}</span>
+          <span>${report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
@@ -1978,7 +2014,7 @@ function renderApprovedReports() {
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""}</span>
+          <span>${report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정보 제보/수정 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260525-17">
+  <link rel="stylesheet" href="./styles.css?v=20260525-18">
 </head>
 <body>
   <header class="topbar compact">
@@ -65,6 +65,16 @@
           <span>구역</span>
           <input id="reportArea" required placeholder="예: 서리 협곡">
         </label>
+        <fieldset class="recommendation-fields essence-report-field">
+          <legend>추천 캐릭터 <small>복수 선택 가능</small></legend>
+          <div class="recommendation-checks">
+            <label><input class="report-recommendation" type="checkbox" value="비요른"><span>비요른</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="에르웬"><span>에르웬</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="미샤"><span>미샤</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="아이나르"><span>아이나르</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="레이븐"><span>레이븐</span></label>
+          </div>
+        </fieldset>
         <label class="field check-field essence-report-field report-medium-field">
           <span>항해 관련 정수</span>
           <span class="check-control">
@@ -170,6 +180,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260525-10"></script>
+  <script src="./app.js?v=20260525-14"></script>
 </body>
 </html>

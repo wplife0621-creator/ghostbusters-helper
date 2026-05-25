@@ -1200,6 +1200,57 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.compact-report-form .recommendation-fields {
+  grid-column: 1 / -1;
+}
+
+.recommendation-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.recommendation-fields legend {
+  padding: 0 6px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.recommendation-fields legend small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.recommendation-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recommendation-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 39px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f8fbff;
+  color: #44516a;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.recommendation-checks input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--brand);
+}
+
 .edit-name-hint {
   color: var(--brand-dark);
   font-size: 11px;
@@ -2226,6 +2277,11 @@ textarea {
 
   .compact-report-form .active-skill-fields {
     grid-template-columns: 1fr;
+  }
+
+  .recommendation-checks label {
+    flex: 1 1 calc(50% - 4px);
+    justify-content: center;
   }
 
   .edit-monster-matches button {
