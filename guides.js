@@ -520,11 +520,13 @@ function renderPosts() {
         ${escapeHtml(post.title)}
         ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
         ${post.commentCount ? `<small>댓글 ${post.commentCount}</small>` : ""}
-        ${post.likes ? `<small>좋아요 ${post.likes}</small>` : ""}
       </button>
       <span class="guide-row-author">${escapeHtml(post.author)}</span>
       <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
-      <span class="guide-row-views">조회 ${post.views}</span>
+      <span class="guide-row-metrics">
+        <span class="guide-row-views">조회 ${post.views}</span>
+        <span class="guide-row-likes">좋아요 ${post.likes}</span>
+      </span>
     </article>
   `).join("") : `<div class="empty compact-empty">조건에 맞는 공략글이 없습니다.</div>`;
   renderViewer();

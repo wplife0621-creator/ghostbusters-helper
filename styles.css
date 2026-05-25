@@ -757,7 +757,7 @@ textarea {
 .guide-list-head,
 .guide-row {
   display: grid;
-  grid-template-columns: 54px 78px minmax(0, 1fr) 122px 92px 58px;
+  grid-template-columns: 54px 78px minmax(0, 1fr) 122px 92px 58px 62px;
   align-items: center;
   text-align: center;
 }
@@ -826,9 +826,14 @@ textarea {
 .guide-row-author,
 .guide-row-date,
 .guide-row-number,
-.guide-row-views {
+.guide-row-views,
+.guide-row-likes {
   color: #63738d;
   font-size: 12px;
+}
+
+.guide-row-metrics {
+  display: contents;
 }
 
 .guide-viewer {
@@ -2263,11 +2268,18 @@ textarea {
     grid-row: 2;
   }
 
-  .guide-row-views {
+  .guide-row-metrics {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     grid-column: 2 / 4;
     grid-row: 3;
     justify-self: start;
     font-weight: 700;
+  }
+
+  .guide-row-metrics .guide-row-likes {
+    color: var(--brand-dark);
   }
 
   .guide-viewer-head {
