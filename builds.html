@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>빌드 공유 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260525-17">
+  <link rel="stylesheet" href="./styles.css?v=20260525-19">
 </head>
 <body>
   <header class="topbar compact">
@@ -24,9 +24,36 @@
 
   <main class="layout build-layout">
     <section class="panel build-panel page-panel">
-      <div class="section-title compact-title">
-        <h2>빌드 등록</h2>
-        <p>캐릭터를 1명부터 5명까지 넣고, 각 캐릭터 레벨만큼 정수를 선택하거나 직접 입력할 수 있습니다.</p>
+      <div class="build-board-head">
+        <div>
+          <h2>공개 빌드</h2>
+          <strong id="buildCount">공개 빌드 0개</strong>
+        </div>
+        <div class="build-board-actions">
+          <label class="field build-sort-control">
+            <span>정렬</span>
+            <select id="buildSort">
+              <option value="latest">최신등록</option>
+              <option value="likes">좋아요</option>
+            </select>
+          </label>
+          <button id="openBuildForm" class="submit-report" type="button">빌드 등록</button>
+        </div>
+      </div>
+      <p id="buildSyncStatus" class="build-sync-status"></p>
+      <div id="sharedBuildView" class="shared-build-view"></div>
+      <div id="buildList" class="build-list"></div>
+    </section>
+  </main>
+
+  <div id="buildFormModal" class="build-form-modal" hidden>
+    <section class="build-form-dialog" role="dialog" aria-modal="true" aria-labelledby="buildFormTitle">
+      <div class="build-form-head">
+        <div>
+          <h2 id="buildFormTitle">빌드 등록</h2>
+          <p>캐릭터와 정수를 선택해 나만의 빌드를 공개해보세요.</p>
+        </div>
+        <button id="closeBuildForm" type="button" aria-label="닫기">×</button>
       </div>
       <form id="buildForm" class="build-form">
         <label class="field">
@@ -53,20 +80,13 @@
           <span>설명</span>
           <textarea id="buildNote" rows="3" placeholder="운용 팁, 장점, 대체 정수 등을 적어주세요."></textarea>
         </label>
-        <button class="submit-report" type="submit">빌드 등록</button>
+        <div class="build-form-actions">
+          <button id="copyCurrentBuild" type="button">현재 빌드 공유 링크 복사</button>
+          <button class="submit-report" type="submit">빌드 등록 완료</button>
+        </div>
       </form>
     </section>
-
-    <section class="panel build-panel page-panel">
-      <div class="review-head">
-        <strong id="buildCount">등록된 빌드 0개</strong>
-        <button id="copyCurrentBuild" type="button">현재 빌드 공유 링크 복사</button>
-      </div>
-      <p id="buildSyncStatus" class="build-sync-status"></p>
-      <div id="sharedBuildView" class="shared-build-view"></div>
-      <div id="buildList" class="build-list"></div>
-    </section>
-  </main>
+  </div>
 
   <div id="essencePickerModal" class="essence-picker-modal" hidden>
     <section class="essence-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="essencePickerTitle">
@@ -107,6 +127,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260525-10"></script>
+  <script src="./app.js?v=20260525-12"></script>
 </body>
 </html>

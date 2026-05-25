@@ -351,6 +351,60 @@ textarea {
   display: none;
 }
 
+.build-form-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  background: rgba(12, 20, 34, 0.58);
+  padding: 22px;
+}
+
+.build-form-modal[hidden] {
+  display: none;
+}
+
+.build-form-dialog {
+  width: min(1120px, 100%);
+  max-height: min(900px, calc(100vh - 44px));
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  padding: 16px;
+}
+
+.build-form-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.build-form-head h2,
+.build-board-head h2 {
+  margin: 0 0 4px;
+}
+
+.build-form-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.build-form-head button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+}
+
 .essence-picker-dialog {
   width: min(1160px, 100%);
   max-height: min(820px, calc(100vh - 44px));
@@ -1111,6 +1165,55 @@ textarea {
   margin-top: 10px;
 }
 
+.build-board-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+}
+
+.build-board-head strong {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.build-board-actions {
+  display: flex;
+  gap: 9px;
+  align-items: end;
+}
+
+.build-sort-control {
+  min-width: 132px;
+}
+
+.build-board-actions .submit-report {
+  min-height: 39px;
+  white-space: nowrap;
+}
+
+.build-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.build-form-actions button {
+  min-height: 42px;
+}
+
+.build-form-actions > button:first-child {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--brand-dark);
+  font: inherit;
+  font-weight: 900;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
 .build-sync-status {
   margin: 8px 0 0;
   color: var(--muted);
@@ -1249,7 +1352,7 @@ textarea {
 }
 
 .build-row {
-  grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.2fr) minmax(280px, 1.6fr) auto minmax(118px, 0.65fr);
+  grid-template-columns: minmax(150px, 0.9fr) minmax(150px, 0.9fr) minmax(190px, 1.2fr) auto minmax(104px, 0.55fr);
   align-items: center;
   gap: 12px;
 }
@@ -1295,8 +1398,15 @@ textarea {
 }
 
 .build-row .pending-actions {
+  min-width: 0;
   justify-content: flex-end;
   flex-wrap: nowrap;
+}
+
+.build-like-button.is-liked {
+  border-color: #c8d9f5;
+  background: #edf4ff;
+  color: var(--brand-dark);
 }
 
 .admin-row {
@@ -2000,6 +2110,29 @@ textarea {
     gap: 10px;
   }
 
+  .build-board-head,
+  .build-board-actions,
+  .build-form-actions {
+    display: grid;
+    gap: 10px;
+  }
+
+  .build-sort-control,
+  .build-board-actions .submit-report,
+  .build-form-actions button {
+    width: 100%;
+  }
+
+  .build-form-modal {
+    align-items: stretch;
+    padding: 8px;
+  }
+
+  .build-form-dialog {
+    max-height: calc(100vh - 16px);
+    padding: 12px;
+  }
+
   .build-panel .review-head button {
     width: 100%;
     min-height: 44px;
@@ -2188,12 +2321,18 @@ textarea {
   }
 
   .build-row .pending-actions button {
+    min-width: 0;
     width: 100%;
   }
 
   .build-row {
+    min-width: 0;
     gap: 9px;
     padding: 12px 10px;
+  }
+
+  .build-row .build-like-button {
+    grid-column: 1 / -1;
   }
 
   .build-row-title strong {

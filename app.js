@@ -32,6 +32,7 @@ const visitorBuildMarkers = {
   total: "__visitor_total__",
   daily: "__visitor_daily__",
 };
+const buildLikeMarker = "__build_like__";
 const numbersReportPrefix = "__numbers__:";
 const sailingMarker = "__sailing__";
 
@@ -108,7 +109,11 @@ const els = {
   buildCharacterSlots: document.querySelector("#buildCharacterSlots"),
   buildNote: document.querySelector("#buildNote"),
   buildCount: document.querySelector("#buildCount"),
+  buildSort: document.querySelector("#buildSort"),
   buildSyncStatus: document.querySelector("#buildSyncStatus"),
+  openBuildForm: document.querySelector("#openBuildForm"),
+  closeBuildForm: document.querySelector("#closeBuildForm"),
+  buildFormModal: document.querySelector("#buildFormModal"),
   copyCurrentBuild: document.querySelector("#copyCurrentBuild"),
   sharedBuildView: document.querySelector("#sharedBuildView"),
   buildList: document.querySelector("#buildList"),
@@ -124,6 +129,10 @@ let approvedReports = loadStoredRows(storageKeys.approved);
 let approvedReportItems = loadStoredRows(storageKeys.approvedReportItems);
 let pendingReports = loadStoredRows(storageKeys.pending);
 let savedBuilds = loadStoredRows(storageKeys.builds);
+let buildLikes = new Map();
+let buildLikeRecordIds = new Set();
+let likedBuildIds = new Set();
+let buildLikeIpPromise = null;
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
 let numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems);
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
@@ -378,9 +387,26 @@ function initBuilds() {
   els.buildCharacterSlots.addEventListener("click", handleBuildSlotClick);
   els.buildForm.addEventListener("submit", submitBuild);
   els.copyCurrentBuild.addEventListener("click", copyCurrentBuildLink);
+  els.buildSort.addEventListener("change", renderBuilds);
+  els.openBuildForm.addEventListener("click", openBuildFormModal);
+  els.closeBuildForm.addEventListener("click", closeBuildFormModal);
+  els.buildFormModal.addEventListener("click", (event) => {
+    if (event.target === els.buildFormModal) closeBuildFormModal();
+  });
   els.buildList.addEventListener("click", handleBuildListClick);
   renderBuilds();
   loadPublicBuilds();
+}
+
+function openBuildFormModal() {
+  els.buildFormModal.hidden = false;
+  document.body.classList.add("modal-open");
+  setTimeout(() => els.buildTitle.focus(), 20);
+}
+
+function closeBuildFormModal() {
+  els.buildFormModal.hidden = true;
+  if (els.essencePickerModal.hidden) document.body.classList.remove("modal-open");
 }
 
 function initEssencePicker() {
@@ -400,7 +426,9 @@ function initEssencePicker() {
     closeEssencePicker();
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !els.essencePickerModal.hidden) closeEssencePicker();
+    if (event.key !== "Escape") return;
+    if (!els.essencePickerModal.hidden) closeEssencePicker();
+    else if (!els.buildFormModal.hidden) closeBuildFormModal();
   });
   renderEssencePickerTable();
 }
@@ -424,7 +452,7 @@ function openEssencePicker() {
 
 function closeEssencePicker() {
   els.essencePickerModal.hidden = true;
-  document.body.classList.remove("modal-open");
+  if (els.buildFormModal.hidden) document.body.classList.remove("modal-open");
 }
 
 function essencePickerRows() {
@@ -601,6 +629,23 @@ function isVisitorBuild(build) {
   return build?.title === visitorBuildMarkers.total || build?.title === visitorBuildMarkers.daily;
 }
 
+function isBuildLike(build) {
+  return build?.title === buildLikeMarker;
+}
+
+function collectPublicBuildRows(rows) {
+  const normalizedRows = rows.map(normalizeRemoteBuild);
+  buildLikes = new Map();
+  buildLikeRecordIds = new Set();
+  normalizedRows.filter(isBuildLike).forEach((like) => {
+    const buildId = textOf(like.note);
+    if (!buildId) return;
+    buildLikes.set(buildId, (buildLikes.get(buildId) || 0) + 1);
+    buildLikeRecordIds.add(like.id);
+  });
+  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build));
+}
+
 function prependBuild(build) {
   savedBuilds = [build, ...savedBuilds.filter((item) => item.id !== build.id)]
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -618,14 +663,70 @@ async function loadPublicBuilds() {
       headers: buildStoreHeaders(),
     });
     if (!response.ok) throw new Error(`load failed: ${response.status}`);
-    savedBuilds = (await response.json()).map(normalizeRemoteBuild).filter((build) => !isVisitorBuild(build));
+    collectPublicBuildRows(await response.json());
     saveStoredRows(storageKeys.builds, savedBuilds);
     renderBuilds();
+    markLikedBuildsForVisitor();
     setBuildSyncStatus("공개 저장소에 연결되었습니다. 등록한 빌드는 모든 방문자에게 표시됩니다.", "is-online");
   } catch {
     setBuildSyncStatus("공개 저장소 연결에 실패해 임시 저장 목록을 보여줍니다.", "is-offline");
     renderBuilds();
   }
+}
+
+async function buildLikeIp() {
+  if (!buildLikeIpPromise) {
+    buildLikeIpPromise = fetch("https://api64.ipify.org?format=json", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("ip unavailable");
+        return response.json();
+      })
+      .then((row) => textOf(row.ip));
+  }
+  return buildLikeIpPromise;
+}
+
+async function buildLikeId(buildId) {
+  const ip = await buildLikeIp();
+  if (!ip) throw new Error("ip unavailable");
+  const source = new TextEncoder().encode(`dukhubusters:build-like:${buildId}:${ip}`);
+  const digest = await crypto.subtle.digest("SHA-256", source);
+  const hash = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `like-${hash}`;
+}
+
+async function markLikedBuildsForVisitor() {
+  try {
+    const entries = await Promise.all(savedBuilds.map(async (build) => [build.id, await buildLikeId(build.id)]));
+    likedBuildIds = new Set(entries.filter((entry) => buildLikeRecordIds.has(entry[1])).map((entry) => entry[0]));
+    renderBuilds();
+  } catch {
+    likedBuildIds = new Set();
+  }
+}
+
+async function savePublicBuildLike(build) {
+  const likeId = await buildLikeId(build.id);
+  if (buildLikeRecordIds.has(likeId)) {
+    likedBuildIds.add(build.id);
+    renderBuilds();
+    return;
+  }
+  const response = await fetch(buildStoreUrl(), {
+    method: "POST",
+    headers: buildStoreHeaders({ Prefer: "resolution=ignore-duplicates,return=minimal" }),
+    body: JSON.stringify({
+      id: likeId,
+      title: buildLikeMarker,
+      author: "like",
+      members: [],
+      note: build.id,
+      created_at: new Date().toISOString(),
+    }),
+  });
+  if (!response.ok && response.status !== 409) throw new Error(`like failed: ${response.status}`);
+  likedBuildIds.add(build.id);
+  await loadPublicBuilds();
 }
 
 async function savePublicBuild(build) {
@@ -669,6 +770,7 @@ async function submitBuild(event) {
     els.buildForm.reset();
     renderBuildCharacterSlots();
     renderBuilds();
+    closeBuildFormModal();
     setBuildSyncStatus(
       hasPublicBuildStore()
         ? "빌드가 공개 저장소에 등록되었습니다."
@@ -766,13 +868,33 @@ function handleBuildListClick(event) {
   }
   if (button.dataset.buildAction === "load") {
     applyBuildToForm(build);
+    openBuildFormModal();
   }
+  if (button.dataset.buildAction === "like") {
+    if (!hasPublicBuildStore()) {
+      setBuildSyncStatus("좋아요는 공개 저장소에 연결된 상태에서 사용할 수 있습니다.", "is-offline");
+      return;
+    }
+    button.disabled = true;
+    savePublicBuildLike(build).catch(() => {
+      setBuildSyncStatus("좋아요 확인에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
+      renderBuilds();
+    });
+  }
+}
+
+function sortedBuilds() {
+  return [...savedBuilds].sort((a, b) => {
+    const newestFirst = new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    if (els.buildSort.value !== "likes") return newestFirst;
+    return (buildLikes.get(b.id) || 0) - (buildLikes.get(a.id) || 0) || newestFirst;
+  });
 }
 
 function renderBuilds() {
   els.buildCount.textContent = `${hasPublicBuildStore() ? "공개 빌드" : "등록된 빌드"} ${savedBuilds.length}개`;
   els.buildList.innerHTML = savedBuilds.length
-    ? savedBuilds.map((build) => buildCard(build, false)).join("")
+    ? sortedBuilds().map((build) => buildCard(build, false)).join("")
     : `<div class="empty compact-empty">등록된 빌드가 없습니다.</div>`;
 }
 
@@ -792,6 +914,8 @@ function buildCard(build, shared) {
     .map((member) => `${member.character}: ${(member.essences || []).map((name) => name || "빈칸").join(", ")}`)
     .join(" / ");
   if (!shared) {
+    const likeCount = buildLikes.get(build.id) || 0;
+    const liked = likedBuildIds.has(build.id);
     return `
       <article class="build-card build-row" data-build-id="${escapeHtml(build.id || "")}">
         <div class="build-row-title">
@@ -801,6 +925,7 @@ function buildCard(build, shared) {
         <span class="build-row-summary">${escapeHtml(memberSummary)}</span>
         <span class="build-row-essences">${escapeHtml(essenceSummary)}</span>
         <div class="pending-actions">
+          <button class="build-like-button${liked ? " is-liked" : ""}" type="button" data-build-action="like"${liked ? " disabled" : ""}>${liked ? "좋아요 완료" : "좋아요"} ${likeCount}</button>
           <button type="button" data-build-action="share">공유 링크 복사</button>
           <button type="button" data-build-action="load">불러오기</button>
         </div>
