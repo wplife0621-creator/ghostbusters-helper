@@ -1294,6 +1294,23 @@ textarea {
   gap: 10px;
 }
 
+.build-essence-slot {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.build-active-toggle select {
+  background: #edf4ff;
+  border-color: #c8d9f5;
+  color: var(--brand-dark);
+  font-weight: 900;
+}
+
+.build-active-toggle[hidden] {
+  display: none;
+}
+
 .shared-build-view {
   margin-top: 10px;
 }
@@ -1576,6 +1593,22 @@ textarea {
   color: #273a58;
   font-size: 12px;
   padding: 4px 7px;
+}
+
+.build-active-state {
+  margin-left: auto;
+  border-radius: 999px;
+  background: #d9f2e7;
+  color: #167047;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 2px 7px;
+}
+
+.build-active-state.is-off {
+  background: #e8edf5;
+  color: #64728a;
 }
 
 .build-loadout-essences b {

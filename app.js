@@ -402,6 +402,10 @@ function initBuilds() {
   els.buildCharacterCount.addEventListener("change", renderBuildCharacterSlots);
   els.buildCharacterSlots.addEventListener("change", (event) => {
     if (event.target.matches(".build-member-level")) renderBuildCharacterSlots();
+    if (event.target.matches(".build-essence-input")) updateBuildActiveToggle(event.target);
+  });
+  els.buildCharacterSlots.addEventListener("input", (event) => {
+    if (event.target.matches(".build-essence-input")) updateBuildActiveToggle(event.target);
   });
   els.buildCharacterSlots.addEventListener("click", handleBuildSlotClick);
   els.buildForm.addEventListener("submit", submitBuild);
@@ -442,6 +446,7 @@ function initEssencePicker() {
     const row = event.target.closest("tr[data-monster]");
     if (!row || !activeEssenceInput) return;
     activeEssenceInput.value = row.dataset.monster;
+    updateBuildActiveToggle(activeEssenceInput);
     closeEssencePicker();
   });
   document.addEventListener("keydown", (event) => {
@@ -519,7 +524,7 @@ function renderEssencePickerTable() {
   `;
 }
 
-const buildCharacters = ["비요른", "에르웬", "미샤", "아이나르", "레이븐"];
+const buildCharacters = ["비요른", "에르웬", "미샤", "아이나르", "레이븐", "아우옌"];
 
 function essenceOptionList() {
   return unique(essenceRows.map((row) => row["몬스터"]));
@@ -537,6 +542,7 @@ function readMemberDrafts() {
     character: card.querySelector(".build-member-character")?.value || "",
     level: Number(card.querySelector(".build-member-level")?.value || 1),
     essences: [...card.querySelectorAll(".build-essence-input")].map((input) => input.value),
+    activeStates: [...card.querySelectorAll(".build-essence-active-state")].map((select) => select.value),
   }));
 }
 
@@ -552,6 +558,29 @@ function characterOptions(selected = "") {
     .join("");
 }
 
+function essenceHasActiveSkill(name) {
+  const row = essenceRows.find((item) => textOf(item["몬스터"]) === textOf(name));
+  return Boolean(row && activeSkillsWithoutSailing(row["액티브"]) !== "-");
+}
+
+function activeStateOptions(selected = "on") {
+  return [
+    ["on", "스킬 ON"],
+    ["off", "스킬 OFF"],
+  ].map(([value, label]) => `<option value="${value}"${selected === value ? " selected" : ""}>${label}</option>`).join("");
+}
+
+function updateBuildActiveToggle(input) {
+  const slot = input.closest(".build-essence-slot");
+  if (!slot) return;
+  const control = slot.querySelector(".build-active-toggle");
+  const select = slot.querySelector(".build-essence-active-state");
+  const hasActiveSkill = essenceHasActiveSkill(input.value);
+  control.hidden = !hasActiveSkill;
+  select.disabled = !hasActiveSkill;
+  if (hasActiveSkill && !select.value) select.value = "on";
+}
+
 function renderBuildCharacterSlots() {
   const drafts = readMemberDrafts();
   const count = Number(els.buildCharacterCount.value || 1);
@@ -559,15 +588,26 @@ function renderBuildCharacterSlots() {
     const draft = drafts[index] || {};
     const character = draft.character || buildCharacters[index] || buildCharacters[0];
     const level = Number(draft.level || 1);
-    const essenceInputs = Array.from({ length: level }, (__, essenceIndex) => `
-      <label class="field">
-        <span>정수 ${essenceIndex + 1}</span>
-        <span class="essence-input-row">
-          <input class="build-essence-input" list="buildEssenceOptions" placeholder="정수 선택, 직접 입력, 빈칸 가능" value="${escapeHtml(draft.essences?.[essenceIndex] || "")}">
-          <button class="open-essence-picker" type="button">선택</button>
-        </span>
-      </label>
-    `).join("");
+    const essenceInputs = Array.from({ length: level }, (__, essenceIndex) => {
+      const name = draft.essences?.[essenceIndex] || "";
+      const activeState = draft.activeStates?.[essenceIndex] || "on";
+      const hasActiveSkill = essenceHasActiveSkill(name);
+      return `
+        <div class="build-essence-slot">
+          <label class="field">
+            <span>정수 ${essenceIndex + 1}</span>
+            <span class="essence-input-row">
+              <input class="build-essence-input" list="buildEssenceOptions" placeholder="정수 선택, 직접 입력, 빈칸 가능" value="${escapeHtml(name)}">
+              <button class="open-essence-picker" type="button">선택</button>
+            </span>
+          </label>
+          <label class="field build-active-toggle"${hasActiveSkill ? "" : " hidden"}>
+            <span>액티브 스킬</span>
+            <select class="build-essence-active-state"${hasActiveSkill ? "" : " disabled"}>${activeStateOptions(activeState)}</select>
+          </label>
+        </div>
+      `;
+    }).join("");
     return `
       <section class="build-member-card">
         <div class="build-member-head">
@@ -588,14 +628,18 @@ function renderBuildCharacterSlots() {
 }
 
 function normalizeBuild(build) {
-  if (Array.isArray(build.members)) return build;
+  const members = Array.isArray(build.members) ? build.members : [{
+    character: build.character || "비요른",
+    level: Number(build.level || 1),
+    essences: build.essences || [],
+  }];
   return {
     ...build,
-    members: [{
-      character: build.character || "비요른",
-      level: Number(build.level || 1),
-      essences: build.essences || [],
-    }],
+    members: members.map((member) => ({
+      ...member,
+      essences: Array.isArray(member.essences) ? member.essences : [],
+      activeStates: Array.isArray(member.activeStates) ? member.activeStates : [],
+    })),
   };
 }
 
@@ -606,6 +650,7 @@ function readBuildMembers() {
       character: card.querySelector(".build-member-character").value,
       level,
       essences: [...card.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)),
+      activeStates: [...card.querySelectorAll(".build-essence-active-state")].map((select) => select.disabled ? "" : select.value),
     };
   });
 }
@@ -822,6 +867,9 @@ function applyBuildToForm(build) {
     const member = normalized.members[index] || {};
     card.querySelectorAll(".build-essence-input").forEach((input, essenceIndex) => {
       input.value = member.essences?.[essenceIndex] || "";
+      updateBuildActiveToggle(input);
+      const select = input.closest(".build-essence-slot")?.querySelector(".build-essence-active-state");
+      if (select && member.activeStates?.[essenceIndex]) select.value = member.activeStates[essenceIndex];
     });
   });
   els.buildNote.value = build.note || "";
@@ -935,7 +983,7 @@ function buildMemberBoard(members, className = "") {
           </div>
           <div class="build-loadout-essences">
             ${(member.essences || []).map((name, index) => `
-              <span class="${name ? "" : "is-empty"}"><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}</span>
+              <span class="${name ? "" : "is-empty"}"><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}${name && member.activeStates?.[index] ? `<i class="build-active-state is-${escapeHtml(member.activeStates[index])}">${member.activeStates[index] === "off" ? "OFF" : "ON"}</i>` : ""}</span>
             `).join("")}
           </div>
         </section>
