@@ -1634,6 +1634,16 @@ textarea {
   justify-content: end;
 }
 
+.build-delete-button {
+  border-color: #efcaca;
+  color: #a43737;
+}
+
+.build-delete-button:hover {
+  border-color: #e4a8a8;
+  background: #fff3f3;
+}
+
 .build-public-summary {
   display: flex;
   flex-wrap: wrap;

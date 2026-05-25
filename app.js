@@ -119,6 +119,7 @@ const els = {
   closeBuildForm: document.querySelector("#closeBuildForm"),
   buildFormModal: document.querySelector("#buildFormModal"),
   buildDeleteModal: document.querySelector("#buildDeleteModal"),
+  buildDeleteGuide: document.querySelector("#buildDeleteGuide"),
   buildDeletePassword: document.querySelector("#buildDeletePassword"),
   buildDeleteStatus: document.querySelector("#buildDeleteStatus"),
   cancelBuildDelete: document.querySelector("#cancelBuildDelete"),
@@ -1024,6 +1025,9 @@ function copyCurrentBuildLink() {
 
 function openBuildDeleteModal(build) {
   pendingDeleteBuild = build;
+  els.buildDeleteGuide.textContent = build.deleteHash
+    ? "등록할 때 입력한 삭제용 비밀번호를 입력하세요."
+    : "기존에 등록된 공개 빌드입니다. 운영자 비밀번호를 입력하면 삭제할 수 있습니다.";
   els.buildDeletePassword.value = "";
   els.buildDeleteStatus.textContent = "";
   els.buildDeleteModal.hidden = false;
@@ -1038,8 +1042,14 @@ function closeBuildDeleteModal() {
 }
 
 async function deleteBuild(build, password) {
-  if (await buildDeleteHash(build.id, textOf(password)) !== build.deleteHash) {
-    els.buildDeleteStatus.textContent = "삭제용 비밀번호가 맞지 않습니다.";
+  const enteredPassword = textOf(password);
+  const matchesOwnerPassword = Boolean(build.deleteHash)
+    && await buildDeleteHash(build.id, enteredPassword) === build.deleteHash;
+  const matchesAdminPassword = enteredPassword === adminCode;
+  if (!matchesOwnerPassword && !matchesAdminPassword) {
+    els.buildDeleteStatus.textContent = build.deleteHash
+      ? "삭제용 비밀번호가 맞지 않습니다."
+      : "운영자 비밀번호가 맞지 않습니다.";
     els.buildDeleteStatus.className = "build-sync-status is-offline";
     return false;
   }
@@ -1104,10 +1114,6 @@ async function handleBuildListClick(event) {
     });
   }
   if (button.dataset.buildAction === "delete") {
-    if (!build.deleteHash) {
-      setBuildSyncStatus("이 기능 추가 전에 등록된 빌드는 삭제용 비밀번호 정보가 없습니다.", "is-offline");
-      return;
-    }
     openBuildDeleteModal(build);
   }
 }
@@ -1286,7 +1292,7 @@ function buildCard(build, shared) {
             <button class="build-like-button${liked ? " is-liked" : ""}" type="button" data-build-action="like"${liked ? " disabled" : ""}>${liked ? "좋아요 완료" : "좋아요"} ${likeCount}</button>
             <button type="button" data-build-action="share">공유 링크 복사</button>
             <button type="button" data-build-action="load">불러오기</button>
-            ${normalized.deleteHash ? `<button type="button" data-build-action="delete">삭제</button>` : ""}
+            <button class="build-delete-button" type="button" data-build-action="delete">삭제</button>
           </div>
         </header>
         <div class="build-public-summary">
