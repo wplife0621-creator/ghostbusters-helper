@@ -133,6 +133,19 @@ body {
   font-weight: 800;
 }
 
+.home-hero .home-fan-notice {
+  max-width: 720px;
+  margin: 25px auto 0;
+  border: 1px solid #d4e2f7;
+  border-radius: 9px;
+  background: #eef5ff;
+  color: #334762;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.65;
+  padding: 11px 14px;
+}
+
 .home-groups {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2032,6 +2045,12 @@ textarea {
 
   .home-highlights span {
     padding: 8px 11px;
+    font-size: 12px;
+  }
+
+  .home-hero .home-fan-notice {
+    margin-top: 17px;
+    padding: 10px 11px;
     font-size: 12px;
   }
 
