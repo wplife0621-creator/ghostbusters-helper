@@ -1649,6 +1649,10 @@ textarea {
   content: "접기";
 }
 
+.build-member-detail-toggle[open] + .build-loadout-essences {
+  display: none;
+}
+
 .build-member-loadout-head strong {
   color: #142a4b;
   font-size: 14px;
