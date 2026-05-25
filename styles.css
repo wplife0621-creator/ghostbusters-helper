@@ -1300,10 +1300,34 @@ textarea {
   gap: 8px;
 }
 
-.build-active-toggle select {
+.build-active-skills {
+  display: grid;
+  gap: 6px;
+}
+
+.build-active-skill {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  align-items: center;
+  gap: 7px;
+}
+
+.build-active-skill > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 7px;
+  background: #fff;
+  color: #334762;
+  font-size: 12px;
+  padding: 11px 9px;
+}
+
+.build-active-skill select {
   background: #edf4ff;
   border-color: #c8d9f5;
   color: var(--brand-dark);
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1583,7 +1607,12 @@ textarea {
   gap: 5px;
 }
 
-.build-loadout-essences span {
+.build-loadout-item {
+  display: grid;
+  gap: 4px;
+}
+
+.build-loadout-item > span {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -1593,6 +1622,21 @@ textarea {
   color: #273a58;
   font-size: 12px;
   padding: 4px 7px;
+}
+
+.build-loadout-skills {
+  display: grid;
+  gap: 3px;
+  padding: 0 3px 2px 27px;
+}
+
+.build-loadout-skills small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #52647f;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .build-active-state {
@@ -1622,7 +1666,7 @@ textarea {
   font-size: 11px;
 }
 
-.build-loadout-essences .is-empty {
+.build-loadout-essences .is-empty > span {
   color: #7a8799;
   background: #f3f5f8;
 }

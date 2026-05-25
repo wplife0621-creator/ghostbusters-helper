@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>빌드 공유 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260525-25">
+  <link rel="stylesheet" href="./styles.css?v=20260525-26">
 </head>
 <body>
   <header class="topbar compact">
@@ -63,6 +63,10 @@
         <label class="field">
           <span>작성자</span>
           <input id="buildAuthor" placeholder="닉네임">
+        </label>
+        <label class="field">
+          <span>삭제용 비밀번호</span>
+          <input id="buildPassword" type="password" required minlength="4" maxlength="40" autocomplete="new-password" placeholder="삭제할 때 사용할 4자 이상 비밀번호">
         </label>
         <label class="field">
           <span>캐릭터 수</span>
@@ -127,6 +131,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260525-15"></script>
+  <script src="./app.js?v=20260525-16"></script>
 </body>
 </html>

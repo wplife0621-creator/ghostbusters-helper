@@ -33,6 +33,7 @@ const visitorBuildMarkers = {
   daily: "__visitor_daily__",
 };
 const buildLikeMarker = "__build_like__";
+const buildDeleteMarker = "__build_deleted__";
 const numbersReportPrefix = "__numbers__:";
 const sailingMarker = "__sailing__";
 const recommendationMarkerPrefix = "__recommended_character__:";
@@ -106,6 +107,7 @@ const els = {
   buildForm: document.querySelector("#buildForm"),
   buildTitle: document.querySelector("#buildTitle"),
   buildAuthor: document.querySelector("#buildAuthor"),
+  buildPassword: document.querySelector("#buildPassword"),
   buildCharacterCount: document.querySelector("#buildCharacterCount"),
   buildEssenceOptions: document.querySelector("#buildEssenceOptions"),
   buildCharacterSlots: document.querySelector("#buildCharacterSlots"),
@@ -402,10 +404,10 @@ function initBuilds() {
   els.buildCharacterCount.addEventListener("change", renderBuildCharacterSlots);
   els.buildCharacterSlots.addEventListener("change", (event) => {
     if (event.target.matches(".build-member-level")) renderBuildCharacterSlots();
-    if (event.target.matches(".build-essence-input")) updateBuildActiveToggle(event.target);
+    if (event.target.matches(".build-essence-input")) updateBuildActiveSkills(event.target);
   });
   els.buildCharacterSlots.addEventListener("input", (event) => {
-    if (event.target.matches(".build-essence-input")) updateBuildActiveToggle(event.target);
+    if (event.target.matches(".build-essence-input")) updateBuildActiveSkills(event.target);
   });
   els.buildCharacterSlots.addEventListener("click", handleBuildSlotClick);
   els.buildForm.addEventListener("submit", submitBuild);
@@ -446,7 +448,7 @@ function initEssencePicker() {
     const row = event.target.closest("tr[data-monster]");
     if (!row || !activeEssenceInput) return;
     activeEssenceInput.value = row.dataset.monster;
-    updateBuildActiveToggle(activeEssenceInput);
+    updateBuildActiveSkills(activeEssenceInput);
     closeEssencePicker();
   });
   document.addEventListener("keydown", (event) => {
@@ -542,7 +544,9 @@ function readMemberDrafts() {
     character: card.querySelector(".build-member-character")?.value || "",
     level: Number(card.querySelector(".build-member-level")?.value || 1),
     essences: [...card.querySelectorAll(".build-essence-input")].map((input) => input.value),
-    activeStates: [...card.querySelectorAll(".build-essence-active-state")].map((select) => select.value),
+    activeSkillStates: [...card.querySelectorAll(".build-essence-slot")].map((slot) =>
+      [...slot.querySelectorAll(".build-active-skill-state")].map((select) => select.value)
+    ),
   }));
 }
 
@@ -558,9 +562,9 @@ function characterOptions(selected = "") {
     .join("");
 }
 
-function essenceHasActiveSkill(name) {
+function activeSkillsForEssence(name) {
   const row = essenceRows.find((item) => textOf(item["몬스터"]) === textOf(name));
-  return Boolean(row && activeSkillsWithoutSailing(row["액티브"]) !== "-");
+  return row ? splitSkills(activeSkillsWithoutSailing(row["액티브"])) : [];
 }
 
 function activeStateOptions(selected = "on") {
@@ -570,15 +574,26 @@ function activeStateOptions(selected = "on") {
   ].map(([value, label]) => `<option value="${value}"${selected === value ? " selected" : ""}>${label}</option>`).join("");
 }
 
-function updateBuildActiveToggle(input) {
+function skillShortName(skill) {
+  return textOf(skill).split(":")[0] || "액티브";
+}
+
+function buildActiveSkillsMarkup(skills, states = []) {
+  return skills.map((skill, index) => `
+    <label class="build-active-skill">
+      <span title="${escapeHtml(skill)}">${escapeHtml(skillShortName(skill))}</span>
+      <select class="build-active-skill-state">${activeStateOptions(states[index] || "on")}</select>
+    </label>
+  `).join("");
+}
+
+function updateBuildActiveSkills(input, states = []) {
   const slot = input.closest(".build-essence-slot");
   if (!slot) return;
   const control = slot.querySelector(".build-active-toggle");
-  const select = slot.querySelector(".build-essence-active-state");
-  const hasActiveSkill = essenceHasActiveSkill(input.value);
-  control.hidden = !hasActiveSkill;
-  select.disabled = !hasActiveSkill;
-  if (hasActiveSkill && !select.value) select.value = "on";
+  const skills = activeSkillsForEssence(input.value);
+  control.hidden = !skills.length;
+  control.querySelector(".build-active-skills").innerHTML = buildActiveSkillsMarkup(skills, states);
 }
 
 function renderBuildCharacterSlots() {
@@ -590,8 +605,9 @@ function renderBuildCharacterSlots() {
     const level = Number(draft.level || 1);
     const essenceInputs = Array.from({ length: level }, (__, essenceIndex) => {
       const name = draft.essences?.[essenceIndex] || "";
-      const activeState = draft.activeStates?.[essenceIndex] || "on";
-      const hasActiveSkill = essenceHasActiveSkill(name);
+      const skills = activeSkillsForEssence(name);
+      const states = draft.activeSkillStates?.[essenceIndex]
+        || skills.map(() => draft.activeStates?.[essenceIndex] || "on");
       return `
         <div class="build-essence-slot">
           <label class="field">
@@ -601,10 +617,10 @@ function renderBuildCharacterSlots() {
               <button class="open-essence-picker" type="button">선택</button>
             </span>
           </label>
-          <label class="field build-active-toggle"${hasActiveSkill ? "" : " hidden"}>
-            <span>액티브 스킬</span>
-            <select class="build-essence-active-state"${hasActiveSkill ? "" : " disabled"}>${activeStateOptions(activeState)}</select>
-          </label>
+          <div class="field build-active-toggle"${skills.length ? "" : " hidden"}>
+            <span>액티브 스킬별 설정</span>
+            <div class="build-active-skills">${buildActiveSkillsMarkup(skills, states)}</div>
+          </div>
         </div>
       `;
     }).join("");
@@ -639,7 +655,9 @@ function normalizeBuild(build) {
       ...member,
       essences: Array.isArray(member.essences) ? member.essences : [],
       activeStates: Array.isArray(member.activeStates) ? member.activeStates : [],
+      activeSkillStates: Array.isArray(member.activeSkillStates) ? member.activeSkillStates : [],
     })),
+    deleteHash: build.deleteHash || members[0]?._deleteHash || "",
   };
 }
 
@@ -650,7 +668,9 @@ function readBuildMembers() {
       character: card.querySelector(".build-member-character").value,
       level,
       essences: [...card.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)),
-      activeStates: [...card.querySelectorAll(".build-essence-active-state")].map((select) => select.disabled ? "" : select.value),
+      activeSkillStates: [...card.querySelectorAll(".build-essence-slot")].map((slot) =>
+        [...slot.querySelectorAll(".build-active-skill-state")].map((select) => select.value)
+      ),
     };
   });
 }
@@ -679,14 +699,14 @@ function setBuildSyncStatus(message, mode = "") {
 }
 
 function normalizeRemoteBuild(row) {
-  return {
+  return normalizeBuild({
     id: row.id,
     title: row.title,
     author: row.author || "익명",
     members: Array.isArray(row.members) ? row.members : [],
     note: row.note || "",
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
-  };
+  });
 }
 
 function isVisitorBuild(build) {
@@ -695,6 +715,10 @@ function isVisitorBuild(build) {
 
 function isBuildLike(build) {
   return build?.title === buildLikeMarker;
+}
+
+function isBuildDelete(build) {
+  return build?.title === buildDeleteMarker;
 }
 
 function collectPublicBuildRows(rows) {
@@ -707,7 +731,8 @@ function collectPublicBuildRows(rows) {
     buildLikes.set(buildId, (buildLikes.get(buildId) || 0) + 1);
     buildLikeRecordIds.add(like.id);
   });
-  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build));
+  const deletedIds = new Set(normalizedRows.filter(isBuildDelete).map((build) => textOf(build.note)).filter(Boolean));
+  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build) && !isBuildDelete(build) && !deletedIds.has(build.id));
 }
 
 function prependBuild(build) {
@@ -794,6 +819,9 @@ async function savePublicBuildLike(build) {
 }
 
 async function savePublicBuild(build) {
+  const members = build.members.map((member, index) => index === 0
+    ? { ...member, _deleteHash: build.deleteHash || "" }
+    : member);
   const response = await fetch(buildStoreUrl(), {
     method: "POST",
     headers: buildStoreHeaders({ Prefer: "return=representation" }),
@@ -801,7 +829,7 @@ async function savePublicBuild(build) {
       id: build.id,
       title: build.title,
       author: build.author,
-      members: build.members,
+      members,
       note: build.note,
       created_at: build.createdAt,
     }),
@@ -809,6 +837,12 @@ async function savePublicBuild(build) {
   if (!response.ok) throw new Error(`save failed: ${response.status}`);
   const rows = await response.json();
   return normalizeRemoteBuild(rows[0] || build);
+}
+
+async function buildDeleteHash(buildId, password) {
+  const source = new TextEncoder().encode(`dukhubusters:build-delete:${buildId}:${password}`);
+  const digest = await crypto.subtle.digest("SHA-256", source);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function readBuildForm() {
@@ -826,6 +860,7 @@ function readBuildForm() {
 async function submitBuild(event) {
   event.preventDefault();
   const build = readBuildForm();
+  build.deleteHash = await buildDeleteHash(build.id, textOf(els.buildPassword.value));
   const submitButton = els.buildForm.querySelector("[type='submit']");
   if (submitButton) submitButton.disabled = true;
   try {
@@ -867,9 +902,10 @@ function applyBuildToForm(build) {
     const member = normalized.members[index] || {};
     card.querySelectorAll(".build-essence-input").forEach((input, essenceIndex) => {
       input.value = member.essences?.[essenceIndex] || "";
-      updateBuildActiveToggle(input);
-      const select = input.closest(".build-essence-slot")?.querySelector(".build-essence-active-state");
-      if (select && member.activeStates?.[essenceIndex]) select.value = member.activeStates[essenceIndex];
+      const skills = activeSkillsForEssence(input.value);
+      const states = member.activeSkillStates?.[essenceIndex]
+        || skills.map(() => member.activeStates?.[essenceIndex] || "on");
+      updateBuildActiveSkills(input, states);
     });
   });
   els.buildNote.value = build.note || "";
@@ -925,7 +961,39 @@ function copyCurrentBuildLink() {
   copyText(shareUrlForBuild(build), els.copyCurrentBuild, "현재 빌드 공유 링크 복사");
 }
 
-function handleBuildListClick(event) {
+async function deleteBuild(build) {
+  if (!build.deleteHash) {
+    setBuildSyncStatus("이 기능 추가 전에 등록된 빌드는 삭제용 비밀번호 정보가 없습니다.", "is-offline");
+    return;
+  }
+  const password = window.prompt("빌드 등록 시 입력한 삭제용 비밀번호를 입력하세요.");
+  if (password === null) return;
+  if (await buildDeleteHash(build.id, textOf(password)) !== build.deleteHash) {
+    setBuildSyncStatus("삭제용 비밀번호가 맞지 않습니다.", "is-offline");
+    return;
+  }
+  if (hasPublicBuildStore()) {
+    const deletion = {
+      id: `deleted-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
+      title: buildDeleteMarker,
+      author: "delete",
+      members: [],
+      note: build.id,
+      createdAt: new Date().toISOString(),
+      deleteHash: "",
+    };
+    await savePublicBuild(deletion);
+  }
+  savedBuilds = savedBuilds.filter((item) => item.id !== build.id);
+  saveStoredRows(storageKeys.builds, savedBuilds);
+  renderBuilds();
+  setBuildSyncStatus(
+    hasPublicBuildStore() ? "빌드가 삭제되었습니다." : "이 브라우저의 임시 빌드를 삭제했습니다.",
+    hasPublicBuildStore() ? "is-online" : "is-offline"
+  );
+}
+
+async function handleBuildListClick(event) {
   const button = event.target.closest("button[data-build-action]");
   if (!button) return;
   const build = savedBuilds.find((item) => item.id === button.closest("[data-build-id]")?.dataset.buildId);
@@ -947,6 +1015,16 @@ function handleBuildListClick(event) {
       setBuildSyncStatus("좋아요 확인에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
       renderBuilds();
     });
+  }
+  if (button.dataset.buildAction === "delete") {
+    button.disabled = true;
+    try {
+      await deleteBuild(build);
+      if (savedBuilds.some((item) => item.id === build.id)) button.disabled = false;
+    } catch {
+      button.disabled = false;
+      setBuildSyncStatus("빌드 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
+    }
   }
 }
 
@@ -982,9 +1060,17 @@ function buildMemberBoard(members, className = "") {
             <span>Lv.${escapeHtml(member.level)}</span>
           </div>
           <div class="build-loadout-essences">
-            ${(member.essences || []).map((name, index) => `
-              <span class="${name ? "" : "is-empty"}"><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}${name && member.activeStates?.[index] ? `<i class="build-active-state is-${escapeHtml(member.activeStates[index])}">${member.activeStates[index] === "off" ? "OFF" : "ON"}</i>` : ""}</span>
-            `).join("")}
+            ${(member.essences || []).map((name, index) => {
+              const skills = activeSkillsForEssence(name);
+              const states = member.activeSkillStates?.[index]
+                || skills.map(() => member.activeStates?.[index] || "");
+              return `
+                <div class="${name ? "build-loadout-item" : "build-loadout-item is-empty"}">
+                  <span><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}</span>
+                  ${name && skills.length && states.some(Boolean) ? `<div class="build-loadout-skills">${skills.map((skill, skillIndex) => `<small>${escapeHtml(skillShortName(skill))}<i class="build-active-state is-${escapeHtml(states[skillIndex] || "on")}">${states[skillIndex] === "off" ? "OFF" : "ON"}</i></small>`).join("")}</div>` : ""}
+                </div>
+              `;
+            }).join("")}
           </div>
         </section>
       `).join("")}
@@ -1011,6 +1097,7 @@ function buildCard(build, shared) {
             <button class="build-like-button${liked ? " is-liked" : ""}" type="button" data-build-action="like"${liked ? " disabled" : ""}>${liked ? "좋아요 완료" : "좋아요"} ${likeCount}</button>
             <button type="button" data-build-action="share">공유 링크 복사</button>
             <button type="button" data-build-action="load">불러오기</button>
+            ${normalized.deleteHash ? `<button type="button" data-build-action="delete">삭제</button>` : ""}
           </div>
         </header>
         <div class="build-public-summary">
