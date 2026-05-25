@@ -411,6 +411,10 @@ function initBuilds() {
   els.buildCharacterSlots.addEventListener("change", (event) => {
     if (event.target.matches(".build-member-level")) renderBuildCharacterSlots();
     if (event.target.matches(".build-essence-input")) updateBuildActiveSkills(event.target);
+    if (event.target.matches(".build-active-color")) {
+      const input = event.target.closest(".build-essence-slot")?.querySelector(".build-essence-input");
+      if (input) updateBuildActiveSkills(input, ["on"], event.target.value);
+    }
   });
   els.buildCharacterSlots.addEventListener("input", (event) => {
     if (event.target.matches(".build-essence-input")) updateBuildActiveSkills(event.target);
@@ -562,6 +566,9 @@ function readMemberDrafts() {
     activeSkillStates: [...card.querySelectorAll(".build-essence-slot")].map((slot) =>
       [...slot.querySelectorAll(".build-active-skill-state")].map((select) => select.value)
     ),
+    activeColors: [...card.querySelectorAll(".build-essence-slot")].map((slot) =>
+      slot.querySelector(".build-active-color")?.value || ""
+    ),
   }));
 }
 
@@ -580,6 +587,17 @@ function characterOptions(selected = "") {
 function activeSkillsForEssence(name) {
   const row = essenceRows.find((item) => textOf(item["몬스터"]) === textOf(name));
   return row ? splitSkills(activeSkillsWithoutSailing(row["액티브"])) : [];
+}
+
+const activeColorPattern = /^(빨강|주황|노랑|초록|청록|파랑|보라|검정|갈색|무색)\s*-\s*/;
+
+function activeSkillColor(skill) {
+  return textOf(skill).match(activeColorPattern)?.[1] || "";
+}
+
+function colorChoiceSkills(skills) {
+  const colors = [...new Set(skills.map(activeSkillColor).filter(Boolean))];
+  return skills.length > 1 && colors.length > 1 && skills.every((skill) => activeSkillColor(skill));
 }
 
 function activeStateOptions(selected = "on") {
@@ -602,13 +620,36 @@ function buildActiveSkillsMarkup(skills, states = []) {
   `).join("");
 }
 
-function updateBuildActiveSkills(input, states = []) {
+function buildActiveSettingsMarkup(skills, states = [], selectedColor = "") {
+  if (!colorChoiceSkills(skills)) return buildActiveSkillsMarkup(skills, states);
+  const selectedSkill = skills.find((skill) => activeSkillColor(skill) === selectedColor) || skills[0];
+  const color = activeSkillColor(selectedSkill);
+  const selectedIndex = skills.indexOf(selectedSkill);
+  const state = states.length === 1 ? states[0] : states[selectedIndex] || "on";
+  return `
+    <label class="field build-color-choice">
+      <span>사용 색상</span>
+      <select class="build-active-color">
+        ${skills.map((skill) => {
+          const skillColor = activeSkillColor(skill);
+          return `<option value="${escapeHtml(skillColor)}"${skillColor === color ? " selected" : ""}>${escapeHtml(skillColor)} - ${escapeHtml(skillShortName(skill).replace(activeColorPattern, ""))}</option>`;
+        }).join("")}
+      </select>
+    </label>
+    <label class="build-active-skill build-selected-color-skill">
+      <span><i class="essence-color-pill color-${escapeHtml(color)}">${escapeHtml(color)}</i>${escapeHtml(skillShortName(selectedSkill).replace(activeColorPattern, ""))}</span>
+      <select class="build-active-skill-state">${activeStateOptions(state)}</select>
+    </label>
+  `;
+}
+
+function updateBuildActiveSkills(input, states = [], selectedColor = "") {
   const slot = input.closest(".build-essence-slot");
   if (!slot) return;
   const control = slot.querySelector(".build-active-toggle");
   const skills = activeSkillsForEssence(input.value);
   control.hidden = !skills.length;
-  control.querySelector(".build-active-skills").innerHTML = buildActiveSkillsMarkup(skills, states);
+  control.querySelector(".build-active-skills").innerHTML = buildActiveSettingsMarkup(skills, states, selectedColor);
 }
 
 function renderBuildCharacterSlots() {
@@ -623,6 +664,7 @@ function renderBuildCharacterSlots() {
       const skills = activeSkillsForEssence(name);
       const states = draft.activeSkillStates?.[essenceIndex]
         || skills.map(() => draft.activeStates?.[essenceIndex] || "on");
+      const selectedColor = draft.activeColors?.[essenceIndex] || "";
       return `
         <div class="build-essence-slot">
           <label class="field">
@@ -634,7 +676,7 @@ function renderBuildCharacterSlots() {
           </label>
           <div class="field build-active-toggle"${skills.length ? "" : " hidden"}>
             <span>액티브 스킬별 설정</span>
-            <div class="build-active-skills">${buildActiveSkillsMarkup(skills, states)}</div>
+            <div class="build-active-skills">${buildActiveSettingsMarkup(skills, states, selectedColor)}</div>
           </div>
         </div>
       `;
@@ -671,6 +713,7 @@ function normalizeBuild(build) {
       essences: Array.isArray(member.essences) ? member.essences : [],
       activeStates: Array.isArray(member.activeStates) ? member.activeStates : [],
       activeSkillStates: Array.isArray(member.activeSkillStates) ? member.activeSkillStates : [],
+      activeColors: Array.isArray(member.activeColors) ? member.activeColors : [],
     })),
     deleteHash: build.deleteHash || members[0]?._deleteHash || "",
   };
@@ -685,6 +728,9 @@ function readBuildMembers() {
       essences: [...card.querySelectorAll(".build-essence-input")].map((input) => textOf(input.value)),
       activeSkillStates: [...card.querySelectorAll(".build-essence-slot")].map((slot) =>
         [...slot.querySelectorAll(".build-active-skill-state")].map((select) => select.value)
+      ),
+      activeColors: [...card.querySelectorAll(".build-essence-slot")].map((slot) =>
+        slot.querySelector(".build-active-color")?.value || ""
       ),
     };
   });
@@ -920,7 +966,7 @@ function applyBuildToForm(build) {
       const skills = activeSkillsForEssence(input.value);
       const states = member.activeSkillStates?.[essenceIndex]
         || skills.map(() => member.activeStates?.[essenceIndex] || "on");
-      updateBuildActiveSkills(input, states);
+      updateBuildActiveSkills(input, states, member.activeColors?.[essenceIndex] || "");
     });
   });
   els.buildNote.value = build.note || "";
@@ -1117,15 +1163,22 @@ function buildMemberStatSummary(member) {
   `).join("");
 }
 
-function buildConfiguredSkillList(row, states = []) {
+function buildConfiguredSkillList(row, states = [], selectedColor = "") {
   const skills = row ? activeSkillsForEssence(row["몬스터"]) : [];
   if (!skills.length) return `<span class="muted">없음</span>`;
+  const visibleSkills = colorChoiceSkills(skills) && selectedColor
+    ? skills.filter((skill) => activeSkillColor(skill) === selectedColor)
+    : skills;
+  const visibleStates = colorChoiceSkills(skills) && selectedColor
+    ? [states[0] || "on"]
+    : states;
   return `
     <div class="build-detail-skills">
-      ${skills.map((skill, index) => `
+      ${visibleSkills.map((skill, index) => `
         <span>
-          ${escapeHtml(skill)}
-          ${states[index] ? `<i class="build-active-state is-${escapeHtml(states[index])}">${states[index] === "off" ? "OFF" : "ON"}</i>` : ""}
+          ${selectedColor ? `<i class="essence-color-pill color-${escapeHtml(selectedColor)}">${escapeHtml(selectedColor)}</i>` : ""}
+          ${escapeHtml(selectedColor ? skill.replace(activeColorPattern, "") : skill)}
+          ${visibleStates[index] ? `<i class="build-active-state is-${escapeHtml(visibleStates[index])}">${visibleStates[index] === "off" ? "OFF" : "ON"}</i>` : ""}
         </span>
       `).join("")}
     </div>
@@ -1142,6 +1195,7 @@ function buildMemberDetails(member) {
         const skills = row ? activeSkillsForEssence(row["몬스터"]) : [];
         const states = member.activeSkillStates?.[index]
           || skills.map(() => member.activeStates?.[index] || "");
+        const selectedColor = member.activeColors?.[index] || "";
         if (!row) return `
           <article class="build-essence-detail">
             <h4>${escapeHtml(name)}</h4>
@@ -1157,7 +1211,7 @@ function buildMemberDetails(member) {
             <dl>
               <dt>주요 스탯</dt><dd>${escapeHtml(row["주요 스탯"] || "-")}</dd>
               <dt>패시브</dt><dd>${escapeHtml(row["패시브"] || "-")}</dd>
-              <dt>액티브</dt><dd>${buildConfiguredSkillList(row, states)}</dd>
+              <dt>액티브</dt><dd>${buildConfiguredSkillList(row, states, selectedColor)}</dd>
             </dl>
           </article>
         `;
@@ -1192,10 +1246,17 @@ function buildMemberBoard(members, className = "") {
               const skills = activeSkillsForEssence(name);
               const states = member.activeSkillStates?.[index]
                 || skills.map(() => member.activeStates?.[index] || "");
+              const selectedColor = member.activeColors?.[index] || "";
+              const visibleSkills = colorChoiceSkills(skills) && selectedColor
+                ? skills.filter((skill) => activeSkillColor(skill) === selectedColor)
+                : skills;
+              const visibleStates = colorChoiceSkills(skills) && selectedColor
+                ? [states[0] || "on"]
+                : states;
               return `
                 <div class="${name ? "build-loadout-item" : "build-loadout-item is-empty"}">
-                  <span><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}</span>
-                  ${name && skills.length && states.some(Boolean) ? `<div class="build-loadout-skills">${skills.map((skill, skillIndex) => `<small>${escapeHtml(skillShortName(skill))}<i class="build-active-state is-${escapeHtml(states[skillIndex] || "on")}">${states[skillIndex] === "off" ? "OFF" : "ON"}</i></small>`).join("")}</div>` : ""}
+                  <span><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}${selectedColor ? `<i class="essence-color-pill color-${escapeHtml(selectedColor)}">${escapeHtml(selectedColor)}</i>` : ""}</span>
+                  ${name && visibleSkills.length && visibleStates.some(Boolean) ? `<div class="build-loadout-skills">${visibleSkills.map((skill, skillIndex) => `<small>${escapeHtml(selectedColor ? skillShortName(skill).replace(activeColorPattern, "") : skillShortName(skill))}<i class="build-active-state is-${escapeHtml(visibleStates[skillIndex] || "on")}">${visibleStates[skillIndex] === "off" ? "OFF" : "ON"}</i></small>`).join("")}</div>` : ""}
                 </div>
               `;
             }).join("")}

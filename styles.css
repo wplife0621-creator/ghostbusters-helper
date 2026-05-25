@@ -1349,6 +1349,17 @@ textarea {
   gap: 6px;
 }
 
+.build-color-choice {
+  margin-bottom: 2px;
+}
+
+.build-color-choice select {
+  border-color: #c8d9f5;
+  background: #fff;
+  color: #142a4b;
+  font-weight: 800;
+}
+
 .build-active-skill {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 104px;
@@ -1374,6 +1385,37 @@ textarea {
   font-size: 12px;
   font-weight: 900;
 }
+
+.build-selected-color-skill {
+  border: 1px solid #d8e5f8;
+  border-radius: 8px;
+  background: #f5f9ff;
+  padding: 6px;
+}
+
+.essence-color-pill {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  padding: 4px 7px;
+}
+
+.color-빨강 { background: #d44747; }
+.color-주황 { background: #d9771f; }
+.color-노랑 { background: #c58d08; }
+.color-초록 { background: #268453; }
+.color-청록 { background: #178a89; }
+.color-파랑 { background: #326bd8; }
+.color-보라 { background: #7651cc; }
+.color-검정 { background: #374151; }
+.color-갈색 { background: #865a3c; }
+.color-무색 { background: #6b7280; }
 
 .build-active-toggle[hidden] {
   display: none;
@@ -1749,6 +1791,10 @@ textarea {
   color: #273a58;
   font-size: 12px;
   padding: 4px 7px;
+}
+
+.build-loadout-item > span .essence-color-pill {
+  margin-left: auto;
 }
 
 .build-loadout-skills {
