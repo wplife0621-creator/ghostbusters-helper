@@ -1249,7 +1249,7 @@ textarea {
 
 .build-list {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   margin-top: 10px;
 }
 
@@ -1437,6 +1437,110 @@ textarea {
 
 .build-member-summary b {
   font-size: 13px;
+}
+
+.build-public-card {
+  gap: 12px;
+  padding: 14px;
+}
+
+.build-public-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 14px;
+}
+
+.build-public-head .pending-actions {
+  flex: 0 0 auto;
+  justify-content: end;
+}
+
+.build-public-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  border-top: 1px solid #e3e9f3;
+  padding-top: 10px;
+}
+
+.build-public-summary span {
+  color: #40516d;
+  font-weight: 800;
+}
+
+.build-public-summary p {
+  color: var(--muted);
+}
+
+.build-member-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(212px, 1fr));
+  gap: 9px;
+}
+
+.build-member-loadout {
+  min-width: 0;
+  border: 1px solid #dce5f2;
+  border-radius: 9px;
+  background: #f8fbff;
+  padding: 10px;
+}
+
+.build-member-loadout-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.build-member-loadout-head strong {
+  color: #142a4b;
+  font-size: 14px;
+}
+
+.build-member-loadout-head span {
+  border-radius: 999px;
+  background: #e4efff;
+  color: var(--brand-dark);
+  font-size: 11px;
+  font-weight: 900;
+  padding: 3px 8px;
+}
+
+.build-loadout-essences {
+  display: grid;
+  gap: 5px;
+}
+
+.build-loadout-essences span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 27px;
+  border-radius: 6px;
+  background: #fff;
+  color: #273a58;
+  font-size: 12px;
+  padding: 4px 7px;
+}
+
+.build-loadout-essences b {
+  display: inline-grid;
+  flex: 0 0 20px;
+  place-items: center;
+  height: 20px;
+  border-radius: 999px;
+  background: #edf4ff;
+  color: var(--brand-dark);
+  font-size: 11px;
+}
+
+.build-loadout-essences .is-empty {
+  color: #7a8799;
+  background: #f3f5f8;
 }
 
 .build-row {
@@ -2469,6 +2573,33 @@ textarea {
 
   .build-row .build-like-button {
     grid-column: 1 / -1;
+  }
+
+  .build-public-card {
+    padding: 12px 10px;
+  }
+
+  .build-public-head {
+    display: grid;
+    gap: 10px;
+  }
+
+  .build-public-head .pending-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .build-public-head .build-like-button {
+    grid-column: 1 / -1;
+  }
+
+  .build-public-summary {
+    display: grid;
+    gap: 5px;
+  }
+
+  .build-member-board {
+    grid-template-columns: 1fr;
   }
 
   .build-row-title strong {

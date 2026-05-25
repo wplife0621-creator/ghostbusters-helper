@@ -905,31 +905,52 @@ function formatBuildDate(value) {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function buildMemberBoard(members, className = "") {
+  return `
+    <div class="build-member-board${className ? ` ${className}` : ""}">
+      ${members.map((member) => `
+        <section class="build-member-loadout">
+          <div class="build-member-loadout-head">
+            <strong>${escapeHtml(member.character)}</strong>
+            <span>Lv.${escapeHtml(member.level)}</span>
+          </div>
+          <div class="build-loadout-essences">
+            ${(member.essences || []).map((name, index) => `
+              <span class="${name ? "" : "is-empty"}"><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}</span>
+            `).join("")}
+          </div>
+        </section>
+      `).join("")}
+    </div>
+  `;
+}
+
 function buildCard(build, shared) {
   const normalized = normalizeBuild(build);
   const memberSummary = normalized.members
     .map((member) => `${member.character} ${member.level}레벨`)
     .join(" · ");
-  const essenceSummary = normalized.members
-    .map((member) => `${member.character}: ${(member.essences || []).map((name) => name || "빈칸").join(", ")}`)
-    .join(" / ");
   if (!shared) {
     const likeCount = buildLikes.get(build.id) || 0;
     const liked = likedBuildIds.has(build.id);
     return `
-      <article class="build-card build-row" data-build-id="${escapeHtml(build.id || "")}">
-        <div class="build-row-title">
-          <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
-          <span>${escapeHtml(build.author || "익명")}</span>
+      <article class="build-card build-public-card" data-build-id="${escapeHtml(build.id || "")}">
+        <header class="build-public-head">
+          <div class="build-row-title">
+            <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
+            <span>${escapeHtml(build.author || "익명")} · ${escapeHtml(formatBuildDate(build.createdAt))}</span>
+          </div>
+          <div class="pending-actions">
+            <button class="build-like-button${liked ? " is-liked" : ""}" type="button" data-build-action="like"${liked ? " disabled" : ""}>${liked ? "좋아요 완료" : "좋아요"} ${likeCount}</button>
+            <button type="button" data-build-action="share">공유 링크 복사</button>
+            <button type="button" data-build-action="load">불러오기</button>
+          </div>
+        </header>
+        <div class="build-public-summary">
+          <span>${escapeHtml(memberSummary)}</span>
+          ${build.note ? `<p>${escapeHtml(build.note)}</p>` : ""}
         </div>
-        <span class="build-row-summary">${escapeHtml(memberSummary)}</span>
-        <span class="build-row-essences">${escapeHtml(essenceSummary)}</span>
-        <div class="pending-actions">
-          <button class="build-like-button${liked ? " is-liked" : ""}" type="button" data-build-action="like"${liked ? " disabled" : ""}>${liked ? "좋아요 완료" : "좋아요"} ${likeCount}</button>
-          <button type="button" data-build-action="share">공유 링크 복사</button>
-          <button type="button" data-build-action="load">불러오기</button>
-        </div>
-        <span class="build-row-date">${escapeHtml(formatBuildDate(build.createdAt))}</span>
+        ${buildMemberBoard(normalized.members)}
       </article>
     `;
   }
@@ -942,14 +963,7 @@ function buildCard(build, shared) {
         </div>
         ${shared ? `<span class="grade-pill">공유 빌드</span>` : ""}
       </div>
-      ${normalized.members.map((member) => `
-        <div class="build-member-summary">
-          <b>${escapeHtml(member.character)} ${escapeHtml(member.level)}레벨</b>
-          <div class="build-essence-list">
-            ${(member.essences || []).map((name, index) => `<span>${index + 1}. ${escapeHtml(name || "빈칸")}</span>`).join("")}
-          </div>
-        </div>
-      `).join("")}
+      ${buildMemberBoard(normalized.members, "is-shared")}
       ${build.note ? `<p>${escapeHtml(build.note)}</p>` : ""}
       ${shared ? "" : `
         <div class="pending-actions">
