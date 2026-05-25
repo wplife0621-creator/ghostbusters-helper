@@ -8,8 +8,10 @@ const guideBackend = {
 const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
 const commentTitlePrefix = "__guide_comment__:";
+const likeTitlePrefix = "__guide_like__:";
 const viewCounterKind = "guide-view-counter";
 const passwordKind = "guide-password";
+const commentParentKind = "guide-comment-parent";
 const fields = {
   form: document.querySelector("#guideForm"),
   editor: document.querySelector("#guideEditor"),
@@ -34,6 +36,11 @@ const fields = {
 };
 let posts = sortPosts(readLocalPosts().map(normalizePost));
 let comments = readLocalComments();
+let guideLikes = new Map();
+let guideLikeRecordIds = new Set();
+let likedPostIds = new Set();
+let guideLikeIpPromise = null;
+let activeReplyId = "";
 let retainedMedia = [];
 let activeCategory = "전체";
 const linkedPostId = new URLSearchParams(window.location.search).get("post") || "";
@@ -154,6 +161,10 @@ function isStoredComment(row) {
   return String(row.title || "").startsWith(commentTitlePrefix);
 }
 
+function isStoredLike(row) {
+  return String(row.title || "").startsWith(likeTitlePrefix);
+}
+
 function viewCount(media) {
   const counter = (Array.isArray(media) ? media : []).find((item) => item?.kind === viewCounterKind);
   return Number(counter?.views || 0);
@@ -161,6 +172,10 @@ function viewCount(media) {
 
 function passwordRecord(media) {
   return (Array.isArray(media) ? media : []).find((item) => item?.kind === passwordKind) || null;
+}
+
+function parentCommentRecord(media) {
+  return (Array.isArray(media) ? media : []).find((item) => item?.kind === commentParentKind) || null;
 }
 
 function visibleMedia(media) {
@@ -218,6 +233,7 @@ function normalizePost(row) {
     content: row.content || "",
     media: visibleMedia(row.media),
     views: Number(row.views || viewCount(row.media)),
+    likes: Number(row.likes || 0),
     password: passwordRecord(row.media),
     commentCount: Number(row.commentCount || 0),
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
@@ -226,18 +242,34 @@ function normalizePost(row) {
 }
 
 function normalizeComment(row) {
+  const parent = parentCommentRecord(row.media);
   return {
     id: row.id,
     postId: row.post_id || row.postId || String(row.title || "").slice(commentTitlePrefix.length),
     author: row.author || "익명",
     content: row.content || "",
     password: passwordRecord(row.media),
+    parentId: row.parentId || parent?.parentId || "",
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
   };
 }
 
 function sortPosts(rows) {
   return rows.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+}
+
+function loadLikeCounts(rows) {
+  guideLikes = new Map();
+  guideLikeRecordIds = new Set();
+  rows.filter(isStoredLike).forEach((row) => {
+    const postId = String(row.title || "").slice(likeTitlePrefix.length);
+    if (!postId) return;
+    guideLikes.set(postId, (guideLikes.get(postId) || 0) + 1);
+    guideLikeRecordIds.add(row.id);
+  });
+  posts.forEach((post) => {
+    post.likes = guideLikes.get(post.id) || 0;
+  });
 }
 
 async function loadPosts() {
@@ -254,15 +286,84 @@ async function loadPosts() {
     if (!response.ok) throw new Error("load");
     const rows = await response.json();
     comments = rows.filter(isStoredComment).map(normalizeComment);
-    posts = sortPosts(rows.filter((row) => !isStoredComment(row)).map(normalizePost));
+    posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row)).map(normalizePost));
+    loadLikeCounts(rows);
     loadCommentCounts();
     renderPosts();
+    markLikedPostsForVisitor();
     openLinkedPostIfAvailable();
     setStatus("공개 공략 게시판에 연결되었습니다.", "is-online");
   } catch {
     openLinkedPostIfAvailable();
     setStatus("게시판 설정이 아직 적용되지 않아 이 기기의 임시 목록을 표시합니다.", "is-offline");
   }
+}
+
+async function guideLikeIp() {
+  if (!guideLikeIpPromise) {
+    guideLikeIpPromise = fetch("https://api64.ipify.org?format=json", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("ip unavailable");
+        return response.json();
+      })
+      .then((row) => String(row.ip || "").trim());
+  }
+  return guideLikeIpPromise;
+}
+
+async function guideLikeId(postId) {
+  const ip = await guideLikeIp();
+  if (!ip) throw new Error("ip unavailable");
+  const source = new TextEncoder().encode(`dukhubusters:guide-like:${postId}:${ip}`);
+  const digest = await crypto.subtle.digest("SHA-256", source);
+  const hash = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `guide-like-${hash}`;
+}
+
+async function markLikedPostsForVisitor() {
+  try {
+    const entries = await Promise.all(posts.map(async (post) => [post.id, await guideLikeId(post.id)]));
+    likedPostIds = new Set(entries.filter((entry) => guideLikeRecordIds.has(entry[1])).map((entry) => entry[0]));
+    renderPosts();
+  } catch {
+    likedPostIds = new Set();
+  }
+}
+
+async function savePostLike(post) {
+  if (!hasPublicStore()) {
+    if (likedPostIds.has(post.id)) return;
+    likedPostIds.add(post.id);
+    post.likes += 1;
+    saveLocalPosts();
+    renderPosts();
+    return;
+  }
+  const likeId = await guideLikeId(post.id);
+  if (guideLikeRecordIds.has(likeId)) {
+    likedPostIds.add(post.id);
+    renderPosts();
+    return;
+  }
+  const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}`, {
+    method: "POST",
+    headers: authHeaders({ "Content-Type": "application/json", Prefer: "resolution=ignore-duplicates,return=minimal" }),
+    body: JSON.stringify({
+      id: likeId,
+      title: `${likeTitlePrefix}${post.id}`,
+      author: "like",
+      content: "like",
+      media: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }),
+  });
+  if (!response.ok && response.status !== 409) throw new Error("like-save");
+  guideLikeRecordIds.add(likeId);
+  likedPostIds.add(post.id);
+  post.likes += 1;
+  guideLikes.set(post.id, post.likes);
+  renderPosts();
 }
 
 function loadCommentCounts() {
@@ -419,6 +520,7 @@ function renderPosts() {
         ${escapeHtml(post.title)}
         ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
         ${post.commentCount ? `<small>댓글 ${post.commentCount}</small>` : ""}
+        ${post.likes ? `<small>좋아요 ${post.likes}</small>` : ""}
       </button>
       <span class="guide-row-author">${escapeHtml(post.author)}</span>
       <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
@@ -440,9 +542,10 @@ function renderViewer() {
       <div>
         <span class="guide-row-category">${escapeHtml(post.category)}</span>
         <h3>${escapeHtml(post.title)}</h3>
-        <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))} · 조회 ${post.views} · 댓글 ${post.commentCount}</p>
+        <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))} · 조회 ${post.views} · 댓글 ${post.commentCount} · 좋아요 ${post.likes}</p>
       </div>
       <div class="pending-actions guide-viewer-actions">
+        <button class="guide-like-button${likedPostIds.has(post.id) ? " is-liked" : ""}" type="button" data-guide-action="like"${likedPostIds.has(post.id) ? " disabled" : ""}>${likedPostIds.has(post.id) ? "좋아요 완료" : "좋아요"} ${post.likes}</button>
         <button type="button" data-guide-action="share">공유</button>
         <button type="button" data-guide-action="edit">수정</button>
         <button type="button" data-guide-action="delete">삭제</button>
@@ -453,6 +556,7 @@ function renderViewer() {
     ${post.media.length ? `<div class="guide-gallery">${mediaMarkup(post.media)}</div>` : ""}
     <section class="guide-comments">
       <h4>댓글 <span id="guideCommentCount">${post.commentCount}</span></h4>
+      <p id="guideReplyTarget" class="guide-reply-target" hidden></p>
       <form class="guide-comment-form" id="guideCommentForm">
         <label class="field">
           <span>작성자</span>
@@ -466,7 +570,10 @@ function renderViewer() {
           <span>삭제용 비밀번호</span>
           <input id="guideCommentPassword" type="password" required minlength="4" maxlength="40" autocomplete="new-password" placeholder="4자 이상 입력">
         </label>
-        <button class="submit-report" type="submit">댓글 등록</button>
+        <div class="guide-comment-submit">
+          <button class="submit-report" type="submit" id="guideCommentSubmit">댓글 등록</button>
+          <button type="button" id="guideReplyCancel" data-comment-action="reply-cancel" hidden>답글 취소</button>
+        </div>
       </form>
       <div id="guideCommentList" class="guide-comment-list"></div>
     </section>
@@ -500,6 +607,41 @@ function commentsForPost(postId) {
     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 }
 
+function updateReplyUi(postId) {
+  const replyTarget = document.querySelector("#guideReplyTarget");
+  const submit = document.querySelector("#guideCommentSubmit");
+  const cancel = document.querySelector("#guideReplyCancel");
+  if (!replyTarget || !submit || !cancel || selectedPostId !== postId) return;
+  const comment = comments.find((item) => item.id === activeReplyId && item.postId === postId);
+  if (!comment) {
+    activeReplyId = "";
+    replyTarget.hidden = true;
+    replyTarget.textContent = "";
+    submit.textContent = "댓글 등록";
+    cancel.hidden = true;
+    return;
+  }
+  replyTarget.hidden = false;
+  replyTarget.textContent = `${comment.author}님에게 답글 작성 중`;
+  submit.textContent = "답글 등록";
+  cancel.hidden = false;
+}
+
+function commentMarkup(comment, isReply = false) {
+  return `
+    <article class="guide-comment${isReply ? " is-reply" : ""}" data-comment-id="${escapeHtml(comment.id)}">
+      <div>
+        ${isReply ? `<span class="guide-reply-mark">답글</span>` : ""}
+        <strong>${escapeHtml(comment.author)}</strong>
+        <span>${escapeHtml(new Date(comment.createdAt).toLocaleString("ko-KR"))}</span>
+        <button type="button" data-comment-action="reply">답글</button>
+        <button type="button" data-comment-action="delete">삭제</button>
+      </div>
+      <p>${escapeHtml(comment.content).replaceAll("\n", "<br>")}</p>
+    </article>
+  `;
+}
+
 function renderComments(postId) {
   const list = document.querySelector("#guideCommentList");
   const count = document.querySelector("#guideCommentCount");
@@ -508,16 +650,12 @@ function renderComments(postId) {
   count.textContent = String(rows.length);
   const post = posts.find((item) => item.id === postId);
   if (post) post.commentCount = rows.length;
-  list.innerHTML = rows.length ? rows.map((comment) => `
-    <article class="guide-comment" data-comment-id="${escapeHtml(comment.id)}">
-      <div>
-        <strong>${escapeHtml(comment.author)}</strong>
-        <span>${escapeHtml(new Date(comment.createdAt).toLocaleString("ko-KR"))}</span>
-        <button type="button" data-comment-action="delete">삭제</button>
-      </div>
-      <p>${escapeHtml(comment.content).replaceAll("\n", "<br>")}</p>
-    </article>
-  `).join("") : `<div class="empty compact-empty">첫 댓글을 남겨보세요.</div>`;
+  const roots = rows.filter((comment) => !comment.parentId || !rows.some((row) => row.id === comment.parentId));
+  list.innerHTML = rows.length ? roots.map((comment) => {
+    const replies = rows.filter((reply) => reply.parentId === comment.id);
+    return `${commentMarkup(comment)}${replies.map((reply) => commentMarkup(reply, true)).join("")}`;
+  }).join("") : `<div class="empty compact-empty">첫 댓글을 남겨보세요.</div>`;
+  updateReplyUi(postId);
 }
 
 async function loadComments(postId) {
@@ -534,6 +672,7 @@ async function submitComment(event) {
     author: document.querySelector("#guideCommentAuthor").value.trim() || "익명",
     content: document.querySelector("#guideCommentContent").value.trim(),
     password: await makePasswordRecord(document.querySelector("#guideCommentPassword").value),
+    parentId: activeReplyId,
     createdAt: new Date().toISOString(),
   };
   try {
@@ -546,7 +685,7 @@ async function submitComment(event) {
           title: `${commentTitlePrefix}${comment.postId}`,
           author: comment.author,
           content: comment.content,
-          media: [comment.password],
+          media: [comment.password, ...(comment.parentId ? [{ kind: commentParentKind, parentId: comment.parentId }] : [])],
           created_at: comment.createdAt,
           updated_at: comment.createdAt,
         }),
@@ -559,6 +698,7 @@ async function submitComment(event) {
       saveLocalComments();
     }
     event.target.reset();
+    activeReplyId = "";
     renderComments(postId);
     renderPosts();
   } catch {
@@ -578,6 +718,7 @@ async function deleteComment(commentId) {
       if (!response.ok) throw new Error("comment-delete");
     }
     comments = comments.filter((item) => item.id !== commentId);
+    if (activeReplyId === commentId) activeReplyId = "";
     saveLocalComments();
     renderComments(comment.postId);
     renderPosts();
@@ -695,7 +836,20 @@ fields.posts.addEventListener("click", (event) => {
 fields.viewer.addEventListener("click", (event) => {
   const commentButton = event.target.closest("button[data-comment-action]");
   if (commentButton) {
-    deleteComment(commentButton.closest("[data-comment-id]").dataset.commentId);
+    if (commentButton.dataset.commentAction === "reply-cancel") {
+      activeReplyId = "";
+      updateReplyUi(selectedPostId);
+      return;
+    }
+    const commentId = commentButton.closest("[data-comment-id]")?.dataset.commentId;
+    if (commentButton.dataset.commentAction === "reply") {
+      const comment = comments.find((item) => item.id === commentId);
+      activeReplyId = comment?.parentId || commentId || "";
+      updateReplyUi(selectedPostId);
+      document.querySelector("#guideCommentContent")?.focus();
+      return;
+    }
+    if (commentButton.dataset.commentAction === "delete") deleteComment(commentId);
     return;
   }
   const button = event.target.closest("button[data-guide-action]");
@@ -708,6 +862,13 @@ fields.viewer.addEventListener("click", (event) => {
     return;
   }
   if (!post) return;
+  if (button.dataset.guideAction === "like") {
+    button.disabled = true;
+    savePostLike(post).catch(() => {
+      setStatus("좋아요 저장에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
+      renderViewer();
+    });
+  }
   if (button.dataset.guideAction === "share") sharePostLink(post, button);
   if (button.dataset.guideAction === "edit") startEdit(post);
   if (button.dataset.guideAction === "delete") deletePost(post);

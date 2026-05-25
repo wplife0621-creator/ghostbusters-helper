@@ -886,12 +886,45 @@ textarea {
   font-size: 17px;
 }
 
+.guide-like-button.is-liked {
+  border-color: #c8d9f5;
+  background: #edf4ff;
+  color: var(--brand-dark);
+}
+
+.guide-reply-target {
+  margin: 0 0 12px;
+  border-radius: 7px;
+  background: #eef4ff;
+  color: var(--brand-dark);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 9px 11px;
+}
+
 .guide-comment-form {
   display: grid;
   grid-template-columns: 125px minmax(0, 1fr) 160px auto;
   align-items: end;
   gap: 8px;
   margin-bottom: 17px;
+}
+
+.guide-comment-submit {
+  display: grid;
+  gap: 6px;
+}
+
+.guide-comment-submit button:not(.submit-report) {
+  min-height: 33px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: #44516a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .guide-comment-form .submit-report {
@@ -907,8 +940,24 @@ textarea {
   border-top: 1px solid #e1e6ef;
 }
 
+.guide-comment.is-reply {
+  margin-left: 30px;
+  padding-left: 12px;
+  border-left: 2px solid #d7e4f6;
+}
+
+.guide-reply-mark {
+  border-radius: 999px;
+  background: #eef4ff;
+  color: var(--brand-dark) !important;
+  font-size: 11px !important;
+  font-weight: 900;
+  padding: 2px 7px;
+}
+
 .guide-comment > div {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 9px;
 }
@@ -924,6 +973,7 @@ textarea {
 }
 
 .guide-comment button {
+  min-height: 28px;
   border: 0;
   background: transparent;
   color: #728198;
@@ -2249,6 +2299,25 @@ textarea {
     min-height: 88px;
   }
 
+  .guide-comment-submit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .guide-comment-submit button {
+    min-height: 44px !important;
+    width: 100%;
+  }
+
+  .guide-comment.is-reply {
+    margin-left: 14px;
+    padding-left: 9px;
+  }
+
+  .guide-comment button {
+    min-height: 38px;
+    padding: 0 5px;
+  }
+
   .guide-form-actions {
     display: grid;
   }
@@ -2295,6 +2364,10 @@ textarea {
 
   .guide-viewer-head .pending-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .guide-viewer-head .guide-like-button {
+    grid-column: 1 / -1;
   }
 
   .pending-actions button:only-child {
