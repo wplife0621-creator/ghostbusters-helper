@@ -133,17 +133,37 @@ body {
   font-weight: 800;
 }
 
-.home-hero .home-fan-notice {
-  max-width: 720px;
-  margin: 25px auto 0;
-  border: 1px solid #d4e2f7;
-  border-radius: 9px;
+.home-fan-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 12px;
+  border: 1px solid #c7d9f5;
   background: #eef5ff;
   color: #334762;
+  padding: 15px 20px;
+  text-align: left;
+}
+
+.home-fan-notice strong {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #dceaff;
+  color: var(--brand-dark);
   font-size: 13px;
-  font-weight: 800;
+  padding: 7px 12px;
+}
+
+.home-fan-notice p {
+  margin: 0;
+  color: #334762;
+  font-size: 15px;
   line-height: 1.65;
-  padding: 11px 14px;
+}
+
+.home-fan-notice b {
+  color: var(--brand-dark);
 }
 
 .home-groups {
@@ -2048,10 +2068,22 @@ textarea {
     font-size: 12px;
   }
 
-  .home-hero .home-fan-notice {
-    margin-top: 17px;
-    padding: 10px 11px;
+  .home-fan-notice {
+    display: grid;
+    justify-content: stretch;
+    gap: 9px;
+    margin-top: 8px;
+    padding: 14px 12px;
+  }
+
+  .home-fan-notice strong {
+    justify-self: start;
     font-size: 12px;
+  }
+
+  .home-fan-notice p {
+    font-size: 14px;
+    line-height: 1.7;
   }
 
   .home-groups {
