@@ -12,7 +12,9 @@ const likeTitlePrefix = "__guide_like__:";
 const viewCounterKind = "guide-view-counter";
 const passwordKind = "guide-password";
 const commentParentKind = "guide-comment-parent";
+const mediaMarkerPattern = /\{\{media:([^}]+)\}\}/g;
 const fields = {
+  board: document.querySelector("#guideBoard"),
   form: document.querySelector("#guideForm"),
   editor: document.querySelector("#guideEditor"),
   openEditor: document.querySelector("#guideOpenEditor"),
@@ -23,6 +25,7 @@ const fields = {
   category: document.querySelector("#guideCategory"),
   password: document.querySelector("#guidePassword"),
   content: document.querySelector("#guideContent"),
+  composer: document.querySelector("#guideComposer"),
   media: document.querySelector("#guideMedia"),
   existingMedia: document.querySelector("#guideExistingMedia"),
   submit: document.querySelector("#guideSubmit"),
@@ -108,6 +111,18 @@ function setStatus(message, mode = "") {
 
 function idValue() {
   return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function mediaRef(media, index = 0) {
+  return String(media.ref || media.path || `legacy-media-${index}`);
+}
+
+function preparedMedia(media) {
+  return media.map((item, index) => ({ ...item, ref: mediaRef(item, index) }));
+}
+
+function markerFor(ref) {
+  return `{{media:${ref}}}`;
 }
 
 function postUrl(postId) {
@@ -231,7 +246,7 @@ function normalizePost(row) {
     author: row.author || "익명",
     category: parsed.category,
     content: row.content || "",
-    media: visibleMedia(row.media),
+    media: preparedMedia(visibleMedia(row.media)),
     views: Number(row.views || viewCount(row.media)),
     likes: Number(row.likes || 0),
     password: passwordRecord(row.media),
@@ -372,20 +387,22 @@ function loadCommentCounts() {
   });
 }
 
-async function filesToTemporaryMedia(files) {
-  const total = files.reduce((sum, file) => sum + file.size, 0);
+async function filesToTemporaryMedia(items) {
+  const total = items.reduce((sum, item) => sum + item.file.size, 0);
   if (total > 3 * 1024 * 1024) throw new Error("local-size");
-  return Promise.all(files.map((file) => new Promise((resolve, reject) => {
+  return Promise.all(items.map((item) => new Promise((resolve, reject) => {
+    const file = item.file;
     const reader = new FileReader();
-    reader.onload = () => resolve({ url: reader.result, type: file.type, name: file.name });
+    reader.onload = () => resolve({ ref: item.ref, url: reader.result, type: file.type, name: file.name });
     reader.onerror = reject;
     reader.readAsDataURL(file);
   })));
 }
 
-async function uploadMedia(files, postId) {
+async function uploadMedia(items, postId) {
   const uploaded = [];
-  for (const file of files) {
+  for (const item of items) {
+    const file = item.file;
     const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_") || "media";
     const path = `${postId}/${idValue()}-${cleanName}`;
     const response = await fetch(`${guideBackend.url}/storage/v1/object/${guideBackend.bucket}/${encodeURIComponent(path).replaceAll("%2F", "/")}`, {
@@ -395,6 +412,7 @@ async function uploadMedia(files, postId) {
     });
     if (!response.ok) throw new Error("upload");
     uploaded.push({
+      ref: item.ref,
       path,
       name: file.name,
       type: file.type,
@@ -424,15 +442,130 @@ async function saveRemotePost(post, editing) {
   return normalizePost(rows[0] || post);
 }
 
+let composerRange = null;
+
+function composerMediaMarkup(item) {
+  const url = escapeHtml(item.previewUrl || item.url);
+  const label = escapeHtml(item.name || "첨부 파일");
+  const preview = String(item.type).startsWith("video/")
+    ? `<video controls preload="metadata" src="${url}" aria-label="${label}"></video>`
+    : `<img src="${url}" alt="${label}">`;
+  return `<figure class="guide-composer-media" data-media-ref="${escapeHtml(item.ref)}" contenteditable="false">${preview}<figcaption>${label}</figcaption></figure>`;
+}
+
+function rememberComposerRange() {
+  const selection = window.getSelection();
+  if (!selection?.rangeCount || !fields.composer.contains(selection.anchorNode)) return;
+  composerRange = selection.getRangeAt(0).cloneRange();
+}
+
+function insertComposerMedia(item) {
+  fields.composer.focus();
+  const selection = window.getSelection();
+  if (composerRange && fields.composer.contains(composerRange.commonAncestorContainer)) {
+    selection.removeAllRanges();
+    selection.addRange(composerRange);
+  }
+  const range = selection.rangeCount ? selection.getRangeAt(0) : document.createRange();
+  if (!selection.rangeCount) {
+    range.selectNodeContents(fields.composer);
+    range.collapse(false);
+  }
+  const template = document.createElement("template");
+  template.innerHTML = composerMediaMarkup(item);
+  const node = template.content.firstElementChild;
+  range.deleteContents();
+  range.insertNode(node);
+  const spacer = document.createElement("div");
+  spacer.innerHTML = "<br>";
+  node.after(spacer);
+  range.setStart(spacer, 0);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  composerRange = range.cloneRange();
+}
+
+function queueMediaFiles(files) {
+  [...files]
+    .filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"))
+    .forEach((file) => {
+      const item = {
+        ref: `media-${idValue()}`,
+        file,
+        name: file.name || "붙여넣은 미디어",
+        type: file.type,
+        previewUrl: URL.createObjectURL(file),
+      };
+      retainedMedia.push(item);
+      insertComposerMedia(item);
+    });
+  fields.media.value = "";
+  showRetainedMedia();
+}
+
+function composerContent() {
+  const walk = (node) => {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    if (node.matches(".guide-composer-media")) return `\n${markerFor(node.dataset.mediaRef)}\n`;
+    if (node.tagName === "BR") return "\n";
+    const text = [...node.childNodes].map(walk).join("");
+    return /^(DIV|P|LI)$/.test(node.tagName) ? `${text}\n` : text;
+  };
+  return [...fields.composer.childNodes]
+    .map(walk)
+    .join("")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function textToComposerMarkup(text) {
+  return escapeHtml(text).replaceAll("\n", "<br>");
+}
+
+function fillComposer(content, media) {
+  const referenced = new Set();
+  let cursor = 0;
+  let markup = "";
+  for (const match of content.matchAll(mediaMarkerPattern)) {
+    markup += textToComposerMarkup(content.slice(cursor, match.index));
+    const item = media.find((entry) => entry.ref === match[1]);
+    if (item) {
+      markup += composerMediaMarkup(item);
+      referenced.add(item.ref);
+    }
+    cursor = match.index + match[0].length;
+  }
+  markup += textToComposerMarkup(content.slice(cursor));
+  media.filter((item) => !referenced.has(item.ref)).forEach((item) => {
+    markup += composerMediaMarkup(item);
+  });
+  fields.composer.innerHTML = markup;
+  fields.content.value = composerContent();
+}
+
 async function submitPost(event) {
   event.preventDefault();
   const editId = fields.editId.value;
   const previous = posts.find((post) => post.id === editId);
   const editing = Boolean(previous);
   const id = editing ? previous.id : idValue();
-  const selectedFiles = [...fields.media.files];
+  const pendingMedia = retainedMedia.filter((item) => item.file);
+  const keptMedia = retainedMedia.filter((item) => !item.file);
   const category = fields.category.value || "일반";
   const title = fields.title.value.trim();
+  const content = composerContent();
+  fields.content.value = content;
+  if (!content) {
+    setStatus("공략 내용을 입력하거나 이미지·동영상을 넣어주세요.", "is-offline");
+    fields.composer.focus();
+    return;
+  }
+  if (content.length > 5000) {
+    setStatus("공략 내용은 5000자 이내로 입력해주세요.", "is-offline");
+    return;
+  }
   if (savedTitle({ title, category }).length > 100) {
     setStatus("말머리를 포함한 제목은 100자 이내로 입력해주세요.", "is-offline");
     return;
@@ -442,8 +575,8 @@ async function submitPost(event) {
     title,
     author: fields.author.value.trim() || "익명",
     category,
-    content: fields.content.value.trim(),
-    media: [...retainedMedia],
+    content,
+    media: [...keptMedia],
     views: previous?.views || 0,
     commentCount: previous?.commentCount || 0,
     password: previous?.password || await makePasswordRecord(fields.password.value),
@@ -453,12 +586,12 @@ async function submitPost(event) {
   fields.submit.disabled = true;
   try {
     if (hasPublicStore()) {
-      basePost.media.push(...await uploadMedia(selectedFiles, id));
+      basePost.media.push(...await uploadMedia(pendingMedia, id));
       const saved = await saveRemotePost(basePost, editing);
       posts = sortPosts([saved, ...posts.filter((post) => post.id !== id)]);
       setStatus(editing ? "공략글이 수정되었습니다." : "공략글이 등록되었습니다.", "is-online");
     } else {
-      basePost.media.push(...await filesToTemporaryMedia(selectedFiles));
+      basePost.media.push(...await filesToTemporaryMedia(pendingMedia));
       posts = sortPosts([basePost, ...posts.filter((post) => post.id !== id)]);
       saveLocalPosts();
       setStatus(editing ? "공략글을 이 기기에서 수정했습니다." : "공략글을 이 기기에 임시 저장했습니다.", "is-offline");
@@ -467,7 +600,7 @@ async function submitPost(event) {
     renderPosts();
   } catch (error) {
     try {
-      basePost.media = [...retainedMedia, ...await filesToTemporaryMedia(selectedFiles)];
+      basePost.media = [...keptMedia, ...await filesToTemporaryMedia(pendingMedia)];
       posts = sortPosts([basePost, ...posts.filter((post) => post.id !== id)]);
       saveLocalPosts();
       resetForm();
@@ -493,6 +626,30 @@ function mediaMarkup(media) {
     }
     return `<img loading="lazy" src="${url}" alt="${label}">`;
   }).join("");
+}
+
+function proseMarkup(text) {
+  return text ? `<div class="guide-prose">${escapeHtml(text).replaceAll("\n", "<br>")}</div>` : "";
+}
+
+function postBodyMarkup(post) {
+  const referenced = new Set();
+  let cursor = 0;
+  let body = "";
+  for (const match of post.content.matchAll(mediaMarkerPattern)) {
+    body += proseMarkup(post.content.slice(cursor, match.index));
+    const media = post.media.find((item) => item.ref === match[1]);
+    if (media) {
+      referenced.add(media.ref);
+      body += `<div class="guide-inline-media">${mediaMarkup([media])}</div>`;
+    }
+    cursor = match.index + match[0].length;
+  }
+  body += proseMarkup(post.content.slice(cursor));
+  return {
+    body,
+    remaining: post.media.filter((item) => !referenced.has(item.ref)),
+  };
 }
 
 function dateLabel(value) {
@@ -535,10 +692,12 @@ function renderPosts() {
 function renderViewer() {
   const post = posts.find((item) => item.id === selectedPostId);
   fields.viewer.hidden = !post;
+  fields.board.classList.toggle("is-viewing", Boolean(post));
   if (!post) {
     fields.viewer.innerHTML = "";
     return;
   }
+  const postBody = postBodyMarkup(post);
   fields.viewer.innerHTML = `
     <div class="guide-viewer-head" data-guide-id="${escapeHtml(post.id)}">
       <div>
@@ -551,11 +710,11 @@ function renderViewer() {
         <button type="button" data-guide-action="share">공유</button>
         <button type="button" data-guide-action="edit">수정</button>
         <button type="button" data-guide-action="delete">삭제</button>
-        <button type="button" data-guide-action="close">닫기</button>
+        <button type="button" data-guide-action="close">목록으로</button>
       </div>
     </div>
-    <div class="guide-viewer-content">${escapeHtml(post.content).replaceAll("\n", "<br>")}</div>
-    ${post.media.length ? `<div class="guide-gallery">${mediaMarkup(post.media)}</div>` : ""}
+    <div class="guide-viewer-content">${postBody.body}</div>
+    ${postBody.remaining.length ? `<div class="guide-gallery">${mediaMarkup(postBody.remaining)}</div>` : ""}
     <section class="guide-comments">
       <h4>댓글 <span id="guideCommentCount">${post.commentCount}</span></h4>
       <p id="guideReplyTarget" class="guide-reply-target" hidden></p>
@@ -732,8 +891,8 @@ async function deleteComment(commentId) {
 function showRetainedMedia() {
   fields.existingMedia.hidden = !retainedMedia.length;
   fields.existingMedia.innerHTML = retainedMedia.length
-    ? `<p>유지할 기존 첨부</p><div class="guide-existing-list">${retainedMedia.map((media, index) => `
-      <span>${escapeHtml(media.name || "첨부 파일")} <button type="button" data-remove-media="${index}">제외</button></span>
+    ? `<p>본문에 들어간 미디어</p><div class="guide-existing-list">${retainedMedia.map((media, index) => `
+      <span>${escapeHtml(media.name || "첨부 파일")} <button type="button" data-remove-media="${index}">삭제</button></span>
     `).join("")}</div>`
     : "";
 }
@@ -750,8 +909,8 @@ async function startEdit(post) {
   fields.password.required = !post.password;
   fields.password.disabled = Boolean(post.password);
   fields.password.placeholder = post.password ? "기존 비밀번호 유지" : "4자 이상 입력";
-  fields.content.value = post.content;
-  retainedMedia = [...post.media];
+  retainedMedia = preparedMedia(post.media);
+  fillComposer(post.content, retainedMedia);
   fields.submit.textContent = "수정 완료";
   fields.cancel.hidden = false;
   showRetainedMedia();
@@ -763,6 +922,9 @@ function resetForm() {
   fields.form.reset();
   fields.editId.value = "";
   retainedMedia = [];
+  fields.composer.innerHTML = "";
+  fields.content.value = "";
+  composerRange = null;
   fields.formTitle.textContent = "공략글 작성";
   fields.submit.textContent = "공략글 등록";
   fields.cancel.hidden = true;
@@ -818,7 +980,9 @@ fields.categories.addEventListener("click", (event) => {
 fields.existingMedia.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-remove-media]");
   if (!button) return;
-  retainedMedia.splice(Number(button.dataset.removeMedia), 1);
+  const removed = retainedMedia.splice(Number(button.dataset.removeMedia), 1)[0];
+  fields.composer.querySelector(`[data-media-ref="${CSS.escape(removed.ref)}"]`)?.remove();
+  fields.content.value = composerContent();
   showRetainedMedia();
 });
 fields.posts.addEventListener("click", (event) => {
@@ -831,6 +995,7 @@ fields.posts.addEventListener("click", (event) => {
     updatePostUrl(post.id);
     incrementViews(post);
     renderViewer();
+    fields.viewer.scrollIntoView({ block: "start", behavior: "smooth" });
   }
   if (button.dataset.guideAction === "edit") startEdit(post);
   if (button.dataset.guideAction === "delete") deletePost(post);
@@ -861,6 +1026,7 @@ fields.viewer.addEventListener("click", (event) => {
     selectedPostId = "";
     updatePostUrl("");
     renderViewer();
+    fields.board.scrollIntoView({ block: "start", behavior: "smooth" });
     return;
   }
   if (!post) return;
@@ -881,6 +1047,21 @@ fields.viewer.addEventListener("submit", (event) => {
 window.addEventListener("popstate", () => {
   selectedPostId = new URLSearchParams(window.location.search).get("post") || "";
   renderViewer();
+  if (selectedPostId) fields.viewer.scrollIntoView({ block: "start" });
 });
+fields.composer.addEventListener("input", () => {
+  fields.content.value = composerContent();
+  rememberComposerRange();
+});
+fields.composer.addEventListener("keyup", rememberComposerRange);
+fields.composer.addEventListener("mouseup", rememberComposerRange);
+fields.composer.addEventListener("paste", (event) => {
+  const files = [...event.clipboardData.files]
+    .filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"));
+  if (!files.length) return;
+  event.preventDefault();
+  queueMediaFiles(files);
+});
+fields.media.addEventListener("change", () => queueMediaFiles(fields.media.files));
 revealCurrentNavItem();
 loadPosts();

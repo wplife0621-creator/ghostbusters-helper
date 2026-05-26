@@ -1127,6 +1127,10 @@ textarea {
   display: grid;
 }
 
+.guide-board.is-viewing .guide-board-list {
+  display: none;
+}
+
 .guide-row {
   min-height: 48px;
   border-bottom: 1px solid #e1e6ef;
@@ -1188,7 +1192,7 @@ textarea {
 }
 
 .guide-viewer {
-  margin-top: 16px;
+  margin-top: 0;
   border-top: 2px solid #263d63;
   border-bottom: 1px solid var(--line);
 }
@@ -1219,6 +1223,30 @@ textarea {
   padding: 22px 14px;
   color: #293952;
   line-height: 1.8;
+}
+
+.guide-prose {
+  margin: 0 0 18px;
+  overflow-wrap: anywhere;
+}
+
+.guide-prose:last-child {
+  margin-bottom: 0;
+}
+
+.guide-inline-media {
+  margin: 18px auto;
+  width: min(100%, 860px);
+}
+
+.guide-inline-media img,
+.guide-inline-media video {
+  display: block;
+  width: 100%;
+  max-height: min(72vh, 720px);
+  border-radius: 9px;
+  background: #101827;
+  object-fit: contain;
 }
 
 .guide-viewer .guide-gallery {
@@ -1359,6 +1387,87 @@ textarea {
 .guide-existing-media,
 .guide-form-actions {
   grid-column: 1 / -1;
+}
+
+.guide-composer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.guide-composer-toolbar small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.guide-insert-media input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.guide-insert-media span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  border: 1px solid #c9d7eb;
+  border-radius: 8px;
+  background: #edf4ff;
+  color: var(--brand-dark);
+  font-weight: 900;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.guide-composer {
+  min-height: 250px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: #273850;
+  line-height: 1.75;
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+
+.guide-composer:empty::before {
+  content: attr(data-placeholder);
+  color: #8795aa;
+}
+
+.guide-composer:focus {
+  outline: 2px solid rgba(58, 119, 205, .24);
+  border-color: var(--brand);
+}
+
+.guide-composer-media {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 14px 0;
+  padding: 9px;
+  border: 1px dashed #ccdaec;
+  border-radius: 9px;
+  background: #f7faff;
+}
+
+.guide-composer-media img,
+.guide-composer-media video {
+  display: block;
+  width: min(100%, 720px);
+  max-height: 380px;
+  border-radius: 8px;
+  background: #101827;
+  object-fit: contain;
+}
+
+.guide-composer-media figcaption {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .guide-media small {
@@ -3265,6 +3374,15 @@ textarea {
     overflow-wrap: anywhere;
   }
 
+  .guide-inline-media {
+    margin: 14px 0;
+  }
+
+  .guide-inline-media img,
+  .guide-inline-media video {
+    max-height: none;
+  }
+
   .guide-comments {
     padding: 16px 10px;
   }
@@ -3298,6 +3416,26 @@ textarea {
 
   .guide-form-actions {
     display: grid;
+  }
+
+  .guide-composer-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .guide-insert-media span {
+    justify-content: center;
+    min-height: 46px;
+  }
+
+  .guide-composer {
+    min-height: 300px;
+    padding: 11px;
+  }
+
+  .guide-composer-media {
+    margin: 12px 0;
+    padding: 7px;
   }
 
   .guide-post-head {
