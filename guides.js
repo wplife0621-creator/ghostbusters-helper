@@ -122,7 +122,7 @@ function preparedMedia(media) {
 }
 
 function markerFor(ref) {
-  return `{{media:${ref}}}`;
+  return `{${"{"}media:${ref}}}`;
 }
 
 function postUrl(postId) {
