@@ -43,15 +43,51 @@ const numbersReportPrefix = "__numbers__:";
 const sailingMarker = "__sailing__";
 const recommendationMarkerPrefix = "__recommended_character__:";
 const effectSortDefinitions = {
-  "physical-damage": { label: "물리 피해", pattern: /물리\s*피해/i },
-  stagger: { label: "경직", pattern: /경직/i },
+  "physical-damage": {
+    label: "물리 피해",
+    pattern: /물리\s*피해/i,
+    scorePatterns: [/물리\s*피해\s*([+-]?\d+(?:\.\d+)?)\s*%/i],
+  },
+  stagger: {
+    label: "경직",
+    pattern: /경직/i,
+    scorePatterns: [
+      /([+-]?\d+(?:\.\d+)?)\s*%\s*확률[^/\n]*경직/i,
+      /([+-]?\d+(?:\.\d+)?)\s*초\s*경직/i,
+      /경직\s*([+-]?\d+(?:\.\d+)?)\s*초/i,
+    ],
+  },
   "armor-pierce": { label: "방어력 관통", pattern: /방어력\s*관통/i },
-  "freeze-stack": { label: "빙결 스택", pattern: /빙결\s*스택/i },
-  "fire-stack": { label: "화염 스택", pattern: /화염\s*스택/i },
-  "dark-stack": { label: "암흑 스택", pattern: /암흑\s*스택/i },
-  "lightning-stack": { label: "번개 스택", pattern: /번개\s*스택/i },
-  vision: { label: "시야", pattern: /시야/i },
-  stamina: { label: "스태미나", pattern: /스태미나/i },
+  "freeze-stack": {
+    label: "빙결 스택",
+    pattern: /빙결\s*스택/i,
+    scorePatterns: [/빙결\s*스택\s*\+?\s*([+-]?\d+(?:\.\d+)?)/i],
+  },
+  "fire-stack": {
+    label: "화염 스택",
+    pattern: /화염\s*스택/i,
+    scorePatterns: [/화염\s*스택\s*\+?\s*([+-]?\d+(?:\.\d+)?)/i],
+  },
+  "dark-stack": {
+    label: "암흑 스택",
+    pattern: /암흑\s*스택/i,
+    scorePatterns: [/암흑\s*스택\s*\+?\s*([+-]?\d+(?:\.\d+)?)/i],
+  },
+  "lightning-stack": {
+    label: "번개 스택",
+    pattern: /번개\s*스택/i,
+    scorePatterns: [/번개\s*스택\s*\+?\s*([+-]?\d+(?:\.\d+)?)/i],
+  },
+  vision: {
+    label: "시야",
+    pattern: /시야/i,
+    scorePatterns: [/시야(?:\s*범위)?\s*\+?\s*([+-]?\d+(?:\.\d+)?)\s*타일/i],
+  },
+  stamina: {
+    label: "스태미나",
+    pattern: /스태미나/i,
+    scorePatterns: [/스태미나(?:\s*소모)?\s*([+-]?\d+(?:\.\d+)?)\s*%/i],
+  },
 };
 
 const els = {
@@ -319,9 +355,8 @@ function effectMatchLines(row, effect) {
 function effectSortScore(row, effect) {
   const lines = effectMatchLines(row, effect);
   if (!lines.length) return { matched: false, value: 0 };
-  const values = lines.flatMap((line) =>
-    [...line.matchAll(/[+-]?\d+(?:\.\d+)?(?=\s*(?:%|초|타일|스택))/g)]
-      .map((match) => Math.abs(Number(match[0])))
+  const values = (effect.scorePatterns || []).flatMap((pattern) =>
+    lines.map((line) => line.match(pattern)?.[1]).filter(Boolean).map((value) => Math.abs(Number(value)))
   );
   return { matched: true, value: values.length ? Math.max(...values) : 0 };
 }
