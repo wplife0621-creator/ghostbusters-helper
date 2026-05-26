@@ -42,6 +42,17 @@ const buildDeleteMarker = "__build_deleted__";
 const numbersReportPrefix = "__numbers__:";
 const sailingMarker = "__sailing__";
 const recommendationMarkerPrefix = "__recommended_character__:";
+const effectSortDefinitions = {
+  "physical-damage": { label: "물리 피해", pattern: /물리\s*피해/i },
+  stagger: { label: "경직", pattern: /경직/i },
+  "armor-pierce": { label: "방어력 관통", pattern: /방어력\s*관통/i },
+  "freeze-stack": { label: "빙결 스택", pattern: /빙결\s*스택/i },
+  "fire-stack": { label: "화염 스택", pattern: /화염\s*스택/i },
+  "dark-stack": { label: "암흑 스택", pattern: /암흑\s*스택/i },
+  "lightning-stack": { label: "번개 스택", pattern: /번개\s*스택/i },
+  vision: { label: "시야", pattern: /시야/i },
+  stamina: { label: "스태미나", pattern: /스태미나/i },
+};
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -289,6 +300,32 @@ function cooldownOf(row) {
   return cooldowns.length ? Math.min(...cooldowns) : Infinity;
 }
 
+function selectedEffectSort() {
+  if (!els.sort?.value.startsWith("effect:")) return null;
+  return effectSortDefinitions[els.sort.value.slice("effect:".length)] || null;
+}
+
+function effectText(row) {
+  return [row["패시브"], row["액티브"]].map(textOf).join("\n");
+}
+
+function effectMatchLines(row, effect) {
+  return effectText(row)
+    .split(/\r?\n|\//)
+    .map((line) => line.replace(/\(\d+\s*s\)/gi, "").trim())
+    .filter((line) => effect.pattern.test(line));
+}
+
+function effectSortScore(row, effect) {
+  const lines = effectMatchLines(row, effect);
+  if (!lines.length) return { matched: false, value: 0 };
+  const values = lines.flatMap((line) =>
+    [...line.matchAll(/[+-]?\d+(?:\.\d+)?(?=\s*(?:%|초|타일|스택))/g)]
+      .map((match) => Math.abs(Number(match[0])))
+  );
+  return { matched: true, value: values.length ? Math.max(...values) : 0 };
+}
+
 function floorRank(value) {
   const match = textOf(value).match(/\d+/);
   return match ? Number(match[0]) : 999;
@@ -528,6 +565,10 @@ function initEssences() {
   els.search.value = new URLSearchParams(location.search).get("search") || "";
   refreshControls();
   renderStatChips();
+
+  els.sort.addEventListener("change", () => {
+    if (selectedEffectSort()) activeStatNames = [];
+  });
 
   els.statSort.addEventListener("change", () => {
     const value = els.statSort.value;
@@ -1834,6 +1875,17 @@ function sortEssenceRows(rows) {
     return copy.sort((a, b) => Number(isSailingRow(b.row)) - Number(isSailingRow(a.row)) || floorAreaMonsterSort(a, b));
   }
 
+  const effect = selectedEffectSort();
+  if (effect) {
+    return copy.sort((a, b) => {
+      const aScore = effectSortScore(a.row, effect);
+      const bScore = effectSortScore(b.row, effect);
+      return Number(bScore.matched) - Number(aScore.matched)
+        || bScore.value - aScore.value
+        || floorAreaMonsterSort(a, b);
+    });
+  }
+
   if (mode.startsWith("recommend:")) {
     const character = mode.slice("recommend:".length);
     return copy.sort((a, b) => Number(isRecommendedFor(b.row, character)) - Number(isRecommendedFor(a.row, character)) || floorAreaMonsterSort(a, b));
@@ -1867,11 +1919,13 @@ function floorAreaMonsterSortDescending(a, b) {
 function render() {
   const rows = collectEssenceRows();
   const selectedStats = selectedStatNames();
+  const selectedEffect = selectedEffectSort();
   const recommendedSortCharacter = els.sort.value.startsWith("recommend:") ? els.sort.value.slice("recommend:".length) : "";
   updateStatSortUi();
   els.resultTitle.textContent = selectedStats.length > 1
     ? "스탯 조합 정렬"
     : hasStatSort() ? `${selectedStats[0]} 정렬`
+      : selectedEffect ? `${selectedEffect.label} 효과 정렬`
       : recommendedSortCharacter ? `${recommendedSortCharacter} 추천 정수`
         : "정수 목록";
   els.resultCount.textContent = `${rows.length}건`;
@@ -1882,7 +1936,7 @@ function render() {
 }
 
 function essenceTemplate(rows) {
-  if (hasStatSort()) {
+  if (hasStatSort() || selectedEffectSort()) {
     return `<div class="essence-table-wrap">${essenceTable(rows)}</div>`;
   }
 
@@ -1927,6 +1981,8 @@ function essenceTable(items) {
 
 function essenceRowTemplate(row) {
   const activeStats = hasStatSort() ? selectedStatNames() : [];
+  const selectedEffect = selectedEffectSort();
+  const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
   const highlightText = activeStats.length
     ? activeStats.map((statName) => `${statName} ${statValue(row, statName)}`).join(" · ")
     : "";
@@ -1936,6 +1992,7 @@ function essenceRowTemplate(row) {
         <div class="monster-title-line">
           <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
           ${isSailingRow(row) ? `<span class="sailing-pill">항해</span>` : ""}
+          ${effectScore?.matched ? `<span class="effect-sort-pill">${escapeHtml(selectedEffect.label)}${effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}
           <span class="location-pill">${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
         </div>
       </td>
