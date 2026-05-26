@@ -2645,6 +2645,12 @@ textarea {
   padding: 3px 8px;
 }
 
+.effect-sort-pill.is-warning {
+  border-color: #efcfb7;
+  background: #fff3e8;
+  color: #a4521c;
+}
+
 .grade-pill {
   background: #edf4ff;
   color: var(--brand-dark);

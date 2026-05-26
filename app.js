@@ -48,6 +48,15 @@ const effectSortDefinitions = {
     pattern: /물리\s*피해/i,
     scorePatterns: [/물리\s*피해\s*([+-]?\d+(?:\.\d+)?)\s*%/i],
   },
+  "incoming-damage": {
+    label: "받는 피해",
+    pattern: /받는\s*피해(?:량)?/i,
+    scorePatterns: [
+      /받는\s*피해(?:량)?\s*-\s*(\d+(?:\.\d+)?)\s*%/i,
+      /받는\s*피해(?:량)?\s*(\d+(?:\.\d+)?)\s*%\s*흡수/i,
+    ],
+    penaltyPattern: /받는\s*피해(?:량)?(?:\s*\+\s*\d+(?:\.\d+)?\s*%|\s*\d+(?:\.\d+)?\s*%\s*트레이드\s*오프|\s*증가)/i,
+  },
   stagger: {
     label: "경직",
     pattern: /경직/i,
@@ -356,11 +365,15 @@ function effectMatchLines(row, effect) {
 
 function effectSortScore(row, effect) {
   const lines = effectMatchLines(row, effect);
-  if (!lines.length) return { matched: false, value: 0 };
+  if (!lines.length) return { matched: false, value: 0, penalized: false };
   const values = (effect.scorePatterns || []).flatMap((pattern) =>
     lines.map((line) => line.match(pattern)?.[1]).filter(Boolean).map((value) => Math.abs(Number(value)))
   );
-  return { matched: true, value: values.length ? Math.max(...values) : 0 };
+  return {
+    matched: true,
+    value: values.length ? Math.max(...values) : 0,
+    penalized: Boolean(effect.penaltyPattern && lines.some((line) => effect.penaltyPattern.test(line))),
+  };
 }
 
 function floorRank(value) {
@@ -1956,6 +1969,7 @@ function sortEssenceRows(rows) {
       const aScore = effectSortScore(a.row, effect);
       const bScore = effectSortScore(b.row, effect);
       return Number(bScore.matched) - Number(aScore.matched)
+        || Number(aScore.penalized) - Number(bScore.penalized)
         || bScore.value - aScore.value
         || floorAreaMonsterSort(a, b);
     });
@@ -2067,7 +2081,7 @@ function essenceRowTemplate(row) {
         <div class="monster-title-line">
           <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
           ${isSailingRow(row) ? `<span class="sailing-pill">항해</span>` : ""}
-          ${effectScore?.matched ? `<span class="effect-sort-pill">${escapeHtml(selectedEffect.label)}${effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}
+          ${effectScore?.matched ? `<span class="effect-sort-pill${effectScore.penalized ? " is-warning" : ""}">${escapeHtml(selectedEffect.label)}${effectScore.penalized ? " · 증가" : effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}
           <span class="location-pill">${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])}</span>
         </div>
       </td>
