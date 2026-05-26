@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정수 확인하기 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260526-2">
+  <link rel="stylesheet" href="./styles.css?v=20260526-3">
 </head>
 <body>
   <header class="topbar compact">
@@ -62,15 +62,6 @@
           <option value="recommend:아이나르">아이나르 추천 우선</option>
           <option value="recommend:레이븐">레이븐 추천 우선</option>
           <option value="recommend:아우옌">아우옌 추천 우선</option>
-          <option value="effect:physical-damage">효과: 물리 피해</option>
-          <option value="effect:stagger">효과: 경직</option>
-          <option value="effect:armor-pierce">효과: 방어력 관통</option>
-          <option value="effect:freeze-stack">효과: 빙결 스택</option>
-          <option value="effect:fire-stack">효과: 화염 스택</option>
-          <option value="effect:dark-stack">효과: 암흑 스택</option>
-          <option value="effect:lightning-stack">효과: 번개 스택</option>
-          <option value="effect:vision">효과: 시야</option>
-          <option value="effect:stamina">효과: 스태미나</option>
           <option value="floor-desc">층 높은 순</option>
           <option value="cooldown">쿨타임 짧은 순</option>
         </select>
@@ -79,6 +70,13 @@
         <span>스탯 선택</span>
         <select id="statSortFilter"></select>
       </label>
+    </section>
+    <section class="panel effect-panel">
+      <div class="section-title compact-title">
+        <h2>효과 정렬</h2>
+        <p id="effectSortSummary">원하는 효과를 누르면 해당 정수가 먼저 표시됩니다.</p>
+      </div>
+      <div id="effectSortChips" class="effect-chip-row" aria-label="효과 정렬 선택"></div>
     </section>
     <section class="panel stat-panel">
       <div class="section-title compact-title">
@@ -105,6 +103,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260526-4"></script>
+  <script src="./app.js?v=20260526-5"></script>
 </body>
 </html>

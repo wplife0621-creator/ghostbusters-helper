@@ -98,6 +98,8 @@ const els = {
   character: document.querySelector("#characterFilter"),
   sailingFilter: document.querySelector("#sailingFilter"),
   sort: document.querySelector("#sortFilter"),
+  effectSortChips: document.querySelector("#effectSortChips"),
+  effectSortSummary: document.querySelector("#effectSortSummary"),
   statSort: document.querySelector("#statSortFilter"),
   statChips: document.querySelector("#statChips"),
   statSortSummary: document.querySelector("#statSortSummary"),
@@ -205,6 +207,7 @@ let numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems)
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
 let activeEssenceInput = null;
 let activeStatNames = [];
+let activeEffectSortKey = "";
 let homeNotices = [];
 let activeHomeNoticeFilter = "all";
 const statNoneLabel = "스탯 선택 안 함";
@@ -337,8 +340,7 @@ function cooldownOf(row) {
 }
 
 function selectedEffectSort() {
-  if (!els.sort?.value.startsWith("effect:")) return null;
-  return effectSortDefinitions[els.sort.value.slice("effect:".length)] || null;
+  return effectSortDefinitions[activeEffectSortKey] || null;
 }
 
 function effectText(row) {
@@ -599,15 +601,23 @@ function initNumbers() {
 function initEssences() {
   els.search.value = new URLSearchParams(location.search).get("search") || "";
   refreshControls();
+  renderEffectSortChips();
   renderStatChips();
 
   els.sort.addEventListener("change", () => {
-    if (selectedEffectSort()) activeStatNames = [];
+    if (els.sort.value !== "default") {
+      activeEffectSortKey = "";
+      renderEffectSortChips();
+    }
   });
 
   els.statSort.addEventListener("change", () => {
     const value = els.statSort.value;
     activeStatNames = value && value !== statNoneLabel ? [value] : [];
+    if (activeStatNames.length) {
+      activeEffectSortKey = "";
+      renderEffectSortChips();
+    }
     render();
   });
 
@@ -1820,7 +1830,37 @@ function renderStatChips() {
     } else {
       activeStatNames = [...activeStatNames, statName];
     }
+    if (activeStatNames.length) {
+      activeEffectSortKey = "";
+      renderEffectSortChips();
+    }
     els.statSort.value = activeStatNames[0] || statNoneLabel;
+    render();
+  };
+}
+
+function renderEffectSortChips() {
+  els.effectSortChips.innerHTML = [
+    `<button type="button" class="effect-chip${activeEffectSortKey ? "" : " is-active"}" data-effect="">선택 안 함</button>`,
+    ...Object.entries(effectSortDefinitions).map(([key, effect]) => `
+      <button type="button" class="effect-chip${activeEffectSortKey === key ? " is-active" : ""}" data-effect="${escapeHtml(key)}">
+        ${escapeHtml(effect.label)}
+      </button>
+    `),
+  ].join("");
+  const selected = selectedEffectSort();
+  els.effectSortSummary.textContent = selected
+    ? `${selected.label} 효과가 있는 정수를 우선 표시합니다. 수치가 있으면 높은 순으로 정렬됩니다.`
+    : "원하는 효과를 누르면 해당 정수가 먼저 표시됩니다.";
+  els.effectSortChips.onclick = (event) => {
+    const button = event.target.closest("button[data-effect]");
+    if (!button) return;
+    activeEffectSortKey = button.dataset.effect;
+    if (activeEffectSortKey) {
+      activeStatNames = [];
+      els.sort.value = "default";
+    }
+    renderEffectSortChips();
     render();
   };
 }

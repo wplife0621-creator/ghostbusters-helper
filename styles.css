@@ -451,6 +451,7 @@ body {
 }
 
 .compact-card,
+.effect-panel,
 .stat-panel,
 .results-panel {
   padding: 14px;
@@ -465,6 +466,39 @@ body {
 
 .essence-controls {
   margin-bottom: 12px;
+}
+
+.effect-panel {
+  margin-bottom: 12px;
+  border-color: #d5e3f5;
+  background:
+    linear-gradient(135deg, #fff 0%, #f5f9ff 100%);
+}
+
+.effect-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.effect-chip {
+  min-height: 38px;
+  border: 1px solid #cfdaea;
+  border-radius: 999px;
+  background: #fff;
+  color: #40516d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 13px;
+  cursor: pointer;
+}
+
+.effect-chip:hover,
+.effect-chip.is-active {
+  border-color: #99ccb8;
+  background: #e7f7f1;
+  color: #116b53;
 }
 
 .section-title {
@@ -2712,6 +2746,7 @@ textarea {
   }
 
   .compact-card,
+  .effect-panel,
   .stat-panel,
   .results-panel,
   .numbers-panel,
@@ -2863,6 +2898,22 @@ textarea {
 
   .home-notice-status {
     text-align: left;
+  }
+
+  .effect-panel {
+    padding: 12px;
+  }
+
+  .effect-chip-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .effect-chip {
+    min-height: 44px;
+    min-width: 0;
+    padding: 0 7px;
   }
 
   .home-group {
@@ -3496,6 +3547,10 @@ textarea {
   .home-notice-item time {
     grid-column: 2;
     padding-top: 0;
+  }
+
+  .effect-chip-row {
+    grid-template-columns: 1fr;
   }
 
   .essence-controls {
