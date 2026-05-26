@@ -496,7 +496,8 @@ function renderHomeNotices() {
     </span>
   `).join("");
   const visible = activeHomeNoticeFilter === "all"
-    ? homeNotices
+    ? types.flatMap((type) => homeNotices.filter((item) => item.type === type.key).slice(0, 4))
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
     : homeNotices.filter((item) => item.type === activeHomeNoticeFilter);
   els.homeNoticeList.innerHTML = visible.length
     ? visible.slice(0, 16).map((notice) => `
