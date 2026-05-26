@@ -2952,7 +2952,7 @@ textarea {
 
   .effect-chip-row {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 7px;
   }
 
@@ -3653,8 +3653,13 @@ textarea {
   }
 }
 
+@media (max-width: 359px) {
+  .effect-chip-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 340px) {
-  .effect-chip-row,
   .essence-controls {
     grid-template-columns: 1fr;
   }
