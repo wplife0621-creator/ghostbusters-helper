@@ -22,6 +22,11 @@ const reportBackend = {
   anonKey: textOf(siteConfig.supabaseAnonKey),
   table: textOf(siteConfig.reportTable) || "monster_reports",
 };
+const guideBackend = {
+  url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
+  anonKey: textOf(siteConfig.supabaseAnonKey),
+  table: textOf(siteConfig.guideTable) || "guide_posts",
+};
 const visitorBackend = {
   url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
   anonKey: textOf(siteConfig.supabaseAnonKey),
@@ -52,6 +57,10 @@ const els = {
   visitorToday: document.querySelector("#visitorToday"),
   visitorTotal: document.querySelector("#visitorTotal"),
   visitorStatus: document.querySelector("#visitorStatus"),
+  homeNoticeFilters: document.querySelector("#homeNoticeFilters"),
+  homeNoticeCounts: document.querySelector("#homeNoticeCounts"),
+  homeNoticeList: document.querySelector("#homeNoticeList"),
+  homeNoticeStatus: document.querySelector("#homeNoticeStatus"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
@@ -149,6 +158,8 @@ let numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems)
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
 let activeEssenceInput = null;
 let activeStatNames = [];
+let homeNotices = [];
+let activeHomeNoticeFilter = "all";
 const statNoneLabel = "스탯 선택 안 함";
 
 function revealCurrentNavItem() {
@@ -335,6 +346,7 @@ function statValue(row, statName) {
 
 function init() {
   revealCurrentNavItem();
+  if (els.homeNoticeList) initHomeNotices();
   if (els.search) initEssences();
   if (els.numbersResults) initNumbers();
   if (els.reportForm) initReport();
@@ -343,7 +355,166 @@ function init() {
   if (els.visitorToday) recordVisit();
 }
 
+function initHomeNotices() {
+  els.homeNoticeFilters.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-notice-filter]");
+    if (!button) return;
+    activeHomeNoticeFilter = button.dataset.noticeFilter;
+    els.homeNoticeFilters.querySelectorAll("button").forEach((item) => {
+      item.classList.toggle("is-active", item === button);
+    });
+    renderHomeNotices();
+  });
+  loadHomeNotices();
+}
+
+function recentNoticeDate(value) {
+  const date = new Date(value || 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function recentNoticeDateLabel(value) {
+  const date = recentNoticeDate(value);
+  if (!date) return "-";
+  return date.toLocaleDateString("ko-KR", { month: "long", day: "numeric" });
+}
+
+function noticeWithinWeek(value) {
+  const date = recentNoticeDate(value);
+  return date && date.getTime() >= Date.now() - (7 * 24 * 60 * 60 * 1000);
+}
+
+function homeNoticeLink(type, id, row) {
+  if (type === "essence") return `./essences.html?search=${encodeURIComponent(visibleReportName(row))}#results`;
+  if (type === "numbers") return `./numbers.html?search=${encodeURIComponent(visibleReportName(row))}#numbersResults`;
+  if (type === "guide") return `./guides.html?post=${encodeURIComponent(id)}`;
+  return `./builds.html?build=${encodeURIComponent(encodeBuild(normalizeRemoteBuild(row)))}`;
+}
+
+function noticeFromReport(row) {
+  const report = normalizeRemoteReport(row);
+  const numbers = isNumbersReport(report);
+  const date = report.reviewedAt || report.createdAt;
+  if (!noticeWithinWeek(date)) return null;
+  return {
+    id: report.id,
+    type: numbers ? "numbers" : "essence",
+    label: numbers ? "넘버스" : "정수",
+    title: visibleReportName(report),
+    summary: numbers
+      ? `${displayNumber(report.floor)} · ${displayLevel(report.grade)} · ${report.passive || "획득처 미기록"}`
+      : `${report.floor || "층 미기록"} · ${report.area || "구역 미기록"} · ${report.grade || "등급 미기록"}`,
+    date,
+    href: homeNoticeLink(numbers ? "numbers" : "essence", report.id, report),
+  };
+}
+
+function homeBuildNotices(rows) {
+  const deletedIds = new Set(rows
+    .filter((row) => row.title === buildDeleteMarker)
+    .map((row) => textOf(row.note))
+    .filter(Boolean));
+  return rows
+    .filter((row) => row.title !== buildLikeMarker && row.title !== buildDeleteMarker
+      && row.title !== visitorBuildMarkers.total && row.title !== visitorBuildMarkers.daily
+      && !deletedIds.has(row.id) && noticeWithinWeek(row.created_at || row.createdAt))
+    .map((row) => {
+      const build = normalizeRemoteBuild(row);
+      return {
+        id: build.id,
+        type: "build",
+        label: "빌드공유",
+        title: build.title || "이름 없는 빌드",
+        summary: `${build.author || "익명"} · ${build.members.length}명 구성`,
+        date: build.createdAt,
+        href: homeNoticeLink("build", build.id, row),
+      };
+    });
+}
+
+function homeGuideNotices(rows) {
+  return rows
+    .filter((row) => !textOf(row.title).startsWith("__guide_comment__:")
+      && !textOf(row.title).startsWith("__guide_like__:")
+      && noticeWithinWeek(row.updated_at || row.created_at))
+    .map((row) => {
+      const title = textOf(row.title).replace(/^\[(보스|파밍|빌드|정보)\]\s*/, "");
+      const category = textOf(row.title).match(/^\[(보스|파밍|빌드|정보)\]/)?.[1] || "일반";
+      return {
+        id: row.id,
+        type: "guide",
+        label: "공략글",
+        title,
+        summary: `${category} · ${textOf(row.author) || "익명"}`,
+        date: row.updated_at || row.created_at,
+        href: homeNoticeLink("guide", row.id, row),
+      };
+    });
+}
+
+async function loadHomeNotices() {
+  if (!reportBackend.url || !reportBackend.anonKey || !buildBackend.url || !buildBackend.anonKey
+    || !guideBackend.url || !guideBackend.anonKey) {
+    els.homeNoticeStatus.textContent = "공개 저장소가 연결되면 최근 공지사항이 표시됩니다.";
+    renderHomeNotices();
+    return;
+  }
+  const requests = await Promise.allSettled([
+    fetch(reportStoreUrl("?select=*&status=eq.approved&order=reviewed_at.desc"), { headers: reportStoreHeaders() }),
+    fetch(buildStoreUrl("?select=*&order=created_at.desc"), { headers: buildStoreHeaders() }),
+    fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?select=*&order=updated_at.desc`, {
+      headers: { apikey: guideBackend.anonKey, Authorization: `Bearer ${guideBackend.anonKey}` },
+    }),
+  ]);
+  const [reports, builds, guides] = await Promise.all(requests.map(async (request) => {
+    if (request.status !== "fulfilled" || !request.value.ok) return [];
+    return request.value.json();
+  }));
+  homeNotices = [
+    ...reports.map(noticeFromReport).filter(Boolean),
+    ...homeBuildNotices(builds),
+    ...homeGuideNotices(guides),
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const failedCount = requests.filter((request) => request.status !== "fulfilled" || !request.value.ok).length;
+  els.homeNoticeStatus.textContent = failedCount
+    ? "일부 최근 소식을 불러오지 못했습니다. 잠시 후 다시 확인해주세요."
+    : "항목을 누르면 해당 정보 화면으로 바로 이동합니다.";
+  renderHomeNotices();
+}
+
+function renderHomeNotices() {
+  const types = [
+    { key: "essence", label: "정수" },
+    { key: "numbers", label: "넘버스" },
+    { key: "build", label: "빌드공유" },
+    { key: "guide", label: "공략글" },
+  ];
+  els.homeNoticeCounts.innerHTML = types.map((type) => `
+    <span class="home-notice-count type-${type.key}">
+      <b>${escapeHtml(type.label)}</b>
+      <strong>${homeNotices.filter((item) => item.type === type.key).length}</strong>
+    </span>
+  `).join("");
+  const visible = activeHomeNoticeFilter === "all"
+    ? homeNotices
+    : homeNotices.filter((item) => item.type === activeHomeNoticeFilter);
+  els.homeNoticeList.innerHTML = visible.length
+    ? visible.slice(0, 16).map((notice) => `
+      <a class="home-notice-item type-${escapeHtml(notice.type)}" href="${escapeHtml(notice.href)}">
+        <span class="home-notice-type">${escapeHtml(notice.label)}</span>
+        <span class="home-notice-copy">
+          <strong>${escapeHtml(notice.title)}</strong>
+          <small>${escapeHtml(notice.summary)}</small>
+        </span>
+        <time datetime="${escapeHtml(notice.date)}">${escapeHtml(recentNoticeDateLabel(notice.date))}</time>
+        <i aria-hidden="true">보기</i>
+      </a>
+    `).join("")
+    : `<div class="home-notice-empty">최근 7일 내 공개된 ${activeHomeNoticeFilter === "all" ? "새 소식이" : "항목이"} 없습니다.</div>`;
+}
+
 function initNumbers() {
+  els.numbersSearch.value = new URLSearchParams(location.search).get("search") || "";
   optionList(els.numbersLevel, unique(numbersRows.map((row) => row["아이템 레벨(Lv)"])), "전체 레벨");
   els.numbersSearch.addEventListener("input", renderNumbers);
   els.numbersLevel.addEventListener("change", renderNumbers);
@@ -353,6 +524,7 @@ function initNumbers() {
 }
 
 function initEssences() {
+  els.search.value = new URLSearchParams(location.search).get("search") || "";
   refreshControls();
   renderStatChips();
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260525-23">
+  <link rel="stylesheet" href="./styles.css?v=20260526-1">
 </head>
 <body>
   <header class="topbar compact">
@@ -44,6 +44,28 @@
     <section class="panel home-fan-notice" aria-label="사이트 운영 안내">
       <strong>팬게임 정보사이트 운영 안내</strong>
       <p>이 사이트는 제작자 <b>겜바바덕후님</b>의 허락을 받아 운영되는 팬게임 정보사이트입니다.</p>
+    </section>
+
+    <section class="panel home-recent" aria-label="최근 공지사항">
+      <div class="home-recent-head">
+        <div>
+          <p class="home-kicker">NOTICE</p>
+          <h2>최근 공지사항</h2>
+          <span>최근 7일 동안 공개된 정보와 새 글을 확인하세요.</span>
+        </div>
+        <nav id="homeNoticeFilters" class="home-notice-filters" aria-label="공지사항 종류 선택">
+          <button type="button" class="is-active" data-notice-filter="all">전체</button>
+          <button type="button" data-notice-filter="essence">정수</button>
+          <button type="button" data-notice-filter="numbers">넘버스</button>
+          <button type="button" data-notice-filter="build">빌드공유</button>
+          <button type="button" data-notice-filter="guide">공략글</button>
+        </nav>
+      </div>
+      <div id="homeNoticeCounts" class="home-notice-counts" aria-label="최근 등록 건수"></div>
+      <div id="homeNoticeList" class="home-notice-list">
+        <div class="home-notice-loading">최근 소식을 불러오는 중입니다.</div>
+      </div>
+      <p id="homeNoticeStatus" class="home-notice-status"></p>
     </section>
 
     <section class="home-groups" aria-label="메뉴 바로가기">
@@ -91,11 +113,12 @@
       supabaseAnonKey: "",
       buildTable: "builds",
       reportTable: "monster_reports",
+      guideTable: "guide_posts",
       visitorTable: "site_visitors",
       dailyVisitorTable: "daily_visitors",
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260524-9"></script>
+  <script src="./app.js?v=20260526-1"></script>
 </body>
 </html>
