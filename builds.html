@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>빌드 공유 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260525-33">
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>빌드 공유</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <a href="./essences.html">정수</a>
+        <a href="./numbers.html">넘버스</a>
+        <a href="./builds.html" aria-current="page">빌드 공유</a>
+        <a href="./guides.html">공략글</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout build-layout">
+    <section class="panel build-panel page-panel">
+      <div class="build-board-head">
+        <div>
+          <h2>공개 빌드</h2>
+          <strong id="buildCount">공개 빌드 0개</strong>
+        </div>
+        <div class="build-board-actions">
+          <label class="field build-sort-control">
+            <span>정렬</span>
+            <select id="buildSort">
+              <option value="latest">최신등록</option>
+              <option value="likes">좋아요</option>
+            </select>
+          </label>
+          <button id="openBuildForm" class="submit-report" type="button">빌드 등록</button>
+        </div>
+      </div>
+      <p id="buildSyncStatus" class="build-sync-status"></p>
+      <div id="sharedBuildView" class="shared-build-view"></div>
+      <div id="buildList" class="build-list"></div>
+    </section>
+  </main>
+
+  <div id="buildFormModal" class="build-form-modal" hidden>
+    <section class="build-form-dialog" role="dialog" aria-modal="true" aria-labelledby="buildFormTitle">
+      <div class="build-form-head">
+        <div>
+          <h2 id="buildFormTitle">빌드 등록</h2>
+          <p>캐릭터와 정수를 선택해 나만의 빌드를 공개해보세요.</p>
+        </div>
+        <button id="closeBuildForm" type="button" aria-label="닫기">×</button>
+      </div>
+      <form id="buildForm" class="build-form">
+        <label class="field">
+          <span>빌드명</span>
+          <input id="buildTitle" required placeholder="예: 비요른 초반 탱커 빌드">
+        </label>
+        <label class="field">
+          <span>작성자</span>
+          <input id="buildAuthor" placeholder="닉네임">
+        </label>
+        <label class="field">
+          <span>삭제용 비밀번호</span>
+          <input id="buildPassword" type="password" required minlength="4" maxlength="40" autocomplete="new-password" placeholder="삭제할 때 사용할 4자 이상 비밀번호">
+        </label>
+        <label class="field">
+          <span>캐릭터 수</span>
+          <select id="buildCharacterCount">
+            <option value="1">1명</option>
+            <option value="2">2명</option>
+            <option value="3">3명</option>
+            <option value="4">4명</option>
+            <option value="5">5명</option>
+          </select>
+        </label>
+        <datalist id="buildEssenceOptions"></datalist>
+        <div id="buildCharacterSlots" class="build-character-slots"></div>
+        <label class="field build-note">
+          <span>설명</span>
+          <textarea id="buildNote" rows="3" placeholder="운용 팁, 장점, 대체 정수 등을 적어주세요."></textarea>
+        </label>
+        <div class="build-form-actions">
+          <button id="copyCurrentBuild" type="button">현재 빌드 공유 링크 복사</button>
+          <button class="submit-report" type="submit">빌드 등록 완료</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="essencePickerModal" class="essence-picker-modal" hidden>
+    <section class="essence-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="essencePickerTitle">
+      <div class="essence-picker-head">
+        <div>
+          <strong id="essencePickerTitle">정수 선택</strong>
+          <span>검색하거나 층/구역으로 좁혀서 선택하세요.</span>
+        </div>
+        <button id="essencePickerClose" type="button" aria-label="닫기">×</button>
+      </div>
+      <div class="essence-picker-controls">
+        <label class="field">
+          <span>검색</span>
+          <input id="essencePickerSearch" type="search" placeholder="몬스터, 스탯, 패시브 검색">
+        </label>
+        <label class="field">
+          <span>층</span>
+          <select id="essencePickerFloor"></select>
+        </label>
+        <label class="field">
+          <span>구역</span>
+          <select id="essencePickerArea"></select>
+        </label>
+      </div>
+      <div id="essencePickerTable" class="essence-picker-table"></div>
+    </section>
+  </div>
+
+  <div id="buildDeleteModal" class="build-delete-modal" hidden>
+    <section class="build-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="buildDeleteTitle">
+      <h2 id="buildDeleteTitle">빌드 삭제</h2>
+      <p id="buildDeleteGuide">등록할 때 입력한 삭제용 비밀번호를 입력하세요.</p>
+      <label class="field">
+        <span>삭제용 비밀번호</span>
+        <input id="buildDeletePassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력">
+      </label>
+      <p id="buildDeleteStatus" class="build-sync-status"></p>
+      <div class="build-delete-actions">
+        <button id="cancelBuildDelete" type="button">취소</button>
+        <button id="confirmBuildDelete" class="submit-report" type="button">삭제하기</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="./ghost-data.js?v=20260520"></script>
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      buildTable: "builds",
+      reportTable: "monster_reports",
+      visitorTable: "site_visitors",
+      dailyVisitorTable: "daily_visitors",
+    };
+  </script>
+  <script src="./config.js?v=20260524-8"></script>
+  <script src="./app.js?v=20260526-2"></script>
+</body>
+</html>

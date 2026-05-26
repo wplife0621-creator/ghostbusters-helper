@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>정보 제보/수정 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260525-18">
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>정보 제보/수정</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <a href="./essences.html">정수</a>
+        <a href="./numbers.html">넘버스</a>
+        <a href="./builds.html">빌드 공유</a>
+        <a href="./guides.html">공략글</a>
+        <a href="./report.html" aria-current="page">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout report-layout">
+    <section class="panel report-panel page-panel">
+      <div class="section-title compact-title">
+        <h2>정보 제보/수정</h2>
+        <p>정수 또는 넘버스 정보를 등록하고, 검수 후 승인하면 해당 정보 페이지에 반영됩니다. 정수 수정 시 몬스터명도 변경할 수 있습니다.</p>
+      </div>
+      <form id="reportForm" class="report-form compact-report-form">
+        <label class="field report-control">
+          <span>정보 종류</span>
+          <select id="reportDataset">
+            <option value="essence">정수</option>
+            <option value="numbers">넘버스</option>
+          </select>
+        </label>
+        <label class="field report-control">
+          <span>구분</span>
+          <select id="reportMode">
+            <option value="new">신규 제보</option>
+            <option value="edit">기존 정보 수정</option>
+          </select>
+        </label>
+        <label class="field essence-report-field report-name-field">
+          <span>몬스터명 <em id="editNameHint" class="edit-name-hint" hidden>수정 가능</em></span>
+          <input id="reportMonster" required list="monsterOptions" placeholder="예: 얼음 와이번">
+          <datalist id="monsterOptions"></datalist>
+        </label>
+        <label id="reportOriginalMonsterField" class="field essence-report-field report-original-field" hidden>
+          <span>수정 대상</span>
+          <input id="reportOriginalMonster" readonly placeholder="아래 목록에서 수정할 몬스터 선택">
+        </label>
+        <label class="field essence-report-field report-short-field">
+          <span>등급</span>
+          <input id="reportGrade" required placeholder="예: 6등급">
+        </label>
+        <label class="field essence-report-field report-short-field">
+          <span>층</span>
+          <input id="reportFloor" required placeholder="예: 5층">
+        </label>
+        <div id="editMonsterMatches" class="edit-monster-matches essence-report-field" hidden></div>
+        <label class="field essence-report-field report-medium-field">
+          <span>구역</span>
+          <input id="reportArea" required placeholder="예: 서리 협곡">
+        </label>
+        <fieldset class="recommendation-fields essence-report-field">
+          <legend>추천 캐릭터 <small>복수 선택 가능</small></legend>
+          <div class="recommendation-checks">
+            <label><input class="report-recommendation" type="checkbox" value="비요른"><span>비요른</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="에르웬"><span>에르웬</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="미샤"><span>미샤</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="아이나르"><span>아이나르</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="레이븐"><span>레이븐</span></label>
+            <label><input class="report-recommendation" type="checkbox" value="아우옌"><span>아우옌</span></label>
+          </div>
+        </fieldset>
+        <label class="field check-field essence-report-field report-medium-field">
+          <span>항해 관련 정수</span>
+          <span class="check-control">
+            <input id="reportSailing" type="checkbox">
+            <strong>항해 정수로 표시</strong>
+          </span>
+        </label>
+        <label class="field wide essence-report-field report-detail-field">
+          <span>스탯</span>
+          <input id="reportStats" required placeholder="예: 근력 32, 민첩 26, 냉기저항 32">
+        </label>
+        <label class="field wide essence-report-field report-detail-field">
+          <span>패시브</span>
+          <input id="reportPassive" required placeholder="예: 동상: 공격 시 빙결 스택 부여">
+        </label>
+        <fieldset class="active-skill-fields wide essence-report-field">
+          <legend>액티브 <small>최대 3개</small></legend>
+          <label class="field">
+            <span>액티브 1 <em>선택</em></span>
+            <input id="reportActive" placeholder="액티브가 있으면 입력">
+          </label>
+          <label class="field">
+            <span>액티브 2 <em>선택</em></span>
+            <input id="reportActive2" placeholder="두 번째 액티브가 있으면 입력">
+          </label>
+          <label class="field">
+            <span>액티브 3 <em>선택</em></span>
+            <input id="reportActive3" placeholder="세 번째 액티브가 있으면 입력">
+          </label>
+        </fieldset>
+        <label class="field numbers-report-field report-name-field" hidden>
+          <span>넘버스 이름</span>
+          <input id="reportNumberName" list="numberOptions" placeholder="예: 차원 자루">
+          <datalist id="numberOptions"></datalist>
+        </label>
+        <label class="field numbers-report-field report-short-field" hidden>
+          <span>번호</span>
+          <input id="reportNumberCode" type="number" placeholder="예: 1313">
+        </label>
+        <label class="field numbers-report-field report-short-field" hidden>
+          <span>아이템 레벨</span>
+          <input id="reportNumberLevel" type="number" placeholder="예: 400">
+        </label>
+        <div id="editNumberMatches" class="edit-monster-matches numbers-report-field" hidden></div>
+        <label class="field wide numbers-report-field report-number-effect" hidden>
+          <span>효과</span>
+          <textarea id="reportNumberEffect" rows="3" placeholder="예: 무게 +30"></textarea>
+        </label>
+        <label class="field numbers-report-field report-number-extra" hidden>
+          <span>착용부위</span>
+          <input id="reportNumberSlot" placeholder="예: 장신구">
+        </label>
+        <label class="field numbers-report-field report-number-extra" hidden>
+          <span>획득처</span>
+          <input id="reportNumberSource" placeholder="예: 4층 보스 드랍">
+        </label>
+        <button class="submit-report report-submit" type="submit">검수 대기에 등록</button>
+      </form>
+      <p id="reportSyncStatus" class="build-sync-status"></p>
+    </section>
+
+    <section class="panel report-panel page-panel admin-gate">
+      <div class="section-title compact-title">
+        <h2>관리자 검수</h2>
+        <p>승인과 반려는 관리자 코드 입력 후에만 가능합니다.</p>
+      </div>
+      <div class="admin-row">
+        <label class="field">
+          <span>관리자 코드</span>
+          <input id="adminCodeInput" type="password" placeholder="관리자 코드 입력">
+        </label>
+        <button id="adminUnlock" class="submit-report" type="button">관리자 모드 열기</button>
+        <button id="adminLock" type="button">잠그기</button>
+      </div>
+      <p id="adminStatus" class="admin-status">관리자 모드가 잠겨 있습니다.</p>
+    </section>
+
+    <section class="panel report-panel page-panel">
+      <div class="review-head">
+        <strong id="pendingCount">검수 대기 0건</strong>
+        <button id="copyApproved" type="button">승인 데이터 복사</button>
+      </div>
+      <div id="pendingReports" class="pending-reports"></div>
+    </section>
+
+    <section class="panel report-panel page-panel">
+      <div class="review-head">
+        <strong id="approvedCount">등록된 정보 0건</strong>
+      </div>
+      <div id="approvedReports" class="pending-reports"></div>
+    </section>
+  </main>
+
+  <script src="./ghost-data.js?v=20260520"></script>
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      buildTable: "builds",
+      reportTable: "monster_reports",
+      visitorTable: "site_visitors",
+      dailyVisitorTable: "daily_visitors",
+    };
+  </script>
+  <script src="./config.js?v=20260524-8"></script>
+  <script src="./app.js?v=20260526-2"></script>
+</body>
+</html>

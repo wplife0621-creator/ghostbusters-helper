@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260526-1">
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>덕후버스터즈</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html" aria-current="page">홈</a>
+        <a href="./essences.html">정수</a>
+        <a href="./numbers.html">넘버스</a>
+        <a href="./builds.html">빌드 공유</a>
+        <a href="./guides.html">공략글</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+      </nav>
+      <div class="visitor-panel topbar-visitors">
+        <div class="visitor-counts" aria-label="방문자 수">
+          <span>오늘 <strong id="visitorToday">-</strong></span>
+          <span>전체 <strong id="visitorTotal">-</strong></span>
+        </div>
+        <p id="visitorStatus"></p>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout home-layout">
+    <section class="panel home-hero">
+      <p class="home-kicker">플레이 정보 허브</p>
+      <h2>필요한 정보와 공략을<br class="home-title-break"> 한곳에서 확인하세요</h2>
+      <p>정수와 넘버스를 찾고, 빌드와 공략을 공유하고, 미궁 진행 시간과 필요 컨디션을 계산할 수 있습니다.</p>
+      <div class="home-highlights" aria-label="주요 기능">
+        <span>정수·넘버스 검색</span>
+        <span>빌드·공략 공유</span>
+        <span>미궁 컨디션 계산</span>
+      </div>
+    </section>
+
+    <section class="panel home-fan-notice" aria-label="사이트 운영 안내">
+      <strong>팬게임 정보사이트 운영 안내</strong>
+      <p>이 사이트는 제작자 <b>겜바바덕후님</b>의 허락을 받아 운영되는 팬게임 정보사이트입니다.</p>
+    </section>
+
+    <section class="panel home-recent" aria-label="최근 공지사항">
+      <div class="home-recent-head">
+        <div>
+          <p class="home-kicker">NOTICE</p>
+          <h2>최근 공지사항</h2>
+          <span>최근 7일 동안 공개된 정보와 새 글을 확인하세요.</span>
+        </div>
+        <nav id="homeNoticeFilters" class="home-notice-filters" aria-label="공지사항 종류 선택">
+          <button type="button" class="is-active" data-notice-filter="all">전체</button>
+          <button type="button" data-notice-filter="essence">정수</button>
+          <button type="button" data-notice-filter="numbers">넘버스</button>
+          <button type="button" data-notice-filter="build">빌드공유</button>
+          <button type="button" data-notice-filter="guide">공략글</button>
+        </nav>
+      </div>
+      <div id="homeNoticeCounts" class="home-notice-counts" aria-label="최근 등록 건수"></div>
+      <div id="homeNoticeList" class="home-notice-list">
+        <div class="home-notice-loading">최근 소식을 불러오는 중입니다.</div>
+      </div>
+      <p id="homeNoticeStatus" class="home-notice-status"></p>
+    </section>
+
+    <section class="home-groups" aria-label="메뉴 바로가기">
+      <article class="panel home-group">
+        <div class="home-group-head">
+          <p>찾기</p>
+          <h3>게임 정보 확인</h3>
+          <span>원하는 장비와 정수를 빠르게 검색하세요.</span>
+        </div>
+        <div class="home-actions">
+          <a href="./essences.html"><strong>정수 확인하기</strong><span>몬스터 정수 검색 및 필터</span></a>
+          <a href="./numbers.html"><strong>넘버스 확인하기</strong><span>착용부위와 획득처 확인</span></a>
+        </div>
+      </article>
+
+      <article class="panel home-group">
+        <div class="home-group-head">
+          <p>공유</p>
+          <h3>빌드와 공략</h3>
+          <span>플레이 노하우를 보고 직접 등록하세요.</span>
+        </div>
+        <div class="home-actions">
+          <a href="./builds.html"><strong>빌드 공유하기</strong><span>캐릭터 조합과 정수 빌드</span></a>
+          <a href="./guides.html"><strong>공략글 보러가기</strong><span>이미지와 영상 공략 공유</span></a>
+        </div>
+      </article>
+
+      <article class="panel home-group">
+        <div class="home-group-head">
+          <p>도구</p>
+          <h3>제보와 계산</h3>
+          <span>정보를 바로잡고 미궁 진행을 준비하세요.</span>
+        </div>
+        <div class="home-actions">
+          <a href="./report.html"><strong>정보 제보/수정 하러가기</strong><span>몬스터명과 새 정보 수정</span></a>
+          <a href="./maze-time.html"><strong>미궁시간 계산기</strong><span>현실 시간과 필요 컨디션 계산</span></a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      buildTable: "builds",
+      reportTable: "monster_reports",
+      guideTable: "guide_posts",
+      visitorTable: "site_visitors",
+      dailyVisitorTable: "daily_visitors",
+    };
+  </script>
+  <script src="./config.js?v=20260524-8"></script>
+  <script src="./app.js?v=20260526-2"></script>
+</body>
+</html>

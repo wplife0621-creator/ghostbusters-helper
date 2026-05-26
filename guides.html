@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>공략글 보러가기 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260526-7">
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>공략글 보러가기</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <a href="./essences.html">정수</a>
+        <a href="./numbers.html">넘버스</a>
+        <a href="./builds.html">빌드 공유</a>
+        <a href="./guides.html" aria-current="page">공략글</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+      </nav>
+    </div>
+  </header>
+  <main class="layout guide-layout">
+    <section class="panel guide-board" id="guideBoard">
+      <section id="guideViewer" class="guide-viewer" hidden></section>
+      <div class="guide-board-list">
+        <div class="guide-board-header">
+          <div>
+            <h2>공략 게시판</h2>
+            <p>미궁 플레이 공략과 정보를 자유롭게 공유하세요.</p>
+          </div>
+          <button class="submit-report guide-write-button" type="button" id="guideOpenEditor">글쓰기</button>
+        </div>
+        <nav class="guide-categories" aria-label="공략 말머리 선택">
+          <button type="button" class="is-active" data-guide-category="전체">전체글</button>
+          <button type="button" data-guide-category="일반">일반</button>
+          <button type="button" data-guide-category="보스">보스</button>
+          <button type="button" data-guide-category="파밍">파밍</button>
+          <button type="button" data-guide-category="빌드">빌드</button>
+          <button type="button" data-guide-category="정보">정보</button>
+        </nav>
+        <div class="guide-toolbar">
+          <label class="guide-search">
+            <span class="sr-only">공략글 검색</span>
+            <input id="guideSearch" type="search" placeholder="제목, 내용, 작성자 검색">
+          </label>
+          <p id="guideCount">전체글 0개</p>
+        </div>
+        <div class="guide-list-head" aria-hidden="true">
+          <span>번호</span>
+          <span>말머리</span>
+          <span>제목</span>
+          <span>글쓴이</span>
+          <span>작성일</span>
+          <span>조회</span>
+          <span>좋아요</span>
+        </div>
+        <div id="guidePosts" class="guide-posts"></div>
+      </div>
+    </section>
+
+    <section class="panel guide-editor" id="guideEditor" hidden>
+      <div class="section-title compact-title">
+        <h2 id="guideFormTitle">공략글 작성</h2>
+        <p>이미지나 동영상을 본문 원하는 위치에 넣거나, 복사한 이미지를 내용 칸에 바로 붙여넣을 수 있습니다.</p>
+      </div>
+      <form id="guideForm" class="guide-form">
+        <input id="guideEditId" type="hidden">
+        <label class="field">
+          <span>제목</span>
+          <input id="guideTitle" required maxlength="92" placeholder="예: 3층 보스 안전 공략">
+        </label>
+        <label class="field">
+          <span>작성자</span>
+          <input id="guideAuthor" maxlength="40" placeholder="닉네임">
+        </label>
+        <label class="field">
+          <span>말머리</span>
+          <select id="guideCategory">
+            <option value="일반">일반</option>
+            <option value="보스">보스</option>
+            <option value="파밍">파밍</option>
+            <option value="빌드">빌드</option>
+            <option value="정보">정보</option>
+          </select>
+        </label>
+        <label class="field guide-password">
+          <span>삭제용 비밀번호</span>
+          <input id="guidePassword" type="password" required minlength="4" maxlength="40" autocomplete="new-password" placeholder="4자 이상 입력">
+        </label>
+        <div class="field guide-content">
+          <span>내용</span>
+          <div class="guide-composer-toolbar">
+            <label class="guide-insert-media">
+              <input id="guideMedia" type="file" accept="image/*,video/*" multiple>
+              <span>이미지 / 동영상 넣기</span>
+            </label>
+            <small>커서를 원하는 위치에 두고 파일을 선택하거나 이미지를 붙여넣으세요.</small>
+          </div>
+          <div id="guideComposer" class="guide-composer" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="공략 내용을 적어주세요."></div>
+          <textarea id="guideContent" hidden></textarea>
+        </div>
+        <div id="guideExistingMedia" class="guide-existing-media" hidden></div>
+        <div class="guide-form-actions">
+          <button class="submit-report" type="submit" id="guideSubmit">공략글 등록</button>
+          <button type="button" id="guideCancelEdit" hidden>수정 취소</button>
+        </div>
+      </form>
+      <p id="guideStatus" class="build-sync-status"></p>
+    </section>
+  </main>
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      guideTable: "guide_posts",
+      guideBucket: "guide-media",
+    };
+  </script>
+  <script src="./config.js?v=20260524-8"></script>
+  <script src="./guides.js?v=20260526-20"></script>
+</body>
+</html>
