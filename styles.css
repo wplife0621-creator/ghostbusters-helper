@@ -501,6 +501,52 @@ body {
   color: #116b53;
 }
 
+.stat-sort-panel {
+  margin-bottom: 12px;
+}
+
+.stat-sort-toggle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.stat-sort-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.stat-sort-toggle::after {
+  flex: 0 0 auto;
+  content: "펼치기";
+  border-radius: 999px;
+  background: #edf4ff;
+  color: var(--brand-dark);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.stat-sort-panel[open] .stat-sort-toggle::after {
+  content: "접기";
+}
+
+.stat-sort-toggle strong {
+  font-size: 17px;
+}
+
+.stat-sort-toggle span {
+  flex: 1 1 auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.stat-sort-panel .stat-chip-row {
+  margin-top: 12px;
+}
+
 .section-title {
   display: flex;
   justify-content: space-between;
@@ -2910,10 +2956,37 @@ textarea {
     gap: 7px;
   }
 
+  .effect-chip:first-child {
+    grid-column: 1 / -1;
+  }
+
   .effect-chip {
     min-height: 44px;
     min-width: 0;
     padding: 0 7px;
+  }
+
+  .stat-sort-toggle {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 5px 8px;
+  }
+
+  .stat-sort-toggle strong {
+    font-size: 16px;
+  }
+
+  .stat-sort-toggle span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .stat-sort-toggle::after {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .home-group {
@@ -3549,12 +3622,8 @@ textarea {
     padding-top: 0;
   }
 
-  .effect-chip-row {
-    grid-template-columns: 1fr;
-  }
-
   .essence-controls {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .numbers-table td,
@@ -3580,6 +3649,13 @@ textarea {
   }
 
   .build-row .pending-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 340px) {
+  .effect-chip-row,
+  .essence-controls {
     grid-template-columns: 1fr;
   }
 }

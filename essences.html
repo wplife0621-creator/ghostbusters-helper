@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정수 확인하기 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260526-3">
+  <link rel="stylesheet" href="./styles.css?v=20260526-4">
 </head>
 <body>
   <header class="topbar compact">
@@ -78,13 +78,13 @@
       </div>
       <div id="effectSortChips" class="effect-chip-row" aria-label="효과 정렬 선택"></div>
     </section>
-    <section class="panel stat-panel">
-      <div class="section-title compact-title">
-        <h2>스탯 정렬</h2>
-        <p id="statSortSummary">스탯을 누르면 높은 순으로 정렬됩니다.</p>
-      </div>
+    <details class="panel stat-panel stat-sort-panel">
+      <summary class="stat-sort-toggle">
+        <strong>스탯 정렬</strong>
+        <span id="statSortSummary">스탯을 누르면 높은 순으로 정렬됩니다.</span>
+      </summary>
       <div id="statChips" class="stat-chip-row"></div>
-    </section>
+    </details>
     <section class="panel results-panel">
       <div class="section-title compact-title">
         <h2 id="resultTitle">정수 목록</h2>
@@ -103,6 +103,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260526-5"></script>
+  <script src="./app.js?v=20260526-6"></script>
 </body>
 </html>
