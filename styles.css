@@ -146,6 +146,10 @@ body {
   text-align: left;
 }
 
+.home-fan-notice:first-child {
+  margin-top: 0;
+}
+
 .home-fan-notice strong {
   flex: 0 0 auto;
   border-radius: 999px;
@@ -258,7 +262,7 @@ body {
 
 .home-notice-list {
   display: grid;
-  gap: 7px;
+  gap: 5px;
 }
 
 .home-notice-item {
@@ -266,12 +270,12 @@ body {
   grid-template-columns: 72px minmax(0, 1fr) auto 42px;
   align-items: center;
   gap: 12px;
-  min-height: 68px;
+  min-height: 58px;
   border: 1px solid #e4ebf5;
   border-radius: 10px;
   background: #fff;
   color: var(--text);
-  padding: 10px 12px;
+  padding: 7px 12px;
   text-decoration: none;
   transition: border-color 0.15s, background 0.15s;
 }
@@ -3036,8 +3040,8 @@ textarea {
   .home-notice-item {
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 8px;
-    min-height: 74px;
-    padding: 10px 9px;
+    min-height: 60px;
+    padding: 7px 9px;
   }
 
   .home-notice-type {
@@ -3059,6 +3063,33 @@ textarea {
 
   .home-notice-status {
     text-align: left;
+  }
+
+  .maze-inputs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .maze-inputs .field {
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .maze-inputs .field span {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .maze-inputs input {
+    min-width: 0;
+    padding: 0 6px;
+    text-align: center;
+  }
+
+  .maze-results {
+    gap: 8px;
+    margin-top: 12px;
   }
 
   .effect-panel {
@@ -3259,8 +3290,17 @@ textarea {
   }
 
   .build-form-dialog {
+    width: 100%;
     max-height: calc(100vh - 16px);
     padding: 12px;
+  }
+
+  .build-panel,
+  .build-public-card,
+  .build-member-loadout,
+  .build-loadout-essences,
+  .build-essence-detail {
+    min-width: 0;
   }
 
   .build-panel .review-head button {
@@ -3270,6 +3310,14 @@ textarea {
 
   .guide-form {
     grid-template-columns: 1fr;
+  }
+
+  .guide-board,
+  .guide-board-list,
+  .guide-row,
+  .guide-viewer,
+  .guide-editor {
+    min-width: 0;
   }
 
   .guide-board-header {
@@ -3331,6 +3379,8 @@ textarea {
     min-height: 30px;
     flex-wrap: wrap;
     line-height: 1.45;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .guide-row-author {
@@ -3421,6 +3471,10 @@ textarea {
   .guide-composer-toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .guide-composer-toolbar small {
+    overflow-wrap: anywhere;
   }
 
   .guide-insert-media span {
@@ -3549,6 +3603,19 @@ textarea {
 
   .build-member-board {
     grid-template-columns: 1fr;
+  }
+
+  .build-member-top {
+    flex-wrap: wrap;
+  }
+
+  .build-member-loadout {
+    padding: 9px 8px;
+  }
+
+  .build-total-stat {
+    min-width: 0;
+    padding: 5px;
   }
 
   .build-row-title strong {
@@ -3766,6 +3833,15 @@ textarea {
     padding-top: 0;
   }
 
+  .maze-calculator {
+    padding: 10px 8px;
+  }
+
+  .maze-inputs input {
+    font-size: 15px;
+    padding: 0 3px;
+  }
+
   .essence-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3778,6 +3854,11 @@ textarea {
 
   .guide-viewer-head .pending-actions {
     grid-template-columns: 1fr;
+  }
+
+  .guide-board,
+  .guide-editor {
+    padding: 10px 8px;
   }
 
   .build-member-card {
@@ -3793,6 +3874,10 @@ textarea {
   }
 
   .build-row .pending-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .build-public-head .pending-actions {
     grid-template-columns: 1fr;
   }
 }
