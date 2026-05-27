@@ -375,6 +375,10 @@ function displayNumber(value) {
   return /^\d+$/.test(number) ? `#${number}` : number || "미확인";
 }
 
+function numberCodeClass(value) {
+  return /^\d+$/.test(textOf(value)) ? "number-code" : "number-code is-unknown";
+}
+
 function displayLevel(value) {
   const level = textOf(value);
   return level ? `Lv ${level}` : "미확인";
@@ -490,9 +494,18 @@ function sourceAreaLabels(source) {
   const normalizedSource = normalizeLocationName(source);
   const configuredMatches = [...areaLabelLookup.entries()]
     .filter(([normalizedArea]) => normalizedSource.includes(normalizedArea))
+    .sort(([left], [right]) => normalizedSource.indexOf(left) - normalizedSource.indexOf(right))
     .map(([, label]) => label);
   if (configuredMatches.length) return unique(configuredMatches);
   return unique(textOf(source).split(/[,\u3001/]/).map((part) => areaLabelLookup.get(normalizeLocationName(part)) || textOf(part)).filter(Boolean));
+}
+
+function sourcePillList(value) {
+  const sources = sourceAreaLabels(value);
+  if (!sources.length) return `<span class="muted">-</span>`;
+  return `<div class="source-pill-list">${sources
+    .map((source) => `<span class="source-pill">${escapeHtml(source)}</span>`)
+    .join("")}</div>`;
 }
 
 function firstSourceAreaLabel(source) {
@@ -2371,11 +2384,11 @@ function renderNumbers() {
             const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
             return `
             <tr>
-              <td data-label="번호"><span class="number-code">${escapeHtml(displayNumber(row["번호"]))}</span></td>
+              <td data-label="번호"><span class="${numberCodeClass(row["번호"])}">${escapeHtml(displayNumber(row["번호"]))}</span></td>
               <td data-label="이름"><strong>${escapeHtml(row["이름"])}</strong></td>
               <td data-label="아이템 레벨"><span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span></td>
               <td data-label="착용부위">${escapeHtml(row["착용부위"] || "-")}</td>
-              <td data-label="획득처">${escapeHtml(row["획득처"] || "-")}</td>
+              <td data-label="획득처">${sourcePillList(row["획득처"])}</td>
               <td data-label="효과">${effectScore?.matched ? `<span class="effect-sort-pill${effectScore.penalized ? " is-warning" : ""}">${escapeHtml(selectedEffect.label)}${effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}${escapeHtml(row["효과"] || "-")}</td>
             </tr>
           `; }).join("")}</tbody>

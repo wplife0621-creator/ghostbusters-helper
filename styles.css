@@ -1651,6 +1651,38 @@ select[multiple] option:checked {
   font-variant-numeric: tabular-nums;
 }
 
+.number-code.is-unknown {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+
+.source-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.source-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid #cfe0ff;
+  border-radius: 999px;
+  background: #edf4ff;
+  color: var(--brand-dark);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
 .page-panel:first-child {
   margin-top: 0;
 }
