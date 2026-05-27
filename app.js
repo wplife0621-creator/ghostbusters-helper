@@ -160,6 +160,7 @@ const els = {
   numbersEffectSortSummary: document.querySelector("#numbersEffectSortSummary"),
   numbersCount: document.querySelector("#numbersCount"),
   numbersResults: document.querySelector("#numbersResults"),
+  numbersPagination: document.querySelector("#numbersPagination"),
   reportForm: document.querySelector("#reportForm"),
   reportDataset: document.querySelector("#reportDataset"),
   reportMode: document.querySelector("#reportMode"),
@@ -248,6 +249,8 @@ let homeNotices = [];
 let activeHomeNoticeFilter = "all";
 let activeHomeNoticePage = 1;
 const homeNoticePageSize = 10;
+let activeNumbersPage = 1;
+const numbersPageSize = 10;
 const statNoneLabel = "스탯 선택 안 함";
 
 function revealCurrentNavItem() {
@@ -777,17 +780,35 @@ function renderHomeNotices() {
 function initNumbers() {
   els.numbersSearch.value = new URLSearchParams(location.search).get("search") || "";
   refreshNumbersControls();
-  els.numbersSearch.addEventListener("input", renderNumbers);
-  els.numbersFloor.addEventListener("change", () => {
-    refreshNumbersAreaOptions();
+  els.numbersSearch.addEventListener("input", () => {
+    activeNumbersPage = 1;
     renderNumbers();
   });
-  els.numbersArea.addEventListener("change", renderNumbers);
-  els.numbersLevel.addEventListener("change", renderNumbers);
+  els.numbersFloor.addEventListener("change", () => {
+    refreshNumbersAreaOptions();
+    activeNumbersPage = 1;
+    renderNumbers();
+  });
+  els.numbersArea.addEventListener("change", () => {
+    activeNumbersPage = 1;
+    renderNumbers();
+  });
+  els.numbersLevel.addEventListener("change", () => {
+    activeNumbersPage = 1;
+    renderNumbers();
+  });
   els.numbersSort.addEventListener("change", () => {
     activeEffectSortKey = "";
+    activeNumbersPage = 1;
     renderNumbersEffectSortChips();
     renderNumbers();
+  });
+  els.numbersPagination.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-numbers-page]");
+    if (!button) return;
+    activeNumbersPage = Number(button.dataset.numbersPage) || 1;
+    renderNumbers();
+    els.numbersResults.scrollIntoView({ block: "start", behavior: "smooth" });
   });
   renderNumbersEffectSortChips();
   renderNumbers();
@@ -2094,6 +2115,7 @@ function renderNumbersEffectSortChips() {
     if (!button) return;
     activeEffectSortKey = button.dataset.effect;
     if (activeEffectSortKey) els.numbersSort.value = "number";
+    activeNumbersPage = 1;
     renderNumbersEffectSortChips();
     renderNumbers();
   };
@@ -2374,10 +2396,16 @@ function renderNumbers() {
     if (sort === "level-asc") return numberFrom(a["아이템 레벨(Lv)"]) - numberFrom(b["아이템 레벨(Lv)"]);
     return numberFrom(a["번호"]) - numberFrom(b["번호"]);
   });
-  els.numbersCount.textContent = `${rows.length}건`;
-  els.numbersResults.innerHTML = rows.length
+  const pageCount = Math.max(1, Math.ceil(rows.length / numbersPageSize));
+  activeNumbersPage = Math.min(activeNumbersPage, pageCount);
+  const pageStart = (activeNumbersPage - 1) * numbersPageSize;
+  const pageRows = rows.slice(pageStart, pageStart + numbersPageSize);
+  els.numbersCount.textContent = rows.length
+    ? `총 ${rows.length}건 · ${activeNumbersPage}/${pageCount}쪽`
+    : "0건";
+  els.numbersResults.innerHTML = pageRows.length
     ? `
-      <div class="numbers-card-list">${rows.map((row) => {
+      <div class="numbers-card-list">${pageRows.map((row) => {
         const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
         return `
           <article class="number-card">
@@ -2403,6 +2431,12 @@ function renderNumbers() {
         `;
       }).join("")}</div>`
     : `<div class="empty">조건에 맞는 넘버스 정보가 없습니다.</div>`;
+  els.numbersPagination.innerHTML = rows.length > numbersPageSize
+    ? Array.from({ length: pageCount }, (_, index) => {
+      const page = index + 1;
+      return `<button type="button" data-numbers-page="${page}" class="${page === activeNumbersPage ? "is-active" : ""}"${page === activeNumbersPage ? ' aria-current="page"' : ""}>${page}</button>`;
+    }).join("")
+    : "";
 }
 
 function hasVisitorStore() {

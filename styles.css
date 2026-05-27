@@ -1123,6 +1123,45 @@ select[multiple] option:checked {
   margin-right: 7px;
 }
 
+.numbers-pagination {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.numbers-pagination::-webkit-scrollbar {
+  display: none;
+}
+
+.numbers-pagination:empty {
+  display: none;
+}
+
+.numbers-pagination button {
+  flex: 0 0 auto;
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: #52617b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.numbers-pagination button:hover,
+.numbers-pagination button.is-active {
+  border-color: #bdd3f4;
+  background: #eaf2ff;
+  color: var(--brand-dark);
+}
+
 .guide-layout {
   width: min(1060px, calc(100% - 28px));
   display: grid;
