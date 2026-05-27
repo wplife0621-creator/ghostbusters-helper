@@ -1018,7 +1018,7 @@ textarea {
 
 .numbers-controls {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(140px, 180px) minmax(140px, 180px);
+  grid-template-columns: minmax(240px, 1fr) repeat(4, minmax(130px, 170px));
   gap: 10px;
 }
 

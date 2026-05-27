@@ -108,6 +108,18 @@ const effectSortDefinitions = {
   },
 };
 
+const floorOptions = ["1층", "1층 균열", "2층", "2층 균열", "3층", "3층 균열", "4층", "4층 균열", "5층", "6층"];
+const crackAreasByFloor = {
+  "1층 균열": ["강철의 묘", "녹색 탄광", "빙하굴", "핏빛 성채"],
+  "2층 균열": ["검귀의 동굴", "망자의제단", "안개의 거석 폐허", "총포사막", "홉고블린 요새"],
+  "3층 균열": ["백색신전"],
+  "4층 균열": ["천공신탁소"],
+};
+const areaFloorLookup = new Map(Object.entries(crackAreasByFloor)
+  .flatMap(([floor, areas]) => areas.map((area) => [normalizeLocationName(area), floor])));
+const areaLabelLookup = new Map(Object.values(crackAreasByFloor)
+  .flatMap((areas) => areas.map((area) => [normalizeLocationName(area), area])));
+
 const els = {
   search: document.querySelector("#searchInput"),
   floor: document.querySelector("#floorFilter"),
@@ -140,6 +152,8 @@ const els = {
   remainingCondition: document.querySelector("#remainingCondition"),
   conditionGuide: document.querySelector("#conditionGuide"),
   numbersSearch: document.querySelector("#numbersSearch"),
+  numbersFloor: document.querySelector("#numbersFloor"),
+  numbersArea: document.querySelector("#numbersArea"),
   numbersLevel: document.querySelector("#numbersLevel"),
   numbersSort: document.querySelector("#numbersSort"),
   numbersEffectSortChips: document.querySelector("#numbersEffectSortChips"),
@@ -168,6 +182,7 @@ const els = {
   reportNumberLevel: document.querySelector("#reportNumberLevel"),
   reportNumberEffect: document.querySelector("#reportNumberEffect"),
   reportNumberSlot: document.querySelector("#reportNumberSlot"),
+  reportNumberSourceFloor: document.querySelector("#reportNumberSourceFloor"),
   reportNumberSource: document.querySelector("#reportNumberSource"),
   monsterOptions: document.querySelector("#monsterOptions"),
   numberOptions: document.querySelector("#numberOptions"),
@@ -243,6 +258,14 @@ function revealCurrentNavItem() {
 
 function textOf(value) {
   return String(value ?? "").trim();
+}
+
+function normalizeLocationName(value) {
+  return textOf(value).replace(/\s+/g, "").toLowerCase();
+}
+
+function sameLocationName(left, right) {
+  return normalizeLocationName(left) === normalizeLocationName(right);
 }
 
 function sailingValue(value) {
@@ -391,8 +414,11 @@ function effectSortScore(row, effect) {
 }
 
 function floorRank(value) {
-  const match = textOf(value).match(/\d+/);
-  return match ? Number(match[0]) : 999;
+  const floor = textOf(value);
+  const knownIndex = floorOptions.indexOf(floor);
+  if (knownIndex >= 0) return knownIndex;
+  const match = floor.match(/\d+/);
+  return match ? Number(match[0]) * 10 + (floor.includes("균열") ? 1 : 0) : 999;
 }
 
 function unique(values) {
@@ -400,11 +426,93 @@ function unique(values) {
 }
 
 function optionList(select, values, allLabel) {
+  if (!select) return;
   const current = select.value;
   select.innerHTML = [allLabel, ...values]
     .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
     .join("");
   if ([...select.options].some((option) => option.value === current)) select.value = current;
+}
+
+function placeholderOptionList(select, values, placeholder) {
+  optionList(select, values, placeholder);
+  if (select?.options?.[0]) select.options[0].value = "";
+}
+
+function floorOptionValues(rows = []) {
+  const extras = unique(rows.map((row) => row["층"])).filter((floor) => !floorOptions.includes(floor));
+  return [...floorOptions, ...extras];
+}
+
+function allConfiguredAreas() {
+  return Object.values(crackAreasByFloor).flat();
+}
+
+function areaOptionsForFloor(floor, rows = []) {
+  if (crackAreasByFloor[floor]) return crackAreasByFloor[floor];
+  if (floor && floor !== "전체 층") {
+    return unique(rows.filter((row) => sameLocationName(row["층"], floor)).map((row) => row["구역"]));
+  }
+  return unique([...allConfiguredAreas(), ...rows.map((row) => row["구역"])]);
+}
+
+function refreshEssenceAreaOptions() {
+  optionList(els.area, areaOptionsForFloor(els.floor?.value, essenceRows), "전체 구역");
+}
+
+function refreshReportAreaOptions() {
+  placeholderOptionList(els.reportArea, areaOptionsForFloor(els.reportFloor?.value, essenceRows), "구역 선택");
+}
+
+function sourceAreaLabels(source) {
+  const normalizedSource = normalizeLocationName(source);
+  const configuredMatches = [...areaLabelLookup.entries()]
+    .filter(([normalizedArea]) => normalizedSource.includes(normalizedArea))
+    .map(([, label]) => label);
+  if (configuredMatches.length) return unique(configuredMatches);
+  return unique(textOf(source).split(/[,\u3001/]/).map((part) => areaLabelLookup.get(normalizeLocationName(part)) || textOf(part)).filter(Boolean));
+}
+
+function firstSourceAreaLabel(source) {
+  return sourceAreaLabels(source)[0] || "";
+}
+
+function sourceMatchesArea(source, area) {
+  return normalizeLocationName(source).includes(normalizeLocationName(area));
+}
+
+function numberSourceMatchesFloor(row, floor) {
+  const source = textOf(row["획득처"]);
+  const configuredAreas = crackAreasByFloor[floor] || [];
+  if (configuredAreas.length) return configuredAreas.some((area) => sourceMatchesArea(source, area));
+  return normalizeLocationName(source).includes(normalizeLocationName(floor));
+}
+
+function numberSourceMatchesArea(row, area) {
+  return sourceMatchesArea(row["획득처"], area);
+}
+
+function numbersAreaOptionsForFloor(floor) {
+  if (crackAreasByFloor[floor]) return crackAreasByFloor[floor];
+  const rows = floor && floor !== "전체 층"
+    ? numbersRows.filter((row) => numberSourceMatchesFloor(row, floor))
+    : numbersRows;
+  const configured = floor && floor !== "전체 층" ? [] : allConfiguredAreas();
+  return unique([...configured, ...rows.flatMap((row) => sourceAreaLabels(row["획득처"]))]);
+}
+
+function refreshNumbersAreaOptions() {
+  optionList(els.numbersArea, numbersAreaOptionsForFloor(els.numbersFloor?.value), "전체 구역");
+}
+
+function refreshNumbersControls() {
+  optionList(els.numbersFloor, floorOptions, "전체 층");
+  refreshNumbersAreaOptions();
+  optionList(els.numbersLevel, unique(numbersRows.map((row) => row["아이템 레벨(Lv)"])), "전체 레벨");
+}
+
+function refreshReportNumberSourceOptions() {
+  placeholderOptionList(els.reportNumberSource, numbersAreaOptionsForFloor(els.reportNumberSourceFloor?.value), "획득처 선택");
 }
 
 function escapeHtml(value) {
@@ -633,8 +741,13 @@ function renderHomeNotices() {
 
 function initNumbers() {
   els.numbersSearch.value = new URLSearchParams(location.search).get("search") || "";
-  optionList(els.numbersLevel, unique(numbersRows.map((row) => row["아이템 레벨(Lv)"])), "전체 레벨");
+  refreshNumbersControls();
   els.numbersSearch.addEventListener("input", renderNumbers);
+  els.numbersFloor.addEventListener("change", () => {
+    refreshNumbersAreaOptions();
+    renderNumbers();
+  });
+  els.numbersArea.addEventListener("change", renderNumbers);
   els.numbersLevel.addEventListener("change", renderNumbers);
   els.numbersSort.addEventListener("change", () => {
     activeEffectSortKey = "";
@@ -669,6 +782,8 @@ function initEssences() {
     render();
   });
 
+  els.floor.addEventListener("change", refreshEssenceAreaOptions);
+
   document.querySelectorAll(".compact-layout input, .compact-layout select").forEach((el) => {
     el.addEventListener("input", render);
     el.addEventListener("change", render);
@@ -691,6 +806,8 @@ function initReport() {
   updateReportDataset();
   els.reportDataset.addEventListener("change", updateReportDataset);
   els.reportMode.addEventListener("change", updateReportMode);
+  els.reportFloor.addEventListener("change", refreshReportAreaOptions);
+  els.reportNumberSourceFloor.addEventListener("change", refreshReportNumberSourceOptions);
   els.reportMonster.addEventListener("input", handleReportMonsterInput);
   els.reportNumberName.addEventListener("input", handleReportNumberInput);
   els.editMonsterMatches.addEventListener("click", handleEditMonsterClick);
@@ -1694,9 +1811,13 @@ function updateReportDataset() {
     field.required = numbersMode;
     field.disabled = !numbersMode;
   });
-  [els.reportNumberSlot, els.reportNumberSource].forEach((field) => {
+  [els.reportNumberSlot, els.reportNumberSourceFloor, els.reportNumberSource].forEach((field) => {
     field.disabled = !numbersMode;
   });
+  placeholderOptionList(els.reportFloor, floorOptionValues(essenceRows), "층 선택");
+  refreshReportAreaOptions();
+  optionList(els.reportNumberSourceFloor, floorOptions, "전체 층");
+  refreshReportNumberSourceOptions();
   updateReportMode();
 }
 
@@ -1763,6 +1884,7 @@ function fillReportFromRow(row) {
   els.reportMonster.value = textOf(row["몬스터"]);
   els.reportGrade.value = textOf(row["등급"]);
   els.reportFloor.value = textOf(row["층"]);
+  refreshReportAreaOptions();
   els.reportArea.value = textOf(row["구역"]);
   els.reportStats.value = textOf(row["주요 스탯"]);
   els.reportPassive.value = textOf(row["패시브"]);
@@ -1795,7 +1917,11 @@ function fillNumberFromRow(row) {
   els.reportNumberLevel.value = textOf(row["아이템 레벨(Lv)"]);
   els.reportNumberEffect.value = textOf(row["효과"]);
   els.reportNumberSlot.value = textOf(row["착용부위"]);
-  els.reportNumberSource.value = textOf(row["획득처"]);
+  const sourceArea = firstSourceAreaLabel(row["획득처"]);
+  const sourceFloor = areaFloorLookup.get(normalizeLocationName(sourceArea)) || "";
+  els.reportNumberSourceFloor.value = sourceFloor || "전체 층";
+  refreshReportNumberSourceOptions();
+  els.reportNumberSource.value = sourceArea || textOf(row["획득처"]);
   renderEditNumberMatches();
 }
 
@@ -1838,8 +1964,8 @@ function renderEditNumberMatches() {
 }
 
 function refreshControls() {
-  optionList(els.floor, unique(essenceRows.map((row) => row["층"])), "전체 층");
-  optionList(els.area, unique(essenceRows.map((row) => row["구역"])), "전체 구역");
+  optionList(els.floor, floorOptionValues(essenceRows), "전체 층");
+  refreshEssenceAreaOptions();
   optionList(els.grade, ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급"], "전체 등급");
   optionList(els.character, unique(essenceRows.flatMap((row) => recommendedCharactersFrom(row["추천 캐릭터"]))), "전체 캐릭터");
   optionList(els.statSort, statNames(), statNoneLabel);
@@ -1969,11 +2095,11 @@ function applyFilters(rows) {
   const query = textOf(els.search.value).toLowerCase();
 
   if (els.floor.value !== "전체 층") {
-    rows = rows.filter(({ row }) => textOf(row["층"]) === els.floor.value);
+    rows = rows.filter(({ row }) => sameLocationName(row["층"], els.floor.value));
   }
 
   if (els.area.value !== "전체 구역") {
-    rows = rows.filter(({ row }) => textOf(row["구역"]) === els.area.value);
+    rows = rows.filter(({ row }) => sameLocationName(row["구역"], els.area.value));
   }
 
   if (els.grade.value !== "전체 등급") {
@@ -2185,9 +2311,13 @@ function splitSkills(value) {
 
 function renderNumbers() {
   const query = textOf(els.numbersSearch.value).toLowerCase();
+  const floor = els.numbersFloor.value;
+  const area = els.numbersArea.value;
   const level = els.numbersLevel.value;
   const sort = els.numbersSort.value;
   let rows = numbersRows.filter((row) => {
+    if (floor !== "전체 층" && !numberSourceMatchesFloor(row, floor)) return false;
+    if (area !== "전체 구역" && !numberSourceMatchesArea(row, area)) return false;
     if (level !== "전체 레벨" && textOf(row["아이템 레벨(Lv)"]) !== level) return false;
     if (!query) return true;
     return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"], row["착용부위"], row["획득처"]]
@@ -2435,7 +2565,7 @@ function syncApprovedRows() {
   numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems);
   if (els.monsterOptions) fillMonsterOptions();
   if (els.numbersResults) {
-    optionList(els.numbersLevel, unique(numbersRows.map((row) => row["아이템 레벨(Lv)"])), "전체 레벨");
+    refreshNumbersControls();
     renderNumbers();
   }
 }
