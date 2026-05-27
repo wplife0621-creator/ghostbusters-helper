@@ -439,6 +439,28 @@ function placeholderOptionList(select, values, placeholder) {
   if (select?.options?.[0]) select.options[0].value = "";
 }
 
+function selectedOptionValues(select) {
+  return [...(select?.selectedOptions || [])].map((option) => option.value).filter(Boolean);
+}
+
+function setSelectedOptionValues(select, values) {
+  const wanted = new Set(values.map(textOf).filter(Boolean));
+  [...(select?.options || [])].forEach((option) => {
+    option.selected = wanted.has(option.value);
+  });
+}
+
+function multiOptionList(select, values) {
+  if (!select) return;
+  const selected = new Set(selectedOptionValues(select));
+  select.innerHTML = values
+    .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+    .join("");
+  [...select.options].forEach((option) => {
+    option.selected = selected.has(option.value);
+  });
+}
+
 function floorOptionValues(rows = []) {
   const extras = unique(rows.map((row) => row["층"])).filter((floor) => !floorOptions.includes(floor));
   return [...floorOptions, ...extras];
@@ -512,7 +534,7 @@ function refreshNumbersControls() {
 }
 
 function refreshReportNumberSourceOptions() {
-  placeholderOptionList(els.reportNumberSource, numbersAreaOptionsForFloor(els.reportNumberSourceFloor?.value), "획득처 선택");
+  multiOptionList(els.reportNumberSource, numbersAreaOptionsForFloor(els.reportNumberSourceFloor?.value));
 }
 
 function escapeHtml(value) {
@@ -1807,10 +1829,12 @@ function updateReportDataset() {
   [els.reportActive, els.reportActive2, els.reportActive3, els.reportSailing, ...els.reportRecommendations].forEach((field) => {
     field.disabled = numbersMode;
   });
-  [els.reportNumberName, els.reportNumberCode, els.reportNumberLevel, els.reportNumberEffect].forEach((field) => {
+  [els.reportNumberName, els.reportNumberLevel, els.reportNumberEffect].forEach((field) => {
     field.required = numbersMode;
     field.disabled = !numbersMode;
   });
+  els.reportNumberCode.required = false;
+  els.reportNumberCode.disabled = !numbersMode;
   [els.reportNumberSlot, els.reportNumberSourceFloor, els.reportNumberSource].forEach((field) => {
     field.disabled = !numbersMode;
   });
@@ -1917,11 +1941,11 @@ function fillNumberFromRow(row) {
   els.reportNumberLevel.value = textOf(row["아이템 레벨(Lv)"]);
   els.reportNumberEffect.value = textOf(row["효과"]);
   els.reportNumberSlot.value = textOf(row["착용부위"]);
-  const sourceArea = firstSourceAreaLabel(row["획득처"]);
-  const sourceFloor = areaFloorLookup.get(normalizeLocationName(sourceArea)) || "";
-  els.reportNumberSourceFloor.value = sourceFloor || "전체 층";
+  const sourceAreas = sourceAreaLabels(row["획득처"]);
+  const sourceFloors = unique(sourceAreas.map((area) => areaFloorLookup.get(normalizeLocationName(area))).filter(Boolean));
+  els.reportNumberSourceFloor.value = sourceFloors.length === 1 ? sourceFloors[0] : "전체 층";
   refreshReportNumberSourceOptions();
-  els.reportNumberSource.value = sourceArea || textOf(row["획득처"]);
+  setSelectedOptionValues(els.reportNumberSource, sourceAreas);
   renderEditNumberMatches();
 }
 
@@ -2685,10 +2709,10 @@ async function submitReport(event) {
     mode: els.reportMode.value,
     monster: `${numbersReportPrefix}${textOf(els.reportNumberName.value)}`,
     grade: textOf(els.reportNumberLevel.value),
-    floor: textOf(els.reportNumberCode.value),
+    floor: textOf(els.reportNumberCode.value) || "미확인",
     area: textOf(els.reportNumberSlot.value) || "-",
     stats: textOf(els.reportNumberEffect.value),
-    passive: textOf(els.reportNumberSource.value) || "-",
+    passive: selectedOptionValues(els.reportNumberSource).join(", ") || "-",
     active: "-",
     createdAt: new Date().toISOString(),
   } : {

@@ -922,6 +922,29 @@ textarea {
   resize: vertical;
 }
 
+select[multiple] {
+  min-height: 132px;
+  padding: 8px;
+}
+
+select[multiple] option {
+  padding: 7px 8px;
+  border-radius: 6px;
+}
+
+select[multiple] option:checked {
+  background: linear-gradient(135deg, rgba(33, 109, 255, 0.95), rgba(61, 150, 255, 0.95));
+  color: #fff;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .calc-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

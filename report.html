@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정보 제보/수정 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260528-1">
+  <link rel="stylesheet" href="./styles.css?v=20260528-2">
 </head>
 <body>
   <header class="topbar compact">
@@ -113,7 +113,7 @@
         </label>
         <label class="field numbers-report-field report-short-field" hidden>
           <span>번호</span>
-          <input id="reportNumberCode" type="number" placeholder="예: 1313">
+          <input id="reportNumberCode" type="text" inputmode="numeric" placeholder="미입력 시 미확인">
         </label>
         <label class="field numbers-report-field report-short-field" hidden>
           <span>아이템 레벨</span>
@@ -134,7 +134,8 @@
         </label>
         <label class="field numbers-report-field report-number-extra" hidden>
           <span>획득처</span>
-          <select id="reportNumberSource"></select>
+          <select id="reportNumberSource" multiple size="5"></select>
+          <small class="field-hint">여러 획득처는 Ctrl/Shift 또는 터치로 복수 선택</small>
         </label>
         <button class="submit-report report-submit" type="submit">검수 대기에 등록</button>
       </form>
@@ -185,6 +186,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260528-1"></script>
+  <script src="./app.js?v=20260528-2"></script>
 </body>
 </html>
