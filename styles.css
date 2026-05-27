@@ -3287,11 +3287,11 @@ textarea {
   }
 
   .build-sort-control {
-    margin-left: auto;
     width: min(132px, 42%);
   }
 
   .build-board-actions .submit-report {
+    margin-left: auto;
     flex: 0 0 auto;
     min-height: 44px;
     padding: 0 15px;
