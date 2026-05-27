@@ -517,6 +517,10 @@ body {
     linear-gradient(135deg, #fff 0%, #f5f9ff 100%);
 }
 
+.numbers-effect-panel {
+  margin-bottom: 0;
+}
+
 .effect-chip-row {
   display: flex;
   flex-wrap: wrap;
@@ -1050,6 +1054,10 @@ textarea {
 
 .numbers-table tr:last-child td {
   border-bottom: 0;
+}
+
+.numbers-table .effect-sort-pill {
+  margin-right: 7px;
 }
 
 .guide-layout {

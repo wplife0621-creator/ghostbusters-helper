@@ -133,6 +133,8 @@ const els = {
   numbersSearch: document.querySelector("#numbersSearch"),
   numbersLevel: document.querySelector("#numbersLevel"),
   numbersSort: document.querySelector("#numbersSort"),
+  numbersEffectSortChips: document.querySelector("#numbersEffectSortChips"),
+  numbersEffectSortSummary: document.querySelector("#numbersEffectSortSummary"),
   numbersCount: document.querySelector("#numbersCount"),
   numbersResults: document.querySelector("#numbersResults"),
   reportForm: document.querySelector("#reportForm"),
@@ -356,7 +358,7 @@ function selectedEffectSort() {
 }
 
 function effectText(row) {
-  return [row["패시브"], row["액티브"]].map(textOf).join("\n");
+  return [row["효과"], row["패시브"], row["액티브"]].map(textOf).join("\n");
 }
 
 function effectMatchLines(row, effect) {
@@ -625,7 +627,12 @@ function initNumbers() {
   optionList(els.numbersLevel, unique(numbersRows.map((row) => row["아이템 레벨(Lv)"])), "전체 레벨");
   els.numbersSearch.addEventListener("input", renderNumbers);
   els.numbersLevel.addEventListener("change", renderNumbers);
-  els.numbersSort.addEventListener("change", renderNumbers);
+  els.numbersSort.addEventListener("change", () => {
+    activeEffectSortKey = "";
+    renderNumbersEffectSortChips();
+    renderNumbers();
+  });
+  renderNumbersEffectSortChips();
   renderNumbers();
   loadPublicApprovedReports();
 }
@@ -1882,8 +1889,8 @@ function renderEffectSortChips() {
   ].join("");
   const selected = selectedEffectSort();
   els.effectSortSummary.textContent = selected
-    ? `${selected.label} 효과가 있는 정수를 우선 표시합니다. 수치가 있으면 높은 순으로 정렬됩니다.`
-    : "원하는 효과를 누르면 해당 정수가 먼저 표시됩니다.";
+    ? `패시브 또는 액티브에 ${selected.label} 효과가 있는 정수를 우선 표시합니다. 수치가 있으면 높은 순으로 정렬됩니다.`
+    : "패시브와 액티브에서 원하는 효과를 찾아 먼저 표시합니다.";
   els.effectSortChips.onclick = (event) => {
     const button = event.target.closest("button[data-effect]");
     if (!button) return;
@@ -1894,6 +1901,29 @@ function renderEffectSortChips() {
     }
     renderEffectSortChips();
     render();
+  };
+}
+
+function renderNumbersEffectSortChips() {
+  els.numbersEffectSortChips.innerHTML = [
+    `<button type="button" class="effect-chip${activeEffectSortKey ? "" : " is-active"}" data-effect="">선택 안 함</button>`,
+    ...Object.entries(effectSortDefinitions).map(([key, effect]) => `
+      <button type="button" class="effect-chip${activeEffectSortKey === key ? " is-active" : ""}" data-effect="${escapeHtml(key)}">
+        ${escapeHtml(effect.label)}
+      </button>
+    `),
+  ].join("");
+  const selected = selectedEffectSort();
+  els.numbersEffectSortSummary.textContent = selected
+    ? `${selected.label} 효과가 있는 넘버스를 우선 표시합니다. 수치가 있으면 높은 순으로 정렬됩니다.`
+    : "원하는 효과를 누르면 해당 넘버스가 먼저 표시됩니다.";
+  els.numbersEffectSortChips.onclick = (event) => {
+    const button = event.target.closest("button[data-effect]");
+    if (!button) return;
+    activeEffectSortKey = button.dataset.effect;
+    if (activeEffectSortKey) els.numbersSort.value = "number";
+    renderNumbersEffectSortChips();
+    renderNumbers();
   };
 }
 
@@ -2154,7 +2184,16 @@ function renderNumbers() {
     return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"], row["착용부위"], row["획득처"]]
       .some((value) => textOf(value).toLowerCase().includes(query));
   });
+  const selectedEffect = selectedEffectSort();
   rows = [...rows].sort((a, b) => {
+    if (selectedEffect) {
+      const aScore = effectSortScore(a, selectedEffect);
+      const bScore = effectSortScore(b, selectedEffect);
+      return Number(bScore.matched) - Number(aScore.matched)
+        || Number(aScore.penalized) - Number(bScore.penalized)
+        || bScore.value - aScore.value
+        || numberFrom(a["번호"]) - numberFrom(b["번호"]);
+    }
     if (sort === "level-desc") return numberFrom(b["아이템 레벨(Lv)"]) - numberFrom(a["아이템 레벨(Lv)"]);
     if (sort === "level-asc") return numberFrom(a["아이템 레벨(Lv)"]) - numberFrom(b["아이템 레벨(Lv)"]);
     return numberFrom(a["번호"]) - numberFrom(b["번호"]);
@@ -2165,16 +2204,18 @@ function renderNumbers() {
       <div class="numbers-table-wrap">
         <table class="numbers-table">
           <thead><tr><th>번호</th><th>이름</th><th>아이템 레벨</th><th>착용부위</th><th>획득처</th><th>효과</th></tr></thead>
-          <tbody>${rows.map((row) => `
+          <tbody>${rows.map((row) => {
+            const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
+            return `
             <tr>
               <td data-label="번호"><span class="number-code">${escapeHtml(displayNumber(row["번호"]))}</span></td>
               <td data-label="이름"><strong>${escapeHtml(row["이름"])}</strong></td>
               <td data-label="아이템 레벨"><span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span></td>
               <td data-label="착용부위">${escapeHtml(row["착용부위"] || "-")}</td>
               <td data-label="획득처">${escapeHtml(row["획득처"] || "-")}</td>
-              <td data-label="효과">${escapeHtml(row["효과"] || "-")}</td>
+              <td data-label="효과">${effectScore?.matched ? `<span class="effect-sort-pill${effectScore.penalized ? " is-warning" : ""}">${escapeHtml(selectedEffect.label)}${effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}${escapeHtml(row["효과"] || "-")}</td>
             </tr>
-          `).join("")}</tbody>
+          `; }).join("")}</tbody>
         </table>
       </div>`
     : `<div class="empty">조건에 맞는 넘버스 정보가 없습니다.</div>`;
