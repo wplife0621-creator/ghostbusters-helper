@@ -118,6 +118,7 @@ const els = {
   homeNoticeFilters: document.querySelector("#homeNoticeFilters"),
   homeNoticeCounts: document.querySelector("#homeNoticeCounts"),
   homeNoticeList: document.querySelector("#homeNoticeList"),
+  homeNoticePagination: document.querySelector("#homeNoticePagination"),
   homeNoticeStatus: document.querySelector("#homeNoticeStatus"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
@@ -219,6 +220,8 @@ let activeStatNames = [];
 let activeEffectSortKey = "";
 let homeNotices = [];
 let activeHomeNoticeFilter = "all";
+let activeHomeNoticePage = 1;
+const homeNoticePageSize = 10;
 const statNoneLabel = "스탯 선택 안 함";
 
 function revealCurrentNavItem() {
@@ -447,9 +450,16 @@ function initHomeNotices() {
     const button = event.target.closest("button[data-notice-filter]");
     if (!button) return;
     activeHomeNoticeFilter = button.dataset.noticeFilter;
+    activeHomeNoticePage = 1;
     els.homeNoticeFilters.querySelectorAll("button").forEach((item) => {
       item.classList.toggle("is-active", item === button);
     });
+    renderHomeNotices();
+  });
+  els.homeNoticePagination.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-notice-page]");
+    if (!button) return;
+    activeHomeNoticePage = Number(button.dataset.noticePage) || 1;
     renderHomeNotices();
   });
   loadHomeNotices();
@@ -583,11 +593,14 @@ function renderHomeNotices() {
     </span>
   `).join("");
   const visible = activeHomeNoticeFilter === "all"
-    ? types.flatMap((type) => homeNotices.filter((item) => item.type === type.key).slice(0, 4))
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+    ? homeNotices
     : homeNotices.filter((item) => item.type === activeHomeNoticeFilter);
-  els.homeNoticeList.innerHTML = visible.length
-    ? visible.slice(0, 16).map((notice) => `
+  const pageCount = Math.max(1, Math.ceil(visible.length / homeNoticePageSize));
+  activeHomeNoticePage = Math.min(activeHomeNoticePage, pageCount);
+  const pageStart = (activeHomeNoticePage - 1) * homeNoticePageSize;
+  const pageNotices = visible.slice(pageStart, pageStart + homeNoticePageSize);
+  els.homeNoticeList.innerHTML = pageNotices.length
+    ? pageNotices.map((notice) => `
       <a class="home-notice-item type-${escapeHtml(notice.type)}" href="${escapeHtml(notice.href)}">
         <span class="home-notice-type">${escapeHtml(notice.label)}</span>
         <span class="home-notice-copy">
@@ -599,6 +612,12 @@ function renderHomeNotices() {
       </a>
     `).join("")
     : `<div class="home-notice-empty">최근 7일 내 공개된 ${activeHomeNoticeFilter === "all" ? "새 소식이" : "항목이"} 없습니다.</div>`;
+  els.homeNoticePagination.innerHTML = visible.length > homeNoticePageSize
+    ? Array.from({ length: pageCount }, (_, index) => {
+      const page = index + 1;
+      return `<button type="button" data-notice-page="${page}" class="${page === activeHomeNoticePage ? "is-active" : ""}"${page === activeHomeNoticePage ? ' aria-current="page"' : ""}>${page}</button>`;
+    }).join("")
+    : "";
 }
 
 function initNumbers() {

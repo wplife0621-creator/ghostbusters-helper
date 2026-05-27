@@ -363,6 +363,36 @@ body {
   text-align: right;
 }
 
+.home-notice-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.home-notice-pagination:empty {
+  display: none;
+}
+
+.home-notice-pagination button {
+  min-width: 36px;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: #52617b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.home-notice-pagination button:hover,
+.home-notice-pagination button.is-active {
+  border-color: #bdd3f4;
+  background: #eaf2ff;
+  color: var(--brand-dark);
+}
+
 .home-groups {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3073,6 +3103,16 @@ textarea {
 
   .home-notice-status {
     text-align: left;
+  }
+
+  .home-notice-pagination {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .home-notice-pagination button {
+    min-width: 40px;
+    min-height: 40px;
   }
 
   .maze-inputs {
