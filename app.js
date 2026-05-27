@@ -87,6 +87,15 @@ const effectSortDefinitions = {
     pattern: /번개\s*스택/i,
     scorePatterns: [/번개\s*스택\s*\+?\s*([+-]?\d+(?:\.\d+)?)/i],
   },
+  shock: {
+    label: "감전",
+    pattern: /감전/i,
+    scorePatterns: [
+      /([+-]?\d+(?:\.\d+)?)\s*%\s*확률[^/\n]*감전/i,
+      /감전\s*([+-]?\d+(?:\.\d+)?)\s*초/i,
+      /([+-]?\d+(?:\.\d+)?)\s*초[^/\n]*감전/i,
+    ],
+  },
   vision: {
     label: "시야",
     pattern: /시야/i,
