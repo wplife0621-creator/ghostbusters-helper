@@ -365,8 +365,15 @@ body {
 
 .home-notice-pagination {
   display: flex;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.home-notice-pagination::-webkit-scrollbar {
+  display: none;
 }
 
 .home-notice-pagination:empty {
@@ -374,10 +381,11 @@ body {
 }
 
 .home-notice-pagination button {
-  min-width: 36px;
-  min-height: 36px;
+  flex: 0 0 auto;
+  min-width: 31px;
+  min-height: 31px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 7px;
   background: #fff;
   color: #52617b;
   font: inherit;
@@ -3106,13 +3114,13 @@ textarea {
   }
 
   .home-notice-pagination {
-    flex-wrap: wrap;
-    gap: 5px;
+    justify-content: flex-start;
+    gap: 4px;
   }
 
   .home-notice-pagination button {
-    min-width: 40px;
-    min-height: 40px;
+    min-width: 32px;
+    min-height: 32px;
   }
 
   .maze-inputs {
