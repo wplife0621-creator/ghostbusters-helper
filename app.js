@@ -2377,23 +2377,31 @@ function renderNumbers() {
   els.numbersCount.textContent = `${rows.length}건`;
   els.numbersResults.innerHTML = rows.length
     ? `
-      <div class="numbers-table-wrap">
-        <table class="numbers-table">
-          <thead><tr><th>번호</th><th>이름</th><th>아이템 레벨</th><th>착용부위</th><th>획득처</th><th>효과</th></tr></thead>
-          <tbody>${rows.map((row) => {
-            const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
-            return `
-            <tr>
-              <td data-label="번호"><span class="${numberCodeClass(row["번호"])}">${escapeHtml(displayNumber(row["번호"]))}</span></td>
-              <td data-label="이름"><strong>${escapeHtml(row["이름"])}</strong></td>
-              <td data-label="아이템 레벨"><span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span></td>
-              <td data-label="착용부위">${escapeHtml(row["착용부위"] || "-")}</td>
-              <td data-label="획득처">${sourcePillList(row["획득처"])}</td>
-              <td data-label="효과">${effectScore?.matched ? `<span class="effect-sort-pill${effectScore.penalized ? " is-warning" : ""}">${escapeHtml(selectedEffect.label)}${effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}${escapeHtml(row["효과"] || "-")}</td>
-            </tr>
-          `; }).join("")}</tbody>
-        </table>
-      </div>`
+      <div class="numbers-card-list">${rows.map((row) => {
+        const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
+        return `
+          <article class="number-card">
+            <div class="number-card-head">
+              <div class="number-title-line">
+                <span class="${numberCodeClass(row["번호"])}">${escapeHtml(displayNumber(row["번호"]))}</span>
+                <strong>${escapeHtml(row["이름"] || "이름 미확인")}</strong>
+              </div>
+              <span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span>
+            </div>
+            <div class="number-card-meta">
+              <span><b>착용부위</b>${escapeHtml(row["착용부위"] || "-")}</span>
+            </div>
+            <div class="number-source-block">
+              <b>획득처</b>
+              ${sourcePillList(row["획득처"])}
+            </div>
+            <div class="number-effect-block">
+              <b>효과</b>
+              <p>${effectScore?.matched ? `<span class="effect-sort-pill${effectScore.penalized ? " is-warning" : ""}">${escapeHtml(selectedEffect.label)}${effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}${escapeHtml(row["효과"] || "-")}</p>
+            </div>
+          </article>
+        `;
+      }).join("")}</div>`
     : `<div class="empty">조건에 맞는 넘버스 정보가 없습니다.</div>`;
 }
 
