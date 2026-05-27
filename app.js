@@ -1563,7 +1563,7 @@ function buildCard(build, shared) {
           <div class="pending-actions">
             <button class="build-like-button${liked ? " is-liked" : ""}" type="button" data-build-action="like"${liked ? " disabled" : ""}>${liked ? "좋아요 완료" : "좋아요"} ${likeCount}</button>
             <button type="button" data-build-action="share">공유 링크 복사</button>
-            <button type="button" data-build-action="load">불러오기</button>
+            <button type="button" data-build-action="load">수정</button>
             <button class="build-delete-button" type="button" data-build-action="delete">삭제</button>
           </div>
         </header>
@@ -1589,7 +1589,7 @@ function buildCard(build, shared) {
       ${shared ? "" : `
         <div class="pending-actions">
           <button type="button" data-build-action="share">공유 링크 복사</button>
-          <button type="button" data-build-action="load">불러오기</button>
+          <button type="button" data-build-action="load">수정</button>
         </div>
       `}
     </article>

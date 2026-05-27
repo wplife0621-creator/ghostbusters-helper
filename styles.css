@@ -1823,6 +1823,7 @@ textarea {
   justify-content: space-between;
   gap: 16px;
   align-items: end;
+  margin-top: 14px;
 }
 
 .build-board-head strong {
@@ -1832,6 +1833,7 @@ textarea {
 
 .build-board-actions {
   display: flex;
+  justify-content: space-between;
   gap: 9px;
   align-items: end;
 }
@@ -2012,13 +2014,21 @@ textarea {
 .build-public-head {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .build-public-head .pending-actions {
+  display: flex;
   flex: 0 0 auto;
+  flex-wrap: nowrap;
   justify-content: end;
+  gap: 6px;
+}
+
+.build-public-head .pending-actions button {
+  white-space: nowrap;
 }
 
 .build-delete-button {
@@ -3267,14 +3277,30 @@ textarea {
   }
 
   .build-board-head,
-  .build-board-actions,
   .build-form-actions {
     display: grid;
     gap: 10px;
   }
 
-  .build-sort-control,
-  .build-board-actions .submit-report,
+  .build-board-actions {
+    align-items: end;
+  }
+
+  .build-sort-control {
+    margin-left: auto;
+    width: min(132px, 42%);
+  }
+
+  .build-board-actions .submit-report {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 15px;
+  }
+
+  .build-board-head {
+    margin-top: 12px;
+  }
+
   .build-form-actions button {
     width: 100%;
   }
@@ -3583,17 +3609,30 @@ textarea {
   }
 
   .build-public-head {
-    display: grid;
-    gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    overflow-x: auto;
+    padding-bottom: 3px;
+    scrollbar-width: none;
+  }
+
+  .build-public-head::-webkit-scrollbar {
+    display: none;
+  }
+
+  .build-public-head .build-row-title {
+    flex: 0 0 auto;
   }
 
   .build-public-head .pending-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex: 0 0 auto;
+    grid-template-columns: none;
   }
 
   .build-public-head .build-like-button {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   .build-public-summary {
@@ -3877,8 +3916,18 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .build-public-head .pending-actions {
-    grid-template-columns: 1fr;
+  .build-board-actions {
+    gap: 7px;
+  }
+
+  .build-sort-control {
+    width: min(124px, 44%);
+  }
+
+  .build-public-head .pending-actions button {
+    min-height: 39px;
+    padding: 0 9px;
+    font-size: 12px;
   }
 }
 
