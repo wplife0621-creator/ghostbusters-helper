@@ -7,5 +7,5 @@ window.DUKHUBUSTERS_CONFIG = {
   dailyVisitorTable: "daily_visitors",
   guideTable: "guide_posts",
   guideBucket: "guide-media",
-  guideShareUrl: "",
+  guideShareUrl: "https://bjlykfxfminmjfgilowj.supabase.co/functions/v1/guide-share",
 };
