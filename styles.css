@@ -3010,25 +3010,63 @@ select[multiple] option:checked {
   width: 74px;
 }
 
+.pin-cell {
+  text-align: center;
+}
+
 .pin-essence-control {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #d7e5fa;
-  border-radius: 999px;
-  background: #f8fbff;
-  color: var(--brand-dark);
-  font-size: 12px;
-  font-weight: 900;
-  padding: 6px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d8e5f6;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85), 0 4px 12px rgba(31, 72, 128, 0.06);
   cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .pin-essence-control input {
-  width: 16px;
-  height: 16px;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
   margin: 0;
-  accent-color: var(--brand);
+}
+
+.pin-essence-control::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 2px solid #9fb7d8;
+  border-radius: 5px;
+  background: #f8fbff;
+  box-sizing: border-box;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.pin-essence-control:has(input:checked) {
+  border-color: #6aa4ff;
+  background: #edf5ff;
+  box-shadow: 0 6px 16px rgba(51, 119, 219, 0.16);
+}
+
+.pin-essence-control:has(input:checked)::before {
+  border-color: var(--brand);
+  background: var(--brand);
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.pin-essence-control:hover {
+  border-color: #9fc2ef;
+  transform: translateY(-1px);
+}
+
+.pin-essence-control:focus-within {
+  outline: 2px solid rgba(51, 119, 219, 0.2);
+  outline-offset: 2px;
 }
 
 .quick-edit-button {
@@ -4157,6 +4195,11 @@ select[multiple] option:checked {
   .pin-essence-control,
   .quick-edit-button {
     width: fit-content;
+  }
+
+  .pin-essence-control {
+    width: 32px;
+    height: 32px;
   }
 
   .quick-edit-modal {
