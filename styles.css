@@ -2265,6 +2265,41 @@ select[multiple] option:checked {
   padding: 8px 11px;
 }
 
+.auth-nickname-form {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-nickname-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 7px 5px 11px;
+}
+
+.auth-nickname-input {
+  width: 150px;
+  min-height: 31px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 11px;
+  outline: none;
+}
+
 .build-card {
   display: grid;
   gap: 10px;
@@ -3675,6 +3710,22 @@ select[multiple] option:checked {
     min-height: 42px;
     display: inline-flex;
     align-items: center;
+  }
+
+  .auth-nickname-form {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .auth-nickname-label {
+    width: 100%;
+    border-radius: 14px;
+    justify-content: space-between;
+  }
+
+  .auth-nickname-input {
+    flex: 1;
+    width: min(220px, 100%);
   }
 
   .topbar-visitors p {
