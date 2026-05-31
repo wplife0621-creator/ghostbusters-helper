@@ -1,4 +1,16 @@
+redirectLegacyGithubPages();
+
 const data = window.GHOST_DATA || {};
+
+function redirectLegacyGithubPages() {
+  if (window.location.hostname !== "wplife0621-creator.github.io") return;
+
+  const legacyBasePath = "/ghostbusters-helper";
+  const nextPath = window.location.pathname.startsWith(legacyBasePath)
+    ? window.location.pathname.slice(legacyBasePath.length) || "/"
+    : window.location.pathname || "/";
+  window.location.replace(`https://busters.kr${nextPath}${window.location.search}${window.location.hash}`);
+}
 
 const storageKeys = {
   pending: "dukhubusters.pendingReports",
