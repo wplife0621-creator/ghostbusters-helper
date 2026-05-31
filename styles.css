@@ -2300,6 +2300,108 @@ select[multiple] option:checked {
   outline: none;
 }
 
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(12, 22, 38, 0.58);
+}
+
+.auth-modal {
+  width: min(460px, 100%);
+  border: 1px solid #c7d9f5;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(16, 32, 56, 0.28);
+  padding: 22px;
+}
+
+.auth-modal-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.auth-modal-head p {
+  margin: 0 0 6px;
+  color: var(--brand-dark);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.auth-modal-head h2 {
+  margin: 0;
+  color: #17263d;
+  font-size: 24px;
+}
+
+.auth-modal-close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: #52617b;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.auth-modal-copy {
+  margin: 14px 0 16px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.auth-modal-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-modal .auth-button {
+  border-color: #c7d9f5;
+  background: #1f6feb;
+  color: #fff;
+}
+
+.auth-modal .auth-button-secondary,
+.auth-modal .auth-check-button {
+  background: #eef5ff;
+  color: var(--brand-dark);
+}
+
+.auth-modal .auth-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.auth-modal-status {
+  min-height: 20px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.auth-modal-status.ok {
+  color: #187047;
+}
+
+.auth-modal-status.error {
+  color: #b42318;
+}
+
 .admin-review-layout {
   width: min(1120px, calc(100% - 28px));
 }
@@ -3747,6 +3849,15 @@ select[multiple] option:checked {
   .auth-nickname-input {
     flex: 1;
     width: min(220px, 100%);
+  }
+
+  .auth-modal {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .auth-modal-actions .auth-button {
+    flex: 1 1 130px;
   }
 
   .topbar-visitors p {
