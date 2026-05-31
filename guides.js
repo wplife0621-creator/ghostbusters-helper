@@ -15,6 +15,8 @@ const commentParentKind = "guide-comment-parent";
 const mediaMarkerPattern = /\{\{media:([^}]+)\}\}/g;
 const guideUploadLimitBytes = 50 * 1024 * 1024;
 const guideUploadLimitLabel = "50MB";
+const guideSiteTitle = "덕후버스터즈";
+const guideDefaultTitle = `공략글 보러가기 · ${guideSiteTitle}`;
 const fields = {
   board: document.querySelector("#guideBoard"),
   form: document.querySelector("#guideForm"),
@@ -111,6 +113,36 @@ function setStatus(message, mode = "") {
   fields.status.className = `build-sync-status ${mode}`.trim();
 }
 
+function setMetaContent(selector, content) {
+  let meta = document.head.querySelector(selector);
+  if (!meta) {
+    meta = document.createElement("meta");
+    const propertyMatch = selector.match(/meta\[property=['"]([^'"]+)['"]\]/);
+    const nameMatch = selector.match(/meta\[name=['"]([^'"]+)['"]\]/);
+    if (propertyMatch) meta.setAttribute("property", propertyMatch[1]);
+    if (nameMatch) meta.setAttribute("name", nameMatch[1]);
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", content);
+}
+
+function shareTitleForPost(post) {
+  return post ? `${post.title} · ${guideSiteTitle}` : guideDefaultTitle;
+}
+
+function updateGuideShareMeta(post = null) {
+  const title = shareTitleForPost(post);
+  const description = post
+    ? String(post.content || "").replace(mediaMarkerPattern, "").replace(/\s+/g, " ").trim().slice(0, 120) || "덕후버스터즈 공략 게시글"
+    : "덕후버스터즈 공략 게시판";
+  document.title = title;
+  setMetaContent("meta[property='og:title']", title);
+  setMetaContent("meta[property='og:site_name']", guideSiteTitle);
+  setMetaContent("meta[property='og:description']", description);
+  setMetaContent("meta[name='twitter:title']", title);
+  setMetaContent("meta[name='description']", description);
+}
+
 function idValue() {
   return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -153,7 +185,7 @@ async function sharePostLink(post, button) {
   const url = postUrl(post.id).toString();
   if (navigator.share) {
     try {
-      await navigator.share({ title: post.title, text: "공략글 보기", url });
+      await navigator.share({ title: shareTitleForPost(post), text: "공략글 보기", url });
       return;
     } catch (error) {
       if (error.name === "AbortError") return;
@@ -697,8 +729,10 @@ function renderViewer() {
   fields.board.classList.toggle("is-viewing", Boolean(post));
   if (!post) {
     fields.viewer.innerHTML = "";
+    updateGuideShareMeta();
     return;
   }
+  updateGuideShareMeta(post);
   const postBody = postBodyMarkup(post);
   fields.viewer.innerHTML = `
     <div class="guide-viewer-head" data-guide-id="${escapeHtml(post.id)}">
