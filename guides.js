@@ -4,6 +4,7 @@ const guideBackend = {
   key: String(config.supabaseAnonKey || ""),
   table: String(config.guideTable || "guide_posts"),
   bucket: String(config.guideBucket || "guide-media"),
+  shareUrl: String(config.guideShareUrl || "").replace(/\/$/, ""),
 };
 const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
@@ -166,6 +167,15 @@ function postUrl(postId) {
   return url;
 }
 
+function postShareUrl(postId) {
+  if (guideBackend.shareUrl && postId) {
+    const url = new URL(guideBackend.shareUrl);
+    url.searchParams.set("post", postId);
+    return url;
+  }
+  return postUrl(postId);
+}
+
 function updatePostUrl(postId, replace = false) {
   const url = postUrl(postId);
   window.history[replace ? "replaceState" : "pushState"]({}, "", url);
@@ -182,7 +192,7 @@ function openLinkedPostIfAvailable() {
 }
 
 async function sharePostLink(post, button) {
-  const url = postUrl(post.id).toString();
+  const url = postShareUrl(post.id).toString();
   if (navigator.share) {
     try {
       await navigator.share({ title: shareTitleForPost(post), text: "공략글 보기", url });
