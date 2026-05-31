@@ -2213,6 +2213,58 @@ select[multiple] option:checked {
   color: #fff;
 }
 
+.auth-panel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.topbar-auth {
+  grid-column: 2;
+  justify-self: end;
+  margin-top: -6px;
+}
+
+.auth-button {
+  min-height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--brand-dark);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 13px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 35, 65, 0.12);
+}
+
+.auth-button:hover {
+  background: #edf5ff;
+}
+
+.auth-button-secondary {
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+  box-shadow: none;
+}
+
+.auth-profile,
+.auth-muted {
+  max-width: min(260px, 48vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 8px 11px;
+}
+
 .build-card {
   display: grid;
   gap: 10px;
@@ -3600,6 +3652,29 @@ select[multiple] option:checked {
     border-radius: 12px;
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .topbar-auth {
+    grid-column: 1;
+    justify-self: stretch;
+    margin-top: 0;
+  }
+
+  .auth-panel {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .auth-button {
+    min-height: 42px;
+  }
+
+  .auth-profile,
+  .auth-muted {
+    max-width: 100%;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
   }
 
   .topbar-visitors p {
