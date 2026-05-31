@@ -1,5 +1,5 @@
 const siteTitle = "덕후버스터즈";
-const defaultSiteUrl = "https://wplife0621-creator.github.io/ghostbusters-helper";
+const defaultSiteUrl = "https://busters.kr";
 const commentTitlePrefix = "__guide_comment__:";
 const likeTitlePrefix = "__guide_like__:";
 const mediaMarkerPattern = /\{\{media:([^}]+)\}\}/g;
