@@ -3013,18 +3013,21 @@ select[multiple] option:checked {
 .pin-essence-control {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
   border: 1px solid #d7e5fa;
   border-radius: 999px;
   background: #f8fbff;
   color: var(--brand-dark);
   font-size: 12px;
   font-weight: 900;
-  padding: 5px 8px;
+  padding: 6px;
   cursor: pointer;
 }
 
 .pin-essence-control input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
   accent-color: var(--brand);
 }
 

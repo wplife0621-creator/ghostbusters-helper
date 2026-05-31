@@ -2449,7 +2449,7 @@ function essenceTemplate(rows) {
     const pinnedSection = `
       <section class="essence-group pinned-essence-group">
         <div class="group-title pinned-title">
-          <h3>고정한 정수</h3>
+          <h3>정수 비교하기</h3>
           <span>${pinnedRows.length}마리 비교 중</span>
         </div>
         <div class="essence-table-wrap">${essenceTable(pinnedRows)}</div>
@@ -2521,7 +2521,6 @@ function essenceRowTemplate(row) {
       <td data-label="고정" class="pin-cell">
         <label class="pin-essence-control">
           <input class="pin-essence-checkbox" type="checkbox" data-monster="${escapeHtml(row["몬스터"])}" ${isPinnedEssence(row) ? "checked" : ""}>
-          <span>고정</span>
         </label>
       </td>
       <td data-label="몬스터">
