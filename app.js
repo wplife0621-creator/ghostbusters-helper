@@ -2419,11 +2419,11 @@ function renderNumbers() {
             <div class="number-card-meta">
               <span><b>착용부위</b>${escapeHtml(row["착용부위"] || "-")}</span>
             </div>
-            <div class="number-source-block">
+            <div class="number-card-meta number-source-block">
               <b>획득처</b>
               ${sourcePillList(row["획득처"])}
             </div>
-            <div class="number-effect-block">
+            <div class="number-card-meta number-effect-block">
               <b>효과</b>
               <p>${effectScore?.matched ? `<span class="effect-sort-pill${effectScore.penalized ? " is-warning" : ""}">${escapeHtml(selectedEffect.label)}${effectScore.value ? ` · ${escapeHtml(effectScore.value)}` : ""}</span>` : ""}${escapeHtml(row["효과"] || "-")}</p>
             </div>

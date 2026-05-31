@@ -1050,15 +1050,17 @@ select[multiple] option:checked {
 }
 
 .numbers-card-list {
-  columns: 3 300px;
-  column-gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 10px;
+  align-items: stretch;
 }
 
 .number-card {
-  break-inside: avoid;
   display: grid;
-  gap: 8px;
-  margin: 0 0 10px;
+  grid-template-rows: auto 1fr 1fr auto;
+  gap: 7px;
+  min-height: 162px;
   border: 1px solid #d9e5f8;
   border-radius: 10px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
@@ -1091,32 +1093,40 @@ select[multiple] option:checked {
 }
 
 .number-card-meta,
-.number-source-block,
-.number-effect-block {
-  display: grid;
-  gap: 5px;
-}
-
 .number-card-meta span {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: var(--text);
   font-size: 12.5px;
+  min-width: 0;
 }
 
 .number-card-meta b,
-.number-source-block > b,
 .number-effect-block > b {
+  flex: 0 0 auto;
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
 }
 
+.number-source-block {
+  align-items: flex-start;
+}
+
+.number-source-block .source-pill-list {
+  min-width: 0;
+}
+
+.number-effect-block {
+  align-items: flex-start;
+}
+
 .number-effect-block p {
+  min-width: 0;
   margin: 0;
   color: #172033;
-  line-height: 1.52;
+  line-height: 1.45;
   overflow-wrap: anywhere;
   font-size: 13px;
 }
@@ -3945,12 +3955,12 @@ select[multiple] option:checked {
   }
 
   .numbers-card-list {
-    columns: 1;
+    grid-template-columns: 1fr;
   }
 
   .number-card {
     gap: 8px;
-    margin-bottom: 8px;
+    min-height: 0;
     padding: 10px;
   }
 
