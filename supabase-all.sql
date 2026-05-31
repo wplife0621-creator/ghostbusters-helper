@@ -175,9 +175,11 @@ drop policy if exists "Anyone can delete guide posts" on public.guide_posts;
 create policy "Anyone can delete guide posts"
 on public.guide_posts for delete to anon using (true);
 
-insert into storage.buckets (id, name, public)
-values ('guide-media', 'guide-media', true)
-on conflict (id) do update set public = true;
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('guide-media', 'guide-media', true, 52428800)
+on conflict (id) do update set
+  public = true,
+  file_size_limit = 52428800;
 
 drop policy if exists "Anyone can read guide media" on storage.objects;
 create policy "Anyone can read guide media"

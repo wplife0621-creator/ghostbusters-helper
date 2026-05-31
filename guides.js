@@ -13,6 +13,8 @@ const viewCounterKind = "guide-view-counter";
 const passwordKind = "guide-password";
 const commentParentKind = "guide-comment-parent";
 const mediaMarkerPattern = /\{\{media:([^}]+)\}\}/g;
+const guideUploadLimitBytes = 50 * 1024 * 1024;
+const guideUploadLimitLabel = "50MB";
 const fields = {
   board: document.querySelector("#guideBoard"),
   form: document.querySelector("#guideForm"),
@@ -389,7 +391,7 @@ function loadCommentCounts() {
 
 async function filesToTemporaryMedia(items) {
   const total = items.reduce((sum, item) => sum + item.file.size, 0);
-  if (total > 3 * 1024 * 1024) throw new Error("local-size");
+  if (total > guideUploadLimitBytes) throw new Error("local-size");
   return Promise.all(items.map((item) => new Promise((resolve, reject) => {
     const file = item.file;
     const reader = new FileReader();
@@ -608,7 +610,7 @@ async function submitPost(event) {
       setStatus("공개 게시판에 저장하지 못해 이 기기에 임시 저장했습니다. 저장소 설정을 적용하면 모두에게 공유됩니다.", "is-offline");
     } catch (localError) {
       const message = localError.message === "local-size"
-        ? "공개 저장소 연결 전에는 첨부 파일 합계 3MB까지 임시 저장할 수 있습니다."
+        ? `첨부 파일 합계 ${guideUploadLimitLabel}까지 업로드할 수 있습니다.`
         : "공략글 저장에 실패했습니다. 게시판 저장소 설정을 확인해주세요.";
       setStatus(message, "is-offline");
     }
