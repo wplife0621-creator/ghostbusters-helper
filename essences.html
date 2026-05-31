@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>정수 확인하기 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260526-6">
+  <link rel="stylesheet" href="./styles.css?v=20260531-1">
 </head>
 <body>
   <header class="topbar compact">
@@ -94,6 +94,86 @@
     </section>
   </main>
 
+  <div id="quickEditModal" class="quick-edit-modal" hidden>
+    <form id="quickEditForm" class="quick-edit-dialog">
+      <div class="quick-edit-head">
+        <div>
+          <strong>정수 정보 바로 수정</strong>
+          <span>수정 내용은 검수 대기에 등록됩니다.</span>
+        </div>
+        <button id="quickEditClose" type="button" aria-label="닫기">×</button>
+      </div>
+      <input id="quickEditOriginalMonster" type="hidden">
+      <div class="quick-edit-grid">
+        <label class="field">
+          <span>올린사람 닉네임</span>
+          <input id="quickEditNickname" maxlength="24" placeholder="예: 겜바바덕후">
+        </label>
+        <label class="field">
+          <span>몬스터명</span>
+          <input id="quickEditMonster" required>
+        </label>
+        <label class="field">
+          <span>등급</span>
+          <input id="quickEditGrade" required>
+        </label>
+        <label class="field">
+          <span>층</span>
+          <select id="quickEditFloor" required></select>
+        </label>
+        <label class="field">
+          <span>구역</span>
+          <select id="quickEditArea" required></select>
+        </label>
+        <label class="field check-field">
+          <span>항해 관련 정수</span>
+          <span class="check-control">
+            <input id="quickEditSailing" type="checkbox">
+            <strong>항해 정수로 표시</strong>
+          </span>
+        </label>
+        <label class="field wide">
+          <span>주요 스탯</span>
+          <input id="quickEditStats" required>
+        </label>
+        <label class="field wide">
+          <span>패시브</span>
+          <input id="quickEditPassive" required>
+        </label>
+      </div>
+      <fieldset class="recommendation-fields">
+        <legend>추천 캐릭터 <small>복수 선택 가능</small></legend>
+        <div class="recommendation-checks">
+          <label><input class="quick-edit-recommendation" type="checkbox" value="비요른"><span>비요른</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="에르웬"><span>에르웬</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="미샤"><span>미샤</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="아이나르"><span>아이나르</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="레이븐"><span>레이븐</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="아우옌"><span>아우옌</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="active-skill-fields wide">
+        <legend>액티브 <small>최대 3개</small></legend>
+        <label class="field">
+          <span>액티브 1</span>
+          <input id="quickEditActive">
+        </label>
+        <label class="field">
+          <span>액티브 2</span>
+          <input id="quickEditActive2">
+        </label>
+        <label class="field">
+          <span>액티브 3</span>
+          <input id="quickEditActive3">
+        </label>
+      </fieldset>
+      <div class="quick-edit-actions">
+        <p id="quickEditStatus"></p>
+        <button class="submit-report" type="submit">수정 제보 등록</button>
+      </div>
+    </form>
+  </div>
+
   <script src="./ghost-data.js?v=20260520"></script>
   <script>
     window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
@@ -103,6 +183,6 @@
     };
   </script>
   <script src="./config.js?v=20260524-8"></script>
-  <script src="./app.js?v=20260528-1"></script>
+  <script src="./app.js?v=20260531-1"></script>
 </body>
 </html>

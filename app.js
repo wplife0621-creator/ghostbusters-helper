@@ -4,6 +4,7 @@ const storageKeys = {
   pending: "dukhubusters.pendingReports",
   approved: "dukhubusters.approvedReports",
   approvedReportItems: "dukhubusters.approvedReportItems",
+  pinnedEssences: "dukhubusters.pinnedEssences",
   adminUnlocked: "dukhubusters.adminUnlocked",
   builds: "dukhubusters.sharedBuilds",
   visitorId: "dukhubusters.visitorId",
@@ -42,6 +43,7 @@ const buildDeleteMarker = "__build_deleted__";
 const numbersReportPrefix = "__numbers__:";
 const sailingMarker = "__sailing__";
 const recommendationMarkerPrefix = "__recommended_character__:";
+const authorNicknameMarkerPrefix = "__author_nickname__:";
 const effectSortDefinitions = {
   "physical-damage": {
     label: "물리 피해",
@@ -164,6 +166,7 @@ const els = {
   reportForm: document.querySelector("#reportForm"),
   reportDataset: document.querySelector("#reportDataset"),
   reportMode: document.querySelector("#reportMode"),
+  reportNickname: document.querySelector("#reportNickname"),
   reportMonster: document.querySelector("#reportMonster"),
   editNameHint: document.querySelector("#editNameHint"),
   reportOriginalMonsterField: document.querySelector("#reportOriginalMonsterField"),
@@ -228,6 +231,23 @@ const els = {
   essencePickerFloor: document.querySelector("#essencePickerFloor"),
   essencePickerArea: document.querySelector("#essencePickerArea"),
   essencePickerTable: document.querySelector("#essencePickerTable"),
+  quickEditModal: document.querySelector("#quickEditModal"),
+  quickEditForm: document.querySelector("#quickEditForm"),
+  quickEditClose: document.querySelector("#quickEditClose"),
+  quickEditNickname: document.querySelector("#quickEditNickname"),
+  quickEditOriginalMonster: document.querySelector("#quickEditOriginalMonster"),
+  quickEditMonster: document.querySelector("#quickEditMonster"),
+  quickEditGrade: document.querySelector("#quickEditGrade"),
+  quickEditFloor: document.querySelector("#quickEditFloor"),
+  quickEditArea: document.querySelector("#quickEditArea"),
+  quickEditStats: document.querySelector("#quickEditStats"),
+  quickEditPassive: document.querySelector("#quickEditPassive"),
+  quickEditActive: document.querySelector("#quickEditActive"),
+  quickEditActive2: document.querySelector("#quickEditActive2"),
+  quickEditActive3: document.querySelector("#quickEditActive3"),
+  quickEditSailing: document.querySelector("#quickEditSailing"),
+  quickEditRecommendations: document.querySelectorAll(".quick-edit-recommendation"),
+  quickEditStatus: document.querySelector("#quickEditStatus"),
 };
 
 let approvedReports = loadStoredRows(storageKeys.approved);
@@ -245,6 +265,7 @@ let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
 let activeEssenceInput = null;
 let activeStatNames = [];
 let activeEffectSortKey = "";
+let pinnedEssenceNames = loadStoredRows(storageKeys.pinnedEssences);
 let homeNotices = [];
 let activeHomeNoticeFilter = "all";
 let activeHomeNoticePage = 1;
@@ -277,7 +298,9 @@ function sailingValue(value) {
 
 function activeSkillsWithoutSailing(value) {
   return splitSkills(value)
-    .filter((skill) => skill !== sailingMarker && !skill.startsWith(recommendationMarkerPrefix))
+    .filter((skill) => skill !== sailingMarker
+      && !skill.startsWith(recommendationMarkerPrefix)
+      && !skill.startsWith(authorNicknameMarkerPrefix))
     .join("\n") || "-";
 }
 
@@ -294,6 +317,11 @@ function recommendedCharacterFromActive(value) {
   return marker ? marker.slice(recommendationMarkerPrefix.length) : "";
 }
 
+function authorNicknameFromActive(value) {
+  const marker = splitSkills(value).find((skill) => skill.startsWith(authorNicknameMarkerPrefix));
+  return marker ? marker.slice(authorNicknameMarkerPrefix.length) : "";
+}
+
 function isRecommendedFor(row, character) {
   return recommendedCharactersFrom(row?.["추천 캐릭터"]).includes(character);
 }
@@ -303,6 +331,7 @@ function reportActiveForStorage(report) {
     .filter((skill) => skill !== sailingMarker && !skill.startsWith(recommendationMarkerPrefix));
   if (report.sailing) skills.push(sailingMarker);
   if (report.recommendedCharacters) skills.push(`${recommendationMarkerPrefix}${report.recommendedCharacters}`);
+  if (report.authorNickname) skills.push(`${authorNicknameMarkerPrefix}${report.authorNickname}`);
   return skills.join("\n") || "-";
 }
 
@@ -317,6 +346,19 @@ function loadStoredRows(key) {
 
 function saveStoredRows(key, rows) {
   localStorage.setItem(key, JSON.stringify(rows));
+}
+
+function monsterKey(value) {
+  return textOf(value).toLowerCase();
+}
+
+function isPinnedEssence(row) {
+  return pinnedEssenceNames.map(monsterKey).includes(monsterKey(row?.["몬스터"]));
+}
+
+function savePinnedEssences() {
+  pinnedEssenceNames = unique(pinnedEssenceNames.map(textOf).filter(Boolean));
+  saveStoredRows(storageKeys.pinnedEssences, pinnedEssenceNames);
 }
 
 function mergeApprovedRows(baseRows, approvedRows) {
@@ -845,8 +887,26 @@ function initEssences() {
     el.addEventListener("change", render);
   });
 
+  els.results.addEventListener("change", handleEssenceResultChange);
+  els.results.addEventListener("click", handleEssenceResultClick);
+  initQuickEditModal();
   render();
   loadPublicApprovedReports();
+}
+
+function initQuickEditModal() {
+  if (!els.quickEditModal || !els.quickEditForm) return;
+  placeholderOptionList(els.quickEditFloor, floorOptionValues(essenceRows), "층 선택");
+  refreshQuickEditAreaOptions();
+  els.quickEditFloor.addEventListener("change", refreshQuickEditAreaOptions);
+  els.quickEditClose.addEventListener("click", closeQuickEditModal);
+  els.quickEditModal.addEventListener("click", (event) => {
+    if (event.target === els.quickEditModal) closeQuickEditModal();
+  });
+  els.quickEditForm.addEventListener("submit", submitQuickEditReport);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.quickEditModal.hidden) closeQuickEditModal();
+  });
 }
 
 function initMazeTime() {
@@ -1958,6 +2018,110 @@ function fillReportFromRow(row) {
   renderEditMonsterMatches();
 }
 
+function refreshQuickEditAreaOptions() {
+  if (!els.quickEditArea) return;
+  placeholderOptionList(els.quickEditArea, areaOptionsForFloor(els.quickEditFloor?.value, essenceRows), "구역 선택");
+}
+
+function openQuickEditModal(row) {
+  if (!row || !els.quickEditModal) return;
+  els.quickEditOriginalMonster.value = textOf(row["몬스터"]);
+  els.quickEditMonster.value = textOf(row["몬스터"]);
+  els.quickEditGrade.value = textOf(row["등급"]);
+  els.quickEditFloor.value = textOf(row["층"]);
+  refreshQuickEditAreaOptions();
+  els.quickEditArea.value = textOf(row["구역"]);
+  els.quickEditStats.value = textOf(row["주요 스탯"]);
+  els.quickEditPassive.value = textOf(row["패시브"]);
+  els.quickEditSailing.checked = isSailingRow(row);
+  const recommendedCharacters = recommendedCharactersFrom(row["추천 캐릭터"]);
+  els.quickEditRecommendations.forEach((field) => {
+    field.checked = recommendedCharacters.includes(field.value);
+  });
+  const activeSkills = splitSkills(activeSkillsWithoutSailing(row["액티브"]));
+  els.quickEditActive.value = activeSkills[0] || "";
+  els.quickEditActive2.value = activeSkills[1] || "";
+  els.quickEditActive3.value = activeSkills[2] || "";
+  els.quickEditStatus.textContent = "";
+  els.quickEditModal.hidden = false;
+  document.body.classList.add("modal-open");
+  setTimeout(() => els.quickEditMonster.focus(), 20);
+}
+
+function closeQuickEditModal() {
+  if (!els.quickEditModal) return;
+  els.quickEditModal.hidden = true;
+  if ((!els.essencePickerModal || els.essencePickerModal.hidden)
+    && (!els.buildFormModal || els.buildFormModal.hidden)
+    && (!els.buildDeleteModal || els.buildDeleteModal.hidden)) {
+    document.body.classList.remove("modal-open");
+  }
+}
+
+function handleEssenceResultChange(event) {
+  const checkbox = event.target.closest(".pin-essence-checkbox");
+  if (!checkbox) return;
+  const name = checkbox.dataset.monster;
+  if (checkbox.checked) {
+    if (!pinnedEssenceNames.map(monsterKey).includes(monsterKey(name))) pinnedEssenceNames.push(name);
+  } else {
+    pinnedEssenceNames = pinnedEssenceNames.filter((item) => monsterKey(item) !== monsterKey(name));
+  }
+  savePinnedEssences();
+  render();
+}
+
+function handleEssenceResultClick(event) {
+  const button = event.target.closest("button[data-edit-monster]");
+  if (!button) return;
+  const row = findMonsterRow(button.dataset.editMonster);
+  openQuickEditModal(row);
+}
+
+async function submitQuickEditReport(event) {
+  event.preventDefault();
+  const report = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    mode: "edit",
+    authorNickname: textOf(els.quickEditNickname.value),
+    monster: textOf(els.quickEditMonster.value),
+    originalMonster: textOf(els.quickEditOriginalMonster.value),
+    grade: textOf(els.quickEditGrade.value),
+    floor: textOf(els.quickEditFloor.value),
+    area: textOf(els.quickEditArea.value),
+    stats: textOf(els.quickEditStats.value),
+    passive: textOf(els.quickEditPassive.value),
+    sailing: Boolean(els.quickEditSailing.checked),
+    recommendedCharacters: [...els.quickEditRecommendations]
+      .filter((field) => field.checked)
+      .map((field) => field.value)
+      .join(", "),
+    active: [els.quickEditActive, els.quickEditActive2, els.quickEditActive3]
+      .map((field) => textOf(field.value))
+      .filter(Boolean)
+      .join("\n") || "-",
+    createdAt: new Date().toISOString(),
+  };
+  const button = els.quickEditForm.querySelector("[type='submit']");
+  if (button) button.disabled = true;
+  els.quickEditStatus.textContent = "수정 제보를 등록하는 중입니다.";
+  try {
+    const saved = hasPublicReportStore()
+      ? { ...(await savePublicReport(report)), authorNickname: report.authorNickname }
+      : report;
+    pendingReports = sortReportsByDate([saved, ...pendingReports.filter((item) => item.id !== saved.id)]);
+    saveStoredRows(storageKeys.pending, pendingReports);
+    els.quickEditStatus.textContent = "수정 제보가 검수 대기에 등록되었습니다.";
+    setTimeout(closeQuickEditModal, 700);
+  } catch {
+    pendingReports = sortReportsByDate([report, ...pendingReports.filter((item) => item.id !== report.id)]);
+    saveStoredRows(storageKeys.pending, pendingReports);
+    els.quickEditStatus.textContent = "저장소 연결이 불안정해 임시 검수 대기에 저장했습니다.";
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
 function findNumberRow(name) {
   const target = textOf(name).toLowerCase();
   return numbersRows.find((row) => textOf(row["이름"]).toLowerCase() === target);
@@ -2249,7 +2413,7 @@ function floorAreaMonsterSortDescending(a, b) {
 }
 
 function render() {
-  const rows = collectEssenceRows();
+  const rows = pinEssenceRows(collectEssenceRows());
   const selectedStats = selectedStatNames();
   const selectedEffect = selectedEffectSort();
   const recommendedSortCharacter = els.sort.value.startsWith("recommend:") ? els.sort.value.slice("recommend:".length) : "";
@@ -2267,7 +2431,39 @@ function render() {
 
 }
 
+function pinEssenceRows(rows) {
+  if (!pinnedEssenceNames.length) return rows;
+  const pinnedKeys = pinnedEssenceNames.map(monsterKey);
+  const pinnedRows = pinnedEssenceNames
+    .map((name) => essenceRows.find((row) => monsterKey(row["몬스터"]) === monsterKey(name)))
+    .filter(Boolean)
+    .map((row) => ({ type: "정수", row }));
+  const rest = rows.filter(({ row }) => !pinnedKeys.includes(monsterKey(row["몬스터"])));
+  return [...pinnedRows, ...rest];
+}
+
 function essenceTemplate(rows) {
+  const pinnedRows = rows.filter(({ row }) => isPinnedEssence(row));
+  const regularRows = rows.filter(({ row }) => !isPinnedEssence(row));
+  if (pinnedRows.length) {
+    const pinnedSection = `
+      <section class="essence-group pinned-essence-group">
+        <div class="group-title pinned-title">
+          <h3>고정한 정수</h3>
+          <span>${pinnedRows.length}마리 비교 중</span>
+        </div>
+        <div class="essence-table-wrap">${essenceTable(pinnedRows)}</div>
+      </section>
+    `;
+    if (hasStatSort() || selectedEffectSort()) {
+      return `${pinnedSection}<div class="essence-table-wrap">${essenceTable(regularRows)}</div>`;
+    }
+    return `${pinnedSection}${essenceTemplateWithoutPinned(regularRows)}`;
+  }
+  return essenceTemplateWithoutPinned(rows);
+}
+
+function essenceTemplateWithoutPinned(rows) {
   if (hasStatSort() || selectedEffectSort()) {
     return `<div class="essence-table-wrap">${essenceTable(rows)}</div>`;
   }
@@ -2298,12 +2494,14 @@ function essenceTable(items) {
     <table class="essence-table">
       <thead>
         <tr>
+          <th>고정</th>
           <th>몬스터</th>
           <th>등급</th>
           <th>추천</th>
           <th>주요 스탯</th>
           <th>패시브</th>
           <th>액티브</th>
+          <th>수정</th>
         </tr>
       </thead>
       <tbody>${items.map(({ row }) => essenceRowTemplate(row)).join("")}</tbody>
@@ -2320,6 +2518,12 @@ function essenceRowTemplate(row) {
     : "";
   return `
     <tr>
+      <td data-label="고정" class="pin-cell">
+        <label class="pin-essence-control">
+          <input class="pin-essence-checkbox" type="checkbox" data-monster="${escapeHtml(row["몬스터"])}" ${isPinnedEssence(row) ? "checked" : ""}>
+          <span>고정</span>
+        </label>
+      </td>
       <td data-label="몬스터">
         <div class="monster-title-line">
           <strong class="monster-name">${escapeHtml(row["몬스터"])}</strong>
@@ -2336,6 +2540,9 @@ function essenceRowTemplate(row) {
       </td>
       <td data-label="패시브" class="skill-cell">${skillText(row["패시브"])}</td>
       <td data-label="액티브" class="skill-cell">${skillText(row["액티브"])}</td>
+      <td data-label="수정" class="essence-edit-cell">
+        <button type="button" class="quick-edit-button" data-edit-monster="${escapeHtml(row["몬스터"])}">수정</button>
+      </td>
     </tr>
   `;
 }
@@ -2624,6 +2831,7 @@ function normalizeRemoteReport(row) {
     stats: row.stats || "",
     passive: row.passive || "",
     active: activeSkillsWithoutSailing(row.active || ""),
+    authorNickname: row.author_nickname || row.authorNickname || authorNicknameFromActive(row.active || ""),
     sailing: splitSkills(row.active || "").includes(sailingMarker),
     recommendedCharacters: recommendedCharacterFromActive(row.active || ""),
     status: row.status || "pending",
@@ -2697,24 +2905,35 @@ async function loadPublicReports() {
 }
 
 async function savePublicReport(report) {
-  const response = await fetch(reportStoreUrl(), {
+  const payload = {
+    id: report.id,
+    mode: report.mode,
+    monster: report.monster,
+    original_monster: report.originalMonster || "",
+    grade: report.grade,
+    floor: report.floor,
+    area: report.area,
+    stats: report.stats,
+    passive: report.passive,
+    active: reportActiveForStorage(report),
+    author_nickname: report.authorNickname || "",
+    status: "pending",
+    created_at: report.createdAt,
+  };
+  let response = await fetch(reportStoreUrl(), {
     method: "POST",
     headers: reportStoreHeaders({ Prefer: "return=representation" }),
-    body: JSON.stringify({
-      id: report.id,
-      mode: report.mode,
-      monster: report.monster,
-      original_monster: report.originalMonster || "",
-      grade: report.grade,
-      floor: report.floor,
-      area: report.area,
-      stats: report.stats,
-      passive: report.passive,
-      active: reportActiveForStorage(report),
-      status: "pending",
-      created_at: report.createdAt,
-    }),
+    body: JSON.stringify(payload),
   });
+  if (!response.ok && report.authorNickname) {
+    const fallbackPayload = { ...payload };
+    delete fallbackPayload.author_nickname;
+    response = await fetch(reportStoreUrl(), {
+      method: "POST",
+      headers: reportStoreHeaders({ Prefer: "return=representation" }),
+      body: JSON.stringify(fallbackPayload),
+    });
+  }
   if (!response.ok) throw new Error(`report save failed: ${response.status}`);
   const rows = await response.json();
   return normalizeRemoteReport(rows[0] || report);
@@ -2762,6 +2981,7 @@ async function submitReport(event) {
   const report = numbersMode ? {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
+    authorNickname: textOf(els.reportNickname?.value),
     monster: `${numbersReportPrefix}${textOf(els.reportNumberName.value)}`,
     grade: textOf(els.reportNumberLevel.value),
     floor: textOf(els.reportNumberCode.value) || "미확인",
@@ -2773,6 +2993,7 @@ async function submitReport(event) {
   } : {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
+    authorNickname: textOf(els.reportNickname?.value),
     monster: textOf(els.reportMonster.value),
     originalMonster: els.reportMode.value === "edit" ? textOf(els.reportOriginalMonster.value) : "",
     grade: textOf(els.reportGrade.value),
@@ -2794,7 +3015,9 @@ async function submitReport(event) {
   const submitButton = els.reportForm.querySelector("[type='submit']");
   if (submitButton) submitButton.disabled = true;
   try {
-    const saved = hasPublicReportStore() ? await savePublicReport(report) : report;
+    const saved = hasPublicReportStore()
+      ? { ...(await savePublicReport(report)), authorNickname: report.authorNickname }
+      : report;
     pendingReports = sortReportsByDate([saved, ...pendingReports.filter((item) => item.id !== saved.id)]);
     saveStoredRows(storageKeys.pending, pendingReports);
     els.reportForm.reset();
@@ -2865,6 +3088,7 @@ function renderPendingReports() {
         <div>
           <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
           <span>${report.mode === "edit" ? "수정" : "신규"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+          ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
         <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
@@ -2878,6 +3102,7 @@ function renderPendingReports() {
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
           <span>${report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
+          ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
@@ -2930,6 +3155,7 @@ function renderApprovedReports() {
         <div>
           <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
           <span>${report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+          ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
         <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
@@ -2942,6 +3168,7 @@ function renderApprovedReports() {
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
           <span>${report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
+          ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>

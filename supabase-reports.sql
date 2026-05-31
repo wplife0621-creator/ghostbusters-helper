@@ -3,6 +3,7 @@ create table if not exists public.monster_reports (
   mode text not null default 'new',
   monster text not null,
   original_monster text not null default '',
+  author_nickname text not null default '',
   grade text not null,
   floor text not null,
   area text not null,
@@ -16,6 +17,9 @@ create table if not exists public.monster_reports (
 
 alter table public.monster_reports
 add column if not exists original_monster text not null default '';
+
+alter table public.monster_reports
+add column if not exists author_nickname text not null default '';
 
 alter table public.monster_reports enable row level security;
 
@@ -34,6 +38,7 @@ with check (
   and mode in ('new', 'edit')
   and char_length(monster) between 1 and 80
   and char_length(original_monster) <= 80
+  and char_length(author_nickname) <= 24
   and char_length(grade) between 1 and 40
   and char_length(floor) between 1 and 40
   and char_length(area) between 1 and 80
