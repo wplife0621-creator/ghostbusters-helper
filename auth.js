@@ -9,6 +9,11 @@
     client: null,
     user: null,
   };
+  window.DUKHUBUSTERS_AUTH = {
+    getUser: () => state.user,
+    signIn: signInWithGoogle,
+    signOut,
+  };
 
   document.addEventListener("DOMContentLoaded", initGoogleAuth);
 
@@ -43,11 +48,13 @@
     state.user = data?.session?.user || null;
     renderAuthPanel(panel, state.user);
     applyUserToAuthorFields(state.user);
+    announceAuthChange();
 
     state.client.auth.onAuthStateChange((_event, session) => {
       state.user = session?.user || null;
       renderAuthPanel(panel, state.user);
       applyUserToAuthorFields(state.user);
+      announceAuthChange();
     });
   }
 
@@ -173,5 +180,11 @@
       const field = document.querySelector(selector);
       if (field && (overwrite || !String(field.value || "").trim())) field.value = name;
     });
+  }
+
+  function announceAuthChange() {
+    window.dispatchEvent(new CustomEvent("dukhubusters:auth", {
+      detail: { user: state.user },
+    }));
   }
 })();

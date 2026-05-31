@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>관리자 검수 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260601-admin">
+</head>
+<body class="admin-review-page">
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>관리자 검수</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <a href="./essences.html">정수</a>
+        <a href="./numbers.html">넘버스</a>
+        <a href="./builds.html">빌드 공유</a>
+        <a href="./guides.html">공략글</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout report-layout admin-review-layout">
+    <section class="panel report-panel page-panel admin-gate">
+      <div class="section-title compact-title">
+        <h2>관리자 전용 검수</h2>
+        <p>등록 대기 중인 정수와 넘버스 제보를 승인하거나 반려할 수 있습니다.</p>
+      </div>
+      <div class="admin-row">
+        <button id="adminUnlock" class="submit-report" type="button">Google 관리자 로그인</button>
+        <button id="adminLock" type="button" hidden>로그아웃</button>
+      </div>
+      <p id="adminStatus" class="admin-status">관리자 권한을 확인하는 중입니다.</p>
+      <p id="reportSyncStatus" class="build-sync-status"></p>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section">
+      <div class="review-head">
+        <strong id="pendingCount">검수 대기 0건</strong>
+        <button id="copyApproved" type="button" hidden>승인 데이터 복사</button>
+      </div>
+      <div id="pendingReports" class="pending-reports"></div>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section">
+      <div class="review-head">
+        <strong id="approvedCount">등록된 정보 0건</strong>
+      </div>
+      <div id="approvedReports" class="pending-reports"></div>
+    </section>
+  </main>
+
+  <script src="./ghost-data.js?v=20260520"></script>
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      buildTable: "builds",
+      reportTable: "monster_reports",
+      adminEmails: [],
+    };
+  </script>
+  <script src="./config.js?v=20260601-admin"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./auth.js?v=20260601-admin"></script>
+  <script src="./app.js?v=20260601-admin"></script>
+</body>
+</html>

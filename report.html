@@ -146,7 +146,7 @@
       <p id="reportSyncStatus" class="build-sync-status"></p>
     </section>
 
-    <section class="panel report-panel page-panel admin-gate">
+    <section class="panel report-panel page-panel admin-gate legacy-admin-section" hidden>
       <div class="section-title compact-title">
         <h2>관리자 검수</h2>
         <p>승인과 반려는 관리자 코드 입력 후에만 가능합니다.</p>
@@ -162,7 +162,7 @@
       <p id="adminStatus" class="admin-status">관리자 모드가 잠겨 있습니다.</p>
     </section>
 
-    <section class="panel report-panel page-panel">
+    <section class="panel report-panel page-panel legacy-admin-section" hidden>
       <div class="review-head">
         <strong id="pendingCount">검수 대기 0건</strong>
         <button id="copyApproved" type="button">승인 데이터 복사</button>
@@ -170,7 +170,7 @@
       <div id="pendingReports" class="pending-reports"></div>
     </section>
 
-    <section class="panel report-panel page-panel">
+    <section class="panel report-panel page-panel legacy-admin-section" hidden>
       <div class="review-head">
         <strong id="approvedCount">등록된 정보 0건</strong>
       </div>
@@ -189,9 +189,9 @@
       dailyVisitorTable: "daily_visitors",
     };
   </script>
-  <script src="./config.js?v=20260524-8"></script>
+  <script src="./config.js?v=20260601-admin"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js?v=20260601-nickname"></script>
-  <script src="./app.js?v=20260601-redirect"></script>
+  <script src="./auth.js?v=20260601-admin"></script>
+  <script src="./app.js?v=20260601-admin"></script>
 </body>
 </html>

@@ -2300,6 +2300,27 @@ select[multiple] option:checked {
   outline: none;
 }
 
+.admin-review-layout {
+  width: min(1120px, calc(100% - 28px));
+}
+
+.admin-review-page .admin-gate {
+  border-color: #c7d9f5;
+  background: linear-gradient(135deg, #ffffff, #f4f8ff);
+}
+
+.admin-review-page:not(.admin-review-unlocked) .admin-review-section {
+  opacity: 0.72;
+}
+
+.admin-review-page:not(.admin-review-unlocked) .pending-actions {
+  display: none;
+}
+
+.admin-review-unlocked .admin-status {
+  color: #187047;
+}
+
 .build-card {
   display: grid;
   gap: 10px;

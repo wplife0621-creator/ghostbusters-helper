@@ -46,6 +46,9 @@ const visitorBackend = {
   visitorTable: textOf(siteConfig.visitorTable) || "site_visitors",
   dailyTable: textOf(siteConfig.dailyVisitorTable) || "daily_visitors",
 };
+const adminEmails = Array.isArray(siteConfig.adminEmails)
+  ? siteConfig.adminEmails.map((email) => textOf(email).toLowerCase()).filter(Boolean)
+  : [];
 const visitorBuildMarkers = {
   total: "__visitor_total__",
   daily: "__visitor_daily__",
@@ -651,6 +654,7 @@ function init() {
   if (els.search) initEssences();
   if (els.numbersResults) initNumbers();
   if (els.reportForm) initReport();
+  else if (els.pendingReports) initAdminReview();
   if (els.buildForm) initBuilds();
   if (els.timeResult) initMazeTime();
   if (els.visitorToday) recordVisit();
@@ -950,6 +954,20 @@ function initReport() {
     if (event.key === "Enter") unlockAdmin();
   });
   updateAdminUi();
+  renderPendingReports();
+  renderApprovedReports();
+  loadPublicReports();
+}
+
+function initAdminReview() {
+  adminUnlocked = false;
+  els.pendingReports.addEventListener("click", handlePendingAction);
+  els.approvedReports?.addEventListener("click", handleApprovedAction);
+  els.copyApproved?.addEventListener("click", copyApprovedRows);
+  els.adminUnlock?.addEventListener("click", () => window.DUKHUBUSTERS_AUTH?.signIn?.());
+  els.adminLock?.addEventListener("click", () => window.DUKHUBUSTERS_AUTH?.signOut?.());
+  window.addEventListener("dukhubusters:auth", (event) => updateAdminAccess(event.detail?.user));
+  updateAdminAccess(window.DUKHUBUSTERS_AUTH?.getUser?.());
   renderPendingReports();
   renderApprovedReports();
   loadPublicReports();
@@ -1897,7 +1915,40 @@ function lockAdmin() {
   renderApprovedReports();
 }
 
+function updateAdminAccess(user) {
+  const email = textOf(user?.email).toLowerCase();
+  const configured = adminEmails.length > 0;
+  const allowed = configured && adminEmails.includes(email);
+  adminUnlocked = allowed;
+  if (allowed) localStorage.setItem(storageKeys.adminUnlocked, "1");
+  else localStorage.removeItem(storageKeys.adminUnlocked);
+  updateAdminUi(user, { configured, allowed });
+  renderPendingReports();
+  renderApprovedReports();
+}
+
 function updateAdminUi() {
+  if (!els.adminStatus) return;
+  const user = window.DUKHUBUSTERS_AUTH?.getUser?.();
+  const email = textOf(user?.email).toLowerCase();
+  const authManaged = !els.adminCodeInput;
+  if (authManaged) {
+    if (!adminEmails.length) {
+      els.adminStatus.textContent = "관리자 이메일이 아직 설정되지 않았습니다. config.js의 adminEmails에 본인 구글 이메일을 추가해주세요.";
+    } else if (!user) {
+      els.adminStatus.textContent = "관리자 구글 계정으로 로그인하면 검수 목록이 열립니다.";
+    } else if (!adminEmails.includes(email)) {
+      els.adminStatus.textContent = `${email} 계정은 관리자 권한이 없습니다.`;
+    } else {
+      els.adminStatus.textContent = "관리자 권한이 확인되었습니다. 검수와 삭제 처리가 가능합니다.";
+    }
+    if (els.adminUnlock) els.adminUnlock.hidden = Boolean(user);
+    if (els.adminLock) els.adminLock.hidden = !user;
+    if (els.copyApproved) els.copyApproved.hidden = !adminUnlocked;
+    document.body.classList.toggle("admin-review-unlocked", adminUnlocked);
+    return;
+  }
+
   els.adminStatus.textContent = adminUnlocked
     ? "관리자 모드가 열려 있습니다. 검수 승인과 반려가 가능합니다."
     : "관리자 모드가 잠겨 있습니다.";
