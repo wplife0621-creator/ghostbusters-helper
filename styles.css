@@ -6096,3 +6096,31 @@ body {
   background: #e2e8f0;
   color: #334155;
 }
+
+/* Build total stat contrast fix */
+.build-total-panel {
+  color: #eefdf9;
+}
+
+.build-total-panel > small {
+  color: #b9d5df;
+}
+
+.build-total-stat {
+  border: 1px solid rgba(49, 214, 201, 0.16);
+  background: rgba(255, 255, 255, 0.11);
+  color: #e7f8f5;
+}
+
+.build-total-stat b {
+  color: #8df5e8;
+}
+
+.build-total-stat strong {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+}
+
+.build-total-stats .build-total-empty {
+  color: #cbd5e1;
+}
