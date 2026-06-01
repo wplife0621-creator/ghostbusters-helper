@@ -1150,6 +1150,48 @@ select[multiple] option:checked {
   border-bottom: 1px solid var(--line);
 }
 
+.number-card-head-side {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+}
+
+.number-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.number-card-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border: 1px solid rgba(49, 214, 201, 0.22);
+  border-radius: 999px;
+  background: rgba(20, 32, 44, 0.92);
+  color: #ecfdf9;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+  padding: 0 10px;
+}
+
+.number-card-actions a:hover {
+  background: linear-gradient(135deg, var(--fantasy-rune), #dff7ef);
+  color: #071017;
+}
+
+.number-card-actions a.is-danger {
+  border-color: rgba(197, 122, 50, 0.28);
+  background: rgba(101, 34, 34, 0.92);
+}
+
+.number-card-actions a.is-danger:hover {
+  background: linear-gradient(135deg, #fca5a5, #fed7aa);
+  color: #3f1111;
+}
+
 .number-title-line {
   min-width: 0;
   display: flex;

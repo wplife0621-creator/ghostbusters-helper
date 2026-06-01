@@ -56,6 +56,7 @@ const visitorBuildMarkers = {
 const buildLikeMarker = "__build_like__";
 const buildDeleteMarker = "__build_deleted__";
 const numbersReportPrefix = "__numbers__:";
+const numbersDeleteMarker = "__numbers_deleted__";
 const sailingMarker = "__sailing__";
 const recommendationMarkerPrefix = "__recommended_character__:";
 const authorNicknameMarkerPrefix = "__author_nickname__:";
@@ -439,9 +440,19 @@ function numbersReportToRow(report) {
   };
 }
 
+function isNumbersDeleteReport(report) {
+  return report?.mode === "delete" || splitSkills(report?.active || "").includes(numbersDeleteMarker);
+}
+
 function mergeNumbersRows(baseRows, reports) {
   const merged = [...baseRows];
   reports.filter((report) => report.status === "approved" && isNumbersReport(report)).forEach((report) => {
+    if (isNumbersDeleteReport(report)) {
+      const deleteName = visibleReportName(report);
+      const index = merged.findIndex((item) => textOf(item["이름"]) === deleteName);
+      if (index >= 0) merged.splice(index, 1);
+      return;
+    }
     const row = numbersReportToRow(report);
     const index = merged.findIndex((item) => textOf(item["이름"]) === textOf(row["이름"]));
     if (index >= 0) merged[index] = { ...merged[index], ...row };
@@ -467,6 +478,15 @@ function numberCodeClass(value) {
 function displayLevel(value) {
   const level = textOf(value);
   return level ? `Lv ${level}` : "미확인";
+}
+
+function numberReportUrl(row, mode = "edit") {
+  const params = new URLSearchParams({
+    dataset: "numbers",
+    mode,
+    number: textOf(row["이름"]),
+  });
+  return `./report.html?${params.toString()}`;
 }
 
 function cooldownOf(row) {
@@ -978,6 +998,7 @@ function initReport() {
   els.adminCodeInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") unlockAdmin();
   });
+  applyReportQueryParams();
   updateAdminUi();
   renderPendingReports();
   renderApprovedReports();
@@ -2028,12 +2049,12 @@ function updateReportDataset() {
 }
 
 function updateReportMode() {
-  const editMode = els.reportMode.value === "edit";
+  const editMode = els.reportMode.value === "edit" || els.reportMode.value === "delete";
   const numbersMode = isNumbersReportMode();
   els.reportOriginalMonsterField.hidden = !editMode || numbersMode;
   els.editNameHint.hidden = !editMode || numbersMode;
   els.reportMonster.placeholder = editMode ? "새 몬스터명 입력 가능" : "예: 얼음 와이번";
-  els.reportNumberName.placeholder = editMode ? "수정할 넘버스를 검색하세요" : "예: 차원 자루";
+  els.reportNumberName.placeholder = editMode ? "수정/삭제할 넘버스를 검색하세요" : "예: 차원 자루";
   els.editMonsterMatches.hidden = !editMode || numbersMode;
   els.editNumberMatches.hidden = !editMode || !numbersMode;
   if (editMode && numbersMode) {
@@ -2051,13 +2072,36 @@ function updateReportMode() {
   if (!editMode || numbersMode) els.reportOriginalMonster.value = "";
 }
 
+function applyReportQueryParams() {
+  const params = new URLSearchParams(location.search);
+  const dataset = params.get("dataset") || params.get("type");
+  const mode = params.get("mode");
+  const numberName = params.get("number") || params.get("name");
+  if (dataset === "numbers" && els.reportDataset) {
+    els.reportDataset.value = "numbers";
+  }
+  if (mode && [...els.reportMode.options].some((option) => option.value === mode)) {
+    els.reportMode.value = mode;
+  }
+  updateReportDataset();
+  if (isNumbersReportMode() && numberName) {
+    els.reportNumberName.value = numberName;
+    fillNumberFromExactName();
+    renderEditNumberMatches();
+    if (els.reportMode.value === "delete") {
+      els.reportNumberEffect.value = `[삭제 요청] ${numberName} 정보를 삭제해주세요.`;
+      setReportSyncStatus("넘버스 삭제 요청 정보가 자동으로 채워졌습니다. 로그인 후 등록하면 검수 대기에 올라갑니다.");
+    }
+  }
+}
+
 function handleReportMonsterInput() {
   if (els.reportMode.value !== "edit" || isNumbersReportMode()) return;
   renderEditMonsterMatches();
 }
 
 function handleReportNumberInput() {
-  if (els.reportMode.value !== "edit" || !isNumbersReportMode()) return;
+  if (!["edit", "delete"].includes(els.reportMode.value) || !isNumbersReportMode()) return;
   renderEditNumberMatches();
   fillNumberFromExactName();
 }
@@ -2713,7 +2757,13 @@ function renderNumbers() {
                 <span class="${numberCodeClass(row["번호"])}">${escapeHtml(displayNumber(row["번호"]))}</span>
                 <strong>${escapeHtml(row["이름"] || "이름 미확인")}</strong>
               </div>
-              <span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span>
+              <div class="number-card-head-side">
+                <span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span>
+                <div class="number-card-actions" aria-label="넘버스 정보 관리">
+                  <a href="${escapeHtml(numberReportUrl(row, "edit"))}">수정</a>
+                  <a class="is-danger" href="${escapeHtml(numberReportUrl(row, "delete"))}">삭제 요청</a>
+                </div>
+              </div>
             </div>
             <div class="number-card-meta">
               <span><b>착용부위</b>${escapeHtml(row["착용부위"] || "-")}</span>
@@ -3082,7 +3132,7 @@ async function submitReport(event) {
     area: textOf(els.reportNumberSlot.value) || "-",
     stats: textOf(els.reportNumberEffect.value),
     passive: selectedOptionValues(els.reportNumberSource).join(", ") || "-",
-    active: "-",
+    active: els.reportMode.value === "delete" ? numbersDeleteMarker : "-",
     createdAt: new Date().toISOString(),
   } : {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
