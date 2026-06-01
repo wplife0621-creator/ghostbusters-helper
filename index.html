@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260601-codex-hub">
+  <link rel="stylesheet" href="./styles.css?v=20260601-codex-dropdown">
 </head>
 <body>
   <header class="topbar compact">
@@ -12,7 +12,13 @@
       <h1>덕후버스터즈</h1>
       <nav class="site-nav" aria-label="주요 메뉴">
         <a href="./index.html" aria-current="page">홈</a>
-        <a href="./codex.html">도감</a>
+        <details class="nav-dropdown">
+          <summary>도감</summary>
+          <div class="nav-submenu">
+            <a href="./essences.html">정수</a>
+            <a href="./numbers.html">넘버스</a>
+          </div>
+        </details>
         <a href="./builds.html">빌드 공유</a>
         <a href="./guides.html">공략글</a>
         <a href="./report.html">정보 제보/수정</a>
