@@ -732,6 +732,18 @@ function dateLabel(value) {
   return new Date(value).toLocaleDateString("ko-KR", { year: "2-digit", month: "2-digit", day: "2-digit" });
 }
 
+function categoryClass(category) {
+  const key = String(category || "일반").trim();
+  const map = {
+    "일반": "general",
+    "보스": "boss",
+    "파밍": "farm",
+    "빌드": "build",
+    "정보": "info",
+  };
+  return `guide-category-${map[key] || "general"}`;
+}
+
 function filteredPosts() {
   const query = fields.search.value.trim().toLowerCase();
   return posts.filter((post) => {
@@ -748,7 +760,7 @@ function renderPosts() {
   fields.posts.innerHTML = visiblePosts.length ? visiblePosts.map((post) => `
     <article class="guide-row" data-guide-id="${escapeHtml(post.id)}">
       <span class="guide-row-number">${posts.length - posts.indexOf(post)}</span>
-      <span class="guide-row-category">${escapeHtml(post.category)}</span>
+      <span class="guide-row-category ${categoryClass(post.category)}">${escapeHtml(post.category)}</span>
       <button type="button" class="guide-row-title" data-guide-action="view">
         ${escapeHtml(post.title)}
         ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
@@ -779,7 +791,7 @@ function renderViewer() {
   fields.viewer.innerHTML = `
     <div class="guide-viewer-head" data-guide-id="${escapeHtml(post.id)}">
       <div>
-        <span class="guide-row-category">${escapeHtml(post.category)}</span>
+        <span class="guide-row-category ${categoryClass(post.category)}">${escapeHtml(post.category)}</span>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))} · 조회 ${post.views} · 댓글 ${post.commentCount} · 좋아요 ${post.likes}</p>
       </div>

@@ -7688,6 +7688,67 @@ body {
   color: #ffffff;
 }
 
+.guide-categories button[data-guide-category="일반"],
+.guide-row-category.guide-category-general {
+  --guide-cat-bg: #eef6f3;
+  --guide-cat-border: rgba(4, 120, 92, 0.24);
+  --guide-cat-text: #04785c;
+  --guide-cat-active: #04785c;
+}
+
+.guide-categories button[data-guide-category="보스"],
+.guide-row-category.guide-category-boss {
+  --guide-cat-bg: #fff1f2;
+  --guide-cat-border: rgba(190, 18, 60, 0.24);
+  --guide-cat-text: #9f1239;
+  --guide-cat-active: #be123c;
+}
+
+.guide-categories button[data-guide-category="파밍"],
+.guide-row-category.guide-category-farm {
+  --guide-cat-bg: #fff7ed;
+  --guide-cat-border: rgba(217, 119, 6, 0.28);
+  --guide-cat-text: #a55308;
+  --guide-cat-active: #d97706;
+}
+
+.guide-categories button[data-guide-category="빌드"],
+.guide-row-category.guide-category-build {
+  --guide-cat-bg: #eef2ff;
+  --guide-cat-border: rgba(79, 70, 229, 0.24);
+  --guide-cat-text: #4f46e5;
+  --guide-cat-active: #4f46e5;
+}
+
+.guide-categories button[data-guide-category="정보"],
+.guide-row-category.guide-category-info {
+  --guide-cat-bg: #ecfeff;
+  --guide-cat-border: rgba(14, 116, 144, 0.26);
+  --guide-cat-text: #0e7490;
+  --guide-cat-active: #0891b2;
+}
+
+.guide-categories button[data-guide-category]:not([data-guide-category="전체"]) {
+  border-color: var(--guide-cat-border);
+  background: var(--guide-cat-bg);
+  color: var(--guide-cat-text);
+}
+
+.guide-categories button[data-guide-category]:not([data-guide-category="전체"]):hover,
+.guide-categories button[data-guide-category]:not([data-guide-category="전체"]).is-active {
+  border-color: var(--guide-cat-active);
+  background: var(--guide-cat-active);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(7, 21, 38, 0.13);
+}
+
+.guide-row-category[class*="guide-category-"] {
+  border-color: var(--guide-cat-border);
+  background: var(--guide-cat-bg);
+  color: var(--guide-cat-text);
+  box-shadow: none;
+}
+
 @media (max-width: 920px) {
   .admin-center-hero,
   .admin-management-card,
