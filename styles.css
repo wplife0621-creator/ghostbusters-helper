@@ -3431,6 +3431,226 @@ select[multiple] option:checked {
   text-align: center;
 }
 
+/* Visual refresh */
+body {
+  background:
+    radial-gradient(circle at 10% -10%, rgba(77, 134, 255, 0.22), transparent 32%),
+    radial-gradient(circle at 100% 10%, rgba(98, 211, 194, 0.16), transparent 30%),
+    linear-gradient(180deg, #f4f8ff 0%, #eef3fb 42%, #f8fafc 100%);
+}
+
+.topbar {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(116, 169, 255, 0.46), transparent 28%),
+    radial-gradient(circle at 92% 14%, rgba(97, 220, 191, 0.24), transparent 28%),
+    linear-gradient(135deg, #0b1730 0%, #153b7a 52%, #1f6feb 100%);
+  box-shadow: 0 18px 44px rgba(15, 35, 70, 0.18);
+}
+
+.topbar::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -70px -10%;
+  height: 130px;
+  background: rgba(255, 255, 255, 0.1);
+  filter: blur(22px);
+  transform: rotate(-2deg);
+}
+
+.topbar-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.topbar h1 {
+  letter-spacing: -0.04em;
+  text-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+.site-nav a,
+.auth-button,
+.topbar-visitors {
+  backdrop-filter: blur(12px);
+}
+
+.site-nav a {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.52);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.layout {
+  margin-top: 18px;
+}
+
+.panel,
+.guide-editor,
+.guide-board,
+.numbers-panel,
+.report-panel,
+.build-panel,
+.build-public-card,
+.build-member-card,
+.number-card,
+.home-group,
+.home-recent,
+.home-fan-notice,
+.home-hero,
+.essence-group {
+  border: 1px solid rgba(205, 216, 234, 0.82);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 252, 255, 0.92));
+  box-shadow: 0 18px 45px rgba(28, 45, 76, 0.09);
+}
+
+.panel:hover,
+.build-public-card:hover,
+.number-card:hover,
+.home-group:hover {
+  box-shadow: 0 22px 56px rgba(28, 45, 76, 0.13);
+}
+
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(166, 197, 247, 0.9);
+  background:
+    radial-gradient(circle at 76% 5%, rgba(31, 111, 235, 0.18), transparent 35%),
+    radial-gradient(circle at 12% 90%, rgba(22, 131, 92, 0.11), transparent 32%),
+    linear-gradient(135deg, #ffffff 0%, #f1f7ff 100%);
+}
+
+.home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(31, 111, 235, 0.08);
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.home-kicker,
+.home-group-head p {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: var(--brand-dark);
+  padding: 5px 10px;
+  letter-spacing: 0.08em;
+}
+
+.home-actions a,
+.home-notice-item,
+.build-row,
+.guide-row,
+.pending-card,
+.build-loadout-item,
+.build-total-stat {
+  border-color: rgba(215, 225, 240, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 10px 24px rgba(28, 45, 76, 0.055);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.home-actions a:hover,
+.home-notice-item:hover,
+.build-row:hover,
+.guide-row:hover {
+  transform: translateY(-2px);
+  border-color: rgba(31, 111, 235, 0.26);
+  box-shadow: 0 16px 34px rgba(28, 45, 76, 0.11);
+}
+
+.submit-report,
+.admin-row > button,
+.review-head button,
+.pending-actions button,
+.guide-form-actions button:not(.submit-report),
+.guide-existing-media button,
+.home-notice-filters button,
+.numbers-pagination button,
+.home-notice-pagination button {
+  border-radius: 999px;
+  box-shadow: 0 10px 22px rgba(31, 111, 235, 0.12);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
+
+.submit-report:hover,
+.admin-row > button:hover,
+.review-head button:hover,
+.pending-actions button:hover,
+.guide-form-actions button:not(.submit-report):hover,
+.guide-existing-media button:hover,
+.home-notice-filters button:hover,
+.numbers-pagination button:hover,
+.home-notice-pagination button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(31, 111, 235, 0.18);
+}
+
+.field input,
+.field select,
+.field textarea,
+.guide-search input,
+.guide-composer {
+  border-color: #d7e2f2;
+  background: #fbfdff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.guide-search input:focus,
+.guide-composer:focus {
+  border-color: rgba(31, 111, 235, 0.55);
+  box-shadow: 0 0 0 4px rgba(31, 111, 235, 0.1);
+}
+
+.number-code,
+.grade-pill,
+.sailing-pill,
+.character-pill,
+.effect-sort-pill,
+.auth-profile,
+.auth-muted {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.essence-table-wrap,
+.essence-picker-table,
+.guide-viewer,
+.guide-composer,
+.build-member-loadout,
+.build-essence-detail {
+  border-radius: 18px;
+}
+
+.essence-table th,
+.essence-picker-table th,
+.guide-list-head {
+  background: linear-gradient(180deg, #f8fbff, #eef4ff);
+}
+
+.guide-viewer-head h3,
+.build-public-head strong,
+.number-title-line strong,
+.home-hero h2 {
+  letter-spacing: -0.035em;
+}
+
 @media (max-width: 1080px) {
   .tool-strip,
   .controls,
