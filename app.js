@@ -1181,6 +1181,10 @@ function initBuilds() {
   initEssencePicker();
   renderBuildCharacterSlots();
   loadBuildFromUrl();
+  if (els.buildAuthor) els.buildAuthor.value = currentAuthNickname();
+  window.addEventListener("dukhubusters:auth", () => {
+    if (els.buildAuthor) els.buildAuthor.value = currentAuthNickname();
+  });
   els.buildCharacterCount.addEventListener("change", renderBuildCharacterSlots);
   els.buildCharacterSlots.addEventListener("change", (event) => {
     if (event.target.matches(".build-member-level")) renderBuildCharacterSlots();
@@ -1685,7 +1689,7 @@ function readBuildForm() {
   return {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     title: textOf(els.buildTitle.value),
-    author: textOf(els.buildAuthor.value) || "익명",
+    author: currentAuthNickname(),
     members,
     note: textOf(els.buildNote.value),
     createdAt: new Date().toISOString(),
@@ -1694,6 +1698,8 @@ function readBuildForm() {
 
 async function submitBuild(event) {
   event.preventDefault();
+  if (!requireLoggedInNickname(els.buildSyncStatus, "빌드 만들기")) return;
+  els.buildAuthor.value = currentAuthNickname();
   const build = readBuildForm();
   build.deleteHash = await buildDeleteHash(build.id, textOf(els.buildPassword.value));
   const submitButton = els.buildForm.querySelector("[type='submit']");
@@ -1724,7 +1730,7 @@ function applyBuildToForm(build) {
   if (!build) return;
   const normalized = normalizeBuild(build);
   els.buildTitle.value = build.title || "";
-  els.buildAuthor.value = build.author || "";
+  els.buildAuthor.value = currentAuthNickname();
   els.buildCharacterCount.value = String(Math.min(Math.max(normalized.members.length, 1), 5));
   renderBuildCharacterSlots();
   els.buildCharacterSlots.querySelectorAll(".build-member-card").forEach((card, index) => {

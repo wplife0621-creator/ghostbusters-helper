@@ -373,6 +373,9 @@
       const field = document.querySelector(selector);
       if (field && (overwrite || !String(field.value || "").trim())) field.value = name;
     });
+    document.querySelectorAll("#buildAuthor, #guideAuthor, #guideCommentAuthor").forEach((field) => {
+      field.value = name;
+    });
   }
 
   function announceAuthChange() {

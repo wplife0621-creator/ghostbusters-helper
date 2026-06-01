@@ -811,7 +811,7 @@ function renderViewer() {
       <form class="guide-comment-form" id="guideCommentForm">
         <label class="field">
           <span>작성자</span>
-          <input id="guideCommentAuthor" maxlength="40" placeholder="닉네임">
+          <input id="guideCommentAuthor" maxlength="40" readonly value="${escapeHtml(currentAuthNickname())}" placeholder="로그인 닉네임으로 자동 입력">
         </label>
         <label class="field guide-comment-content">
           <span>댓글 내용</span>
@@ -915,12 +915,13 @@ async function loadComments(postId) {
 
 async function submitComment(event) {
   event.preventDefault();
+  if (!requireLoggedInNickname(activeReplyId ? "답글 작성" : "댓글 작성")) return;
   const postId = selectedPostId;
   if (!postId) return;
   const comment = {
     id: idValue(),
     postId,
-    author: document.querySelector("#guideCommentAuthor").value.trim() || "익명",
+    author: currentAuthNickname(),
     content: document.querySelector("#guideCommentContent").value.trim(),
     password: await makePasswordRecord(document.querySelector("#guideCommentPassword").value),
     parentId: activeReplyId,
