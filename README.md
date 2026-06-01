@@ -9,6 +9,10 @@ GitHub Pages에 그대로 올릴 수 있는 정적 웹사이트입니다.
 배포에 필요한 파일:
 
 - `index.html`
+- `about.html`
+- `privacy.html`
+- `terms.html`
+- `contact.html`
 - `codex.html`
 - `essences.html`
 - `numbers.html`
