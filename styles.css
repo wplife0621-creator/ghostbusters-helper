@@ -4103,6 +4103,408 @@ body::after {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* Dungeon fantasy skin */
+:root {
+  --dungeon-void: #100b08;
+  --dungeon-stone: #211a16;
+  --dungeon-stone-2: #342a23;
+  --dungeon-parchment: #fff4d8;
+  --dungeon-paper: #f8ead0;
+  --dungeon-ink: #28180d;
+  --dungeon-muted: #745f49;
+  --dungeon-rune: #25d6b2;
+  --dungeon-fire: #f28c28;
+  --dungeon-blood: #9f2d24;
+  --dungeon-gold: #d6a642;
+  --dungeon-edge: rgba(83, 57, 38, 0.42);
+  --dungeon-shadow: 0 20px 54px rgba(25, 13, 6, 0.28);
+}
+
+body {
+  color: var(--dungeon-ink);
+  background:
+    radial-gradient(circle at 16% 6%, rgba(242, 140, 40, 0.24), transparent 18rem),
+    radial-gradient(circle at 88% 2%, rgba(159, 45, 36, 0.2), transparent 20rem),
+    radial-gradient(circle at 50% 112%, rgba(37, 214, 178, 0.12), transparent 28rem),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, #100b08 0%, #21150d 31%, #ead7b6 31.25%, #f6ebd4 100%);
+}
+
+body::before {
+  background-image:
+    linear-gradient(rgba(236, 201, 139, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236, 201, 139, 0.045) 1px, transparent 1px),
+    radial-gradient(circle, rgba(242, 140, 40, 0.14) 0 1px, transparent 1.5px);
+  background-size: 54px 54px, 54px 54px, 120px 120px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 70%);
+}
+
+body::after {
+  background:
+    linear-gradient(118deg, transparent 0 17%, rgba(214, 166, 66, 0.12) 17% 17.25%, transparent 17.25% 100%),
+    linear-gradient(78deg, transparent 0 74%, rgba(37, 214, 178, 0.11) 74% 74.2%, transparent 74.2% 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(0, 0, 0, 0.22), transparent 46%);
+}
+
+.topbar {
+  border-bottom: 1px solid rgba(214, 166, 66, 0.26);
+  background:
+    radial-gradient(circle at 9% 14%, rgba(242, 140, 40, 0.34), transparent 18rem),
+    radial-gradient(circle at 90% 0%, rgba(159, 45, 36, 0.3), transparent 20rem),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 22px),
+    linear-gradient(135deg, #100b08 0%, #2b170d 48%, #4a1e17 100%);
+  box-shadow: 0 24px 80px rgba(24, 10, 5, 0.38);
+}
+
+.topbar::before {
+  border-color: rgba(214, 166, 66, 0.22);
+  background:
+    linear-gradient(90deg, rgba(214, 166, 66, 0.1), transparent 20%, transparent 80%, rgba(242, 140, 40, 0.12)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 13px);
+}
+
+.topbar::after {
+  background:
+    radial-gradient(ellipse at center, rgba(242, 140, 40, 0.38), transparent 62%);
+}
+
+.topbar h1 {
+  color: #fff3d0;
+  text-shadow:
+    0 2px 0 rgba(81, 28, 14, 0.8),
+    0 16px 34px rgba(0, 0, 0, 0.36);
+}
+
+.topbar h1::before {
+  width: 18px;
+  height: 42px;
+  border: 1px solid rgba(255, 220, 138, 0.64);
+  border-radius: 4px 999px 999px 4px;
+  background:
+    linear-gradient(180deg, #ffe4a3, var(--dungeon-fire) 45%, #8f2a1e);
+  box-shadow:
+    0 0 24px rgba(242, 140, 40, 0.74),
+    inset 0 0 8px rgba(255, 255, 255, 0.28);
+}
+
+.site-nav a,
+.auth-button,
+.topbar-visitors {
+  border-color: rgba(239, 196, 119, 0.32);
+  background:
+    linear-gradient(180deg, rgba(255, 229, 177, 0.16), rgba(58, 31, 17, 0.2));
+  color: #fff2d0;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  border-color: rgba(255, 216, 132, 0.72);
+  background:
+    linear-gradient(180deg, rgba(242, 140, 40, 0.24), rgba(159, 45, 36, 0.18));
+}
+
+.site-nav a::after {
+  inset: auto 11px 7px;
+}
+
+.site-nav a:hover::after,
+.site-nav a[aria-current="page"]::after {
+  background: var(--dungeon-fire);
+  box-shadow: 0 0 16px rgba(242, 140, 40, 0.9);
+}
+
+.panel,
+.guide-editor,
+.guide-board,
+.numbers-panel,
+.report-panel,
+.build-panel,
+.build-public-card,
+.build-member-card,
+.number-card,
+.home-group,
+.home-recent,
+.home-fan-notice,
+.home-hero,
+.essence-group,
+.pending-card {
+  border-color: var(--dungeon-edge);
+  background:
+    linear-gradient(180deg, rgba(255, 248, 227, 0.98), rgba(245, 224, 190, 0.94)),
+    repeating-linear-gradient(135deg, rgba(118, 81, 45, 0.06) 0 1px, transparent 1px 12px);
+  box-shadow: var(--dungeon-shadow);
+}
+
+.panel::before,
+.home-group::before,
+.home-recent::before,
+.number-card::before,
+.guide-board::before,
+.build-public-card::before,
+.essence-group::before {
+  background:
+    linear-gradient(135deg, rgba(214, 166, 66, 0.8), transparent 18%, transparent 76%, rgba(95, 45, 25, 0.42));
+}
+
+.home-fan-notice {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(242, 140, 40, 0.18), transparent 34%),
+    linear-gradient(90deg, rgba(255, 240, 199, 0.98), rgba(241, 214, 174, 0.9));
+}
+
+.home-fan-notice strong,
+.home-kicker,
+.home-group-head p {
+  border-color: rgba(214, 166, 66, 0.54);
+  background:
+    linear-gradient(135deg, #21150d, #4b2117);
+  color: #ffe7af;
+  box-shadow:
+    0 10px 24px rgba(63, 27, 11, 0.22),
+    inset 0 1px 0 rgba(255, 232, 175, 0.16);
+}
+
+.home-recent-head h2,
+.home-group-head h3,
+.section-title h2,
+.guide-board-header h2,
+.build-board-head h2,
+.home-actions strong,
+.home-notice-copy strong,
+.number-title-line strong,
+.build-public-head strong,
+.guide-viewer-head h3 {
+  color: #32180b;
+}
+
+.section-title p,
+.home-group-head span,
+.home-actions span,
+.home-recent-head span,
+.home-notice-copy small,
+.field span,
+.build-public-summary,
+.guide-board-header p {
+  color: var(--dungeon-muted);
+}
+
+.home-notice-count,
+.home-actions a,
+.home-notice-item,
+.guide-row,
+.build-row,
+.build-loadout-item,
+.build-essence-detail,
+.build-member-loadout {
+  border-color: rgba(118, 81, 45, 0.25);
+  background:
+    linear-gradient(135deg, rgba(255, 250, 231, 0.98), rgba(247, 228, 195, 0.92));
+}
+
+.home-notice-count.type-essence { border-left-color: #297b62; }
+.home-notice-count.type-numbers { border-left-color: #8e4f2d; }
+.home-notice-count.type-build { border-left-color: #a6822d; }
+.home-notice-count.type-guide { border-left-color: #9f2d24; }
+
+.home-notice-item::before,
+.guide-row::before,
+.build-row::before {
+  background:
+    linear-gradient(180deg, #ffd076, var(--dungeon-fire) 48%, var(--dungeon-blood));
+  box-shadow: 0 0 16px rgba(242, 140, 40, 0.55);
+}
+
+.home-actions a::before {
+  background:
+    linear-gradient(180deg, #ffd076, var(--dungeon-fire), var(--dungeon-blood));
+}
+
+.home-actions a:hover,
+.home-notice-item:hover,
+.build-row:hover,
+.guide-row:hover,
+.number-card:hover,
+.home-group:hover {
+  border-color: rgba(214, 166, 66, 0.62);
+  box-shadow:
+    0 20px 44px rgba(70, 34, 16, 0.22),
+    0 0 0 1px rgba(255, 219, 139, 0.2);
+}
+
+.home-notice-type,
+.guide-row-category,
+.grade-pill,
+.sailing-pill,
+.character-pill,
+.effect-sort-pill,
+.essence-color-pill {
+  border: 1px solid rgba(118, 81, 45, 0.22);
+  background:
+    linear-gradient(180deg, #fff0bf, #e8c982);
+  color: #4a2412;
+}
+
+.home-notice-item.type-numbers .home-notice-type {
+  background: linear-gradient(180deg, #f3dfc7, #d7aa81);
+  color: #603017;
+}
+
+.home-notice-item.type-build .home-notice-type {
+  background: linear-gradient(180deg, #e6edc2, #c4aa52);
+  color: #4d3b0c;
+}
+
+.home-notice-item.type-guide .home-notice-type {
+  background: linear-gradient(180deg, #ffd1ad, #d7854d);
+  color: #6a2415;
+}
+
+.home-hero {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(242, 140, 40, 0.42), transparent 25%),
+    radial-gradient(circle at 86% 20%, rgba(159, 45, 36, 0.34), transparent 28%),
+    radial-gradient(circle at 50% 100%, rgba(37, 214, 178, 0.18), transparent 34%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 16px),
+    linear-gradient(135deg, #120b08 0%, #2d170d 48%, #4a1f17 100%);
+}
+
+.home-hero::before {
+  border-color: rgba(255, 220, 138, 0.16);
+  background:
+    linear-gradient(90deg, transparent 0 48%, rgba(255, 208, 118, 0.1) 48% 48.35%, transparent 48.35% 100%),
+    radial-gradient(circle at 50% 50%, transparent 0 36%, rgba(255, 208, 118, 0.08) 36.5% 37%, transparent 37.5%);
+}
+
+.home-hero h2 {
+  color: #fff2c9;
+  text-shadow:
+    0 2px 0 rgba(104, 30, 17, 0.9),
+    0 18px 40px rgba(0, 0, 0, 0.5);
+}
+
+.home-hero > p:not(.home-kicker) {
+  color: #ead6b5;
+}
+
+.home-highlights span {
+  border-color: rgba(255, 214, 130, 0.26);
+  background:
+    linear-gradient(180deg, rgba(255, 238, 196, 0.14), rgba(80, 35, 18, 0.22));
+  color: #fff3d0;
+}
+
+.field input,
+.field select,
+.field textarea,
+.guide-search input,
+.guide-composer {
+  border-color: rgba(118, 81, 45, 0.32);
+  background:
+    linear-gradient(180deg, #fff8e8, #f3dfbd);
+  color: var(--dungeon-ink);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.guide-search input:focus,
+.guide-composer:focus {
+  border-color: rgba(242, 140, 40, 0.76);
+  box-shadow:
+    0 0 0 4px rgba(242, 140, 40, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.submit-report,
+.pending-actions button,
+.guide-form-actions button:not(.submit-report),
+.guide-existing-media button,
+.home-notice-filters button,
+.guide-categories button,
+.numbers-pagination button,
+.home-notice-pagination button,
+.build-form-actions button {
+  border-color: rgba(103, 62, 31, 0.34);
+  background:
+    linear-gradient(180deg, #ffe6a8, #c88938);
+  color: #32180b;
+  text-shadow: 0 1px 0 rgba(255, 239, 190, 0.5);
+}
+
+.submit-report:hover,
+.pending-actions button:hover,
+.guide-form-actions button:not(.submit-report):hover,
+.guide-existing-media button:hover,
+.home-notice-filters button:hover,
+.guide-categories button:hover,
+.numbers-pagination button:hover,
+.home-notice-pagination button:hover,
+.build-form-actions button:hover {
+  background:
+    linear-gradient(180deg, #fff0bd, #e39b3a);
+}
+
+.effect-panel,
+.stat-panel,
+.compact-card,
+.results-panel,
+.guide-viewer,
+.guide-composer,
+.essence-table-wrap,
+.essence-picker-table {
+  border-color: rgba(118, 81, 45, 0.32);
+  background:
+    linear-gradient(180deg, rgba(255, 246, 222, 0.98), rgba(239, 213, 176, 0.9));
+}
+
+.essence-table th,
+.essence-picker-table th,
+.guide-list-head {
+  background:
+    linear-gradient(180deg, #3c2415, #1d120b);
+  color: #ffe7af;
+}
+
+.essence-table tbody tr:hover,
+.essence-picker-table tbody tr:hover {
+  background: rgba(255, 238, 197, 0.72);
+}
+
+.number-code {
+  border: 1px solid rgba(255, 214, 130, 0.28);
+  background:
+    linear-gradient(135deg, #1d120b, #4b2117);
+  color: #ffe7af;
+}
+
+.number-code.is-unknown {
+  color: #d9c3a4;
+}
+
+.build-total-panel {
+  border: 1px solid rgba(255, 214, 130, 0.22);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(242, 140, 40, 0.16), transparent 42%),
+    linear-gradient(135deg, #170d08, #3b2012);
+  color: #fff2d0;
+}
+
+.build-total-panel > small,
+.build-total-stat b {
+  color: #d8bd91;
+}
+
+.build-total-stat {
+  border-color: rgba(255, 214, 130, 0.2);
+  background: rgba(255, 238, 196, 0.08);
+}
+
+.auth-profile,
+.auth-muted,
+.topbar-visitors {
+  color: #ffe7af;
+}
+
 @media (max-width: 1080px) {
   .tool-strip,
   .controls,
