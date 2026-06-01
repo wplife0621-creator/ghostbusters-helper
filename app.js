@@ -2890,7 +2890,6 @@ function renderNumbers() {
                 <span class="grade-pill">${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span>
                 <div class="number-card-actions" aria-label="넘버스 정보 관리">
                   <a href="${escapeHtml(numberReportUrl(row, "edit"))}">수정</a>
-                  <a class="is-danger" href="${escapeHtml(numberReportUrl(row, "delete"))}">삭제 요청</a>
                   ${adminUnlocked ? `<button class="is-danger" type="button" data-number-admin-delete="${escapeHtml(row["이름"])}">관리자 삭제</button>` : ""}
                 </div>
               </div>
