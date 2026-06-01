@@ -2276,7 +2276,7 @@ function renderEditNumberMatches() {
 function refreshControls() {
   optionList(els.floor, floorOptionValues(essenceRows), "전체 층");
   refreshEssenceAreaOptions();
-  optionList(els.grade, ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급"], "전체 등급");
+  optionList(els.grade, ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급", "수호자"], "전체 등급");
   optionList(els.character, unique(essenceRows.flatMap((row) => recommendedCharactersFrom(row["추천 캐릭터"]))), "전체 캐릭터");
   optionList(els.statSort, statNames(), statNoneLabel);
 }
@@ -2414,7 +2414,12 @@ function applyFilters(rows) {
   }
 
   if (els.grade.value !== "전체 등급") {
-    rows = rows.filter(({ row }) => `${numberFrom(row["등급"])}등급` === els.grade.value);
+    const selectedGrade = els.grade.value;
+    rows = rows.filter(({ row }) => (
+      selectedGrade === "수호자"
+        ? textOf(row["등급"]).includes("수호자")
+        : `${numberFrom(row["등급"])}등급` === selectedGrade
+    ));
   }
 
   if (els.character.value !== "전체 캐릭터") {
