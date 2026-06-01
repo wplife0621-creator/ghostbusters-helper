@@ -451,11 +451,16 @@ function isNumbersDeleteReport(report) {
 
 function mergeNumbersRows(baseRows, reports) {
   const merged = [...baseRows];
-  reports.filter((report) => report.status === "approved" && isNumbersReport(report)).forEach((report) => {
+  [...reports].filter((report) => report.status === "approved" && isNumbersReport(report)).reverse().forEach((report) => {
+    const reportName = visibleReportName(report);
+    const reportNumber = textOf(report.floor);
     if (isNumbersDeleteReport(report)) {
-      const deleteName = visibleReportName(report);
-      const index = merged.findIndex((item) => textOf(item["이름"]) === deleteName);
-      if (index >= 0) merged.splice(index, 1);
+      for (let index = merged.length - 1; index >= 0; index -= 1) {
+        const item = merged[index];
+        if (textOf(item["이름"]) === reportName || (reportNumber && textOf(item["번호"]) === reportNumber)) {
+          merged.splice(index, 1);
+        }
+      }
       return;
     }
     const row = numbersReportToRow(report);
