@@ -3018,9 +3018,10 @@ function setReportSyncStatus(message, mode = "") {
 }
 
 function normalizeRemoteReport(row) {
+  const rawActive = row.active || "";
   return {
     id: row.id,
-    mode: row.mode || "new",
+    mode: splitSkills(rawActive).includes(numbersDeleteMarker) ? "delete" : row.mode || "new",
     monster: row.monster || "",
     originalMonster: row.original_monster || row.originalMonster || "",
     grade: row.grade || "",
@@ -3028,10 +3029,10 @@ function normalizeRemoteReport(row) {
     area: row.area || "",
     stats: row.stats || "",
     passive: row.passive || "",
-    active: activeSkillsWithoutSailing(row.active || ""),
-    authorNickname: row.author_nickname || row.authorNickname || authorNicknameFromActive(row.active || ""),
-    sailing: splitSkills(row.active || "").includes(sailingMarker),
-    recommendedCharacters: recommendedCharacterFromActive(row.active || ""),
+    active: activeSkillsWithoutSailing(rawActive),
+    authorNickname: row.author_nickname || row.authorNickname || authorNicknameFromActive(rawActive),
+    sailing: splitSkills(rawActive).includes(sailingMarker),
+    recommendedCharacters: recommendedCharacterFromActive(rawActive),
     status: row.status || "pending",
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
     reviewedAt: row.reviewed_at || row.reviewedAt || "",
@@ -3105,7 +3106,7 @@ async function loadPublicReports() {
 async function savePublicReport(report) {
   const payload = {
     id: report.id,
-    mode: report.mode,
+    mode: report.mode === "delete" ? "edit" : report.mode,
     monster: report.monster,
     original_monster: report.originalMonster || "",
     grade: report.grade,
@@ -3140,7 +3141,7 @@ async function savePublicReport(report) {
 async function saveApprovedNumberDeleteReport(report) {
   const payload = {
     id: report.id,
-    mode: "delete",
+    mode: "edit",
     monster: report.monster,
     original_monster: report.originalMonster || "",
     grade: report.grade,
@@ -3150,7 +3151,7 @@ async function saveApprovedNumberDeleteReport(report) {
     passive: report.passive,
     active: reportActiveForStorage(report),
     author_nickname: report.authorNickname || "",
-    status: "approved",
+    status: "pending",
     created_at: report.createdAt,
     reviewed_at: report.reviewedAt || new Date().toISOString(),
   };
@@ -3170,7 +3171,8 @@ async function saveApprovedNumberDeleteReport(report) {
   }
   if (!response.ok) throw new Error(`approved number delete save failed: ${response.status}`);
   const rows = await response.json();
-  return normalizeRemoteReport(rows[0] || report);
+  const inserted = normalizeRemoteReport(rows[0] || report);
+  return await updatePublicReportStatus(inserted.id, "approved") || inserted;
 }
 
 async function updatePublicReportStatus(id, status) {
