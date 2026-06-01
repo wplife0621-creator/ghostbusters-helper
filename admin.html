@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>관리자 센터 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260601-admin-center">
+  <link rel="stylesheet" href="./styles.css?v=20260601-admin-links">
 </head>
 <body class="admin-review-page">
   <header class="topbar compact">
@@ -54,7 +54,7 @@
       </div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section">
+    <section id="admin-pending" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
         <strong id="pendingCount">검수 대기 0건</strong>
         <button id="copyApproved" type="button" hidden>승인 데이터 복사</button>
@@ -62,14 +62,14 @@
       <div id="pendingReports" class="pending-reports"></div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section">
+    <section id="admin-approved" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
         <strong id="approvedCount">등록된 정보 0건</strong>
       </div>
       <div id="approvedReports" class="pending-reports"></div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section">
+    <section id="admin-guides" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
         <strong id="adminGuideCount">공략글/댓글 0건</strong>
         <button id="adminRefreshCenter" type="button">새로고침</button>
@@ -77,14 +77,14 @@
       <div id="adminGuideList" class="admin-management-list"></div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section">
+    <section id="admin-builds" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
         <strong id="adminBuildCount">공개 빌드 0건</strong>
       </div>
       <div id="adminBuildList" class="admin-management-list"></div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section">
+    <section id="admin-users" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
         <strong id="adminUserCount">사용자 닉네임 0명</strong>
       </div>
@@ -93,20 +93,20 @@
 
     <section class="panel report-panel page-panel admin-review-section admin-ops-grid">
       <div>
-        <div class="review-head">
+        <div id="admin-stats" class="review-head">
           <strong>사이트 통계</strong>
         </div>
         <div id="adminSiteStats" class="admin-management-list"></div>
       </div>
       <div>
-        <div class="review-head">
+        <div id="admin-quality" class="review-head">
           <strong>품질 점검</strong>
         </div>
         <div id="adminQualityList" class="admin-management-list"></div>
       </div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section">
+    <section id="admin-backup" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
         <strong>데이터 백업</strong>
       </div>
@@ -132,6 +132,6 @@
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./auth.js?v=20260601-nickname-check"></script>
-  <script src="./app.js?v=20260601-admin-center"></script>
+  <script src="./app.js?v=20260601-admin-links"></script>
 </body>
 </html>

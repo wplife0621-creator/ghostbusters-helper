@@ -2269,6 +2269,26 @@ function dateLabel(value) {
   return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+function adminQualityItems(posts, builds) {
+  const duplicateNumbers = Object.entries(numbersRows.reduce((acc, row) => {
+    const code = normalizeNumberCode(row["번호"]);
+    if (code) acc[code] = (acc[code] || 0) + 1;
+    return acc;
+  }, {})).filter(([, count]) => count > 1).length;
+  const shortGuides = posts.filter((post) => post.content.length < 80).length;
+  const emptyBuilds = builds.filter((build) => !build.members.length).length;
+  return [
+    { label: "검수", value: pendingReports.length ? `${pendingReports.length}건 대기` : "없음", warn: pendingReports.length > 0, href: "#admin-pending" },
+    { label: "넘버스 중복", value: duplicateNumbers ? `${duplicateNumbers}개` : "없음", warn: duplicateNumbers > 0, href: "./numbers.html" },
+    { label: "짧은 공략", value: shortGuides ? `${shortGuides}건` : "양호", warn: shortGuides > 0, href: "./guides.html" },
+    { label: "빈 빌드", value: emptyBuilds ? `${emptyBuilds}건` : "없음", warn: emptyBuilds > 0, href: "#admin-builds" },
+  ];
+}
+
+function qualityWarningCount(posts, builds) {
+  return adminQualityItems(posts, builds).filter((item) => item.warn).length;
+}
+
 async function loadAdminCenter() {
   if (!els.adminStatsGrid) return;
   if (!adminUnlocked || !isAdminUser()) {
@@ -2324,18 +2344,21 @@ function renderAdminCenter() {
   const comments = adminGuideComments();
   const builds = activeAdminBuilds();
   const stats = [
-    ["검수 대기", `${pendingReports.length}건`],
-    ["등록 정보", `${approvedReportItems.length}건`],
-    ["공략글", `${posts.length}건`],
-    ["댓글", `${comments.length}건`],
-    ["공개 빌드", `${builds.length}건`],
-    ["가입 닉네임", `${adminCenterData.users.length}명`],
+    { label: "검수", value: `${pendingReports.length}건`, hint: "대기 제보", href: "#admin-pending" },
+    { label: "등록", value: `${approvedReportItems.length}건`, hint: "승인 정보", href: "#admin-approved" },
+    { label: "공략", value: `${posts.length}건`, hint: "게시글", href: "./guides.html" },
+    { label: "댓글", value: `${comments.length}건`, hint: "최근 댓글", href: "#admin-guides" },
+    { label: "빌드", value: `${builds.length}건`, hint: "공개 빌드", href: "./builds.html" },
+    { label: "회원", value: `${adminCenterData.users.length}명`, hint: "닉네임", href: "#admin-users" },
+    { label: "방문", value: `${adminCenterData.visitors.today ?? "-"}명`, hint: "오늘 방문", href: "#admin-stats" },
+    { label: "점검", value: qualityWarningCount(posts, builds) ? `${qualityWarningCount(posts, builds)}건` : "양호", hint: "품질 상태", href: "#admin-quality" },
   ];
-  els.adminStatsGrid.innerHTML = stats.map(([label, value]) => `
-    <div class="admin-stat-card">
-      <span>${escapeHtml(label)}</span>
-      <strong>${escapeHtml(value)}</strong>
-    </div>
+  els.adminStatsGrid.innerHTML = stats.map((item) => `
+    <a class="admin-stat-card" href="${escapeHtml(item.href)}">
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${escapeHtml(item.value)}</strong>
+      <small>${escapeHtml(item.hint)}</small>
+    </a>
   `).join("");
   renderAdminGuides(posts, comments);
   renderAdminBuilds(builds);
@@ -2350,9 +2373,9 @@ function renderAdminGuides(posts, comments) {
   const postHtml = posts.slice(0, 12).map((post) => `
     <article class="admin-management-card" data-admin-guide-id="${escapeHtml(post.id)}" data-admin-guide-kind="post">
       <div>
-        <strong>${escapeHtml(post.title)}</strong>
-        <span>${escapeHtml(post.category)} · ${escapeHtml(post.author)} · 조회 ${post.views} · 좋아요 ${post.likes} · 댓글 ${post.commentCount}</span>
-        <small>${escapeHtml(dateLabel(post.updatedAt))}</small>
+        <strong><a href="./guides.html?post=${encodeURIComponent(post.id)}">${escapeHtml(post.title)}</a></strong>
+        <span>${escapeHtml(post.category)} · ${escapeHtml(post.author)}</span>
+        <small>조회 ${post.views} · 좋아요 ${post.likes} · 댓글 ${post.commentCount} · ${escapeHtml(dateLabel(post.updatedAt))}</small>
       </div>
       <div class="pending-actions">
         <a href="./guides.html?post=${encodeURIComponent(post.id)}">열기</a>
@@ -2363,7 +2386,7 @@ function renderAdminGuides(posts, comments) {
   const commentHtml = comments.slice(0, 8).map((comment) => `
     <article class="admin-management-card" data-admin-guide-id="${escapeHtml(comment.id)}" data-admin-guide-kind="comment">
       <div>
-        <strong>댓글 · ${escapeHtml(comment.author)}</strong>
+        <strong><a href="./guides.html?post=${encodeURIComponent(comment.postId)}">댓글 · ${escapeHtml(comment.author)}</a></strong>
         <span>${escapeHtml(comment.content.slice(0, 90))}${comment.content.length > 90 ? "..." : ""}</span>
         <small>${escapeHtml(dateLabel(comment.createdAt))}</small>
       </div>
@@ -2385,9 +2408,9 @@ function renderAdminBuilds(builds) {
     ? builds.slice(0, 16).map((build) => `
       <article class="admin-management-card" data-admin-build-id="${escapeHtml(build.id)}">
         <div>
-          <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
-          <span>${escapeHtml(build.author || "익명")} · 캐릭터 ${build.members.length}명 · 좋아요 ${build.likes}</span>
-          <small>${escapeHtml(dateLabel(build.createdAt))}</small>
+          <strong><a href="${escapeHtml(shareUrlForBuild(build))}">${escapeHtml(build.title || "이름 없는 빌드")}</a></strong>
+          <span>${escapeHtml(build.author || "익명")} · 캐릭터 ${build.members.length}명</span>
+          <small>좋아요 ${build.likes} · ${escapeHtml(dateLabel(build.createdAt))}</small>
         </div>
         <div class="pending-actions">
           <a href="${escapeHtml(shareUrlForBuild(build))}">열기</a>
@@ -2431,23 +2454,10 @@ function renderAdminSiteStats() {
 
 function renderAdminQuality(posts, builds) {
   if (!els.adminQualityList) return;
-  const duplicateNumbers = Object.entries(numbersRows.reduce((acc, row) => {
-    const code = normalizeNumberCode(row["번호"]);
-    if (code) acc[code] = (acc[code] || 0) + 1;
-    return acc;
-  }, {})).filter(([, count]) => count > 1).length;
-  const shortGuides = posts.filter((post) => post.content.length < 80).length;
-  const emptyBuilds = builds.filter((build) => !build.members.length).length;
-  const items = [
-    { label: "검수 대기", value: pendingReports.length ? `${pendingReports.length}건 확인 필요` : "깨끗함", warn: pendingReports.length > 0 },
-    { label: "넘버스 중복 번호", value: duplicateNumbers ? `${duplicateNumbers}개 발견` : "없음", warn: duplicateNumbers > 0 },
-    { label: "짧은 공략글", value: shortGuides ? `${shortGuides}건 보강 권장` : "양호", warn: shortGuides > 0 },
-    { label: "빈 빌드", value: emptyBuilds ? `${emptyBuilds}건 확인` : "없음", warn: emptyBuilds > 0 },
-  ];
-  els.adminQualityList.innerHTML = items.map((item) => `
+  els.adminQualityList.innerHTML = adminQualityItems(posts, builds).map((item) => `
     <article class="admin-management-card ${item.warn ? "is-warning" : "is-ok"}">
       <div>
-        <strong>${escapeHtml(item.label)}</strong>
+        <strong><a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a></strong>
         <span>${escapeHtml(item.value)}</span>
       </div>
     </article>
