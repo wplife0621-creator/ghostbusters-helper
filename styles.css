@@ -6478,6 +6478,129 @@ body {
   color: #be123c;
 }
 
+.codex-layout {
+  width: min(1120px, calc(100% - 28px));
+}
+
+.codex-hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(34px, 6vw, 70px);
+  text-align: center;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(8, 183, 131, 0.18), transparent 28%),
+    radial-gradient(circle at 90% 8%, rgba(105, 225, 186, 0.28), transparent 28%),
+    linear-gradient(180deg, #f0fff9 0%, #ffffff 78%);
+}
+
+.codex-hero h2 {
+  margin: 0 0 12px;
+  color: #071526;
+  font-size: clamp(32px, 5vw, 54px);
+  letter-spacing: -0.07em;
+  line-height: 1.16;
+}
+
+.codex-hero p:not(.home-kicker) {
+  max-width: 620px;
+  margin: 0 auto;
+  color: #526174;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.7;
+}
+
+.codex-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.codex-card {
+  position: relative;
+  display: grid;
+  min-height: 310px;
+  align-content: start;
+  gap: 12px;
+  overflow: hidden;
+  padding: clamp(22px, 3.5vw, 34px);
+  color: #071526;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.codex-card::after {
+  content: "";
+  position: absolute;
+  right: -44px;
+  bottom: -58px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(8, 183, 131, 0.1);
+}
+
+.codex-card:hover {
+  border-color: rgba(8, 183, 131, 0.28);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  transform: translateY(-3px);
+}
+
+.codex-icon {
+  display: inline-flex;
+  width: 54px;
+  height: 54px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: #e9fbf4;
+  color: #048464;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.codex-card small {
+  color: #048464;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.codex-card strong {
+  font-size: clamp(26px, 3.2vw, 36px);
+  letter-spacing: -0.06em;
+}
+
+.codex-card p {
+  max-width: 420px;
+  margin: 0;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.codex-card b {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 38px;
+  align-items: center;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: #071526;
+  color: #ffffff;
+  padding: 0 16px;
+  font-size: 13px;
+  letter-spacing: -0.02em;
+}
+
+.codex-card.numbers-card .codex-icon {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.codex-card.numbers-card::after {
+  background: rgba(79, 70, 229, 0.09);
+}
+
 @media (max-width: 900px) {
   .topbar-inner {
     grid-template-columns: 1fr auto;
@@ -6530,5 +6653,13 @@ body {
 
   .topbar-auth {
     justify-self: end;
+  }
+
+  .codex-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .codex-card {
+    min-height: auto;
   }
 }
