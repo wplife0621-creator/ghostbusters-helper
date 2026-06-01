@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>빌드 공유 · 덕후버스터즈</title>
+  <title>나만의 빌드 · 덕후버스터즈</title>
   <link rel="stylesheet" href="./styles.css?v=20260601-essence-label-fix">
 </head>
 <body>
   <header class="topbar compact">
     <div class="topbar-inner">
-      <h1>빌드 공유</h1>
+      <h1>나만의 빌드</h1>
       <nav class="site-nav" aria-label="주요 메뉴">
         <a href="./index.html">홈</a>
         <details class="nav-dropdown">
@@ -19,7 +19,7 @@
             <a href="./numbers.html">넘버스</a>
           </div>
         </details>
-        <a href="./builds.html" aria-current="page">빌드 공유</a>
+        <a href="./builds.html" aria-current="page">나만의 빌드</a>
         <a href="./guides.html">공략글</a>
         <a href="./report.html">정보 제보/수정</a>
         <a href="./maze-time.html">미궁 시간 계산기</a>
@@ -37,7 +37,7 @@
             <option value="likes">좋아요</option>
           </select>
         </label>
-        <button id="openBuildForm" class="submit-report" type="button">빌드 등록</button>
+        <button id="openBuildForm" class="submit-report" type="button">빌드 만들기</button>
       </div>
       <div class="build-board-head">
         <div>
@@ -55,7 +55,7 @@
     <section class="build-form-dialog" role="dialog" aria-modal="true" aria-labelledby="buildFormTitle">
       <div class="build-form-head">
         <div>
-          <h2 id="buildFormTitle">빌드 등록</h2>
+          <h2 id="buildFormTitle">빌드 만들기</h2>
           <p>캐릭터와 정수를 선택해 나만의 빌드를 공개해보세요.</p>
         </div>
         <button id="closeBuildForm" type="button" aria-label="닫기">×</button>
@@ -90,8 +90,8 @@
           <textarea id="buildNote" rows="3" placeholder="운용 팁, 장점, 대체 정수 등을 적어주세요."></textarea>
         </label>
         <div class="build-form-actions">
-          <button id="copyCurrentBuild" type="button">현재 빌드 공유 링크 복사</button>
-          <button class="submit-report" type="submit">빌드 등록 완료</button>
+          <button id="copyCurrentBuild" type="button">현재 빌드 링크 복사</button>
+          <button class="submit-report" type="submit">빌드 만들기 완료</button>
         </div>
       </form>
     </section>
@@ -154,6 +154,6 @@
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./auth.js?v=20260601-nickname-check"></script>
-  <script src="./app.js?v=20260601-codex-hub"></script>
+  <script src="./app.js?v=20260601-build-rename"></script>
 </body>
 </html>
