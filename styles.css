@@ -7303,19 +7303,6 @@ body {
   border-top: 3px solid #08b783;
 }
 
-.essence-controls::before {
-  content: "정수 검색 필터";
-  grid-column: 1 / -1;
-  width: fit-content;
-  border-radius: 999px;
-  background: #071526;
-  color: #a7f3d0;
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: -0.02em;
-  padding: 8px 12px;
-}
-
 .essence-controls .field span,
 .stat-sort-toggle span,
 .effect-panel .section-title p,
@@ -7484,10 +7471,4 @@ body {
 .quick-edit-button:hover {
   background: #071526;
   color: #ffffff;
-}
-
-@media (max-width: 720px) {
-  .essence-controls::before {
-    grid-column: auto;
-  }
 }
