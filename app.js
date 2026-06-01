@@ -433,15 +433,77 @@ function visibleReportName(report) {
   return isNumbersReport(report) ? textOf(report.monster).slice(numbersReportPrefix.length) : textOf(report.monster);
 }
 
+function cleanNumberSources(value) {
+  return unique(textOf(value)
+    .split(/[,、/]/)
+    .map(textOf)
+    .filter((source) => source && source !== "4층 보스 드랍"))
+    .join(", ");
+}
+
+function normalizeNumberCode(value) {
+  const raw = textOf(value).replace(/^NO\.?\s*/i, "");
+  if (!raw || raw === "미확인") return "";
+  const match = raw.match(/^\d{1,4}$/);
+  if (!match) return "";
+  const number = Number(match[0]);
+  return number >= 0 && number <= 9999 ? String(number) : "";
+}
+
+function hasConfirmedNumber(value) {
+  return normalizeNumberCode(value) !== "";
+}
+
+function numberIdentity(row) {
+  const code = normalizeNumberCode(row?.["번호"]);
+  return code ? `no:${code}` : `name:${textOf(row?.["이름"]).toLowerCase()}`;
+}
+
+function mergeNumberSources(left, right) {
+  return unique([
+    ...cleanNumberSources(left).split(",").map(textOf),
+    ...cleanNumberSources(right).split(",").map(textOf),
+  ].filter(Boolean)).join(", ");
+}
+
+function combineNumberRows(current, incoming) {
+  return {
+    ...current,
+    ...incoming,
+    "획득처": mergeNumberSources(current?.["획득처"], incoming?.["획득처"]),
+  };
+}
+
+function dedupeNumberRows(rows) {
+  const merged = [];
+  const indexByKey = new Map();
+  rows.forEach((row) => {
+    const cleanRow = { ...row, "번호": normalizeNumberCode(row["번호"]) || "미확인", "획득처": cleanNumberSources(row["획득처"]) };
+    const key = numberIdentity(cleanRow);
+    if (key === "name:") {
+      merged.push(cleanRow);
+      return;
+    }
+    const existingIndex = indexByKey.get(key);
+    if (existingIndex === undefined) {
+      indexByKey.set(key, merged.length);
+      merged.push(cleanRow);
+    } else {
+      merged[existingIndex] = combineNumberRows(merged[existingIndex], cleanRow);
+    }
+  });
+  return merged;
+}
+
 function numbersReportToRow(report) {
   return {
     "_reportId": report.id,
-    "번호": report.floor,
+    "번호": normalizeNumberCode(report.floor) || "미확인",
     "이름": visibleReportName(report),
     "효과": report.stats,
     "아이템 레벨(Lv)": report.grade,
     "착용부위": report.area === "-" ? "" : report.area,
-    "획득처": report.passive === "-" ? "" : report.passive,
+    "획득처": report.passive === "-" ? "" : cleanNumberSources(report.passive),
   };
 }
 
@@ -450,22 +512,23 @@ function isNumbersDeleteReport(report) {
 }
 
 function mergeNumbersRows(baseRows, reports) {
-  const merged = [...baseRows];
+  const merged = dedupeNumberRows(baseRows);
   [...reports].filter((report) => report.status === "approved" && isNumbersReport(report)).reverse().forEach((report) => {
     const reportName = visibleReportName(report);
-    const reportNumber = textOf(report.floor);
+    const reportNumber = normalizeNumberCode(report.floor);
     if (isNumbersDeleteReport(report)) {
       for (let index = merged.length - 1; index >= 0; index -= 1) {
         const item = merged[index];
-        if (textOf(item["이름"]) === reportName || (reportNumber && textOf(item["번호"]) === reportNumber)) {
+        if (textOf(item["이름"]) === reportName || (reportNumber && normalizeNumberCode(item["번호"]) === reportNumber)) {
           merged.splice(index, 1);
         }
       }
       return;
     }
     const row = numbersReportToRow(report);
-    const index = merged.findIndex((item) => textOf(item["이름"]) === textOf(row["이름"]));
-    if (index >= 0) merged[index] = { ...merged[index], ...row };
+    const rowKey = numberIdentity(row);
+    const index = merged.findIndex((item) => numberIdentity(item) === rowKey || textOf(item["이름"]) === textOf(row["이름"]));
+    if (index >= 0) merged[index] = combineNumberRows(merged[index], row);
     else merged.unshift(row);
   });
   return merged;
@@ -477,12 +540,12 @@ function numberFrom(value) {
 }
 
 function displayNumber(value) {
-  const number = textOf(value);
-  return /^\d+$/.test(number) ? `#${number}` : number || "미확인";
+  const number = normalizeNumberCode(value);
+  return number ? `NO.${number}` : "미확인";
 }
 
 function numberCodeClass(value) {
-  return /^\d+$/.test(textOf(value)) ? "number-code" : "number-code is-unknown";
+  return hasConfirmedNumber(value) ? "number-code" : "number-code is-unknown";
 }
 
 function displayLevel(value) {
@@ -2319,6 +2382,12 @@ function findNumberRow(name) {
   return numbersRows.find((row) => textOf(row["이름"]).toLowerCase() === target);
 }
 
+function findNumberRowByCode(code) {
+  const target = normalizeNumberCode(code);
+  if (!target) return null;
+  return numbersRows.find((row) => normalizeNumberCode(row["번호"]) === target);
+}
+
 function fillNumberFromExactName() {
   const row = findNumberRow(els.reportNumberName.value);
   if (row) fillNumberFromRow(row);
@@ -2327,7 +2396,7 @@ function fillNumberFromExactName() {
 function fillNumberFromRow(row) {
   if (!row) return;
   els.reportNumberName.value = textOf(row["이름"]);
-  els.reportNumberCode.value = textOf(row["번호"]);
+  els.reportNumberCode.value = normalizeNumberCode(row["번호"]);
   els.reportNumberLevel.value = textOf(row["아이템 레벨(Lv)"]);
   els.reportNumberEffect.value = textOf(row["효과"]);
   els.reportNumberSlot.value = textOf(row["착용부위"]);
@@ -3217,6 +3286,21 @@ async function submitReport(event) {
   if (!requireLoggedInNickname(els.reportSyncStatus, "정보 제보/수정")) return;
   const authorNickname = currentAuthNickname();
   const numbersMode = isNumbersReportMode();
+  if (numbersMode) {
+    const enteredCode = textOf(els.reportNumberCode.value);
+    const normalizedCode = normalizeNumberCode(enteredCode);
+    if (enteredCode && !normalizedCode) {
+      setReportSyncStatus("넘버스 번호는 0부터 9999 사이의 정수만 입력할 수 있습니다.", "is-offline");
+      return;
+    }
+    const currentName = textOf(els.reportNumberName.value);
+    const existingByCode = findNumberRowByCode(normalizedCode);
+    if (normalizedCode && existingByCode && textOf(existingByCode["이름"]) !== currentName) {
+      setReportSyncStatus(`이미 NO.${normalizedCode} 번호를 사용하는 넘버스가 있습니다: ${textOf(existingByCode["이름"])}`, "is-offline");
+      return;
+    }
+    els.reportNumberCode.value = normalizedCode;
+  }
   if (!numbersMode && els.reportMode.value === "edit" && !textOf(els.reportOriginalMonster.value)) {
     setReportSyncStatus("수정할 기존 몬스터를 목록에서 먼저 선택해주세요.", "is-offline");
     return;
@@ -3227,10 +3311,10 @@ async function submitReport(event) {
     authorNickname,
     monster: `${numbersReportPrefix}${textOf(els.reportNumberName.value)}`,
     grade: textOf(els.reportNumberLevel.value),
-    floor: textOf(els.reportNumberCode.value) || "미확인",
+    floor: normalizeNumberCode(els.reportNumberCode.value) || "미확인",
     area: textOf(els.reportNumberSlot.value) || "-",
     stats: textOf(els.reportNumberEffect.value),
-    passive: selectedOptionValues(els.reportNumberSource).join(", ") || "-",
+    passive: cleanNumberSources(selectedOptionValues(els.reportNumberSource).join(", ")) || "-",
     active: els.reportMode.value === "delete" ? numbersDeleteMarker : "-",
     createdAt: new Date().toISOString(),
   } : {
