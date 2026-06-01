@@ -2370,7 +2370,7 @@ function renderAdminCenter() {
 function renderAdminGuides(posts, comments) {
   if (!els.adminGuideList || !els.adminGuideCount) return;
   els.adminGuideCount.textContent = `공략글 ${posts.length}건 · 댓글 ${comments.length}건`;
-  const postHtml = posts.slice(0, 12).map((post) => `
+  const postHtml = posts.slice(0, 3).map((post) => `
     <article class="admin-management-card" data-admin-guide-id="${escapeHtml(post.id)}" data-admin-guide-kind="post">
       <div>
         <strong><a href="./guides.html?post=${encodeURIComponent(post.id)}">${escapeHtml(post.title)}</a></strong>
@@ -2383,7 +2383,7 @@ function renderAdminGuides(posts, comments) {
       </div>
     </article>
   `).join("");
-  const commentHtml = comments.slice(0, 8).map((comment) => `
+  const commentHtml = comments.slice(0, 3).map((comment) => `
     <article class="admin-management-card" data-admin-guide-id="${escapeHtml(comment.id)}" data-admin-guide-kind="comment">
       <div>
         <strong><a href="./guides.html?post=${encodeURIComponent(comment.postId)}">댓글 · ${escapeHtml(comment.author)}</a></strong>
@@ -2396,8 +2396,11 @@ function renderAdminGuides(posts, comments) {
       </div>
     </article>
   `).join("");
+  const more = posts.length + comments.length > 6
+    ? `<a class="admin-more-link" href="./guides.html">공략글 페이지에서 전체 보기</a>`
+    : "";
   els.adminGuideList.innerHTML = postHtml || commentHtml
-    ? `${postHtml}${commentHtml}`
+    ? `${postHtml}${commentHtml}${more}`
     : `<div class="empty compact-empty">${adminCenterData.errors?.guides ? "공략글 저장소를 불러오지 못했습니다." : "등록된 공략글이 없습니다."}</div>`;
 }
 
@@ -2405,7 +2408,7 @@ function renderAdminBuilds(builds) {
   if (!els.adminBuildList || !els.adminBuildCount) return;
   els.adminBuildCount.textContent = `공개 빌드 ${builds.length}건`;
   els.adminBuildList.innerHTML = builds.length
-    ? builds.slice(0, 16).map((build) => `
+    ? `${builds.slice(0, 4).map((build) => `
       <article class="admin-management-card" data-admin-build-id="${escapeHtml(build.id)}">
         <div>
           <strong><a href="${escapeHtml(shareUrlForBuild(build))}">${escapeHtml(build.title || "이름 없는 빌드")}</a></strong>
@@ -2417,7 +2420,7 @@ function renderAdminBuilds(builds) {
           <button type="button" data-admin-build-action="delete">삭제</button>
         </div>
       </article>
-    `).join("")
+    `).join("")}${builds.length > 4 ? `<a class="admin-more-link" href="./builds.html">빌드 공유 페이지에서 전체 보기</a>` : ""}`
     : `<div class="empty compact-empty">${adminCenterData.errors?.builds ? "빌드 저장소를 불러오지 못했습니다." : "등록된 공개 빌드가 없습니다."}</div>`;
 }
 
@@ -2425,7 +2428,7 @@ function renderAdminUsers() {
   if (!els.adminUserList || !els.adminUserCount) return;
   els.adminUserCount.textContent = `사용자 닉네임 ${adminCenterData.users.length}명`;
   els.adminUserList.innerHTML = adminCenterData.users.length
-    ? adminCenterData.users.slice(0, 20).map((user) => `
+    ? `${adminCenterData.users.slice(0, 5).map((user) => `
       <article class="admin-management-card">
         <div>
           <strong>${escapeHtml(user.nickname || "닉네임 없음")}</strong>
@@ -2433,7 +2436,7 @@ function renderAdminUsers() {
           <small>${escapeHtml(dateLabel(user.updated_at || user.created_at))}</small>
         </div>
       </article>
-    `).join("")
+    `).join("")}${adminCenterData.users.length > 5 ? `<span class="admin-more-link is-static">나머지 ${adminCenterData.users.length - 5}명은 백업에서 확인</span>` : ""}`
     : `<div class="empty compact-empty">${adminCenterData.errors?.users ? "닉네임 저장소 권한 또는 테이블 설정을 확인해주세요." : "등록된 닉네임이 없습니다."}</div>`;
 }
 

@@ -2480,6 +2480,10 @@ select[multiple] option:checked {
   gap: 14px;
 }
 
+.admin-center-layout .admin-review-section {
+  scroll-margin-top: 88px;
+}
+
 .admin-center-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -2581,6 +2585,18 @@ select[multiple] option:checked {
   margin-top: 10px;
 }
 
+.admin-center-layout .pending-reports,
+.admin-center-layout .admin-management-list {
+  max-height: 320px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
+.admin-center-layout #approvedReports {
+  max-height: 360px;
+}
+
 .admin-management-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -2627,6 +2643,30 @@ select[multiple] option:checked {
   color: #7b8993;
   font-size: 11px;
   font-weight: 850;
+}
+
+.admin-more-link {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(29, 120, 145, 0.34);
+  border-radius: 12px;
+  background: #f5fbfb;
+  color: #0f5e70;
+  font-size: 12px;
+  font-weight: 950;
+  text-decoration: none;
+  padding: 0 12px;
+}
+
+.admin-more-link:hover {
+  background: #eaf7f7;
+  color: #0b4756;
+}
+
+.admin-more-link.is-static {
+  cursor: default;
 }
 
 .admin-management-card.is-warning {
