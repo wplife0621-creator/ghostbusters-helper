@@ -46,6 +46,11 @@ const visitorBackend = {
   visitorTable: textOf(siteConfig.visitorTable) || "site_visitors",
   dailyTable: textOf(siteConfig.dailyVisitorTable) || "daily_visitors",
 };
+const profileBackend = {
+  url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
+  anonKey: textOf(siteConfig.supabaseAnonKey),
+  table: textOf(siteConfig.profileTable) || "user_profiles",
+};
 const adminEmails = Array.isArray(siteConfig.adminEmails)
   ? siteConfig.adminEmails.map((email) => textOf(email).toLowerCase()).filter(Boolean)
   : [];
@@ -218,6 +223,20 @@ const els = {
   adminUnlock: document.querySelector("#adminUnlock"),
   adminLock: document.querySelector("#adminLock"),
   adminStatus: document.querySelector("#adminStatus"),
+  adminStatsGrid: document.querySelector("#adminStatsGrid"),
+  adminGuideCount: document.querySelector("#adminGuideCount"),
+  adminGuideList: document.querySelector("#adminGuideList"),
+  adminBuildCount: document.querySelector("#adminBuildCount"),
+  adminBuildList: document.querySelector("#adminBuildList"),
+  adminUserCount: document.querySelector("#adminUserCount"),
+  adminUserList: document.querySelector("#adminUserList"),
+  adminSiteStats: document.querySelector("#adminSiteStats"),
+  adminQualityList: document.querySelector("#adminQualityList"),
+  adminRefreshCenter: document.querySelector("#adminRefreshCenter"),
+  adminExportReports: document.querySelector("#adminExportReports"),
+  adminExportGuides: document.querySelector("#adminExportGuides"),
+  adminExportBuilds: document.querySelector("#adminExportBuilds"),
+  adminExportAll: document.querySelector("#adminExportAll"),
   buildForm: document.querySelector("#buildForm"),
   buildTitle: document.querySelector("#buildTitle"),
   buildAuthor: document.querySelector("#buildAuthor"),
@@ -278,6 +297,13 @@ let pendingDeleteBuild = null;
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
 let numbersRows = mergeNumbersRows(data["넘버스"] || [], approvedReportItems);
 let adminUnlocked = localStorage.getItem(storageKeys.adminUnlocked) === "1";
+let adminCenterData = {
+  guides: [],
+  builds: [],
+  users: [],
+  visitors: { total: null, today: null },
+  loadedAt: "",
+};
 let activeEssenceInput = null;
 let activeStatNames = [];
 let activeEffectSortKey = "";
@@ -1135,11 +1161,19 @@ function initAdminReview() {
   els.copyApproved?.addEventListener("click", copyApprovedRows);
   els.adminUnlock?.addEventListener("click", () => window.DUKHUBUSTERS_AUTH?.signIn?.());
   els.adminLock?.addEventListener("click", () => window.DUKHUBUSTERS_AUTH?.signOut?.());
+  els.adminRefreshCenter?.addEventListener("click", loadAdminCenter);
+  els.adminGuideList?.addEventListener("click", handleAdminGuideAction);
+  els.adminBuildList?.addEventListener("click", handleAdminBuildAction);
+  els.adminExportReports?.addEventListener("click", () => exportAdminData("reports"));
+  els.adminExportGuides?.addEventListener("click", () => exportAdminData("guides"));
+  els.adminExportBuilds?.addEventListener("click", () => exportAdminData("builds"));
+  els.adminExportAll?.addEventListener("click", () => exportAdminData("all"));
   window.addEventListener("dukhubusters:auth", (event) => updateAdminAccess(event.detail?.user));
   updateAdminAccess(window.DUKHUBUSTERS_AUTH?.getUser?.());
   renderPendingReports();
   renderApprovedReports();
   loadPublicReports();
+  loadAdminCenter();
 }
 
 function initBuilds() {
@@ -2094,6 +2128,8 @@ function updateAdminAccess(user) {
   updateAdminUi(user, { configured, allowed });
   renderPendingReports();
   renderApprovedReports();
+  renderAdminCenter();
+  if (allowed) loadAdminCenter();
 }
 
 function updateAdminUi() {
@@ -2115,6 +2151,7 @@ function updateAdminUi() {
     if (els.adminLock) els.adminLock.hidden = !user;
     if (els.copyApproved) els.copyApproved.hidden = !adminUnlocked;
     document.body.classList.toggle("admin-review-unlocked", adminUnlocked);
+    renderAdminCenter();
     return;
   }
 
@@ -2125,6 +2162,393 @@ function updateAdminUi() {
   els.adminLock.hidden = !adminUnlocked;
   els.adminCodeInput.disabled = adminUnlocked;
   els.copyApproved.hidden = !adminUnlocked;
+  renderAdminCenter();
+}
+
+function adminStoreHeaders(backend, extra = {}) {
+  return {
+    apikey: backend.anonKey,
+    Authorization: `Bearer ${backend.anonKey}`,
+    "Content-Type": "application/json",
+    ...extra,
+  };
+}
+
+function guideStoreUrl(query = "") {
+  return `${guideBackend.url}/rest/v1/${guideBackend.table}${query}`;
+}
+
+function hasAdminBackend(backend) {
+  return Boolean(backend.url && backend.anonKey);
+}
+
+async function fetchAdminRows(backend, table, query = "?select=*") {
+  if (!hasAdminBackend(backend)) return [];
+  const response = await fetch(`${backend.url}/rest/v1/${table}${query}`, {
+    headers: adminStoreHeaders(backend),
+  });
+  if (!response.ok) throw new Error(`admin fetch failed: ${table}`);
+  return response.json();
+}
+
+function guideRowKind(row) {
+  const title = textOf(row.title);
+  if (title.startsWith("__guide_comment__:")) return "comment";
+  if (title.startsWith("__guide_like__:")) return "like";
+  return "post";
+}
+
+function guideCategoryTitle(row) {
+  const title = textOf(row.title);
+  const match = title.match(/^\[(보스|파밍|빌드|정보)\]\s*/);
+  return {
+    category: match?.[1] || "일반",
+    title: match ? title.slice(match[0].length) : title,
+  };
+}
+
+function guideViewCount(row) {
+  const media = Array.isArray(row.media) ? row.media : [];
+  return Number(media.find((item) => item?.kind === "guide-view-counter")?.views || 0);
+}
+
+function normalizeAdminGuide(row) {
+  const kind = guideRowKind(row);
+  const parsed = guideCategoryTitle(row);
+  return {
+    id: row.id,
+    kind,
+    postId: kind === "comment" ? textOf(row.post_id) || textOf(row.title).slice("__guide_comment__:".length) : row.id,
+    title: parsed.title || "(제목 없음)",
+    category: parsed.category,
+    author: textOf(row.author) || "익명",
+    content: textOf(row.content),
+    views: guideViewCount(row),
+    createdAt: row.created_at || "",
+    updatedAt: row.updated_at || row.created_at || "",
+  };
+}
+
+function adminGuidePosts() {
+  const likes = new Map();
+  const comments = new Map();
+  adminCenterData.guides.forEach((row) => {
+    if (row.kind === "like") likes.set(row.postId, (likes.get(row.postId) || 0) + 1);
+    if (row.kind === "comment") comments.set(row.postId, (comments.get(row.postId) || 0) + 1);
+  });
+  return adminCenterData.guides
+    .filter((row) => row.kind === "post")
+    .map((post) => ({
+      ...post,
+      likes: likes.get(post.id) || 0,
+      commentCount: comments.get(post.id) || 0,
+    }))
+    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+}
+
+function adminGuideComments() {
+  return adminCenterData.guides
+    .filter((row) => row.kind === "comment")
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+function activeAdminBuilds() {
+  const rows = adminCenterData.builds.map(normalizeRemoteBuild);
+  const deleted = new Set(rows.filter(isBuildDelete).map((row) => textOf(row.note)).filter(Boolean));
+  const likes = new Map();
+  rows.filter(isBuildLike).forEach((row) => likes.set(textOf(row.note), (likes.get(textOf(row.note)) || 0) + 1));
+  return rows
+    .filter((row) => !isVisitorBuild(row) && !isBuildLike(row) && !isBuildDelete(row) && !deleted.has(row.id))
+    .map((row) => ({ ...row, likes: likes.get(row.id) || 0 }))
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+function dateLabel(value) {
+  const date = new Date(value || 0);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+async function loadAdminCenter() {
+  if (!els.adminStatsGrid) return;
+  if (!adminUnlocked || !isAdminUser()) {
+    renderAdminCenter();
+    return;
+  }
+  els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
+  const [guideResult, buildResult, userResult, visitorResult, dailyResult] = await Promise.allSettled([
+    fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
+    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc"),
+    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc"),
+    fetchAdminRows(visitorBackend, visitorBackend.visitorTable, "?select=visitor_id"),
+    fetchAdminRows(visitorBackend, visitorBackend.dailyTable, "?select=visitor_id,visit_date&order=visit_date.desc"),
+  ]);
+  adminCenterData = {
+    guides: guideResult.status === "fulfilled" ? guideResult.value.map(normalizeAdminGuide) : [],
+    builds: buildResult.status === "fulfilled" ? buildResult.value : [],
+    users: userResult.status === "fulfilled" ? userResult.value : [],
+    visitors: {
+      total: visitorResult.status === "fulfilled" ? visitorResult.value.length : null,
+      today: dailyResult.status === "fulfilled"
+        ? dailyResult.value.filter((row) => textOf(row.visit_date) === new Date().toISOString().slice(0, 10)).length
+        : null,
+    },
+    errors: {
+      guides: guideResult.status !== "fulfilled",
+      builds: buildResult.status !== "fulfilled",
+      users: userResult.status !== "fulfilled",
+      visitors: visitorResult.status !== "fulfilled" || dailyResult.status !== "fulfilled",
+    },
+    loadedAt: new Date().toISOString(),
+  };
+  renderAdminCenter();
+}
+
+function renderAdminCenter() {
+  if (!els.adminStatsGrid) return;
+  const locked = !adminUnlocked || !isAdminUser();
+  document.querySelectorAll(".admin-dashboard, .admin-ops-grid, .admin-backup-grid").forEach((element) => {
+    element.classList.toggle("is-locked", locked);
+  });
+  if (locked) {
+    const message = `<div class="empty compact-empty">wplife0621@gmail.com Google 계정으로 로그인해야 관리자 기능이 열립니다.</div>`;
+    els.adminStatsGrid.innerHTML = message;
+    if (els.adminGuideList) els.adminGuideList.innerHTML = message;
+    if (els.adminBuildList) els.adminBuildList.innerHTML = message;
+    if (els.adminUserList) els.adminUserList.innerHTML = message;
+    if (els.adminSiteStats) els.adminSiteStats.innerHTML = message;
+    if (els.adminQualityList) els.adminQualityList.innerHTML = message;
+    return;
+  }
+  const posts = adminGuidePosts();
+  const comments = adminGuideComments();
+  const builds = activeAdminBuilds();
+  const stats = [
+    ["검수 대기", `${pendingReports.length}건`],
+    ["등록 정보", `${approvedReportItems.length}건`],
+    ["공략글", `${posts.length}건`],
+    ["댓글", `${comments.length}건`],
+    ["공개 빌드", `${builds.length}건`],
+    ["가입 닉네임", `${adminCenterData.users.length}명`],
+  ];
+  els.adminStatsGrid.innerHTML = stats.map(([label, value]) => `
+    <div class="admin-stat-card">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    </div>
+  `).join("");
+  renderAdminGuides(posts, comments);
+  renderAdminBuilds(builds);
+  renderAdminUsers();
+  renderAdminSiteStats();
+  renderAdminQuality(posts, builds);
+}
+
+function renderAdminGuides(posts, comments) {
+  if (!els.adminGuideList || !els.adminGuideCount) return;
+  els.adminGuideCount.textContent = `공략글 ${posts.length}건 · 댓글 ${comments.length}건`;
+  const postHtml = posts.slice(0, 12).map((post) => `
+    <article class="admin-management-card" data-admin-guide-id="${escapeHtml(post.id)}" data-admin-guide-kind="post">
+      <div>
+        <strong>${escapeHtml(post.title)}</strong>
+        <span>${escapeHtml(post.category)} · ${escapeHtml(post.author)} · 조회 ${post.views} · 좋아요 ${post.likes} · 댓글 ${post.commentCount}</span>
+        <small>${escapeHtml(dateLabel(post.updatedAt))}</small>
+      </div>
+      <div class="pending-actions">
+        <a href="./guides.html?post=${encodeURIComponent(post.id)}">열기</a>
+        <button type="button" data-admin-guide-action="delete-post">삭제</button>
+      </div>
+    </article>
+  `).join("");
+  const commentHtml = comments.slice(0, 8).map((comment) => `
+    <article class="admin-management-card" data-admin-guide-id="${escapeHtml(comment.id)}" data-admin-guide-kind="comment">
+      <div>
+        <strong>댓글 · ${escapeHtml(comment.author)}</strong>
+        <span>${escapeHtml(comment.content.slice(0, 90))}${comment.content.length > 90 ? "..." : ""}</span>
+        <small>${escapeHtml(dateLabel(comment.createdAt))}</small>
+      </div>
+      <div class="pending-actions">
+        <a href="./guides.html?post=${encodeURIComponent(comment.postId)}">원글</a>
+        <button type="button" data-admin-guide-action="delete-comment">삭제</button>
+      </div>
+    </article>
+  `).join("");
+  els.adminGuideList.innerHTML = postHtml || commentHtml
+    ? `${postHtml}${commentHtml}`
+    : `<div class="empty compact-empty">${adminCenterData.errors?.guides ? "공략글 저장소를 불러오지 못했습니다." : "등록된 공략글이 없습니다."}</div>`;
+}
+
+function renderAdminBuilds(builds) {
+  if (!els.adminBuildList || !els.adminBuildCount) return;
+  els.adminBuildCount.textContent = `공개 빌드 ${builds.length}건`;
+  els.adminBuildList.innerHTML = builds.length
+    ? builds.slice(0, 16).map((build) => `
+      <article class="admin-management-card" data-admin-build-id="${escapeHtml(build.id)}">
+        <div>
+          <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
+          <span>${escapeHtml(build.author || "익명")} · 캐릭터 ${build.members.length}명 · 좋아요 ${build.likes}</span>
+          <small>${escapeHtml(dateLabel(build.createdAt))}</small>
+        </div>
+        <div class="pending-actions">
+          <a href="${escapeHtml(shareUrlForBuild(build))}">열기</a>
+          <button type="button" data-admin-build-action="delete">삭제</button>
+        </div>
+      </article>
+    `).join("")
+    : `<div class="empty compact-empty">${adminCenterData.errors?.builds ? "빌드 저장소를 불러오지 못했습니다." : "등록된 공개 빌드가 없습니다."}</div>`;
+}
+
+function renderAdminUsers() {
+  if (!els.adminUserList || !els.adminUserCount) return;
+  els.adminUserCount.textContent = `사용자 닉네임 ${adminCenterData.users.length}명`;
+  els.adminUserList.innerHTML = adminCenterData.users.length
+    ? adminCenterData.users.slice(0, 20).map((user) => `
+      <article class="admin-management-card">
+        <div>
+          <strong>${escapeHtml(user.nickname || "닉네임 없음")}</strong>
+          <span>${escapeHtml(user.email || "이메일 미기록")}</span>
+          <small>${escapeHtml(dateLabel(user.updated_at || user.created_at))}</small>
+        </div>
+      </article>
+    `).join("")
+    : `<div class="empty compact-empty">${adminCenterData.errors?.users ? "닉네임 저장소 권한 또는 테이블 설정을 확인해주세요." : "등록된 닉네임이 없습니다."}</div>`;
+}
+
+function renderAdminSiteStats() {
+  if (!els.adminSiteStats) return;
+  const total = adminCenterData.visitors.total ?? "확인 실패";
+  const today = adminCenterData.visitors.today ?? "확인 실패";
+  els.adminSiteStats.innerHTML = `
+    <article class="admin-management-card">
+      <div>
+        <strong>방문자</strong>
+        <span>오늘 ${escapeHtml(today)} · 누적 ${escapeHtml(total)}</span>
+        <small>마지막 갱신 ${escapeHtml(dateLabel(adminCenterData.loadedAt))}</small>
+      </div>
+    </article>
+  `;
+}
+
+function renderAdminQuality(posts, builds) {
+  if (!els.adminQualityList) return;
+  const duplicateNumbers = Object.entries(numbersRows.reduce((acc, row) => {
+    const code = normalizeNumberCode(row["번호"]);
+    if (code) acc[code] = (acc[code] || 0) + 1;
+    return acc;
+  }, {})).filter(([, count]) => count > 1).length;
+  const shortGuides = posts.filter((post) => post.content.length < 80).length;
+  const emptyBuilds = builds.filter((build) => !build.members.length).length;
+  const items = [
+    { label: "검수 대기", value: pendingReports.length ? `${pendingReports.length}건 확인 필요` : "깨끗함", warn: pendingReports.length > 0 },
+    { label: "넘버스 중복 번호", value: duplicateNumbers ? `${duplicateNumbers}개 발견` : "없음", warn: duplicateNumbers > 0 },
+    { label: "짧은 공략글", value: shortGuides ? `${shortGuides}건 보강 권장` : "양호", warn: shortGuides > 0 },
+    { label: "빈 빌드", value: emptyBuilds ? `${emptyBuilds}건 확인` : "없음", warn: emptyBuilds > 0 },
+  ];
+  els.adminQualityList.innerHTML = items.map((item) => `
+    <article class="admin-management-card ${item.warn ? "is-warning" : "is-ok"}">
+      <div>
+        <strong>${escapeHtml(item.label)}</strong>
+        <span>${escapeHtml(item.value)}</span>
+      </div>
+    </article>
+  `).join("");
+}
+
+async function handleAdminGuideAction(event) {
+  const button = event.target.closest("button[data-admin-guide-action]");
+  if (!button || !adminUnlocked || !isAdminUser()) return;
+  const card = button.closest("[data-admin-guide-id]");
+  const id = card?.dataset.adminGuideId;
+  const kind = card?.dataset.adminGuideKind;
+  if (!id) return;
+  const label = kind === "comment" ? "댓글" : "공략글";
+  if (!confirm(`${label}을 관리자 권한으로 삭제할까요?`)) return;
+  button.disabled = true;
+  try {
+    await deleteAdminGuideRows(id, kind);
+    await loadAdminCenter();
+  } catch {
+    alert(`${label} 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.`);
+    button.disabled = false;
+  }
+}
+
+async function deleteAdminGuideRows(id, kind) {
+  if (!hasAdminBackend(guideBackend)) throw new Error("guide backend unavailable");
+  const targets = kind === "comment"
+    ? [`?id=eq.${encodeURIComponent(id)}`]
+    : [
+      `?id=eq.${encodeURIComponent(id)}`,
+      `?title=eq.${encodeURIComponent(`__guide_comment__:${id}`)}`,
+      `?title=eq.${encodeURIComponent(`__guide_like__:${id}`)}`,
+    ];
+  for (const query of targets) {
+    const response = await fetch(guideStoreUrl(query), {
+      method: "DELETE",
+      headers: adminStoreHeaders(guideBackend),
+    });
+    if (!response.ok) throw new Error("guide delete failed");
+  }
+}
+
+async function handleAdminBuildAction(event) {
+  const button = event.target.closest("button[data-admin-build-action]");
+  if (!button || !adminUnlocked || !isAdminUser()) return;
+  const id = button.closest("[data-admin-build-id]")?.dataset.adminBuildId;
+  const build = activeAdminBuilds().find((item) => item.id === id);
+  if (!build) return;
+  if (!confirm(`${build.title || "이 빌드"}를 공개 목록에서 삭제할까요?`)) return;
+  button.disabled = true;
+  try {
+    await adminDeleteBuild(build);
+    await loadAdminCenter();
+  } catch {
+    alert("빌드 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    button.disabled = false;
+  }
+}
+
+async function adminDeleteBuild(build) {
+  if (!hasPublicBuildStore()) throw new Error("build backend unavailable");
+  await savePublicBuild({
+    id: `deleted-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
+    title: buildDeleteMarker,
+    author: "admin",
+    members: [],
+    note: build.id,
+    createdAt: new Date().toISOString(),
+  });
+}
+
+function adminExportPayload(type) {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    site: "덕후버스터즈",
+  };
+  if (type === "reports" || type === "all") {
+    payload.reports = { pending: pendingReports, approved: approvedReportItems };
+  }
+  if (type === "guides" || type === "all") payload.guides = adminCenterData.guides;
+  if (type === "builds" || type === "all") payload.builds = activeAdminBuilds();
+  if (type === "all") {
+    payload.users = adminCenterData.users;
+    payload.visitors = adminCenterData.visitors;
+  }
+  return payload;
+}
+
+function exportAdminData(type) {
+  if (!adminUnlocked || !isAdminUser()) return;
+  const payload = adminExportPayload(type);
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `dukhubusters-${type}-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function fillMonsterOptions() {
@@ -3138,6 +3562,7 @@ function updateApprovedFromReports(reports) {
     render();
   }
   renderApprovedReports();
+  renderAdminCenter();
 }
 
 async function loadPublicApprovedReports() {
@@ -3169,10 +3594,12 @@ async function loadPublicReports() {
     saveStoredRows(storageKeys.pending, pendingReports);
     updateApprovedFromReports(reports);
     renderPendingReports();
+    renderAdminCenter();
     setReportSyncStatus("제보 저장소에 연결되었습니다. 새 제보는 검수 대기에 공개 저장됩니다.", "is-online");
   } catch {
     setReportSyncStatus("제보 저장소 연결에 실패해 이 브라우저의 임시 목록을 사용합니다.", "is-offline");
     renderPendingReports();
+    renderAdminCenter();
   }
 }
 
@@ -3399,6 +3826,7 @@ async function handlePendingAction(event) {
   else {
     renderPendingReports();
     renderApprovedReports();
+    renderAdminCenter();
   }
 }
 
@@ -3461,6 +3889,7 @@ async function handleApprovedAction(event) {
       render();
     }
     renderApprovedReports();
+    renderAdminCenter();
     setReportSyncStatus("등록된 정수를 삭제 처리했습니다.", "is-online");
   } catch {
     button.disabled = false;

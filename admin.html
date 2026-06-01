@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>관리자 검수 · 덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260601-essence-label-fix">
+  <title>관리자 센터 · 덕후버스터즈</title>
+  <link rel="stylesheet" href="./styles.css?v=20260601-admin-center">
 </head>
 <body class="admin-review-page">
   <header class="topbar compact">
     <div class="topbar-inner">
-      <h1>관리자 검수</h1>
+      <h1>관리자 센터</h1>
       <nav class="site-nav" aria-label="주요 메뉴">
         <a href="./index.html">홈</a>
         <details class="nav-dropdown">
@@ -27,11 +27,11 @@
     </div>
   </header>
 
-  <main class="layout report-layout admin-review-layout">
-    <section class="panel report-panel page-panel admin-gate">
+  <main class="layout report-layout admin-review-layout admin-center-layout">
+    <section class="panel report-panel page-panel admin-gate admin-center-hero">
       <div class="section-title compact-title">
-        <h2>관리자 전용 검수</h2>
-        <p>등록 대기 중인 정수와 넘버스 제보를 승인하거나 반려할 수 있습니다.</p>
+        <h2>관리자 전용 운영실</h2>
+        <p>제보 검수, 공략글, 댓글, 빌드, 사용자 닉네임, 방문 통계와 백업을 한 곳에서 확인합니다.</p>
       </div>
       <div class="admin-row">
         <button id="adminUnlock" class="submit-report" type="button">Google 관리자 로그인</button>
@@ -39,6 +39,19 @@
       </div>
       <p id="adminStatus" class="admin-status">관리자 권한을 확인하는 중입니다.</p>
       <p id="reportSyncStatus" class="build-sync-status"></p>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section admin-dashboard">
+      <div class="section-title compact-title">
+        <h2>운영 현황</h2>
+        <p>지금 손봐야 할 항목을 빠르게 확인합니다.</p>
+      </div>
+      <div id="adminStatsGrid" class="admin-stats-grid"></div>
+      <div class="admin-quick-actions">
+        <a href="./report.html">정보 제보/수정 열기</a>
+        <a href="./guides.html">공략 게시판 열기</a>
+        <a href="./builds.html">빌드 공유 열기</a>
+      </div>
     </section>
 
     <section class="panel report-panel page-panel admin-review-section">
@@ -55,6 +68,55 @@
       </div>
       <div id="approvedReports" class="pending-reports"></div>
     </section>
+
+    <section class="panel report-panel page-panel admin-review-section">
+      <div class="review-head">
+        <strong id="adminGuideCount">공략글/댓글 0건</strong>
+        <button id="adminRefreshCenter" type="button">새로고침</button>
+      </div>
+      <div id="adminGuideList" class="admin-management-list"></div>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section">
+      <div class="review-head">
+        <strong id="adminBuildCount">공개 빌드 0건</strong>
+      </div>
+      <div id="adminBuildList" class="admin-management-list"></div>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section">
+      <div class="review-head">
+        <strong id="adminUserCount">사용자 닉네임 0명</strong>
+      </div>
+      <div id="adminUserList" class="admin-management-list"></div>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section admin-ops-grid">
+      <div>
+        <div class="review-head">
+          <strong>사이트 통계</strong>
+        </div>
+        <div id="adminSiteStats" class="admin-management-list"></div>
+      </div>
+      <div>
+        <div class="review-head">
+          <strong>품질 점검</strong>
+        </div>
+        <div id="adminQualityList" class="admin-management-list"></div>
+      </div>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section">
+      <div class="review-head">
+        <strong>데이터 백업</strong>
+      </div>
+      <div class="admin-backup-grid">
+        <button id="adminExportReports" type="button">정수/넘버스 백업</button>
+        <button id="adminExportGuides" type="button">공략글 백업</button>
+        <button id="adminExportBuilds" type="button">빌드 백업</button>
+        <button id="adminExportAll" type="button">전체 백업</button>
+      </div>
+    </section>
   </main>
 
   <script src="./ghost-data.js?v=20260520"></script>
@@ -70,6 +132,6 @@
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./auth.js?v=20260601-nickname-check"></script>
-  <script src="./app.js?v=20260601-codex-hub"></script>
+  <script src="./app.js?v=20260601-admin-center"></script>
 </body>
 </html>
