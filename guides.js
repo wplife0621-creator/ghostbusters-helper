@@ -126,6 +126,25 @@ function setStatus(message, mode = "") {
   fields.status.className = `build-sync-status ${mode}`.trim();
 }
 
+function currentAuthNickname() {
+  return String(window.DUKHUBUSTERS_AUTH?.getDisplayName?.() || "").trim();
+}
+
+function requireLoggedInNickname(actionLabel = "작성") {
+  const user = window.DUKHUBUSTERS_AUTH?.getUser?.();
+  if (!user) {
+    setStatus(`${actionLabel}하려면 Google 로그인이 필요합니다.`, "is-offline");
+    window.DUKHUBUSTERS_AUTH?.signIn?.();
+    return false;
+  }
+  if (!window.DUKHUBUSTERS_AUTH?.hasNickname?.()) {
+    setStatus(`${actionLabel}하려면 닉네임을 먼저 설정해주세요.`, "is-offline");
+    window.DUKHUBUSTERS_AUTH?.openNickname?.();
+    return false;
+  }
+  return true;
+}
+
 function setMetaContent(selector, content) {
   let meta = document.head.querySelector(selector);
   if (!meta) {
@@ -603,6 +622,7 @@ function fillComposer(content, media) {
 
 async function submitPost(event) {
   event.preventDefault();
+  if (!requireLoggedInNickname("공략글 작성")) return;
   const editId = fields.editId.value;
   const previous = posts.find((post) => post.id === editId);
   const editing = Boolean(previous);
@@ -629,7 +649,7 @@ async function submitPost(event) {
   const basePost = {
     id,
     title,
-    author: fields.author.value.trim() || "익명",
+    author: currentAuthNickname(),
     category,
     content,
     media: [...keptMedia],
@@ -1020,6 +1040,7 @@ async function deletePost(post) {
 fields.form.addEventListener("submit", submitPost);
 fields.cancel.addEventListener("click", resetForm);
 fields.openEditor.addEventListener("click", () => {
+  if (!requireLoggedInNickname("공략글 작성")) return;
   resetForm();
   fields.editor.hidden = false;
   fields.title.focus();

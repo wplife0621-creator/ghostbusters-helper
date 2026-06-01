@@ -299,6 +299,31 @@ function textOf(value) {
   return String(value ?? "").trim();
 }
 
+function currentAuthNickname() {
+  return textOf(window.DUKHUBUSTERS_AUTH?.getDisplayName?.());
+}
+
+function requireLoggedInNickname(statusTarget, actionLabel = "등록") {
+  const user = window.DUKHUBUSTERS_AUTH?.getUser?.();
+  if (!user) {
+    if (statusTarget) {
+      statusTarget.textContent = `${actionLabel}하려면 Google 로그인이 필요합니다.`;
+      statusTarget.className = "build-sync-status is-offline";
+    }
+    window.DUKHUBUSTERS_AUTH?.signIn?.();
+    return false;
+  }
+  if (!window.DUKHUBUSTERS_AUTH?.hasNickname?.()) {
+    if (statusTarget) {
+      statusTarget.textContent = `${actionLabel}하려면 닉네임을 먼저 설정해주세요.`;
+      statusTarget.className = "build-sync-status is-offline";
+    }
+    window.DUKHUBUSTERS_AUTH?.openNickname?.();
+    return false;
+  }
+  return true;
+}
+
 function normalizeLocationName(value) {
   return textOf(value).replace(/\s+/g, "").toLowerCase();
 }
@@ -3035,6 +3060,8 @@ function reportToRow(report) {
 
 async function submitReport(event) {
   event.preventDefault();
+  if (!requireLoggedInNickname(els.reportSyncStatus, "정보 제보/수정")) return;
+  const authorNickname = currentAuthNickname();
   const numbersMode = isNumbersReportMode();
   if (!numbersMode && els.reportMode.value === "edit" && !textOf(els.reportOriginalMonster.value)) {
     setReportSyncStatus("수정할 기존 몬스터를 목록에서 먼저 선택해주세요.", "is-offline");
@@ -3043,7 +3070,7 @@ async function submitReport(event) {
   const report = numbersMode ? {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
-    authorNickname: textOf(els.reportNickname?.value),
+    authorNickname,
     monster: `${numbersReportPrefix}${textOf(els.reportNumberName.value)}`,
     grade: textOf(els.reportNumberLevel.value),
     floor: textOf(els.reportNumberCode.value) || "미확인",
@@ -3055,7 +3082,7 @@ async function submitReport(event) {
   } : {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
-    authorNickname: textOf(els.reportNickname?.value),
+    authorNickname,
     monster: textOf(els.reportMonster.value),
     originalMonster: els.reportMode.value === "edit" ? textOf(els.reportOriginalMonster.value) : "",
     grade: textOf(els.reportGrade.value),

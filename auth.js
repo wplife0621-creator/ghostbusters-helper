@@ -22,6 +22,9 @@
 
   window.DUKHUBUSTERS_AUTH = {
     getUser: () => state.user,
+    getDisplayName: () => state.user ? displayName(state.user) : "",
+    hasNickname: () => Boolean(state.user && nicknameOf(state.user)),
+    openNickname: () => openNicknameModal({ required: false }),
     signIn: signInWithGoogle,
     signOut,
   };
