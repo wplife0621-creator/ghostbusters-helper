@@ -1163,7 +1163,8 @@ select[multiple] option:checked {
   gap: 5px;
 }
 
-.number-card-actions a {
+.number-card-actions a,
+.number-card-actions button {
   display: inline-flex;
   align-items: center;
   min-height: 30px;
@@ -1171,25 +1172,35 @@ select[multiple] option:checked {
   border-radius: 999px;
   background: rgba(20, 32, 44, 0.92);
   color: #ecfdf9;
+  font: inherit;
   font-size: 12px;
   font-weight: 900;
   text-decoration: none;
   padding: 0 10px;
+  cursor: pointer;
 }
 
-.number-card-actions a:hover {
+.number-card-actions a:hover,
+.number-card-actions button:hover {
   background: linear-gradient(135deg, var(--fantasy-rune), #dff7ef);
   color: #071017;
 }
 
-.number-card-actions a.is-danger {
+.number-card-actions a.is-danger,
+.number-card-actions button.is-danger {
   border-color: rgba(197, 122, 50, 0.28);
   background: rgba(101, 34, 34, 0.92);
 }
 
-.number-card-actions a.is-danger:hover {
+.number-card-actions a.is-danger:hover,
+.number-card-actions button.is-danger:hover {
   background: linear-gradient(135deg, #fca5a5, #fed7aa);
   color: #3f1111;
+}
+
+.number-card-actions button:disabled {
+  cursor: progress;
+  opacity: 0.7;
 }
 
 .number-title-line {

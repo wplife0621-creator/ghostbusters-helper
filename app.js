@@ -304,6 +304,11 @@ function currentAuthNickname() {
   return textOf(window.DUKHUBUSTERS_AUTH?.getDisplayName?.());
 }
 
+function isAdminUser(user = window.DUKHUBUSTERS_AUTH?.getUser?.()) {
+  const email = textOf(user?.email).toLowerCase();
+  return Boolean(adminEmails.length && adminEmails.includes(email));
+}
+
 function requireLoggedInNickname(statusTarget, actionLabel = "등록") {
   const user = window.DUKHUBUSTERS_AUTH?.getUser?.();
   if (!user) {
@@ -882,6 +887,11 @@ function renderHomeNotices() {
 
 function initNumbers() {
   els.numbersSearch.value = new URLSearchParams(location.search).get("search") || "";
+  adminUnlocked = isAdminUser();
+  window.addEventListener("dukhubusters:auth", (event) => {
+    adminUnlocked = isAdminUser(event.detail?.user);
+    renderNumbers();
+  });
   refreshNumbersControls();
   els.numbersSearch.addEventListener("input", () => {
     activeNumbersPage = 1;
@@ -913,9 +923,54 @@ function initNumbers() {
     renderNumbers();
     els.numbersResults.scrollIntoView({ block: "start", behavior: "smooth" });
   });
+  els.numbersResults.addEventListener("click", handleNumberCardAction);
   renderNumbersEffectSortChips();
   renderNumbers();
   loadPublicApprovedReports();
+}
+
+async function handleNumberCardAction(event) {
+  const button = event.target.closest("button[data-number-admin-delete]");
+  if (!button) return;
+  if (!adminUnlocked || !isAdminUser()) {
+    alert("관리자 계정으로 로그인해야 바로 삭제할 수 있습니다.");
+    return;
+  }
+  const row = findNumberRow(button.dataset.numberAdminDelete);
+  if (!row) return;
+  if (!confirm(`${textOf(row["이름"])} 정보를 바로 삭제할까요?`)) return;
+  button.disabled = true;
+  button.textContent = "삭제 중";
+  try {
+    await adminDeleteNumber(row);
+  } catch {
+    alert("삭제 처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    button.disabled = false;
+    button.textContent = "관리자 삭제";
+  }
+}
+
+async function adminDeleteNumber(row) {
+  const report = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    mode: "delete",
+    authorNickname: currentAuthNickname() || "관리자",
+    monster: `${numbersReportPrefix}${textOf(row["이름"])}`,
+    grade: textOf(row["아이템 레벨(Lv)"]),
+    floor: textOf(row["번호"]) || "미확인",
+    area: textOf(row["착용부위"]) || "-",
+    stats: `[관리자 삭제] ${textOf(row["이름"])} 정보 삭제`,
+    passive: textOf(row["획득처"]) || "-",
+    active: numbersDeleteMarker,
+    status: "approved",
+    createdAt: new Date().toISOString(),
+    reviewedAt: new Date().toISOString(),
+  };
+  const saved = hasPublicReportStore()
+    ? await saveApprovedNumberDeleteReport(report)
+    : report;
+  approvedReportItems = sortReportsByDate([saved, ...approvedReportItems.filter((item) => item.id !== saved.id)]);
+  updateApprovedFromReports([...approvedReportItems]);
 }
 
 function initEssences() {
@@ -2762,6 +2817,7 @@ function renderNumbers() {
                 <div class="number-card-actions" aria-label="넘버스 정보 관리">
                   <a href="${escapeHtml(numberReportUrl(row, "edit"))}">수정</a>
                   <a class="is-danger" href="${escapeHtml(numberReportUrl(row, "delete"))}">삭제 요청</a>
+                  ${adminUnlocked ? `<button class="is-danger" type="button" data-number-admin-delete="${escapeHtml(row["이름"])}">관리자 삭제</button>` : ""}
                 </div>
               </div>
             </div>
@@ -3077,6 +3133,42 @@ async function savePublicReport(report) {
     });
   }
   if (!response.ok) throw new Error(`report save failed: ${response.status}`);
+  const rows = await response.json();
+  return normalizeRemoteReport(rows[0] || report);
+}
+
+async function saveApprovedNumberDeleteReport(report) {
+  const payload = {
+    id: report.id,
+    mode: "delete",
+    monster: report.monster,
+    original_monster: report.originalMonster || "",
+    grade: report.grade,
+    floor: report.floor,
+    area: report.area,
+    stats: report.stats,
+    passive: report.passive,
+    active: reportActiveForStorage(report),
+    author_nickname: report.authorNickname || "",
+    status: "approved",
+    created_at: report.createdAt,
+    reviewed_at: report.reviewedAt || new Date().toISOString(),
+  };
+  let response = await fetch(reportStoreUrl(), {
+    method: "POST",
+    headers: reportStoreHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok && report.authorNickname) {
+    const fallbackPayload = { ...payload };
+    delete fallbackPayload.author_nickname;
+    response = await fetch(reportStoreUrl(), {
+      method: "POST",
+      headers: reportStoreHeaders({ Prefer: "return=representation" }),
+      body: JSON.stringify(fallbackPayload),
+    });
+  }
+  if (!response.ok) throw new Error(`approved number delete save failed: ${response.status}`);
   const rows = await response.json();
   return normalizeRemoteReport(rows[0] || report);
 }
