@@ -170,6 +170,27 @@ body {
   color: var(--brand-dark);
 }
 
+.home-external-link {
+  flex: 0 0 auto;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(8, 183, 131, 0.24);
+  border-radius: 999px;
+  background: #071526;
+  color: #dffcf4;
+  font-size: 13px;
+  font-weight: 950;
+  text-decoration: none;
+  padding: 0 13px;
+}
+
+.home-external-link:hover {
+  background: #04785c;
+  color: #ffffff;
+}
+
 .home-recent {
   display: grid;
   gap: 15px;

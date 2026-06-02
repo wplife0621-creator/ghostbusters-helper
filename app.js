@@ -899,7 +899,7 @@ function homeGuideNotices(rows) {
       return {
         id: row.id,
         type: "guide",
-        label: "공략글",
+        label: "게시판",
         title,
         summary: `${category} · ${textOf(row.author) || "익명"}`,
         date: row.updated_at || row.created_at,
@@ -943,7 +943,7 @@ function renderHomeNotices() {
     { key: "essence", label: "정수" },
     { key: "numbers", label: "넘버스" },
     { key: "build", label: "나만의 빌드" },
-    { key: "guide", label: "공략글" },
+    { key: "guide", label: "게시판" },
   ];
   els.homeNoticeCounts.innerHTML = types.map((type) => `
     <span class="home-notice-count type-${type.key}">
@@ -2286,7 +2286,7 @@ function adminQualityItems(posts, builds) {
   return [
     { label: "검수", value: pendingReports.length ? `${pendingReports.length}건 대기` : "없음", warn: pendingReports.length > 0, href: "#admin-pending" },
     { label: "넘버스 중복", value: duplicateNumbers ? `${duplicateNumbers}개` : "없음", warn: duplicateNumbers > 0, href: "./numbers.html" },
-    { label: "짧은 공략", value: shortGuides ? `${shortGuides}건` : "양호", warn: shortGuides > 0, href: "./guides.html" },
+    { label: "짧은 게시글", value: shortGuides ? `${shortGuides}건` : "양호", warn: shortGuides > 0, href: "./guides.html" },
     { label: "빈 빌드", value: emptyBuilds ? `${emptyBuilds}건` : "없음", warn: emptyBuilds > 0, href: "#admin-builds" },
   ];
 }
@@ -2352,7 +2352,7 @@ function renderAdminCenter() {
   const stats = [
     { label: "검수", value: `${pendingReports.length}건`, hint: "대기 제보", href: "#admin-pending" },
     { label: "등록", value: `${approvedReportItems.length}건`, hint: "승인 정보", href: "#admin-approved" },
-    { label: "공략", value: `${posts.length}건`, hint: "게시글", href: "./guides.html" },
+    { label: "게시글", value: `${posts.length}건`, hint: "게시판", href: "./guides.html" },
     { label: "댓글", value: `${comments.length}건`, hint: "최근 댓글", href: "#admin-guides" },
     { label: "빌드", value: `${builds.length}건`, hint: "공개 빌드", href: "./builds.html" },
     { label: "회원", value: `${adminCenterData.users.length}명`, hint: "닉네임", href: "#admin-users" },
@@ -2375,7 +2375,7 @@ function renderAdminCenter() {
 
 function renderAdminGuides(posts, comments) {
   if (!els.adminGuideList || !els.adminGuideCount) return;
-  els.adminGuideCount.textContent = `공략글 ${posts.length}건 · 댓글 ${comments.length}건`;
+  els.adminGuideCount.textContent = `게시글 ${posts.length}건 · 댓글 ${comments.length}건`;
   const postHtml = posts.slice(0, 3).map((post) => `
     <article class="admin-management-card" data-admin-guide-id="${escapeHtml(post.id)}" data-admin-guide-kind="post">
       <div>
@@ -2403,11 +2403,11 @@ function renderAdminGuides(posts, comments) {
     </article>
   `).join("");
   const more = posts.length + comments.length > 6
-    ? `<a class="admin-more-link" href="./guides.html">공략글 페이지에서 전체 보기</a>`
+    ? `<a class="admin-more-link" href="./guides.html">게시판에서 전체 보기</a>`
     : "";
   els.adminGuideList.innerHTML = postHtml || commentHtml
     ? `${postHtml}${commentHtml}${more}`
-    : `<div class="empty compact-empty">${adminCenterData.errors?.guides ? "공략글 저장소를 불러오지 못했습니다." : "등록된 공략글이 없습니다."}</div>`;
+    : `<div class="empty compact-empty">${adminCenterData.errors?.guides ? "게시글 저장소를 불러오지 못했습니다." : "등록된 게시글이 없습니다."}</div>`;
 }
 
 function renderAdminBuilds(builds) {
@@ -2480,7 +2480,7 @@ async function handleAdminGuideAction(event) {
   const id = card?.dataset.adminGuideId;
   const kind = card?.dataset.adminGuideKind;
   if (!id) return;
-  const label = kind === "comment" ? "댓글" : "공략글";
+  const label = kind === "comment" ? "댓글" : "게시글";
   if (!confirm(`${label}을 관리자 권한으로 삭제할까요?`)) return;
   button.disabled = true;
   try {

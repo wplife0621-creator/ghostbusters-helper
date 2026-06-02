@@ -20,7 +20,7 @@
           </div>
         </details>
         <a href="./builds.html">나만의 빌드</a>
-        <a href="./guides.html">공략글</a>
+        <a href="./guides.html">게시판</a>
         <a href="./report.html">정보 제보/수정</a>
         <a href="./maze-time.html">미궁 시간 계산기</a>
       </nav>
@@ -31,7 +31,7 @@
     <section class="panel report-panel page-panel admin-gate admin-center-hero">
       <div class="section-title compact-title">
         <h2>관리자 전용 운영실</h2>
-        <p>제보 검수, 공략글, 댓글, 빌드, 사용자 닉네임, 방문 통계와 백업을 한 곳에서 확인합니다.</p>
+        <p>제보 검수, 게시글, 댓글, 빌드, 사용자 닉네임, 방문 통계와 백업을 한 곳에서 확인합니다.</p>
       </div>
       <div class="admin-row">
         <button id="adminUnlock" class="submit-report" type="button">Google 관리자 로그인</button>
@@ -49,7 +49,7 @@
       <div id="adminStatsGrid" class="admin-stats-grid"></div>
       <div class="admin-quick-actions">
         <a href="./report.html">정보 제보/수정 열기</a>
-        <a href="./guides.html">공략 게시판 열기</a>
+        <a href="./guides.html">게시판 열기</a>
         <a href="./builds.html">나만의 빌드 열기</a>
       </div>
     </section>
@@ -71,7 +71,7 @@
 
     <section id="admin-guides" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
-        <strong id="adminGuideCount">공략글/댓글 0건</strong>
+        <strong id="adminGuideCount">게시글/댓글 0건</strong>
         <button id="adminRefreshCenter" type="button">새로고침</button>
       </div>
       <div id="adminGuideList" class="admin-management-list"></div>
@@ -112,7 +112,7 @@
       </div>
       <div class="admin-backup-grid">
         <button id="adminExportReports" type="button">정수/넘버스 백업</button>
-        <button id="adminExportGuides" type="button">공략글 백업</button>
+        <button id="adminExportGuides" type="button">게시글 백업</button>
         <button id="adminExportBuilds" type="button">빌드 백업</button>
         <button id="adminExportAll" type="button">전체 백업</button>
       </div>
@@ -132,6 +132,6 @@
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./auth.js?v=20260601-fixed-author"></script>
-  <script src="./app.js?v=20260601-fixed-author"></script>
+  <script src="./app.js?v=20260601-board-rename"></script>
 </body>
 </html>

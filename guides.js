@@ -29,7 +29,7 @@ const mediaMarkerPattern = /\{\{media:([^}]+)\}\}/g;
 const guideUploadLimitBytes = 50 * 1024 * 1024;
 const guideUploadLimitLabel = "50MB";
 const guideSiteTitle = "덕후버스터즈";
-const guideDefaultTitle = `공략글 보러가기 · ${guideSiteTitle}`;
+const guideDefaultTitle = `게시판 · ${guideSiteTitle}`;
 const fields = {
   board: document.querySelector("#guideBoard"),
   form: document.querySelector("#guideForm"),
@@ -165,8 +165,8 @@ function shareTitleForPost(post) {
 function updateGuideShareMeta(post = null) {
   const title = shareTitleForPost(post);
   const description = post
-    ? String(post.content || "").replace(mediaMarkerPattern, "").replace(/\s+/g, " ").trim().slice(0, 120) || "덕후버스터즈 공략 게시글"
-    : "덕후버스터즈 공략 게시판";
+    ? String(post.content || "").replace(mediaMarkerPattern, "").replace(/\s+/g, " ").trim().slice(0, 120) || "덕후버스터즈 게시글"
+    : "덕후버스터즈 게시판";
   document.title = title;
   setMetaContent("meta[property='og:title']", title);
   setMetaContent("meta[property='og:site_name']", guideSiteTitle);
@@ -226,7 +226,7 @@ async function sharePostLink(post, button) {
   const url = postShareUrl(post.id).toString();
   if (navigator.share) {
     try {
-      await navigator.share({ title: shareTitleForPost(post), text: "공략글 보기", url });
+      await navigator.share({ title: shareTitleForPost(post), text: "게시글 보기", url });
       return;
     } catch (error) {
       if (error.name === "AbortError") return;
@@ -239,7 +239,7 @@ async function sharePostLink(post, button) {
       if (selectedPostId === post.id) renderViewer();
     }, 1300);
   } catch {
-    window.prompt("공략글 링크를 복사하세요.", url);
+    window.prompt("게시글 링크를 복사하세요.", url);
   }
 }
 
@@ -382,7 +382,7 @@ async function loadPosts() {
     renderPosts();
     markLikedPostsForVisitor();
     openLinkedPostIfAvailable();
-    setStatus("공개 공략 게시판에 연결되었습니다.", "is-online");
+    setStatus("공개 게시판에 연결되었습니다.", "is-online");
   } catch {
     openLinkedPostIfAvailable();
     setStatus("게시판 설정이 아직 적용되지 않아 이 기기의 임시 목록을 표시합니다.", "is-offline");
@@ -622,7 +622,7 @@ function fillComposer(content, media) {
 
 async function submitPost(event) {
   event.preventDefault();
-  if (!requireLoggedInNickname("공략글 작성")) return;
+  if (!requireLoggedInNickname("게시글 작성")) return;
   const editId = fields.editId.value;
   const previous = posts.find((post) => post.id === editId);
   const editing = Boolean(previous);
@@ -634,12 +634,12 @@ async function submitPost(event) {
   const content = composerContent();
   fields.content.value = content;
   if (!content) {
-    setStatus("공략 내용을 입력하거나 이미지·동영상을 넣어주세요.", "is-offline");
+    setStatus("게시글 내용을 입력하거나 이미지·동영상을 넣어주세요.", "is-offline");
     fields.composer.focus();
     return;
   }
   if (content.length > 5000) {
-    setStatus("공략 내용은 5000자 이내로 입력해주세요.", "is-offline");
+    setStatus("게시글 내용은 5000자 이내로 입력해주세요.", "is-offline");
     return;
   }
   if (savedTitle({ title, category }).length > 100) {
@@ -665,12 +665,12 @@ async function submitPost(event) {
       basePost.media.push(...await uploadMedia(pendingMedia, id));
       const saved = await saveRemotePost(basePost, editing);
       posts = sortPosts([saved, ...posts.filter((post) => post.id !== id)]);
-      setStatus(editing ? "공략글이 수정되었습니다." : "공략글이 등록되었습니다.", "is-online");
+      setStatus(editing ? "게시글이 수정되었습니다." : "게시글이 등록되었습니다.", "is-online");
     } else {
       basePost.media.push(...await filesToTemporaryMedia(pendingMedia));
       posts = sortPosts([basePost, ...posts.filter((post) => post.id !== id)]);
       saveLocalPosts();
-      setStatus(editing ? "공략글을 이 기기에서 수정했습니다." : "공략글을 이 기기에 임시 저장했습니다.", "is-offline");
+      setStatus(editing ? "게시글을 이 기기에서 수정했습니다." : "게시글을 이 기기에 임시 저장했습니다.", "is-offline");
     }
     resetForm();
     renderPosts();
@@ -685,7 +685,7 @@ async function submitPost(event) {
     } catch (localError) {
       const message = localError.message === "local-size"
         ? `첨부 파일 합계 ${guideUploadLimitLabel}까지 업로드할 수 있습니다.`
-        : "공략글 저장에 실패했습니다. 게시판 저장소 설정을 확인해주세요.";
+        : "게시글 저장에 실패했습니다. 게시판 저장소 설정을 확인해주세요.";
       setStatus(message, "is-offline");
     }
   } finally {
@@ -773,7 +773,7 @@ function renderPosts() {
         <span class="guide-row-likes">좋아요 ${post.likes}</span>
       </span>
     </article>
-  `).join("") : `<div class="empty compact-empty">조건에 맞는 공략글이 없습니다.</div>`;
+  `).join("") : `<div class="empty compact-empty">조건에 맞는 게시글이 없습니다.</div>`;
   renderViewer();
 }
 
@@ -991,7 +991,7 @@ function showRetainedMedia() {
 async function startEdit(post) {
   if (!(await verifyPassword(post, "글 수정"))) return;
   fields.editor.hidden = false;
-  fields.formTitle.textContent = "공략글 수정";
+  fields.formTitle.textContent = "게시글 수정";
   fields.editId.value = post.id;
   fields.title.value = post.title;
   fields.author.value = post.author === "익명" ? "" : post.author;
@@ -1016,8 +1016,8 @@ function resetForm() {
   fields.composer.innerHTML = "";
   fields.content.value = "";
   composerRange = null;
-  fields.formTitle.textContent = "공략글 작성";
-  fields.submit.textContent = "공략글 등록";
+  fields.formTitle.textContent = "게시글 작성";
+  fields.submit.textContent = "게시글 등록";
   fields.cancel.hidden = true;
   fields.password.disabled = false;
   fields.password.required = true;
@@ -1044,16 +1044,16 @@ async function deletePost(post) {
     saveLocalPosts();
     if (fields.editId.value === post.id) resetForm();
     renderPosts();
-    setStatus("공략글이 삭제되었습니다.", hasPublicStore() ? "is-online" : "is-offline");
+    setStatus("게시글이 삭제되었습니다.", hasPublicStore() ? "is-online" : "is-offline");
   } catch {
-    setStatus("공략글 삭제에 실패했습니다.", "is-offline");
+    setStatus("게시글 삭제에 실패했습니다.", "is-offline");
   }
 }
 
 fields.form.addEventListener("submit", submitPost);
 fields.cancel.addEventListener("click", resetForm);
 fields.openEditor.addEventListener("click", () => {
-  if (!requireLoggedInNickname("공략글 작성")) return;
+  if (!requireLoggedInNickname("게시글 작성")) return;
   resetForm();
   fields.editor.hidden = false;
   fields.title.focus();

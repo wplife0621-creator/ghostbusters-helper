@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>공략글 보러가기 · 덕후버스터즈</title>
-  <meta property="og:title" content="공략글 보러가기 · 덕후버스터즈">
+  <title>게시판 · 덕후버스터즈</title>
+  <meta property="og:title" content="게시판 · 덕후버스터즈">
   <meta property="og:site_name" content="덕후버스터즈">
   <meta property="og:type" content="article">
-  <meta property="og:description" content="덕후버스터즈 공략 게시판">
+  <meta property="og:description" content="덕후버스터즈 게시판">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="공략글 보러가기 · 덕후버스터즈">
+  <meta name="twitter:title" content="게시판 · 덕후버스터즈">
   <link rel="stylesheet" href="./styles.css?v=20260601-guide-categories">
 </head>
 <body>
   <header class="topbar compact">
     <div class="topbar-inner">
-      <h1>공략글 보러가기</h1>
+      <h1>게시판</h1>
       <nav class="site-nav" aria-label="주요 메뉴">
         <a href="./index.html">홈</a>
         <details class="nav-dropdown">
@@ -26,7 +26,7 @@
           </div>
         </details>
         <a href="./builds.html">나만의 빌드</a>
-        <a href="./guides.html" aria-current="page">공략글</a>
+        <a href="./guides.html" aria-current="page">게시판</a>
         <a href="./report.html">정보 제보/수정</a>
         <a href="./maze-time.html">미궁 시간 계산기</a>
       </nav>
@@ -38,7 +38,7 @@
       <div class="guide-board-list">
         <div class="guide-board-header">
           <div>
-            <h2>공략 게시판</h2>
+            <h2>게시판</h2>
             <p>미궁 플레이 공략과 정보를 자유롭게 공유하세요.</p>
           </div>
           <button class="submit-report guide-write-button" type="button" id="guideOpenEditor">글쓰기</button>
@@ -53,7 +53,7 @@
         </nav>
         <div class="guide-toolbar">
           <label class="guide-search">
-            <span class="sr-only">공략글 검색</span>
+            <span class="sr-only">게시글 검색</span>
             <input id="guideSearch" type="search" placeholder="제목, 내용, 작성자 검색">
           </label>
           <p id="guideCount">전체글 0개</p>
@@ -73,7 +73,7 @@
 
     <section class="panel guide-editor" id="guideEditor" hidden>
       <div class="section-title compact-title">
-        <h2 id="guideFormTitle">공략글 작성</h2>
+        <h2 id="guideFormTitle">게시글 작성</h2>
         <p>이미지나 동영상을 본문 원하는 위치에 넣거나, 복사한 이미지를 내용 칸에 바로 붙여넣을 수 있습니다.</p>
       </div>
       <form id="guideForm" class="guide-form">
@@ -114,7 +114,7 @@
         </div>
         <div id="guideExistingMedia" class="guide-existing-media" hidden></div>
         <div class="guide-form-actions">
-          <button class="submit-report" type="submit" id="guideSubmit">공략글 등록</button>
+          <button class="submit-report" type="submit" id="guideSubmit">게시글 등록</button>
           <button type="button" id="guideCancelEdit" hidden>수정 취소</button>
         </div>
       </form>
@@ -133,6 +133,6 @@
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./auth.js?v=20260601-fixed-author"></script>
-  <script src="./guides.js?v=20260601-fixed-author"></script>
+  <script src="./guides.js?v=20260601-board-rename"></script>
 </body>
 </html>
