@@ -255,6 +255,18 @@ async function sharePostLink(post, button) {
   }
 }
 
+async function copyText(text, button, defaultText) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.textContent = "주소 복사됨";
+    setTimeout(() => {
+      button.textContent = defaultText;
+    }, 1300);
+  } catch {
+    window.prompt("게시글 고유주소를 복사하세요.", text);
+  }
+}
+
 function savedTitle(post) {
   return post.category !== "일반" ? `[${post.category}] ${post.title}` : post.title;
 }
@@ -812,15 +824,21 @@ function renderViewer() {
   }
   updateGuideShareMeta(post);
   const postBody = postBodyMarkup(post);
+  const permalink = guidePostHref(post.id);
   fields.viewer.innerHTML = `
     <div class="guide-viewer-head" data-guide-id="${escapeHtml(post.id)}">
       <div>
         <span class="guide-row-category ${categoryClass(post.category)}">${escapeHtml(post.category)}</span>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.author)} · ${escapeHtml(new Date(post.updatedAt).toLocaleString("ko-KR"))} · 조회 ${post.views} · 댓글 ${post.commentCount} · 좋아요 ${post.likes}</p>
+        <div class="guide-permalink">
+          <span>고유주소</span>
+          <a href="${escapeHtml(permalink)}">${escapeHtml(permalink)}</a>
+        </div>
       </div>
       <div class="pending-actions guide-viewer-actions">
         <button class="guide-like-button${likedPostIds.has(post.id) ? " is-liked" : ""}" type="button" data-guide-action="like"${likedPostIds.has(post.id) ? " disabled" : ""}>${likedPostIds.has(post.id) ? "좋아요 완료" : "좋아요"} ${post.likes}</button>
+        <button type="button" data-guide-action="copy-permalink">주소 복사</button>
         <button type="button" data-guide-action="share">공유</button>
         <button type="button" data-guide-action="report">신고</button>
         <button type="button" data-guide-action="edit">수정</button>
@@ -1225,6 +1243,7 @@ fields.viewer.addEventListener("click", (event) => {
       renderViewer();
     });
   }
+  if (button.dataset.guideAction === "copy-permalink") copyText(guidePostHref(post.id), button, "주소 복사");
   if (button.dataset.guideAction === "share") sharePostLink(post, button);
   if (button.dataset.guideAction === "report") reportGuideTarget("post", post.id, "게시글");
   if (button.dataset.guideAction === "edit") startEdit(post);
@@ -1285,12 +1304,12 @@ function renderPosts() {
     <article class="guide-row" data-guide-id="${escapeHtml(post.id)}">
       <span class="guide-row-number">${posts.length - posts.indexOf(post)}</span>
       <span class="guide-row-category ${categoryClass(post.category)}">${escapeHtml(post.category)}</span>
-      <button type="button" class="guide-row-title" data-guide-action="view">
+      <a class="guide-row-title" data-guide-action="view" href="${escapeHtml(guidePostHref(post.id))}">
         ${escapeHtml(post.title)}
         ${post.acceptedCommentId ? `<small class="guide-accepted-mini">답변 채택</small>` : ""}
         ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
         ${post.commentCount ? `<small>댓글 ${post.commentCount}</small>` : ""}
-      </button>
+      </a>
       <span class="guide-row-author">${escapeHtml(post.author)}</span>
       <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
       <span class="guide-row-metrics">

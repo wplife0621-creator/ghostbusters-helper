@@ -1512,6 +1512,37 @@ select[multiple] option:checked {
   white-space: nowrap;
 }
 
+.guide-permalink {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+  margin-top: 8px;
+  max-width: 100%;
+  font-size: 12px;
+}
+
+.guide-permalink span {
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #24486f;
+  font-weight: 950;
+  padding: 4px 8px;
+}
+
+.guide-permalink a {
+  min-width: 0;
+  color: #526574;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.guide-permalink a:hover {
+  color: var(--brand-dark);
+  text-decoration: underline;
+}
+
 .guide-row-author,
 .guide-row-date,
 .guide-row-number,
