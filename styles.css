@@ -191,6 +191,27 @@ body {
   color: #ffffff;
 }
 
+.home-fan-links {
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-external-link.kakao-link {
+  border-color: rgba(24, 24, 24, 0.08);
+  background: #fee500;
+  color: #191919;
+  box-shadow: 0 10px 22px rgba(254, 229, 0, 0.22);
+}
+
+.home-external-link.kakao-link:hover {
+  border-color: rgba(24, 24, 24, 0.16);
+  background: #f7d900;
+  color: #191919;
+}
+
 .home-recent {
   display: grid;
   gap: 15px;
