@@ -879,7 +879,7 @@ function homeBuildNotices(rows) {
       return {
         id: build.id,
         type: "build",
-        label: "나만의 빌드",
+        label: "빌드",
         title: build.title || "이름 없는 빌드",
         summary: `${build.author || "익명"} · ${build.members.length}명 구성`,
         date: build.createdAt,
@@ -942,7 +942,7 @@ function renderHomeNotices() {
   const types = [
     { key: "essence", label: "정수" },
     { key: "numbers", label: "넘버스" },
-    { key: "build", label: "나만의 빌드" },
+    { key: "build", label: "빌드" },
     { key: "guide", label: "게시판" },
   ];
   els.homeNoticeCounts.innerHTML = types.map((type) => `
@@ -2426,7 +2426,7 @@ function renderAdminBuilds(builds) {
           <button type="button" data-admin-build-action="delete">삭제</button>
         </div>
       </article>
-    `).join("")}${builds.length > 4 ? `<a class="admin-more-link" href="./builds.html">나만의 빌드 페이지에서 전체 보기</a>` : ""}`
+    `).join("")}${builds.length > 4 ? `<a class="admin-more-link" href="./builds.html">빌드 페이지에서 전체 보기</a>` : ""}`
     : `<div class="empty compact-empty">${adminCenterData.errors?.builds ? "빌드 저장소를 불러오지 못했습니다." : "등록된 공개 빌드가 없습니다."}</div>`;
 }
 
