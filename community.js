@@ -237,7 +237,11 @@ async function fetchGuides() {
 }
 
 async function fetchBuilds() {
-  const rows = await restSelect(config.buildTable || "builds", "id,title,author,created_at,members", "order=created_at.desc&limit=80");
+  const rows = await restSelect(
+    config.buildTable || "builds",
+    "id,title,author,created_at,members",
+    "title=neq.__session_time__&title=neq.__visitor_total__&title=neq.__visitor_daily__&order=created_at.desc&limit=120"
+  );
   return rows
     .filter((row) => !isBuildMeta(row))
     .map((row) => {

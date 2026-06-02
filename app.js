@@ -992,7 +992,7 @@ async function loadHomeNotices() {
   }
   const requests = await Promise.allSettled([
     fetch(reportStoreUrl("?select=*&status=eq.approved&order=reviewed_at.desc"), { headers: reportStoreHeaders() }),
-    fetch(buildStoreUrl("?select=*&order=created_at.desc"), { headers: buildStoreHeaders() }),
+    fetch(buildStoreUrl(publicBuildRowsQuery()), { headers: buildStoreHeaders() }),
     fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?select=*&order=updated_at.desc`, {
       headers: { apikey: guideBackend.anonKey, Authorization: `Bearer ${guideBackend.anonKey}` },
     }),
@@ -1613,6 +1613,13 @@ function buildStoreUrl(query = "") {
   return `${buildBackend.url}/rest/v1/${buildBackend.table}${query}`;
 }
 
+function publicBuildRowsQuery(limit = 2000) {
+  const excludedTitles = [visitorBuildMarkers.total, visitorBuildMarkers.daily, sessionTimeMarker]
+    .map((title) => `title=neq.${encodeURIComponent(title)}`)
+    .join("&");
+  return `?select=*&${excludedTitles}&order=created_at.desc&limit=${limit}`;
+}
+
 function setBuildSyncStatus(message, mode = "") {
   if (!els.buildSyncStatus) return;
   els.buildSyncStatus.textContent = message;
@@ -1702,7 +1709,7 @@ async function loadPublicBuilds() {
   }
   setBuildSyncStatus("공개 빌드 목록을 불러오는 중입니다.", "is-online");
   try {
-    const response = await fetch(buildStoreUrl("?select=*&order=created_at.desc"), {
+    const response = await fetch(buildStoreUrl(publicBuildRowsQuery()), {
       headers: buildStoreHeaders(),
     });
     if (!response.ok) throw new Error(`load failed: ${response.status}`);
