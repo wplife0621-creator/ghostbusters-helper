@@ -8430,12 +8430,12 @@ body {
 
 .admin-site-overview {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 12px;
   border: 1px solid rgba(50, 93, 128, 0.16);
-  border-radius: 16px;
+  border-radius: 20px;
   background: linear-gradient(135deg, #ffffff, #f6fbff);
-  padding: 12px;
+  padding: 16px;
 }
 
 .admin-site-overview > small {
@@ -8447,9 +8447,9 @@ body {
 
 .admin-site-metric {
   border: 1px solid rgba(114, 84, 45, 0.16);
-  border-radius: 13px;
+  border-radius: 16px;
   background: #fffaf0;
-  padding: 10px;
+  padding: 14px;
 }
 
 .admin-site-metric span {
@@ -8461,25 +8461,25 @@ body {
 
 .admin-site-metric strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 6px;
   color: #1f2937;
-  font-size: 20px;
+  font-size: 24px;
   letter-spacing: -0.04em;
 }
 
 .admin-analytics-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
-  margin-top: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
 }
 
 .admin-analytics-grid section {
   min-width: 0;
   border: 1px solid rgba(50, 93, 128, 0.16);
-  border-radius: 16px;
+  border-radius: 20px;
   background: #ffffff;
-  padding: 12px;
+  padding: 14px;
 }
 
 .admin-analytics-grid h3 {
@@ -8490,8 +8490,9 @@ body {
 }
 
 .admin-visitor-chart,
-.admin-stay-chart {
-  height: 180px;
+.admin-stay-chart,
+.admin-activity-chart {
+  height: 220px;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(32px, 1fr);
@@ -8505,7 +8506,7 @@ body {
 }
 
 .admin-chart-bar {
-  height: 140px;
+  height: 174px;
   display: grid;
   grid-template-rows: 1fr auto auto;
   align-items: end;
@@ -8527,6 +8528,95 @@ body {
 .admin-stay-bar span {
   background: linear-gradient(180deg, #7dd3fc, #2563eb);
   box-shadow: 0 8px 16px rgba(37, 99, 235, 0.16);
+}
+
+.admin-activity-bar span {
+  background: linear-gradient(180deg, #c4b5fd, #7c3aed);
+  box-shadow: 0 8px 16px rgba(124, 58, 237, 0.16);
+}
+
+.admin-stats-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-stats-controls div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-stats-controls button {
+  min-height: 34px;
+  border: 1px solid rgba(50, 93, 128, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #243447;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.admin-stats-controls button:hover,
+.admin-stats-controls button.is-active {
+  border-color: rgba(37, 99, 235, 0.36);
+  background: #eaf2ff;
+  color: #1d4ed8;
+}
+
+.admin-popular-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.admin-popular-grid section {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(50, 93, 128, 0.16);
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.admin-popular-grid h3 {
+  margin: 0 0 4px;
+  color: #142334;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.admin-popular-grid a,
+.admin-popular-grid p {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(50, 93, 128, 0.1);
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #142334;
+  text-decoration: none;
+  padding: 10px;
+}
+
+.admin-popular-grid a:hover {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: #eff6ff;
+}
+
+.admin-popular-grid b {
+  font-size: 12px;
+}
+
+.admin-popular-grid span,
+.admin-popular-grid p {
+  color: #526574;
+  font-size: 11px;
+  font-weight: 850;
 }
 
 .admin-chart-bar b {

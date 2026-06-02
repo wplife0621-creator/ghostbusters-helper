@@ -311,6 +311,8 @@ let adminCenterData = {
   visitors: { total: null, today: null },
   loadedAt: "",
 };
+let adminStatsRangeDays = 14;
+let adminStatsExcludeAdmin = false;
 let activeEssenceInput = null;
 let activeStatNames = [];
 let activeEffectSortKey = "";
@@ -1240,6 +1242,7 @@ function initAdminReview() {
   els.adminUnlock?.addEventListener("click", () => window.DUKHUBUSTERS_AUTH?.signIn?.());
   els.adminLock?.addEventListener("click", () => window.DUKHUBUSTERS_AUTH?.signOut?.());
   els.adminRefreshCenter?.addEventListener("click", loadAdminCenter);
+  els.adminSiteStats?.addEventListener("click", handleAdminStatsControls);
   els.adminGuideList?.addEventListener("click", handleAdminGuideAction);
   els.adminBuildList?.addEventListener("click", handleAdminBuildAction);
   els.adminExportReports?.addEventListener("click", () => exportAdminData("reports"));
@@ -4519,6 +4522,139 @@ function adminFormatMinutes(seconds) {
   return `${Math.floor(minutes / 60)}시간 ${minutes % 60}분`;
 }
 
+function adminRangeStartDate() {
+  if (!adminStatsRangeDays) return "";
+  const date = new Date();
+  date.setDate(date.getDate() - (adminStatsRangeDays - 1));
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function adminWithinRange(date) {
+  const key = textOf(date).slice(0, 10);
+  const start = adminRangeStartDate();
+  return Boolean(key && (!start || key >= start));
+}
+
+function adminFilterStayAccounts(rows) {
+  return rows
+    .filter((row) => adminWithinRange(row.date))
+    .filter((row) => !adminStatsExcludeAdmin || !adminEmails.includes(textOf(row.account).toLowerCase()));
+}
+
+function adminFilterStayDays(rows) {
+  return rows.filter((row) => adminWithinRange(row.date));
+}
+
+function adminFilterStayPages(rows) {
+  if (!adminStatsRangeDays) return rows;
+  return rows;
+}
+
+function adminContentActivityStats(posts, comments, builds) {
+  const dayMap = new Map();
+  const touch = (date) => {
+    const key = textOf(date).slice(0, 10);
+    if (!key || !adminWithinRange(key)) return null;
+    const bucket = dayMap.get(key) || { date: key, posts: 0, comments: 0, builds: 0 };
+    dayMap.set(key, bucket);
+    return bucket;
+  };
+  posts.forEach((post) => {
+    const bucket = touch(post.createdAt || post.updatedAt);
+    if (bucket) bucket.posts += 1;
+  });
+  comments.forEach((comment) => {
+    const bucket = touch(comment.createdAt);
+    if (bucket) bucket.comments += 1;
+  });
+  builds.forEach((build) => {
+    const bucket = touch(build.createdAt || build.created_at);
+    if (bucket) bucket.builds += 1;
+  });
+  return [...dayMap.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function adminActivityChartMarkup(rows) {
+  if (!rows.length) return `<div class="empty compact-empty">선택한 기간에 콘텐츠 활동 기록이 없습니다.</div>`;
+  const max = Math.max(...rows.map((row) => row.posts + row.comments + row.builds), 1);
+  return `
+    <div class="admin-activity-chart" aria-label="콘텐츠 활동 그래프">
+      ${rows.map((row) => {
+        const total = row.posts + row.comments + row.builds;
+        const height = Math.max(10, Math.round((total / max) * 100));
+        return `
+          <div class="admin-chart-bar admin-activity-bar" title="${escapeHtml(row.date)} 게시글 ${row.posts}, 댓글 ${row.comments}, 빌드 ${row.builds}">
+            <span style="height:${height}%"></span>
+            <b>${total}</b>
+            <small>${escapeHtml(row.date.slice(5).replace("-", "/"))}</small>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function adminPopularContentMarkup(posts, builds) {
+  const topPosts = posts
+    .filter((post) => adminWithinRange(post.updatedAt || post.createdAt))
+    .sort((a, b) => (b.likes + b.views + b.commentCount) - (a.likes + a.views + a.commentCount))
+    .slice(0, 5);
+  const topBuilds = builds
+    .filter((build) => adminWithinRange(build.createdAt || build.created_at))
+    .sort((a, b) => b.likes - a.likes)
+    .slice(0, 5);
+  return `
+    <div class="admin-popular-grid">
+      <section>
+        <h3>인기 게시글 TOP 5</h3>
+        ${topPosts.length ? topPosts.map((post) => `
+          <a href="./guides.html?post=${encodeURIComponent(post.id)}">
+            <b>${escapeHtml(post.title)}</b>
+            <span>조회 ${post.views} · 좋아요 ${post.likes} · 댓글 ${post.commentCount}</span>
+          </a>
+        `).join("") : `<p>선택한 기간에 게시글 기록이 없습니다.</p>`}
+      </section>
+      <section>
+        <h3>인기 빌드 TOP 5</h3>
+        ${topBuilds.length ? topBuilds.map((build) => `
+          <a href="${escapeHtml(shareUrlForBuild(build))}">
+            <b>${escapeHtml(build.title || "이름 없는 빌드")}</b>
+            <span>${escapeHtml(build.author || "익명")} · 좋아요 ${build.likes}</span>
+          </a>
+        `).join("") : `<p>선택한 기간에 빌드 기록이 없습니다.</p>`}
+      </section>
+    </div>
+  `;
+}
+
+function adminStatsControlsMarkup() {
+  const ranges = [
+    { label: "7일", value: 7 },
+    { label: "14일", value: 14 },
+    { label: "30일", value: 30 },
+    { label: "전체", value: 0 },
+  ];
+  return `
+    <div class="admin-stats-controls">
+      <div>
+        ${ranges.map((item) => `
+          <button type="button" class="${adminStatsRangeDays === item.value ? "is-active" : ""}" data-admin-stats-range="${item.value}">
+            ${item.label}
+          </button>
+        `).join("")}
+      </div>
+      <button type="button" class="${adminStatsExcludeAdmin ? "is-active" : ""}" data-admin-stats-exclude-admin>
+        관리자 제외
+      </button>
+    </div>
+  `;
+}
+
 function adminVisitorChartMarkup(rows) {
   if (!rows?.length) return `<div class="empty compact-empty">아직 표시할 일자별 방문 기록이 없습니다.</div>`;
   const max = Math.max(...rows.map((row) => row.count), 1);
@@ -4617,19 +4753,39 @@ function adminPageStayTableMarkup(rows) {
   `;
 }
 
+function handleAdminStatsControls(event) {
+  const rangeButton = event.target.closest("button[data-admin-stats-range]");
+  if (rangeButton) {
+    adminStatsRangeDays = Number(rangeButton.dataset.adminStatsRange || 14);
+    renderAdminSiteStats();
+    return;
+  }
+  const excludeButton = event.target.closest("button[data-admin-stats-exclude-admin]");
+  if (excludeButton) {
+    adminStatsExcludeAdmin = !adminStatsExcludeAdmin;
+    renderAdminSiteStats();
+  }
+}
+
 function renderAdminSiteStats() {
   if (!els.adminSiteStats) return;
+  const posts = adminGuidePosts();
+  const comments = adminGuideComments();
+  const builds = activeAdminBuilds();
   const total = adminCenterData.visitors.total ?? "확인 실패";
   const today = adminCenterData.visitors.today ?? "확인 실패";
-  const stayRows = adminCenterData.visitors.stayStats?.daily || [];
-  const accountRows = adminCenterData.visitors.stayStats?.accounts || [];
-  const pageRows = adminCenterData.visitors.stayStats?.pages || [];
+  const stayRows = adminFilterStayDays(adminCenterData.visitors.stayStats?.daily || []);
+  const accountRows = adminFilterStayAccounts(adminCenterData.visitors.stayStats?.accounts || []);
+  const pageRows = adminFilterStayPages(adminCenterData.visitors.stayStats?.pages || []);
+  const dailyCounts = (adminCenterData.visitors.dailyCounts || []).filter((row) => adminWithinRange(row.date));
+  const activityRows = adminContentActivityStats(posts, comments, builds);
   const todayStay = stayRows.find((row) => row.date === todayKey());
   const avgStaySeconds = todayStay?.records ? todayStay.seconds / todayStay.records : 0;
   const totalStaySeconds = stayRows.reduce((sum, row) => sum + row.seconds, 0);
   const activeAccountsToday = new Set(accountRows.filter((row) => row.date === todayKey()).map((row) => row.account)).size;
   const topPage = pageRows[0];
   els.adminSiteStats.innerHTML = `
+    ${adminStatsControlsMarkup()}
     <article class="admin-site-overview">
       <div class="admin-site-metric">
         <span>오늘 방문</span>
@@ -4659,18 +4815,27 @@ function renderAdminSiteStats() {
         <span>최장 체류 페이지</span>
         <strong>${topPage ? escapeHtml(topPage.label) : "-"}</strong>
       </div>
+      <div class="admin-site-metric">
+        <span>기간 내 활동</span>
+        <strong>${activityRows.reduce((sum, row) => sum + row.posts + row.comments + row.builds, 0)}건</strong>
+      </div>
       <small>마지막 갱신 ${escapeHtml(dateLabel(adminCenterData.loadedAt))}</small>
     </article>
     <div class="admin-analytics-grid">
       <section>
         <h3>일자별 방문자 수</h3>
-        ${adminVisitorChartMarkup(adminCenterData.visitors.dailyCounts)}
+        ${adminVisitorChartMarkup(dailyCounts)}
       </section>
       <section>
         <h3>일자별 로그인 체류 시간</h3>
         ${adminStayChartMarkup(stayRows)}
       </section>
+      <section>
+        <h3>콘텐츠 활동량</h3>
+        ${adminActivityChartMarkup(activityRows)}
+      </section>
     </div>
+    ${adminPopularContentMarkup(posts, builds)}
     <div class="admin-stay-list admin-account-stay">
       <strong>계정별 일자별 체류 시간</strong>
       ${adminAccountStayTableMarkup(accountRows)}
