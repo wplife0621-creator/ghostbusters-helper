@@ -91,19 +91,18 @@
       <div id="adminUserList" class="admin-management-list"></div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section admin-ops-grid">
-      <div>
-        <div id="admin-stats" class="review-head">
-          <strong>사이트 통계</strong>
-        </div>
-        <div id="adminSiteStats" class="admin-management-list"></div>
+    <section id="admin-stats" class="panel report-panel page-panel admin-review-section admin-site-stats-section">
+      <div class="review-head">
+        <strong>사이트 통계</strong>
       </div>
-      <div>
-        <div id="admin-quality" class="review-head">
-          <strong>품질 점검</strong>
-        </div>
-        <div id="adminQualityList" class="admin-management-list"></div>
+      <div id="adminSiteStats" class="admin-management-list"></div>
+    </section>
+
+    <section id="admin-quality" class="panel report-panel page-panel admin-review-section admin-quality-section">
+      <div class="review-head">
+        <strong>품질 점검</strong>
       </div>
+      <div id="adminQualityList" class="admin-management-list"></div>
     </section>
 
     <section id="admin-backup" class="panel report-panel page-panel admin-review-section">
@@ -131,7 +130,7 @@
   </script>
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js?v=20260602-encoding-fix"></script>
-  <script src="./app.js?v=20260602-encoding-fix"></script>
+  <script src="./auth.js?v=20260602-admin-stats-v2"></script>
+  <script src="./app.js?v=20260602-admin-stats-v2"></script>
 </body>
 </html>

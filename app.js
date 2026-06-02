@@ -4450,6 +4450,7 @@ function adminDailyVisitorCounts(rows) {
 
 function adminSessionStayStats(rows) {
   const dailyMap = new Map();
+  const accountMap = new Map();
   rows.filter((row) => textOf(row.title) === sessionTimeMarker).forEach((row) => {
     const parsed = parseBuildMarkerNote(row.note);
     const date = textOf(parsed.date) || textOf(row.created_at || row.createdAt).slice(0, 10);
@@ -4459,10 +4460,20 @@ function adminSessionStayStats(rows) {
     bucket.seconds += Math.min(seconds, 600);
     bucket.records += 1;
     dailyMap.set(date, bucket);
+    const account = textOf(parsed.email) || textOf(parsed.nickname) || textOf(row.author) || "계정 미확인";
+    const nickname = textOf(parsed.nickname) || textOf(row.author) || account;
+    const key = `${account}__${date}`;
+    const accountBucket = accountMap.get(key) || { account, nickname, date, seconds: 0, records: 0 };
+    accountBucket.seconds += Math.min(seconds, 600);
+    accountBucket.records += 1;
+    accountMap.set(key, accountBucket);
   });
-  return [...dailyMap.values()]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-14);
+  return {
+    daily: [...dailyMap.values()].sort((a, b) => a.date.localeCompare(b.date)).slice(-14),
+    accounts: [...accountMap.values()]
+      .sort((a, b) => b.date.localeCompare(a.date) || b.seconds - a.seconds)
+      .slice(0, 80),
+  };
 }
 
 function adminFormatMinutes(seconds) {
@@ -4490,13 +4501,62 @@ function adminVisitorChartMarkup(rows) {
   `;
 }
 
+function adminStayChartMarkup(rows) {
+  if (!rows?.length) return `<div class="empty compact-empty">아직 표시할 일자별 체류 기록이 없습니다.</div>`;
+  const max = Math.max(...rows.map((row) => row.seconds), 1);
+  return `
+    <div class="admin-stay-chart" aria-label="일자별 로그인 사용자 체류 시간 그래프">
+      ${rows.map((row) => {
+        const height = Math.max(10, Math.round((row.seconds / max) * 100));
+        return `
+          <div class="admin-chart-bar admin-stay-bar" title="${escapeHtml(row.date)} ${escapeHtml(adminFormatMinutes(row.seconds))}">
+            <span style="height:${height}%"></span>
+            <b>${escapeHtml(adminFormatMinutes(row.seconds))}</b>
+            <small>${escapeHtml(row.date.slice(5).replace("-", "/"))}</small>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function adminAccountStayTableMarkup(rows) {
+  if (!rows?.length) {
+    return `<div class="empty compact-empty">계정별 체류 기록이 아직 없습니다. 로그인 사용자가 사이트에 머문 뒤부터 집계됩니다.</div>`;
+  }
+  return `
+    <div class="admin-account-stay-table">
+      <div class="admin-account-stay-head">
+        <span>계정</span>
+        <span>날짜</span>
+        <span>체류 시간</span>
+        <span>기록</span>
+      </div>
+      ${rows.map((row) => `
+        <div class="admin-account-stay-row">
+          <span>
+            <b>${escapeHtml(row.nickname)}</b>
+            <small>${escapeHtml(row.account)}</small>
+          </span>
+          <span>${escapeHtml(row.date)}</span>
+          <strong>${escapeHtml(adminFormatMinutes(row.seconds))}</strong>
+          <span>${row.records}회</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderAdminSiteStats() {
   if (!els.adminSiteStats) return;
   const total = adminCenterData.visitors.total ?? "확인 실패";
   const today = adminCenterData.visitors.today ?? "확인 실패";
-  const stayRows = adminCenterData.visitors.stayStats || [];
+  const stayRows = adminCenterData.visitors.stayStats?.daily || [];
+  const accountRows = adminCenterData.visitors.stayStats?.accounts || [];
   const todayStay = stayRows.find((row) => row.date === todayKey());
   const avgStaySeconds = todayStay?.records ? todayStay.seconds / todayStay.records : 0;
+  const totalStaySeconds = stayRows.reduce((sum, row) => sum + row.seconds, 0);
+  const activeAccountsToday = new Set(accountRows.filter((row) => row.date === todayKey()).map((row) => row.account)).size;
   els.adminSiteStats.innerHTML = `
     <article class="admin-site-overview">
       <div class="admin-site-metric">
@@ -4511,14 +4571,33 @@ function renderAdminSiteStats() {
         <span>오늘 평균 체류</span>
         <strong>${avgStaySeconds ? escapeHtml(adminFormatMinutes(avgStaySeconds)) : "-"}</strong>
       </div>
+      <div class="admin-site-metric">
+        <span>최근 로그인 체류 합계</span>
+        <strong>${totalStaySeconds ? escapeHtml(adminFormatMinutes(totalStaySeconds)) : "-"}</strong>
+      </div>
+      <div class="admin-site-metric">
+        <span>오늘 활동 계정</span>
+        <strong>${activeAccountsToday || "-"}명</strong>
+      </div>
+      <div class="admin-site-metric">
+        <span>계정별 집계</span>
+        <strong>${accountRows.length}건</strong>
+      </div>
       <small>마지막 갱신 ${escapeHtml(dateLabel(adminCenterData.loadedAt))}</small>
     </article>
-    ${adminVisitorChartMarkup(adminCenterData.visitors.dailyCounts)}
-    <div class="admin-stay-list">
-      <strong>로그인 사용자 일자별 체류 시간</strong>
-      ${stayRows.length ? stayRows.map((row) => `
-        <span>${escapeHtml(row.date)} · 총 ${escapeHtml(adminFormatMinutes(row.seconds))} · 기록 ${row.records}회</span>
-      `).join("") : `<span>로그인 사용자 체류 기록이 아직 없습니다.</span>`}
+    <div class="admin-analytics-grid">
+      <section>
+        <h3>일자별 방문자 수</h3>
+        ${adminVisitorChartMarkup(adminCenterData.visitors.dailyCounts)}
+      </section>
+      <section>
+        <h3>일자별 로그인 체류 시간</h3>
+        ${adminStayChartMarkup(stayRows)}
+      </section>
+    </div>
+    <div class="admin-stay-list admin-account-stay">
+      <strong>계정별 일자별 체류 시간</strong>
+      ${adminAccountStayTableMarkup(accountRows)}
     </div>
   `;
 }
