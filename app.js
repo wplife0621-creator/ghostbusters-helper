@@ -61,6 +61,7 @@ const visitorBuildMarkers = {
 const sessionTimeMarker = "__session_time__";
 const buildLikeMarker = "__build_like__";
 const buildDeleteMarker = "__build_deleted__";
+const buildRestoreMarker = "__build_restored__";
 const buildReviewMarker = "__build_review__";
 const buildReportMarker = "__build_report__";
 const guideCommentPrefix = "__guide_comment__:";
@@ -234,10 +235,13 @@ const els = {
   adminGuideList: document.querySelector("#adminGuideList"),
   adminBuildCount: document.querySelector("#adminBuildCount"),
   adminBuildList: document.querySelector("#adminBuildList"),
+  adminDeletedBuildCount: document.querySelector("#adminDeletedBuildCount"),
+  adminDeletedBuildList: document.querySelector("#adminDeletedBuildList"),
   adminUserCount: document.querySelector("#adminUserCount"),
   adminUserList: document.querySelector("#adminUserList"),
   adminSiteStats: document.querySelector("#adminSiteStats"),
   adminQualityList: document.querySelector("#adminQualityList"),
+  adminDataHealthList: document.querySelector("#adminDataHealthList"),
   adminRefreshCenter: document.querySelector("#adminRefreshCenter"),
   adminExportReports: document.querySelector("#adminExportReports"),
   adminExportGuides: document.querySelector("#adminExportGuides"),
@@ -1656,6 +1660,10 @@ function isBuildDelete(build) {
   return build?.title === buildDeleteMarker;
 }
 
+function isBuildRestore(build) {
+  return build?.title === buildRestoreMarker;
+}
+
 function isBuildReview(build) {
   return build?.title === buildReviewMarker;
 }
@@ -1698,8 +1706,8 @@ function collectPublicBuildRows(rows) {
     });
     buildReviews.set(buildId, list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)));
   });
-  const deletedIds = new Set(normalizedRows.filter(isBuildDelete).map((build) => textOf(build.note)).filter(Boolean));
-  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build) && !isBuildDelete(build)
+  const deletedIds = deletedBuildIdSet(normalizedRows);
+  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build) && !isBuildDelete(build) && !isBuildRestore(build)
     && !isBuildReview(build) && !isBuildReport(build) && !deletedIds.has(build.id));
 }
 
@@ -2503,14 +2511,78 @@ function adminGuideComments() {
 
 function activeAdminBuilds() {
   const rows = adminCenterData.builds.map(normalizeRemoteBuild);
-  const deleted = new Set(rows.filter(isBuildDelete).map((row) => textOf(row.note)).filter(Boolean));
+  const deleted = deletedBuildIdSet(rows);
   const likes = new Map();
   rows.filter(isBuildLike).forEach((row) => likes.set(textOf(row.note), (likes.get(textOf(row.note)) || 0) + 1));
   return rows
-    .filter((row) => !isVisitorBuild(row) && !isBuildLike(row) && !isBuildDelete(row)
+    .filter((row) => !isVisitorBuild(row) && !isBuildLike(row) && !isBuildDelete(row) && !isBuildRestore(row)
       && !isBuildReview(row) && !isBuildReport(row) && !deleted.has(row.id))
     .map((row) => ({ ...row, likes: likes.get(row.id) || 0 }))
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+}
+
+function buildVisibilityActions(rows) {
+  const actions = new Map();
+  rows
+    .filter((row) => isBuildDelete(row) || isBuildRestore(row))
+    .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
+    .forEach((row) => {
+      const buildId = textOf(row.note);
+      if (!buildId) return;
+      actions.set(buildId, {
+        buildId,
+        markerId: row.id,
+        type: isBuildDelete(row) ? "delete" : "restore",
+        createdAt: row.createdAt,
+      });
+    });
+  return actions;
+}
+
+function deletedBuildIdSet(rows) {
+  return new Set([...buildVisibilityActions(rows).values()]
+    .filter((action) => action.type === "delete")
+    .map((action) => action.buildId));
+}
+
+function deletedAdminBuilds() {
+  const rows = adminCenterData.builds.map(normalizeRemoteBuild);
+  const buildsById = new Map(rows.map((row) => [row.id, row]));
+  return [...buildVisibilityActions(rows).values()]
+    .filter((action) => action.type === "delete")
+    .map((action) => {
+      const build = buildsById.get(action.buildId);
+      if (!build || isVisitorBuild(build) || isBuildLike(build) || isBuildDelete(build)
+        || isBuildReview(build) || isBuildReport(build)) return null;
+      return {
+        ...build,
+        deletedAt: action.createdAt,
+        deleteMarkerId: action.markerId,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.deletedAt || 0) - new Date(a.deletedAt || 0));
+}
+
+function adminBuildHealth() {
+  const rows = adminCenterData.builds.map(normalizeRemoteBuild);
+  const active = activeAdminBuilds();
+  const deleted = deletedAdminBuilds();
+  const counters = {
+    totalRows: rows.length,
+    active: active.length,
+    deleted: deleted.length,
+    restores: rows.filter(isBuildRestore).length,
+    likes: rows.filter(isBuildLike).length,
+    reviews: rows.filter(isBuildReview).length,
+    reports: rows.filter(isBuildReport).length,
+    sessionLogs: rows.filter((row) => row.title === sessionTimeMarker).length,
+    dailyLogs: rows.filter((row) => row.title === visitorBuildMarkers.daily).length,
+    totalLogs: rows.filter((row) => row.title === visitorBuildMarkers.total).length,
+  };
+  counters.operationRows = counters.likes + counters.reviews + counters.reports + counters.deleted + counters.restores;
+  counters.visitorRows = counters.sessionLogs + counters.dailyLogs + counters.totalLogs;
+  return counters;
 }
 
 function dateLabel(value) {
@@ -2548,7 +2620,7 @@ async function loadAdminCenter() {
   els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
   const [guideResult, buildResult, userResult, visitorResult, dailyResult] = await Promise.allSettled([
     fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc"),
+    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(3000)),
     fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc"),
     fetchAdminRows(visitorBackend, visitorBackend.visitorTable, "?select=visitor_id"),
     fetchAdminRows(visitorBackend, visitorBackend.dailyTable, "?select=visitor_id,visit_date&order=visit_date.desc"),
@@ -2585,9 +2657,11 @@ function renderAdminCenter() {
     els.adminStatsGrid.innerHTML = message;
     if (els.adminGuideList) els.adminGuideList.innerHTML = message;
     if (els.adminBuildList) els.adminBuildList.innerHTML = message;
+    if (els.adminDeletedBuildList) els.adminDeletedBuildList.innerHTML = message;
     if (els.adminUserList) els.adminUserList.innerHTML = message;
     if (els.adminSiteStats) els.adminSiteStats.innerHTML = message;
     if (els.adminQualityList) els.adminQualityList.innerHTML = message;
+    if (els.adminDataHealthList) els.adminDataHealthList.innerHTML = message;
     return;
   }
   const posts = adminGuidePosts();
@@ -2612,9 +2686,11 @@ function renderAdminCenter() {
   `).join("");
   renderAdminGuides(posts, comments);
   renderAdminBuilds(builds);
+  renderAdminDeletedBuilds();
   renderAdminUsers();
   renderAdminSiteStats();
   renderAdminQuality(posts, builds);
+  renderAdminDataHealth();
 }
 
 function renderAdminGuides(posts, comments) {
@@ -2672,6 +2748,67 @@ function renderAdminBuilds(builds) {
       </article>
     `).join("")}${builds.length > 4 ? `<a class="admin-more-link" href="./builds.html">빌드 페이지에서 전체 보기</a>` : ""}`
     : `<div class="empty compact-empty">${adminCenterData.errors?.builds ? "빌드 저장소를 불러오지 못했습니다." : "등록된 공개 빌드가 없습니다."}</div>`;
+}
+
+function renderAdminDeletedBuilds() {
+  if (!els.adminDeletedBuildList || !els.adminDeletedBuildCount) return;
+  const deleted = deletedAdminBuilds();
+  els.adminDeletedBuildCount.textContent = `삭제된 빌드 ${deleted.length}건`;
+  els.adminDeletedBuildList.innerHTML = deleted.length
+    ? `${deleted.slice(0, 6).map((build) => `
+      <article class="admin-management-card" data-admin-build-id="${escapeHtml(build.id)}" data-admin-delete-marker-id="${escapeHtml(build.deleteMarkerId)}">
+        <div>
+          <strong>${escapeHtml(build.title || "이름 없는 빌드")}</strong>
+          <span>${escapeHtml(build.author || "익명")} · 캐릭터 ${build.members.length}명</span>
+          <small>삭제 처리 ${escapeHtml(dateLabel(build.deletedAt))} · 원본 등록 ${escapeHtml(dateLabel(build.createdAt))}</small>
+        </div>
+        <div class="pending-actions">
+          <a href="${escapeHtml(shareUrlForBuild(build))}">미리보기</a>
+          <button type="button" data-admin-build-action="restore">복구</button>
+        </div>
+      </article>
+    `).join("")}${deleted.length > 6 ? `<span class="admin-more-link is-static">나머지 ${deleted.length - 6}건은 빌드 백업에서 확인</span>` : ""}`
+    : `<div class="empty compact-empty">복구 가능한 삭제 빌드가 없습니다.</div>`;
+}
+
+function renderAdminDataHealth() {
+  if (!els.adminDataHealthList) return;
+  const health = adminBuildHealth();
+  const items = [
+    {
+      label: "빌드 저장소",
+      value: `전체 ${health.totalRows}행 · 공개 ${health.active}건 · 삭제 ${health.deleted}건`,
+      hint: "공개 빌드는 통계/좋아요/삭제 마커를 제외해 표시합니다.",
+      warn: false,
+    },
+    {
+      label: "운영 마커",
+      value: `좋아요 ${health.likes}건 · 복구 ${health.restores}건 · 후기 ${health.reviews}건 · 신고 ${health.reports}건`,
+      hint: "빌드 본문과 분리해서 집계되는 운영 기록입니다. 삭제/복구도 마커로 안전하게 처리합니다.",
+      warn: false,
+    },
+    {
+      label: "통계 로그",
+      value: `체류 ${health.sessionLogs}건 · 일별 ${health.dailyLogs}건 · 누적 ${health.totalLogs}건`,
+      hint: "현재 빌드 화면에서는 통계 로그를 서버 단계에서 제외합니다. 추후 별도 테이블 분리를 권장합니다.",
+      warn: health.visitorRows > 500,
+    },
+    {
+      label: "백업 상태",
+      value: health.totalRows ? "내보내기 가능" : "확인 필요",
+      hint: "전체 백업은 공개 빌드, 삭제 빌드, 원본 rows, 방문 통계를 함께 저장합니다.",
+      warn: !health.totalRows,
+    },
+  ];
+  els.adminDataHealthList.innerHTML = items.map((item) => `
+    <article class="admin-management-card ${item.warn ? "is-warning" : "is-ok"}">
+      <div>
+        <strong>${escapeHtml(item.label)}</strong>
+        <span>${escapeHtml(item.value)}</span>
+        <small>${escapeHtml(item.hint)}</small>
+      </div>
+    </article>
+  `).join("");
 }
 
 function renderAdminUsers() {
@@ -2757,9 +2894,25 @@ async function deleteAdminGuideRows(id, kind) {
 async function handleAdminBuildAction(event) {
   const button = event.target.closest("button[data-admin-build-action]");
   if (!button || !adminUnlocked || !isAdminUser()) return;
-  const id = button.closest("[data-admin-build-id]")?.dataset.adminBuildId;
-  const build = activeAdminBuilds().find((item) => item.id === id);
+  const card = button.closest("[data-admin-build-id]");
+  const id = card?.dataset.adminBuildId;
+  const action = button.dataset.adminBuildAction;
+  const build = action === "restore"
+    ? deletedAdminBuilds().find((item) => item.id === id)
+    : activeAdminBuilds().find((item) => item.id === id);
   if (!build) return;
+  if (action === "restore") {
+    if (!confirm(`${build.title || "이 빌드"}를 공개 목록으로 복구할까요?`)) return;
+    button.disabled = true;
+    try {
+      await adminRestoreBuild(build);
+      await loadAdminCenter();
+    } catch {
+      alert("빌드 복구에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      button.disabled = false;
+    }
+    return;
+  }
   if (!confirm(`${build.title || "이 빌드"}를 공개 목록에서 삭제할까요?`)) return;
   button.disabled = true;
   try {
@@ -2783,6 +2936,23 @@ async function adminDeleteBuild(build) {
   });
 }
 
+async function adminRestoreBuild(build) {
+  if (!hasPublicBuildStore()) throw new Error("build restore unavailable");
+  const response = await fetch(buildStoreUrl(), {
+    method: "POST",
+    headers: buildStoreHeaders({ Prefer: "return=minimal" }),
+    body: JSON.stringify({
+      id: `restored-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
+      title: buildRestoreMarker,
+      author: "admin",
+      members: [],
+      note: build.id,
+      created_at: new Date().toISOString(),
+    }),
+  });
+  if (!response.ok) throw new Error("build restore failed");
+}
+
 function adminExportPayload(type) {
   const payload = {
     exportedAt: new Date().toISOString(),
@@ -2792,7 +2962,14 @@ function adminExportPayload(type) {
     payload.reports = { pending: pendingReports, approved: approvedReportItems };
   }
   if (type === "guides" || type === "all") payload.guides = adminCenterData.guides;
-  if (type === "builds" || type === "all") payload.builds = activeAdminBuilds();
+  if (type === "builds" || type === "all") {
+    payload.builds = {
+      active: activeAdminBuilds(),
+      deleted: deletedAdminBuilds(),
+      health: adminBuildHealth(),
+      raw: adminCenterData.builds,
+    };
+  }
   if (type === "all") {
     payload.users = adminCenterData.users;
     payload.visitors = adminCenterData.visitors;
@@ -4257,23 +4434,29 @@ function renderAdminCenter() {
     els.adminStatsGrid.innerHTML = message;
     if (els.adminGuideList) els.adminGuideList.innerHTML = message;
     if (els.adminBuildList) els.adminBuildList.innerHTML = message;
+    if (els.adminDeletedBuildList) els.adminDeletedBuildList.innerHTML = message;
     if (els.adminUserList) els.adminUserList.innerHTML = message;
     if (els.adminSiteStats) els.adminSiteStats.innerHTML = message;
     if (els.adminQualityList) els.adminQualityList.innerHTML = message;
+    if (els.adminDataHealthList) els.adminDataHealthList.innerHTML = message;
     return;
   }
 
   const posts = adminGuidePosts();
   const comments = adminGuideComments();
   const builds = activeAdminBuilds();
+  const deletedBuilds = deletedAdminBuilds();
+  const health = adminBuildHealth();
   const warningCount = qualityWarningCount(posts, builds);
   const stats = [
     { label: "검수 대기", value: `${pendingReports.length}건`, hint: "정수/넘버스 제보", href: "#admin-pending", tone: pendingReports.length ? "warn" : "ok" },
     { label: "등록 정보", value: `${approvedReportItems.length}건`, hint: "승인된 도감 정보", href: "#admin-approved", tone: "normal" },
     { label: "게시글", value: `${posts.length}건`, hint: `댓글 ${comments.length}건`, href: "#admin-guides", tone: "normal" },
     { label: "공개 빌드", value: `${builds.length}건`, hint: "유저 공유 빌드", href: "#admin-builds", tone: "normal" },
+    { label: "삭제 빌드", value: `${deletedBuilds.length}건`, hint: "복구 가능 항목", href: "#admin-deleted-builds", tone: deletedBuilds.length ? "warn" : "ok" },
     { label: "회원", value: `${adminCenterData.users.length}명`, hint: "닉네임 등록", href: "#admin-users", tone: "normal" },
     { label: "오늘 방문", value: `${adminCenterData.visitors.today ?? "-"}명`, hint: `누적 ${adminCenterData.visitors.total ?? "-"}명`, href: "#admin-stats", tone: "normal" },
+    { label: "통계 로그", value: `${health.visitorRows}건`, hint: "빌드 목록에서 자동 제외", href: "#admin-data-health", tone: health.visitorRows > 500 ? "warn" : "normal" },
     { label: "운영 점검", value: warningCount ? `${warningCount}건` : "양호", hint: "품질 체크", href: "#admin-quality", tone: warningCount ? "warn" : "ok" },
     { label: "백업", value: "내보내기", hint: "운영 데이터 저장", href: "#admin-backup", tone: "normal" },
   ];
@@ -4287,9 +4470,11 @@ function renderAdminCenter() {
 
   renderAdminGuides(posts, comments);
   renderAdminBuilds(builds);
+  renderAdminDeletedBuilds();
   renderAdminUsers();
   renderAdminSiteStats();
   renderAdminQuality(posts, builds);
+  renderAdminDataHealth();
 }
 
 function renderAdminGuides(posts, comments) {
@@ -4399,14 +4584,18 @@ async function loadAdminCenter() {
     return;
   }
   els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
-  const [guideResult, buildResult, userResult, visitorResult, dailyResult] = await Promise.allSettled([
+  const [guideResult, buildResult, buildLogResult, userResult, visitorResult, dailyResult] = await Promise.allSettled([
     fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc"),
+    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(3000)),
+    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc&limit=1200"),
     fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc"),
     fetchAdminRows(visitorBackend, visitorBackend.visitorTable, "?select=visitor_id"),
     fetchAdminRows(visitorBackend, visitorBackend.dailyTable, "?select=visitor_id,visit_date&order=visit_date.desc"),
   ]);
-  const buildRows = buildResult.status === "fulfilled" ? buildResult.value : [];
+  const buildRows = mergeAdminBuildRows(
+    buildResult.status === "fulfilled" ? buildResult.value : [],
+    buildLogResult.status === "fulfilled" ? buildLogResult.value : [],
+  );
   const buildVisitorStats = adminBuildVisitorStats(buildRows);
   const dailyRows = dailyResult.status === "fulfilled" ? dailyResult.value : [];
   const tableDaily = adminDailyVisitorCounts(dailyRows);
@@ -4426,7 +4615,7 @@ async function loadAdminCenter() {
       guides: guideResult.status !== "fulfilled",
       builds: buildResult.status !== "fulfilled",
       users: userResult.status !== "fulfilled",
-      visitors: buildResult.status !== "fulfilled" && (visitorResult.status !== "fulfilled" || dailyResult.status !== "fulfilled"),
+      visitors: buildLogResult.status !== "fulfilled" && (visitorResult.status !== "fulfilled" || dailyResult.status !== "fulfilled"),
     },
     loadedAt: new Date().toISOString(),
   };
@@ -4450,6 +4639,15 @@ function adminBuildVisitorStats(rows) {
     today: dailyMap.get(todayKey()) || 0,
     dailyCounts,
   };
+}
+
+function mergeAdminBuildRows(primaryRows, logRows) {
+  const map = new Map();
+  [...primaryRows, ...logRows].forEach((row) => {
+    if (!row?.id || map.has(row.id)) return;
+    map.set(row.id, row);
+  });
+  return [...map.values()];
 }
 
 function adminDailyVisitorCounts(rows) {
