@@ -505,15 +505,21 @@ function combineNumberRows(current, incoming) {
   return {
     ...current,
     ...incoming,
+    "_baseNumber": Boolean(current?._baseNumber),
     "획득처": mergeNumberSources(current?.["획득처"], incoming?.["획득처"]),
   };
 }
 
-function dedupeNumberRows(rows) {
+function dedupeNumberRows(rows, options = {}) {
   const merged = [];
   const indexByKey = new Map();
   rows.forEach((row) => {
-    const cleanRow = { ...row, "번호": normalizeNumberCode(row["번호"]) || "미확인", "획득처": cleanNumberSources(row["획득처"]) };
+    const cleanRow = {
+      ...row,
+      "_baseNumber": Boolean(options.base),
+      "번호": normalizeNumberCode(row["번호"]) || "미확인",
+      "획득처": cleanNumberSources(row["획득처"]),
+    };
     const key = numberIdentity(cleanRow);
     if (key === "name:") {
       merged.push(cleanRow);
@@ -547,13 +553,14 @@ function isNumbersDeleteReport(report) {
 }
 
 function mergeNumbersRows(baseRows, reports) {
-  const merged = dedupeNumberRows(baseRows);
+  const merged = dedupeNumberRows(baseRows, { base: true });
   [...reports].filter((report) => report.status === "approved" && isNumbersReport(report)).reverse().forEach((report) => {
     const reportName = visibleReportName(report);
     const reportNumber = normalizeNumberCode(report.floor);
     if (isNumbersDeleteReport(report)) {
       for (let index = merged.length - 1; index >= 0; index -= 1) {
         const item = merged[index];
+        if (item._baseNumber) continue;
         if (textOf(item["이름"]) === reportName || (reportNumber && normalizeNumberCode(item["번호"]) === reportNumber)) {
           merged.splice(index, 1);
         }
