@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>내 보관함 · 덕후버스터즈</title>
+  <meta name="description" content="덕후버스터즈에서 저장한 즐겨찾기, 정수와 넘버스 비교함, 내 게시글 댓글 알림을 모아 봅니다.">
+  <link rel="canonical" href="https://busters.kr/library.html">
+  <link rel="stylesheet" href="./styles.css?v=20260603-community">
+  <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>내 보관함</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <details class="nav-dropdown">
+          <summary>도감</summary>
+          <div class="nav-submenu">
+            <a href="./essences.html">정수</a>
+            <a href="./numbers.html">넘버스</a>
+          </div>
+        </details>
+        <a href="./builds.html">빌드</a>
+        <a href="./guides.html">게시판</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout community-layout">
+    <section class="panel community-hero">
+      <p class="home-kicker">MY LIBRARY</p>
+      <h2>필요한 정보만 따로 모아보기</h2>
+      <p>통합 검색에서 저장한 항목과 비교함에 담은 정수/넘버스/빌드를 한곳에서 다시 볼 수 있습니다. 로그인한 닉네임 기준으로 내 글 댓글 알림도 확인합니다.</p>
+      <div class="community-quick-links">
+        <a href="./search.html">통합 검색 열기</a>
+        <a href="./essences.html">정수 비교하러 가기</a>
+        <a href="./builds.html">빌드 보기</a>
+      </div>
+    </section>
+
+    <section class="community-library-grid">
+      <article class="panel community-section">
+        <div class="section-title compact-title">
+          <h2>즐겨찾기</h2>
+          <p>자주 보는 정보 바로가기입니다.</p>
+        </div>
+        <div class="community-result-grid compact" data-library-favorites></div>
+      </article>
+      <article class="panel community-section">
+        <div class="section-title compact-title">
+          <h2>비교함</h2>
+          <p>정수와 넘버스를 비교할 때 임시로 담아두는 공간입니다.</p>
+        </div>
+        <div class="community-result-grid compact" data-library-compare></div>
+      </article>
+      <article class="panel community-section community-wide-section">
+        <div class="section-title compact-title">
+          <h2>내 알림</h2>
+          <p>내 게시글에 달린 댓글과 반응을 빠르게 확인합니다.</p>
+        </div>
+        <div class="community-result-grid compact" data-library-alerts></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {};
+  </script>
+  <script src="./config.js?v=20260601-nickname-check"></script>
+  <script src="./ghost-data.js?v=20260602-adsense-ready"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./auth.js?v=20260602-encoding-fix"></script>
+  <script src="./community.js?v=20260603-community"></script>
+</body>
+</html>

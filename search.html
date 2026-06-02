@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>통합 검색 · 덕후버스터즈</title>
+  <meta name="description" content="덕후버스터즈의 정수, 넘버스, 빌드, 게시판 글을 한 번에 검색하고 즐겨찾기와 비교함에 담아 확인합니다.">
+  <link rel="canonical" href="https://busters.kr/search.html">
+  <meta property="og:title" content="통합 검색 · 덕후버스터즈">
+  <meta property="og:description" content="정수, 넘버스, 빌드, 게시판 글을 한 번에 찾고 내 보관함에 저장하세요.">
+  <link rel="stylesheet" href="./styles.css?v=20260603-community">
+  <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>통합 검색</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <details class="nav-dropdown">
+          <summary>도감</summary>
+          <div class="nav-submenu">
+            <a href="./essences.html">정수</a>
+            <a href="./numbers.html">넘버스</a>
+          </div>
+        </details>
+        <a href="./builds.html">빌드</a>
+        <a href="./guides.html">게시판</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout community-layout">
+    <section class="panel community-hero">
+      <p class="home-kicker">GLOBAL SEARCH</p>
+      <h2>정수, 넘버스, 빌드, 게시판을 한 번에 찾기</h2>
+      <p>효과, 몬스터명, 번호, 획득처, 빌드 태그, 게시글 제목을 한 검색창에서 확인할 수 있습니다. 필요한 항목은 즐겨찾기나 비교함에 담아두세요.</p>
+      <form class="community-search-form" data-global-search-form>
+        <input data-global-search-input type="search" placeholder="예: 감전, 항해, 백색신전, NO.5050, 보스 빌드">
+        <button type="submit">검색</button>
+      </form>
+      <div class="community-filter-row" aria-label="검색 분류">
+        <button type="button" class="is-active" data-search-tag="all">전체</button>
+        <button type="button" data-search-tag="essence">정수</button>
+        <button type="button" data-search-tag="number">넘버스</button>
+        <button type="button" data-search-tag="build">빌드</button>
+        <button type="button" data-search-tag="guide">게시판</button>
+        <button type="button" data-search-tag="항해">항해</button>
+        <button type="button" data-search-tag="보스">보스</button>
+        <button type="button" data-search-tag="파밍">파밍</button>
+      </div>
+      <p class="community-status" data-global-search-status>검색 데이터를 준비하고 있습니다.</p>
+    </section>
+
+    <section class="panel community-section">
+      <div class="section-title compact-title">
+        <h2>검색 결과</h2>
+        <p>클릭하면 해당 페이지로 이동하고, 버튼으로 내 보관함에 저장할 수 있습니다.</p>
+      </div>
+      <div class="community-result-grid" data-global-search-results></div>
+    </section>
+  </main>
+
+  <script>
+    window.DUKHUBUSTERS_CONFIG = window.DUKHUBUSTERS_CONFIG || {};
+  </script>
+  <script src="./config.js?v=20260601-nickname-check"></script>
+  <script src="./ghost-data.js?v=20260602-adsense-ready"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./auth.js?v=20260602-encoding-fix"></script>
+  <script src="./community.js?v=20260603-community"></script>
+</body>
+</html>
