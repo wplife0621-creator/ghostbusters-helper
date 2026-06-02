@@ -3,29 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>鍮뚮뱶 쨌 ?뺥썑踰꾩뒪?곗쫰</title>
-  <meta name="description" content="罹먮┃?곕퀎 ?뺤닔 議고빀??怨듦컻 鍮뚮뱶濡?怨듭쑀?섍퀬 醫뗭븘?? ?꾧린, 留곹겕 怨듭쑀 湲곕뒫?쇰줈 鍮꾧탳?⑸땲??">
-  <link rel="stylesheet" href="./styles.css?v=20260602-admin-analytics">
+  <title>빌드 · 덕후버스터즈</title>
+  <meta name="description" content="캐릭터별 정수 조합을 공개 빌드로 공유하고 좋아요, 후기, 링크 공유 기능으로 비교합니다.">
+  <link rel="stylesheet" href="./styles.css?v=20260602-adsense-ready">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
 <body>
   <header class="topbar compact">
     <div class="topbar-inner">
-      <h1>鍮뚮뱶</h1>
-      <nav class="site-nav" aria-label="二쇱슂 硫붾돱">
-        <a href="./index.html">??/a>
+      <h1>빌드</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
         <details class="nav-dropdown">
-          <summary>?꾧컧</summary>
+          <summary>도감</summary>
           <div class="nav-submenu">
-            <a href="./essences.html">?뺤닔</a>
-            <a href="./numbers.html">?섎쾭??/a>
+            <a href="./essences.html">정수</a>
+            <a href="./numbers.html">넘버스</a>
           </div>
         </details>
-        <a href="./builds.html" aria-current="page">鍮뚮뱶</a>
-        <a href="./guides.html">寃뚯떆??/a>
-        <a href="./report.html">?뺣낫 ?쒕낫/?섏젙</a>
-        <a href="./maze-time.html">誘멸턿 ?쒓컙 怨꾩궛湲?/a>
+        <a href="./builds.html" aria-current="page">빌드</a>
+        <a href="./guides.html">게시판</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
       </nav>
     </div>
   </header>
@@ -33,24 +33,24 @@
   <main class="layout build-layout">
     <section class="panel page-intro">
       <p class="home-kicker">BUILD LAB</p>
-      <h2>罹먮┃?곕퀎 ?뺤닔 鍮뚮뱶 怨듭쑀</h2>
-      <p>罹먮┃?곕쭏???μ갑???뺤닔, ?됱긽, ?≫떚釉?ON/OFF, ?⑹궛 ?ㅽ꺈???뺣━??怨듦컻 鍮뚮뱶濡?怨듭쑀?????덉뒿?덈떎. 醫뗭븘?? ?꾧린, 怨듭쑀 留곹겕, ??젣??鍮꾨?踰덊샇 湲곕뒫?쇰줈 而ㅻ??덊떚 鍮뚮뱶瑜?愿由ы빀?덈떎.</p>
+      <h2>캐릭터별 정수 빌드 공유</h2>
+      <p>캐릭터마다 장착한 정수, 색상, 액티브 ON/OFF, 합산 스탯을 정리해 공개 빌드로 공유할 수 있습니다. 좋아요, 후기, 공유 링크, 삭제용 비밀번호 기능으로 커뮤니티 빌드를 관리합니다.</p>
     </section>
     <section class="panel build-panel page-panel">
       <div class="build-board-actions">
         <label class="field build-sort-control">
-          <span>?뺣젹</span>
+          <span>정렬</span>
           <select id="buildSort">
-            <option value="latest">理쒖떊?깅줉</option>
-            <option value="likes">醫뗭븘??/option>
+            <option value="latest">최신등록</option>
+            <option value="likes">좋아요</option>
           </select>
         </label>
-        <button id="openBuildForm" class="submit-report" type="button">鍮뚮뱶 留뚮뱾湲?/button>
+        <button id="openBuildForm" class="submit-report" type="button">빌드 만들기</button>
       </div>
       <div class="build-board-head">
         <div>
-          <h2>怨듦컻 鍮뚮뱶</h2>
-          <strong id="buildCount">怨듦컻 鍮뚮뱶 0媛?/strong>
+          <h2>공개 빌드</h2>
+          <strong id="buildCount">공개 빌드 0개</strong>
         </div>
       </div>
       <p id="buildSyncStatus" class="build-sync-status"></p>
@@ -63,43 +63,43 @@
     <section class="build-form-dialog" role="dialog" aria-modal="true" aria-labelledby="buildFormTitle">
       <div class="build-form-head">
         <div>
-          <h2 id="buildFormTitle">鍮뚮뱶 留뚮뱾湲?/h2>
-          <p>罹먮┃?곗? ?뺤닔瑜??좏깮??鍮뚮뱶瑜?怨듦컻?대낫?몄슂.</p>
+          <h2 id="buildFormTitle">빌드 만들기</h2>
+          <p>캐릭터와 정수를 선택해 빌드를 공개해보세요.</p>
         </div>
-        <button id="closeBuildForm" type="button" aria-label="?リ린">횞</button>
+        <button id="closeBuildForm" type="button" aria-label="닫기">×</button>
       </div>
       <form id="buildForm" class="build-form">
         <label class="field">
-          <span>鍮뚮뱶紐?/span>
-          <input id="buildTitle" required placeholder="?? 鍮꾩슂瑜?珥덈컲 ?깆빱 鍮뚮뱶">
+          <span>빌드명</span>
+          <input id="buildTitle" required placeholder="예: 비요른 초반 탱커 빌드">
         </label>
         <label class="field">
-          <span>?묒꽦??/span>
-          <input id="buildAuthor" readonly placeholder="濡쒓렇???됰꽕?꾩쑝濡??먮룞 ?낅젰">
+          <span>작성자</span>
+          <input id="buildAuthor" readonly placeholder="로그인 닉네임으로 자동 입력">
         </label>
         <label class="field">
-          <span>??젣??鍮꾨?踰덊샇</span>
-          <input id="buildPassword" type="password" required minlength="4" maxlength="40" autocomplete="new-password" placeholder="??젣?????ъ슜??4???댁긽 鍮꾨?踰덊샇">
+          <span>삭제용 비밀번호</span>
+          <input id="buildPassword" type="password" required minlength="4" maxlength="40" autocomplete="new-password" placeholder="삭제할 때 사용할 4자 이상 비밀번호">
         </label>
         <label class="field">
-          <span>罹먮┃????/span>
+          <span>캐릭터 수</span>
           <select id="buildCharacterCount">
-            <option value="1">1紐?/option>
-            <option value="2">2紐?/option>
-            <option value="3">3紐?/option>
-            <option value="4">4紐?/option>
-            <option value="5">5紐?/option>
+            <option value="1">1명</option>
+            <option value="2">2명</option>
+            <option value="3">3명</option>
+            <option value="4">4명</option>
+            <option value="5">5명</option>
           </select>
         </label>
         <datalist id="buildEssenceOptions"></datalist>
         <div id="buildCharacterSlots" class="build-character-slots"></div>
         <label class="field build-note">
-          <span>?ㅻ챸</span>
-          <textarea id="buildNote" rows="3" placeholder="?댁슜 ?? ?μ젏, ?泥??뺤닔 ?깆쓣 ?곸뼱二쇱꽭??"></textarea>
+          <span>설명</span>
+          <textarea id="buildNote" rows="3" placeholder="운용 팁, 장점, 대체 정수 등을 적어주세요."></textarea>
         </label>
         <div class="build-form-actions">
-          <button id="copyCurrentBuild" type="button">?꾩옱 鍮뚮뱶 留곹겕 蹂듭궗</button>
-          <button class="submit-report" type="submit">鍮뚮뱶 留뚮뱾湲??꾨즺</button>
+          <button id="copyCurrentBuild" type="button">현재 빌드 링크 복사</button>
+          <button class="submit-report" type="submit">빌드 만들기 완료</button>
         </div>
       </form>
     </section>
@@ -109,22 +109,22 @@
     <section class="essence-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="essencePickerTitle">
       <div class="essence-picker-head">
         <div>
-          <strong id="essencePickerTitle">?뺤닔 ?좏깮</strong>
-          <span>寃?됲븯嫄곕굹 痢?援ъ뿭?쇰줈 醫곹????좏깮?섏꽭??</span>
+          <strong id="essencePickerTitle">정수 선택</strong>
+          <span>검색하거나 층/구역으로 좁혀서 선택하세요.</span>
         </div>
-        <button id="essencePickerClose" type="button" aria-label="?リ린">횞</button>
+        <button id="essencePickerClose" type="button" aria-label="닫기">×</button>
       </div>
       <div class="essence-picker-controls">
         <label class="field">
-          <span>寃??/span>
-          <input id="essencePickerSearch" type="search" placeholder="紐ъ뒪?? ?ㅽ꺈, ?⑥떆釉?寃??>
+          <span>검색</span>
+          <input id="essencePickerSearch" type="search" placeholder="몬스터, 스탯, 패시브 검색">
         </label>
         <label class="field">
-          <span>痢?/span>
+          <span>층</span>
           <select id="essencePickerFloor"></select>
         </label>
         <label class="field">
-          <span>援ъ뿭</span>
+          <span>구역</span>
           <select id="essencePickerArea"></select>
         </label>
       </div>
@@ -134,16 +134,16 @@
 
   <div id="buildDeleteModal" class="build-delete-modal" hidden>
     <section class="build-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="buildDeleteTitle">
-      <h2 id="buildDeleteTitle">鍮뚮뱶 ??젣</h2>
-      <p id="buildDeleteGuide">?깅줉?????낅젰????젣??鍮꾨?踰덊샇瑜??낅젰?섏꽭??</p>
+      <h2 id="buildDeleteTitle">빌드 삭제</h2>
+      <p id="buildDeleteGuide">등록할 때 입력한 삭제용 비밀번호를 입력하세요.</p>
       <label class="field">
-        <span>??젣??鍮꾨?踰덊샇</span>
-        <input id="buildDeletePassword" type="password" autocomplete="current-password" placeholder="鍮꾨?踰덊샇 ?낅젰">
+        <span>삭제용 비밀번호</span>
+        <input id="buildDeletePassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력">
       </label>
       <p id="buildDeleteStatus" class="build-sync-status"></p>
       <div class="build-delete-actions">
-        <button id="cancelBuildDelete" type="button">痍⑥냼</button>
-        <button id="confirmBuildDelete" class="submit-report" type="button">??젣?섍린</button>
+        <button id="cancelBuildDelete" type="button">취소</button>
+        <button id="confirmBuildDelete" class="submit-report" type="button">삭제하기</button>
       </div>
     </section>
   </div>
@@ -161,7 +161,7 @@
   </script>
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js?v=20260602-admin-analytics"></script>
-  <script src="./app.js?v=20260602-admin-analytics"></script>
+  <script src="./auth.js?v=20260602-encoding-fix"></script>
+  <script src="./app.js?v=20260602-encoding-fix"></script>
 </body>
 </html>

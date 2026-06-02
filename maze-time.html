@@ -3,74 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>誘멸턿 ?쒓컙 怨꾩궛湲?쨌 ?뺥썑踰꾩뒪?곗쫰</title>
-  <meta name="description" content="寃뚯엫 ?쇨낵 寃뚯엫 ?쒓컙???낅젰???꾩떎 ?쒓컙, ?꾩슂 而⑤뵒?? 吏꾪뻾 ??而⑤뵒?섏쓣 怨꾩궛?⑸땲??">
-  <link rel="stylesheet" href="./styles.css?v=20260602-admin-analytics">
+  <title>미궁 시간 계산기 · 덕후버스터즈</title>
+  <meta name="description" content="게임 일과 게임 시간을 입력해 현실 시간, 필요 컨디션, 진행 후 컨디션을 계산합니다.">
+  <link rel="stylesheet" href="./styles.css?v=20260602-adsense-ready">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
 <body>
   <header class="topbar compact">
     <div class="topbar-inner">
-      <h1>誘멸턿 ?쒓컙 怨꾩궛湲?/h1>
-      <nav class="site-nav" aria-label="二쇱슂 硫붾돱">
-        <a href="./index.html">??/a>
+      <h1>미궁 시간 계산기</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
         <details class="nav-dropdown">
-          <summary>?꾧컧</summary>
+          <summary>도감</summary>
           <div class="nav-submenu">
-            <a href="./essences.html">?뺤닔</a>
-            <a href="./numbers.html">?섎쾭??/a>
+            <a href="./essences.html">정수</a>
+            <a href="./numbers.html">넘버스</a>
           </div>
         </details>
-        <a href="./builds.html">鍮뚮뱶</a>
-        <a href="./guides.html">寃뚯떆??/a>
-        <a href="./report.html">?뺣낫 ?쒕낫/?섏젙</a>
-        <a href="./maze-time.html" aria-current="page">誘멸턿 ?쒓컙 怨꾩궛湲?/a>
+        <a href="./builds.html">빌드</a>
+        <a href="./guides.html">게시판</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html" aria-current="page">미궁 시간 계산기</a>
       </nav>
     </div>
   </header>
   <main class="layout calculator-layout">
     <section class="panel page-intro">
       <p class="home-kicker">MAZE TIMER</p>
-      <h2>誘멸턿 ?쒓컙怨?而⑤뵒??怨꾩궛</h2>
-      <p>寃뚯엫 ?? 寃뚯엫 ?쒓컙, ?꾩옱 而⑤뵒?섏쓣 ?낅젰?섎㈃ 誘멸턿 吏꾪뻾???꾩슂???꾩떎 ?쒓컙怨??꾩슂 而⑤뵒?? 吏꾪뻾 ???⑤뒗 而⑤뵒?섏쓣 怨꾩궛?⑸땲?? 誘멸턿 吏꾩엯 ??怨꾪쉷???몄슱 ???ъ슜?????덉뒿?덈떎.</p>
+      <h2>미궁 시간과 컨디션 계산</h2>
+      <p>게임 일, 게임 시간, 현재 컨디션을 입력하면 미궁 진행에 필요한 현실 시간과 필요 컨디션, 진행 후 남는 컨디션을 계산합니다. 미궁 진입 전 계획을 세울 때 사용할 수 있습니다.</p>
     </section>
     <section class="panel maze-calculator">
       <div class="section-title compact-title">
-        <h2>寃뚯엫 吏꾪뻾 ?쒓컙</h2>
+        <h2>게임 진행 시간</h2>
       </div>
       <div class="maze-inputs">
         <label class="field">
-          <span>寃뚯엫 ??/span>
+          <span>게임 일</span>
           <input id="gameDays" type="number" min="0" step="1" value="1">
         </label>
         <label class="field">
-          <span>寃뚯엫 ?쒓컙</span>
+          <span>게임 시간</span>
           <input id="gameHours" type="number" min="0" step="1" value="0">
         </label>
         <label class="field">
-          <span>?꾩옱 而⑤뵒??/span>
+          <span>현재 컨디션</span>
           <input id="currentCondition" type="number" min="0" max="100" step="1" value="100">
         </label>
       </div>
       <div class="maze-results">
         <div class="calc-result" id="timeResult"></div>
         <div class="condition-result">
-          <span>?꾩슂 而⑤뵒??/span>
+          <span>필요 컨디션</span>
           <strong id="neededCondition">0</strong>
           <small id="conditionGuide"></small>
         </div>
         <div class="condition-result remaining">
-          <span>吏꾪뻾 ??而⑤뵒??/span>
+          <span>진행 후 컨디션</span>
           <strong id="remainingCondition">100</strong>
-          <small>而⑤뵒?섏? 0 誘몃쭔?쇰줈 ?대젮媛吏 ?딆뒿?덈떎.</small>
+          <small>컨디션은 0 미만으로 내려가지 않습니다.</small>
         </div>
       </div>
     </section>
   </main>
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js?v=20260602-admin-analytics"></script>
-  <script src="./app.js?v=20260602-admin-analytics"></script>
+  <script src="./auth.js?v=20260602-encoding-fix"></script>
+  <script src="./app.js?v=20260602-encoding-fix"></script>
 </body>
 </html>
