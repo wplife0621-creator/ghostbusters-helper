@@ -22,9 +22,11 @@ const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
 const commentTitlePrefix = "__guide_comment__:";
 const likeTitlePrefix = "__guide_like__:";
+const reportTitlePrefix = "__guide_report__:";
 const viewCounterKind = "guide-view-counter";
 const passwordKind = "guide-password";
 const commentParentKind = "guide-comment-parent";
+const acceptedCommentKind = "guide-accepted-comment";
 const mediaMarkerPattern = /\{\{media:([^}]+)\}\}/g;
 const guideUploadLimitBytes = 50 * 1024 * 1024;
 const guideUploadLimitLabel = "50MB";
@@ -255,6 +257,10 @@ function isStoredLike(row) {
   return String(row.title || "").startsWith(likeTitlePrefix);
 }
 
+function isStoredReport(row) {
+  return String(row.title || "").startsWith(reportTitlePrefix);
+}
+
 function viewCount(media) {
   const counter = (Array.isArray(media) ? media : []).find((item) => item?.kind === viewCounterKind);
   return Number(counter?.views || 0);
@@ -268,15 +274,20 @@ function parentCommentRecord(media) {
   return (Array.isArray(media) ? media : []).find((item) => item?.kind === commentParentKind) || null;
 }
 
+function acceptedCommentRecord(media) {
+  return (Array.isArray(media) ? media : []).find((item) => item?.kind === acceptedCommentKind) || null;
+}
+
 function visibleMedia(media) {
   return (Array.isArray(media) ? media : [])
-    .filter((item) => item?.kind !== viewCounterKind && item?.kind !== passwordKind);
+    .filter((item) => item?.kind !== viewCounterKind && item?.kind !== passwordKind && item?.kind !== acceptedCommentKind);
 }
 
 function storedMedia(post) {
   const metadata = [];
   if (post.views) metadata.push({ kind: viewCounterKind, views: post.views });
   if (post.password) metadata.push(post.password);
+  if (post.acceptedCommentId) metadata.push({ kind: acceptedCommentKind, commentId: post.acceptedCommentId });
   return [...post.media, ...metadata];
 }
 
@@ -306,7 +317,7 @@ async function verifyPassword(item, action) {
 
 function parsedTitle(row) {
   const title = row.title || "";
-  const match = title.match(/^\[(보스|파밍|빌드|정보)\]\s*/);
+  const match = title.match(/^\[(질문|보스|파밍|빌드|정보)\]\s*/);
   return {
     title: match ? title.slice(match[0].length) : title,
     category: row.category || match?.[1] || "일반",
@@ -325,6 +336,7 @@ function normalizePost(row) {
     views: Number(row.views || viewCount(row.media)),
     likes: Number(row.likes || 0),
     password: passwordRecord(row.media),
+    acceptedCommentId: row.acceptedCommentId || acceptedCommentRecord(row.media)?.commentId || "",
     commentCount: Number(row.commentCount || 0),
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
     updatedAt: row.updated_at || row.updatedAt || row.created_at || new Date().toISOString(),
@@ -376,7 +388,7 @@ async function loadPosts() {
     if (!response.ok) throw new Error("load");
     const rows = await response.json();
     comments = rows.filter(isStoredComment).map(normalizeComment);
-    posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row)).map(normalizePost));
+    posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row) && !isStoredReport(row)).map(normalizePost));
     loadLikeCounts(rows);
     loadCommentCounts();
     renderPosts();
@@ -736,6 +748,7 @@ function categoryClass(category) {
   const key = String(category || "일반").trim();
   const map = {
     "일반": "general",
+    "질문": "question",
     "보스": "boss",
     "파밍": "farm",
     "빌드": "build",
@@ -763,6 +776,7 @@ function renderPosts() {
       <span class="guide-row-category ${categoryClass(post.category)}">${escapeHtml(post.category)}</span>
       <button type="button" class="guide-row-title" data-guide-action="view">
         ${escapeHtml(post.title)}
+        ${post.acceptedCommentId ? `<small class="guide-accepted-mini">답변 채택</small>` : ""}
         ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
         ${post.commentCount ? `<small>댓글 ${post.commentCount}</small>` : ""}
       </button>
@@ -798,6 +812,7 @@ function renderViewer() {
       <div class="pending-actions guide-viewer-actions">
         <button class="guide-like-button${likedPostIds.has(post.id) ? " is-liked" : ""}" type="button" data-guide-action="like"${likedPostIds.has(post.id) ? " disabled" : ""}>${likedPostIds.has(post.id) ? "좋아요 완료" : "좋아요"} ${post.likes}</button>
         <button type="button" data-guide-action="share">공유</button>
+        <button type="button" data-guide-action="report">신고</button>
         <button type="button" data-guide-action="edit">수정</button>
         <button type="button" data-guide-action="delete">삭제</button>
         <button type="button" data-guide-action="close">목록으로</button>
@@ -878,14 +893,19 @@ function updateReplyUi(postId) {
   cancel.hidden = false;
 }
 
-function commentMarkup(comment, isReply = false) {
+function commentMarkup(comment, isReply = false, post = null) {
+  const isAccepted = Boolean(post?.acceptedCommentId && post.acceptedCommentId === comment.id);
+  const canAccept = post?.category === "질문" && !isAccepted;
   return `
-    <article class="guide-comment${isReply ? " is-reply" : ""}" data-comment-id="${escapeHtml(comment.id)}">
+    <article class="guide-comment${isReply ? " is-reply" : ""}${isAccepted ? " is-accepted" : ""}" data-comment-id="${escapeHtml(comment.id)}">
       <div>
         ${isReply ? `<span class="guide-reply-mark">답글</span>` : ""}
+        ${isAccepted ? `<span class="guide-accepted-badge">채택 답변</span>` : ""}
         <strong>${escapeHtml(comment.author)}</strong>
         <span>${escapeHtml(new Date(comment.createdAt).toLocaleString("ko-KR"))}</span>
+        ${canAccept ? `<button type="button" data-comment-action="accept">답변 채택</button>` : ""}
         <button type="button" data-comment-action="reply">답글</button>
+        <button type="button" data-comment-action="report">신고</button>
         <button type="button" data-comment-action="delete">삭제</button>
       </div>
       <p>${escapeHtml(comment.content).replaceAll("\n", "<br>")}</p>
@@ -901,10 +921,16 @@ function renderComments(postId) {
   count.textContent = String(rows.length);
   const post = posts.find((item) => item.id === postId);
   if (post) post.commentCount = rows.length;
-  const roots = rows.filter((comment) => !comment.parentId || !rows.some((row) => row.id === comment.parentId));
+  const roots = rows
+    .filter((comment) => !comment.parentId || !rows.some((row) => row.id === comment.parentId))
+    .sort((a, b) => (b.id === post?.acceptedCommentId) - (a.id === post?.acceptedCommentId)
+      || new Date(a.createdAt) - new Date(b.createdAt));
   list.innerHTML = rows.length ? roots.map((comment) => {
-    const replies = rows.filter((reply) => reply.parentId === comment.id);
-    return `${commentMarkup(comment)}${replies.map((reply) => commentMarkup(reply, true)).join("")}`;
+    const replies = rows
+      .filter((reply) => reply.parentId === comment.id)
+      .sort((a, b) => (b.id === post?.acceptedCommentId) - (a.id === post?.acceptedCommentId)
+        || new Date(a.createdAt) - new Date(b.createdAt));
+    return `${commentMarkup(comment, false, post)}${replies.map((reply) => commentMarkup(reply, true, post)).join("")}`;
   }).join("") : `<div class="empty compact-empty">첫 댓글을 남겨보세요.</div>`;
   updateReplyUi(postId);
 }
@@ -976,6 +1002,57 @@ async function deleteComment(commentId) {
     renderPosts();
   } catch {
     setStatus("댓글 삭제에 실패했습니다.", "is-offline");
+  }
+}
+
+async function acceptComment(commentId) {
+  const post = posts.find((item) => item.id === selectedPostId);
+  const comment = comments.find((item) => item.id === commentId && item.postId === selectedPostId);
+  if (!post || !comment || post.category !== "질문") return;
+  if (!(await verifyPassword(post, "답변 채택"))) return;
+  try {
+    post.acceptedCommentId = comment.id;
+    post.updatedAt = new Date().toISOString();
+    if (hasPublicStore()) {
+      const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?id=eq.${encodeURIComponent(post.id)}`, {
+        method: "PATCH",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ media: storedMedia(post), updated_at: post.updatedAt }),
+      });
+      if (!response.ok) throw new Error("accept");
+    }
+    saveLocalPosts();
+    renderPosts();
+    setStatus("답변을 채택했습니다.", hasPublicStore() ? "is-online" : "is-offline");
+  } catch {
+    setStatus("답변 채택 저장에 실패했습니다.", "is-offline");
+  }
+}
+
+async function reportGuideTarget(targetType, targetId, label) {
+  if (!requireLoggedInNickname("신고")) return;
+  const reason = window.prompt(`${label} 신고 사유를 간단히 입력해주세요.`);
+  if (!reason?.trim()) return;
+  try {
+    if (hasPublicStore()) {
+      const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}`, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json", Prefer: "return=minimal" }),
+        body: JSON.stringify({
+          id: `guide-report-${idValue()}`,
+          title: `${reportTitlePrefix}${targetType}:${targetId}`,
+          author: currentAuthNickname(),
+          content: reason.trim().slice(0, 500),
+          media: [{ kind: "guide-report", targetType, targetId }],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      if (!response.ok) throw new Error("report");
+    }
+    setStatus("신고가 접수되었습니다. 운영자가 확인할게요.", hasPublicStore() ? "is-online" : "is-offline");
+  } catch {
+    setStatus("신고 접수에 실패했습니다.", "is-offline");
   }
 }
 
@@ -1108,6 +1185,14 @@ fields.viewer.addEventListener("click", (event) => {
       document.querySelector("#guideCommentContent")?.focus();
       return;
     }
+    if (commentButton.dataset.commentAction === "accept") {
+      acceptComment(commentId);
+      return;
+    }
+    if (commentButton.dataset.commentAction === "report") {
+      reportGuideTarget("comment", commentId, "댓글");
+      return;
+    }
     if (commentButton.dataset.commentAction === "delete") deleteComment(commentId);
     return;
   }
@@ -1130,6 +1215,7 @@ fields.viewer.addEventListener("click", (event) => {
     });
   }
   if (button.dataset.guideAction === "share") sharePostLink(post, button);
+  if (button.dataset.guideAction === "report") reportGuideTarget("post", post.id, "게시글");
   if (button.dataset.guideAction === "edit") startEdit(post);
   if (button.dataset.guideAction === "delete") deletePost(post);
 });

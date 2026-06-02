@@ -7770,6 +7770,176 @@ body {
   box-shadow: none;
 }
 
+.guide-categories button[data-guide-category="질문"],
+.guide-row-category.guide-category-question {
+  --guide-cat-bg: #f5f0ff;
+  --guide-cat-border: rgba(124, 58, 237, 0.25);
+  --guide-cat-text: #6d35ca;
+  --guide-cat-active: #7c3aed;
+}
+
+.guide-accepted-mini,
+.guide-accepted-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(8, 183, 131, 0.25);
+  border-radius: 999px;
+  background: #e9fbf4;
+  color: #04785c !important;
+  font-size: 11px !important;
+  font-weight: 900;
+}
+
+.guide-accepted-mini {
+  padding: 2px 7px;
+}
+
+.guide-accepted-badge {
+  padding: 4px 8px;
+}
+
+.guide-comment.is-accepted {
+  margin: 8px 0;
+  padding: 14px 12px;
+  border: 1px solid rgba(8, 183, 131, 0.25);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f3fff9, #ffffff);
+  box-shadow: 0 12px 26px rgba(8, 183, 131, 0.08);
+}
+
+.build-review-box {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(55, 72, 98, 0.14);
+  padding-top: 12px;
+}
+
+.build-review-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.build-review-head strong {
+  color: #17263d;
+  font-size: 14px;
+}
+
+.build-review-head span {
+  border-radius: 999px;
+  background: #eef6f3;
+  color: #04785c;
+  padding: 4px 9px;
+  font-weight: 900;
+}
+
+.build-review-list {
+  display: grid;
+  gap: 7px;
+}
+
+.build-review-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  border: 1px solid rgba(55, 72, 98, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 9px 10px;
+}
+
+.build-review-item b {
+  color: #26364d;
+  font-size: 12px;
+}
+
+.build-review-item span {
+  justify-self: end;
+  color: #728198;
+  font-size: 11px;
+}
+
+.build-review-item p,
+.build-review-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.build-review-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.build-review-form textarea {
+  min-height: 48px;
+  resize: vertical;
+}
+
+.home-popular-list {
+  display: grid;
+  gap: 8px;
+}
+
+.home-popular-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 2px 10px;
+  align-items: center;
+  border: 1px solid rgba(55, 72, 98, 0.14);
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(255, 252, 243, 0.98), rgba(241, 235, 223, 0.94));
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.home-popular-item:hover {
+  border-color: rgba(8, 183, 131, 0.28);
+  transform: translateY(-1px);
+}
+
+.home-popular-item span {
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 11px;
+  background: #e9fbf4;
+  color: #04785c;
+  font-weight: 950;
+}
+
+.home-popular-item strong {
+  overflow: hidden;
+  color: #17263d;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-popular-item small {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .build-review-form {
+    grid-template-columns: 1fr;
+  }
+
+  .build-review-form .submit-report {
+    min-height: 42px;
+  }
+}
+
 @media (max-width: 920px) {
   .admin-center-hero,
   .admin-management-card,

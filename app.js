@@ -60,6 +60,11 @@ const visitorBuildMarkers = {
 };
 const buildLikeMarker = "__build_like__";
 const buildDeleteMarker = "__build_deleted__";
+const buildReviewMarker = "__build_review__";
+const buildReportMarker = "__build_report__";
+const guideCommentPrefix = "__guide_comment__:";
+const guideLikePrefix = "__guide_like__:";
+const guideReportPrefix = "__guide_report__:";
 const numbersReportPrefix = "__numbers__:";
 const numbersDeleteMarker = "__numbers_deleted__";
 const sailingMarker = "__sailing__";
@@ -164,6 +169,7 @@ const els = {
   homeNoticeList: document.querySelector("#homeNoticeList"),
   homeNoticePagination: document.querySelector("#homeNoticePagination"),
   homeNoticeStatus: document.querySelector("#homeNoticeStatus"),
+  homePopularGuides: document.querySelector("#homePopularGuides"),
   results: document.querySelector("#results"),
   resultTitle: document.querySelector("#resultTitle"),
   resultCount: document.querySelector("#resultCount"),
@@ -292,6 +298,7 @@ let savedBuilds = loadStoredRows(storageKeys.builds);
 let buildLikes = new Map();
 let buildLikeRecordIds = new Set();
 let likedBuildIds = new Set();
+let buildReviews = new Map();
 let buildLikeIpPromise = null;
 let pendingDeleteBuild = null;
 let essenceRows = mergeApprovedRows(data["정수"] || [], approvedReports);
@@ -872,6 +879,7 @@ function homeBuildNotices(rows) {
     .filter(Boolean));
   return rows
     .filter((row) => row.title !== buildLikeMarker && row.title !== buildDeleteMarker
+      && row.title !== buildReviewMarker && row.title !== buildReportMarker
       && row.title !== visitorBuildMarkers.total && row.title !== visitorBuildMarkers.daily
       && !deletedIds.has(row.id) && noticeWithinWeek(row.created_at || row.createdAt))
     .map((row) => {
@@ -890,12 +898,13 @@ function homeBuildNotices(rows) {
 
 function homeGuideNotices(rows) {
   return rows
-    .filter((row) => !textOf(row.title).startsWith("__guide_comment__:")
-      && !textOf(row.title).startsWith("__guide_like__:")
+    .filter((row) => !textOf(row.title).startsWith(guideCommentPrefix)
+      && !textOf(row.title).startsWith(guideLikePrefix)
+      && !textOf(row.title).startsWith(guideReportPrefix)
       && noticeWithinWeek(row.updated_at || row.created_at))
     .map((row) => {
-      const title = textOf(row.title).replace(/^\[(보스|파밍|빌드|정보)\]\s*/, "");
-      const category = textOf(row.title).match(/^\[(보스|파밍|빌드|정보)\]/)?.[1] || "일반";
+      const title = textOf(row.title).replace(/^\[(질문|보스|파밍|빌드|정보)\]\s*/, "");
+      const category = textOf(row.title).match(/^\[(질문|보스|파밍|빌드|정보)\]/)?.[1] || "일반";
       return {
         id: row.id,
         type: "guide",
@@ -908,10 +917,74 @@ function homeGuideNotices(rows) {
     });
 }
 
+function guideMediaRows(row) {
+  return Array.isArray(row.media) ? row.media : [];
+}
+
+function guideViewCount(row) {
+  const counter = guideMediaRows(row).find((item) => item?.kind === "guide-view-counter");
+  return Number(counter?.views || 0);
+}
+
+function guidePlainTitle(row) {
+  return textOf(row.title).replace(/^\[(질문|보스|파밍|빌드|정보)\]\s*/, "");
+}
+
+function guideCategory(row) {
+  return textOf(row.title).match(/^\[(질문|보스|파밍|빌드|정보)\]/)?.[1] || "일반";
+}
+
+function renderHomePopularGuides(rows) {
+  if (!els.homePopularGuides) return;
+  const comments = new Map();
+  const likes = new Map();
+  rows.forEach((row) => {
+    const title = textOf(row.title);
+    if (title.startsWith(guideCommentPrefix)) {
+      const postId = title.slice(guideCommentPrefix.length);
+      comments.set(postId, (comments.get(postId) || 0) + 1);
+    }
+    if (title.startsWith(guideLikePrefix)) {
+      const postId = title.slice(guideLikePrefix.length);
+      likes.set(postId, (likes.get(postId) || 0) + 1);
+    }
+  });
+  const popular = rows
+    .filter((row) => !textOf(row.title).startsWith(guideCommentPrefix)
+      && !textOf(row.title).startsWith(guideLikePrefix)
+      && !textOf(row.title).startsWith(guideReportPrefix))
+    .map((row) => {
+      const viewCount = guideViewCount(row);
+      const likeCount = likes.get(row.id) || 0;
+      const commentCount = comments.get(row.id) || 0;
+      return {
+        id: row.id,
+        title: guidePlainTitle(row),
+        category: guideCategory(row),
+        author: textOf(row.author) || "익명",
+        views: viewCount,
+        likes: likeCount,
+        comments: commentCount,
+        score: viewCount + likeCount * 5 + commentCount * 3,
+      };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+  els.homePopularGuides.innerHTML = popular.length ? popular.map((post, index) => `
+    <a class="home-popular-item" href="./guides.html?post=${encodeURIComponent(post.id)}">
+      <span>${index + 1}</span>
+      <strong>${escapeHtml(post.title || "제목 없는 게시글")}</strong>
+      <small>${escapeHtml(post.category)} · ${escapeHtml(post.author)} · 조회 ${post.views} · 좋아요 ${post.likes} · 댓글 ${post.comments}</small>
+    </a>
+  `).join("") : `<div class="home-notice-empty">아직 집계된 인기 게시글이 없습니다.</div>`;
+}
+
 async function loadHomeNotices() {
   if (!reportBackend.url || !reportBackend.anonKey || !buildBackend.url || !buildBackend.anonKey
     || !guideBackend.url || !guideBackend.anonKey) {
     els.homeNoticeStatus.textContent = "공개 저장소가 연결되면 최근 공지사항이 표시됩니다.";
+    renderHomePopularGuides([]);
     renderHomeNotices();
     return;
   }
@@ -931,6 +1004,7 @@ async function loadHomeNotices() {
     ...homeBuildNotices(builds),
     ...homeGuideNotices(guides),
   ].sort((a, b) => new Date(b.date) - new Date(a.date));
+  renderHomePopularGuides(guides);
   const failedCount = requests.filter((request) => request.status !== "fulfilled" || !request.value.ok).length;
   els.homeNoticeStatus.textContent = failedCount
     ? "일부 최근 소식을 불러오지 못했습니다. 잠시 후 다시 확인해주세요."
@@ -1215,6 +1289,7 @@ function initBuilds() {
     if (event.key === "Enter") confirmBuildDelete();
   });
   els.buildList.addEventListener("click", handleBuildListClick);
+  els.buildList.addEventListener("submit", handleBuildReviewSubmit);
   renderBuilds();
   loadPublicBuilds();
 }
@@ -1560,18 +1635,51 @@ function isBuildDelete(build) {
   return build?.title === buildDeleteMarker;
 }
 
+function isBuildReview(build) {
+  return build?.title === buildReviewMarker;
+}
+
+function isBuildReport(build) {
+  return build?.title === buildReportMarker;
+}
+
+function parseBuildMarkerNote(note) {
+  try {
+    const parsed = JSON.parse(textOf(note));
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 function collectPublicBuildRows(rows) {
   const normalizedRows = rows.map(normalizeRemoteBuild);
   buildLikes = new Map();
   buildLikeRecordIds = new Set();
+  buildReviews = new Map();
   normalizedRows.filter(isBuildLike).forEach((like) => {
     const buildId = textOf(like.note);
     if (!buildId) return;
     buildLikes.set(buildId, (buildLikes.get(buildId) || 0) + 1);
     buildLikeRecordIds.add(like.id);
   });
+  normalizedRows.filter(isBuildReview).forEach((review) => {
+    const note = parseBuildMarkerNote(review.note);
+    const buildId = textOf(note.buildId);
+    const content = textOf(note.content);
+    if (!buildId || !content) return;
+    const list = buildReviews.get(buildId) || [];
+    list.push({
+      id: review.id,
+      author: review.author || "익명",
+      content,
+      createdAt: review.createdAt,
+    });
+    buildReviews.set(buildId, list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)));
+  });
   const deletedIds = new Set(normalizedRows.filter(isBuildDelete).map((build) => textOf(build.note)).filter(Boolean));
-  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build) && !isBuildDelete(build) && !deletedIds.has(build.id));
+  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build) && !isBuildDelete(build)
+    && !isBuildReview(build) && !isBuildReport(build) && !deletedIds.has(build.id));
 }
 
 function prependBuild(build) {
@@ -1655,6 +1763,67 @@ async function savePublicBuildLike(build) {
   if (!response.ok && response.status !== 409) throw new Error(`like failed: ${response.status}`);
   likedBuildIds.add(build.id);
   await loadPublicBuilds();
+}
+
+async function savePublicBuildReview(build, content) {
+  if (!requireLoggedInNickname(els.buildSyncStatus, "빌드 후기 작성")) return false;
+  const cleanContent = textOf(content).slice(0, 500);
+  if (!cleanContent) return false;
+  const review = {
+    id: `build-review-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
+    title: buildReviewMarker,
+    author: currentAuthNickname(),
+    members: [],
+    note: JSON.stringify({ buildId: build.id, content: cleanContent }),
+    createdAt: new Date().toISOString(),
+  };
+  if (hasPublicBuildStore()) {
+    const response = await fetch(buildStoreUrl(), {
+      method: "POST",
+      headers: buildStoreHeaders({ Prefer: "return=minimal" }),
+      body: JSON.stringify({
+        id: review.id,
+        title: review.title,
+        author: review.author,
+        members: review.members,
+        note: review.note,
+        created_at: review.createdAt,
+      }),
+    });
+    if (!response.ok) throw new Error(`review failed: ${response.status}`);
+    await loadPublicBuilds();
+  } else {
+    const list = buildReviews.get(build.id) || [];
+    buildReviews.set(build.id, [{ ...review, content: cleanContent }, ...list]);
+    renderBuilds();
+  }
+  return true;
+}
+
+async function savePublicBuildReport(build) {
+  if (!requireLoggedInNickname(els.buildSyncStatus, "빌드 신고")) return;
+  const reason = window.prompt("빌드 신고 사유를 간단히 입력해주세요.");
+  if (!reason?.trim()) return;
+  try {
+    if (hasPublicBuildStore()) {
+      const response = await fetch(buildStoreUrl(), {
+        method: "POST",
+        headers: buildStoreHeaders({ Prefer: "return=minimal" }),
+        body: JSON.stringify({
+          id: `build-report-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
+          title: buildReportMarker,
+          author: currentAuthNickname(),
+          members: [],
+          note: JSON.stringify({ buildId: build.id, reason: reason.trim().slice(0, 500) }),
+          created_at: new Date().toISOString(),
+        }),
+      });
+      if (!response.ok) throw new Error(`report failed: ${response.status}`);
+    }
+    setBuildSyncStatus("신고가 접수되었습니다. 운영자가 확인할게요.", hasPublicBuildStore() ? "is-online" : "is-offline");
+  } catch {
+    setBuildSyncStatus("신고 접수에 실패했습니다.", "is-offline");
+  }
 }
 
 async function savePublicBuild(build) {
@@ -1895,6 +2064,31 @@ async function handleBuildListClick(event) {
   if (button.dataset.buildAction === "delete") {
     openBuildDeleteModal(build);
   }
+  if (button.dataset.buildAction === "report") {
+    savePublicBuildReport(build);
+  }
+}
+
+async function handleBuildReviewSubmit(event) {
+  if (!event.target.matches("[data-build-review-form]")) return;
+  event.preventDefault();
+  const card = event.target.closest("[data-build-id]");
+  const build = savedBuilds.find((item) => item.id === card?.dataset.buildId);
+  const textarea = event.target.querySelector("[data-build-review-content]");
+  if (!build || !textarea) return;
+  const button = event.target.querySelector("button");
+  button.disabled = true;
+  try {
+    const saved = await savePublicBuildReview(build, textarea.value);
+    if (saved) {
+      textarea.value = "";
+      setBuildSyncStatus("빌드 후기가 등록되었습니다.", hasPublicBuildStore() ? "is-online" : "is-offline");
+    }
+  } catch {
+    setBuildSyncStatus("빌드 후기 저장에 실패했습니다.", "is-offline");
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function sortedBuilds() {
@@ -1946,6 +2140,31 @@ function buildMemberStatSummary(member) {
       <strong>${value > 0 ? "+" : ""}${escapeHtml(value)}</strong>
     </span>
   `).join("");
+}
+
+function buildReviewMarkup(build) {
+  const reviews = buildReviews.get(build.id) || [];
+  return `
+    <section class="build-review-box" aria-label="빌드 후기">
+      <div class="build-review-head">
+        <strong>빌드 후기</strong>
+        <span>${reviews.length}개</span>
+      </div>
+      <div class="build-review-list">
+        ${reviews.length ? reviews.slice(0, 3).map((review) => `
+          <article class="build-review-item">
+            <b>${escapeHtml(review.author || "익명")}</b>
+            <span>${escapeHtml(formatBuildDate(review.createdAt))}</span>
+            <p>${escapeHtml(review.content).replaceAll("\n", "<br>")}</p>
+          </article>
+        `).join("") : `<p class="build-review-empty">아직 후기가 없습니다. 사용감을 남겨주세요.</p>`}
+      </div>
+      <form class="build-review-form" data-build-review-form>
+        <textarea data-build-review-content maxlength="500" rows="2" placeholder="이 빌드를 써본 느낌이나 보완점을 적어주세요."></textarea>
+        <button class="submit-report" type="submit">후기 등록</button>
+      </form>
+    </section>
+  `;
 }
 
 function buildConfiguredSkillList(row, states = [], selectedColor = "") {
@@ -2071,6 +2290,7 @@ function buildCard(build, shared) {
             <button class="build-like-button${liked ? " is-liked" : ""}" type="button" data-build-action="like"${liked ? " disabled" : ""}>${liked ? "좋아요 완료" : "좋아요"} ${likeCount}</button>
             <button type="button" data-build-action="share">공유 링크 복사</button>
             <button type="button" data-build-action="load">수정</button>
+            <button type="button" data-build-action="report">신고</button>
             <button class="build-delete-button" type="button" data-build-action="delete">삭제</button>
           </div>
         </header>
@@ -2079,6 +2299,7 @@ function buildCard(build, shared) {
           ${build.note ? `<p>${escapeHtml(build.note)}</p>` : ""}
         </div>
         ${buildMemberBoard(normalized.members)}
+        ${buildReviewMarkup(build)}
       </article>
     `;
   }
@@ -2199,14 +2420,15 @@ async function fetchAdminRows(backend, table, query = "?select=*") {
 
 function guideRowKind(row) {
   const title = textOf(row.title);
-  if (title.startsWith("__guide_comment__:")) return "comment";
-  if (title.startsWith("__guide_like__:")) return "like";
+  if (title.startsWith(guideCommentPrefix)) return "comment";
+  if (title.startsWith(guideLikePrefix)) return "like";
+  if (title.startsWith(guideReportPrefix)) return "report";
   return "post";
 }
 
 function guideCategoryTitle(row) {
   const title = textOf(row.title);
-  const match = title.match(/^\[(보스|파밍|빌드|정보)\]\s*/);
+  const match = title.match(/^\[(질문|보스|파밍|빌드|정보)\]\s*/);
   return {
     category: match?.[1] || "일반",
     title: match ? title.slice(match[0].length) : title,
@@ -2224,7 +2446,7 @@ function normalizeAdminGuide(row) {
   return {
     id: row.id,
     kind,
-    postId: kind === "comment" ? textOf(row.post_id) || textOf(row.title).slice("__guide_comment__:".length) : row.id,
+    postId: kind === "comment" ? textOf(row.post_id) || textOf(row.title).slice(guideCommentPrefix.length) : row.id,
     title: parsed.title || "(제목 없음)",
     category: parsed.category,
     author: textOf(row.author) || "익명",
@@ -2264,7 +2486,8 @@ function activeAdminBuilds() {
   const likes = new Map();
   rows.filter(isBuildLike).forEach((row) => likes.set(textOf(row.note), (likes.get(textOf(row.note)) || 0) + 1));
   return rows
-    .filter((row) => !isVisitorBuild(row) && !isBuildLike(row) && !isBuildDelete(row) && !deleted.has(row.id))
+    .filter((row) => !isVisitorBuild(row) && !isBuildLike(row) && !isBuildDelete(row)
+      && !isBuildReview(row) && !isBuildReport(row) && !deleted.has(row.id))
     .map((row) => ({ ...row, likes: likes.get(row.id) || 0 }))
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }

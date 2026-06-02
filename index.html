@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>덕후버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260602-home-links">
+  <link rel="stylesheet" href="./styles.css?v=20260602-community">
 </head>
 <body>
   <header class="topbar compact">
@@ -62,6 +62,19 @@
       </div>
       <nav id="homeNoticePagination" class="home-notice-pagination" aria-label="공지사항 페이지"></nav>
       <p id="homeNoticeStatus" class="home-notice-status"></p>
+    </section>
+
+    <section class="panel home-popular" aria-label="인기 게시글">
+      <div class="home-recent-head">
+        <div>
+          <p class="home-kicker">POPULAR</p>
+          <h2>인기 게시글</h2>
+          <span>조회수, 좋아요, 댓글 반응을 합산해 많이 보는 글을 모았습니다.</span>
+        </div>
+      </div>
+      <div id="homePopularGuides" class="home-popular-list">
+        <div class="home-notice-loading">인기 게시글을 불러오는 중입니다.</div>
+      </div>
     </section>
 
     <section class="home-groups" aria-label="메뉴 바로가기">
@@ -144,6 +157,6 @@
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./auth.js?v=20260601-fixed-author"></script>
-  <script src="./app.js?v=20260602-build-label"></script>
+  <script src="./app.js?v=20260602-community"></script>
 </body>
 </html>
