@@ -8386,6 +8386,7 @@ body {
 }
 
 .admin-center-layout > .admin-site-stats-section {
+  grid-column: 1 / -1;
   order: 1;
 }
 
@@ -8769,6 +8770,24 @@ body {
   font-size: 10px;
   font-weight: 800;
   word-break: break-all;
+}
+
+.admin-review-page .admin-review-layout {
+  width: min(1480px, calc(100% - 32px));
+}
+
+.admin-site-stats-section {
+  padding: 20px;
+}
+
+.admin-site-stats-section .review-head strong {
+  font-size: 18px;
+}
+
+.admin-site-stats-section #adminSiteStats {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
 }
 
 @media (max-width: 640px) {
