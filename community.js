@@ -417,11 +417,11 @@ async function restSelect(table, select, query = "") {
 }
 
 async function getCurrentNickname() {
-  if (window.DukhuAuth?.getDisplayName) {
-    const nickname = await window.DukhuAuth.getDisplayName().catch(() => "");
+  if (window.DUKHUBUSTERS_AUTH?.getDisplayName) {
+    const nickname = textOf(window.DUKHUBUSTERS_AUTH.getDisplayName());
     if (nickname) return nickname;
   }
-  return localStorage.getItem("dukhubusters.nickname") || "";
+  return localStorage.getItem("dukhubusters.authNickname") || "";
 }
 
 function getStore(key) {
