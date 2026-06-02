@@ -7,7 +7,7 @@ window.DUKHUBUSTERS_CONFIG = {
   dailyVisitorTable: "daily_visitors",
   guideTable: "guide_posts",
   guideBucket: "guide-media",
-  guideShareUrl: "https://bjlykfxfminmjfgilowj.supabase.co/functions/v1/guide-share",
+  guideShareUrl: "https://busters.kr/guide-share",
   profileTable: "user_profiles",
   adminEmails: ["wplife0621@gmail.com"],
 };

@@ -172,11 +172,14 @@ function updateGuideShareMeta(post = null) {
   const description = post
     ? String(post.content || "").replace(mediaMarkerPattern, "").replace(/\s+/g, " ").trim().slice(0, 120) || "덕후버스터즈 게시글"
     : "덕후버스터즈 게시판";
+  const url = post ? postShareUrl(post.id).toString() : postUrl("").toString();
   document.title = title;
   setMetaContent("meta[property='og:title']", title);
   setMetaContent("meta[property='og:site_name']", guideSiteTitle);
   setMetaContent("meta[property='og:description']", description);
+  setMetaContent("meta[property='og:url']", url);
   setMetaContent("meta[name='twitter:title']", title);
+  setMetaContent("meta[name='twitter:description']", description);
   setMetaContent("meta[name='description']", description);
 }
 
@@ -197,7 +200,7 @@ function markerFor(ref) {
 }
 
 function postUrl(postId) {
-  const url = new URL(window.location.href);
+  const url = new URL("./guides.html", window.location.href);
   if (postId) url.searchParams.set("post", postId);
   else url.searchParams.delete("post");
   return url;
@@ -215,6 +218,10 @@ function postShareUrl(postId) {
 function updatePostUrl(postId, replace = false) {
   const url = postUrl(postId);
   window.history[replace ? "replaceState" : "pushState"]({}, "", url);
+}
+
+function guidePostHref(postId) {
+  return postUrl(postId).toString();
 }
 
 function openLinkedPostIfAvailable() {
@@ -777,12 +784,12 @@ function renderPosts() {
     <article class="guide-row" data-guide-id="${escapeHtml(post.id)}">
       <span class="guide-row-number">${posts.length - posts.indexOf(post)}</span>
       <span class="guide-row-category ${categoryClass(post.category)}">${escapeHtml(post.category)}</span>
-      <button type="button" class="guide-row-title" data-guide-action="view">
+      <a class="guide-row-title" data-guide-action="view" href="${escapeHtml(guidePostHref(post.id))}">
         ${escapeHtml(post.title)}
         ${post.acceptedCommentId ? `<small class="guide-accepted-mini">답변 채택</small>` : ""}
         ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
         ${post.commentCount ? `<small>댓글 ${post.commentCount}</small>` : ""}
-      </button>
+      </a>
       <span class="guide-row-author">${escapeHtml(post.author)}</span>
       <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
       <span class="guide-row-metrics">
@@ -1158,11 +1165,12 @@ fields.existingMedia.addEventListener("click", (event) => {
   showRetainedMedia();
 });
 fields.posts.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-guide-action]");
+  const button = event.target.closest("[data-guide-action]");
   if (!button) return;
   const post = posts.find((item) => item.id === button.closest("[data-guide-id]").dataset.guideId);
   if (!post) return;
   if (button.dataset.guideAction === "view") {
+    event.preventDefault();
     selectedPostId = post.id;
     updatePostUrl(post.id);
     incrementViews(post);

@@ -1491,9 +1491,11 @@ select[multiple] option:checked {
   border: 0;
   background: transparent;
   color: #17283f;
+  cursor: pointer;
   font: inherit;
   font-weight: 700;
   text-align: left;
+  text-decoration: none;
 }
 
 .guide-row-title:hover {
