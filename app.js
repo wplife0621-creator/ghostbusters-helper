@@ -4228,4 +4228,150 @@ function formatSeconds(totalSeconds) {
   return parts.join(" ");
 }
 
+function renderAdminCenter() {
+  if (!els.adminStatsGrid) return;
+  const locked = !adminUnlocked || !isAdminUser();
+  document.querySelectorAll(".admin-dashboard, .admin-ops-grid, .admin-backup-grid").forEach((element) => {
+    element.classList.toggle("is-locked", locked);
+  });
+  if (locked) {
+    const message = `<div class="empty compact-empty">wplife0621@gmail.com Google 계정으로 로그인하면 관리자 센터가 열립니다.</div>`;
+    els.adminStatsGrid.innerHTML = message;
+    if (els.adminGuideList) els.adminGuideList.innerHTML = message;
+    if (els.adminBuildList) els.adminBuildList.innerHTML = message;
+    if (els.adminUserList) els.adminUserList.innerHTML = message;
+    if (els.adminSiteStats) els.adminSiteStats.innerHTML = message;
+    if (els.adminQualityList) els.adminQualityList.innerHTML = message;
+    return;
+  }
+
+  const posts = adminGuidePosts();
+  const comments = adminGuideComments();
+  const builds = activeAdminBuilds();
+  const warningCount = qualityWarningCount(posts, builds);
+  const stats = [
+    { label: "검수 대기", value: `${pendingReports.length}건`, hint: "정수/넘버스 제보", href: "#admin-pending", tone: pendingReports.length ? "warn" : "ok" },
+    { label: "등록 정보", value: `${approvedReportItems.length}건`, hint: "승인된 도감 정보", href: "#admin-approved", tone: "normal" },
+    { label: "게시글", value: `${posts.length}건`, hint: `댓글 ${comments.length}건`, href: "#admin-guides", tone: "normal" },
+    { label: "공개 빌드", value: `${builds.length}건`, hint: "유저 공유 빌드", href: "#admin-builds", tone: "normal" },
+    { label: "회원", value: `${adminCenterData.users.length}명`, hint: "닉네임 등록", href: "#admin-users", tone: "normal" },
+    { label: "오늘 방문", value: `${adminCenterData.visitors.today ?? "-"}명`, hint: `누적 ${adminCenterData.visitors.total ?? "-"}명`, href: "#admin-stats", tone: "normal" },
+    { label: "운영 점검", value: warningCount ? `${warningCount}건` : "양호", hint: "품질 체크", href: "#admin-quality", tone: warningCount ? "warn" : "ok" },
+    { label: "백업", value: "내보내기", hint: "운영 데이터 저장", href: "#admin-backup", tone: "normal" },
+  ];
+  els.adminStatsGrid.innerHTML = stats.map((item) => `
+    <a class="admin-stat-card admin-stat-${escapeHtml(item.tone)}" href="${escapeHtml(item.href)}">
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${escapeHtml(item.value)}</strong>
+      <small>${escapeHtml(item.hint)}</small>
+    </a>
+  `).join("");
+
+  renderAdminGuides(posts, comments);
+  renderAdminBuilds(builds);
+  renderAdminUsers();
+  renderAdminSiteStats();
+  renderAdminQuality(posts, builds);
+}
+
+function renderAdminGuides(posts, comments) {
+  if (!els.adminGuideList || !els.adminGuideCount) return;
+  els.adminGuideCount.textContent = `게시판 ${posts.length}건 · 댓글 ${comments.length}건`;
+  const postHtml = posts.slice(0, 2).map((post) => `
+    <article class="admin-management-card" data-admin-guide-id="${escapeHtml(post.id)}" data-admin-guide-kind="post">
+      <div>
+        <strong><a href="./guides.html?post=${encodeURIComponent(post.id)}">${escapeHtml(post.title)}</a></strong>
+        <span>${escapeHtml(post.category)} · ${escapeHtml(post.author)} · 조회 ${post.views} · 좋아요 ${post.likes} · 댓글 ${post.commentCount}</span>
+        <small>${escapeHtml(dateLabel(post.updatedAt))}</small>
+      </div>
+      <div class="pending-actions">
+        <a href="./guides.html?post=${encodeURIComponent(post.id)}">보기</a>
+        <button type="button" data-admin-guide-action="delete-post">삭제</button>
+      </div>
+    </article>
+  `).join("");
+  const commentHtml = comments.slice(0, 2).map((comment) => `
+    <article class="admin-management-card" data-admin-guide-id="${escapeHtml(comment.id)}" data-admin-guide-kind="comment">
+      <div>
+        <strong><a href="./guides.html?post=${encodeURIComponent(comment.postId)}">댓글 · ${escapeHtml(comment.author)}</a></strong>
+        <span>${escapeHtml(comment.content.slice(0, 72))}${comment.content.length > 72 ? "..." : ""}</span>
+        <small>${escapeHtml(dateLabel(comment.createdAt))}</small>
+      </div>
+      <div class="pending-actions">
+        <a href="./guides.html?post=${encodeURIComponent(comment.postId)}">원문</a>
+        <button type="button" data-admin-guide-action="delete-comment">삭제</button>
+      </div>
+    </article>
+  `).join("");
+  const more = posts.length + comments.length > 4
+    ? `<a class="admin-more-link" href="./guides.html">게시판 전체 보기</a>`
+    : "";
+  els.adminGuideList.innerHTML = postHtml || commentHtml
+    ? `${postHtml}${commentHtml}${more}`
+    : `<div class="empty compact-empty">${adminCenterData.errors?.guides ? "게시글 저장소를 불러오지 못했습니다." : "등록된 게시글이 없습니다."}</div>`;
+}
+
+function renderAdminBuilds(builds) {
+  if (!els.adminBuildList || !els.adminBuildCount) return;
+  els.adminBuildCount.textContent = `공개 빌드 ${builds.length}건`;
+  els.adminBuildList.innerHTML = builds.length
+    ? `${builds.slice(0, 3).map((build) => `
+      <article class="admin-management-card" data-admin-build-id="${escapeHtml(build.id)}">
+        <div>
+          <strong><a href="${escapeHtml(shareUrlForBuild(build))}">${escapeHtml(build.title || "이름 없는 빌드")}</a></strong>
+          <span>${escapeHtml(build.author || "익명")} · 캐릭터 ${build.members.length}명 · 좋아요 ${build.likes}</span>
+          <small>${escapeHtml(dateLabel(build.createdAt))}</small>
+        </div>
+        <div class="pending-actions">
+          <a href="${escapeHtml(shareUrlForBuild(build))}">보기</a>
+          <button type="button" data-admin-build-action="delete">삭제</button>
+        </div>
+      </article>
+    `).join("")}${builds.length > 3 ? `<a class="admin-more-link" href="./builds.html">빌드 전체 보기</a>` : ""}`
+    : `<div class="empty compact-empty">${adminCenterData.errors?.builds ? "빌드 저장소를 불러오지 못했습니다." : "등록된 공개 빌드가 없습니다."}</div>`;
+}
+
+function renderAdminUsers() {
+  if (!els.adminUserList || !els.adminUserCount) return;
+  els.adminUserCount.textContent = `사용자 닉네임 ${adminCenterData.users.length}명`;
+  els.adminUserList.innerHTML = adminCenterData.users.length
+    ? `${adminCenterData.users.slice(0, 4).map((user) => `
+      <article class="admin-management-card">
+        <div>
+          <strong>${escapeHtml(user.nickname || "닉네임 없음")}</strong>
+          <span>${escapeHtml(user.email || "이메일 미기록")}</span>
+          <small>${escapeHtml(dateLabel(user.updated_at || user.created_at))}</small>
+        </div>
+      </article>
+    `).join("")}${adminCenterData.users.length > 4 ? `<span class="admin-more-link is-static">나머지 ${adminCenterData.users.length - 4}명은 백업에서 확인</span>` : ""}`
+    : `<div class="empty compact-empty">${adminCenterData.errors?.users ? "닉네임 저장소 권한 또는 테이블 설정을 확인해주세요." : "등록된 닉네임이 없습니다."}</div>`;
+}
+
+function renderAdminSiteStats() {
+  if (!els.adminSiteStats) return;
+  const total = adminCenterData.visitors.total ?? "확인 실패";
+  const today = adminCenterData.visitors.today ?? "확인 실패";
+  els.adminSiteStats.innerHTML = `
+    <article class="admin-management-card admin-mini-summary">
+      <div>
+        <strong>방문 흐름</strong>
+        <span>오늘 ${escapeHtml(today)} · 누적 ${escapeHtml(total)}</span>
+        <small>마지막 갱신 ${escapeHtml(dateLabel(adminCenterData.loadedAt))}</small>
+      </div>
+    </article>
+  `;
+}
+
+function renderAdminQuality(posts, builds) {
+  if (!els.adminQualityList) return;
+  els.adminQualityList.innerHTML = adminQualityItems(posts, builds).map((item) => `
+    <article class="admin-management-card ${item.warn ? "is-warning" : "is-ok"}">
+      <div>
+        <strong><a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a></strong>
+        <span>${escapeHtml(item.value)}</span>
+      </div>
+    </article>
+  `).join("");
+}
+
 init();

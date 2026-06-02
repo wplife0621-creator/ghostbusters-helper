@@ -8191,3 +8191,156 @@ body {
     flex: 1 1 140px;
   }
 }
+
+/* Admin center usability pass */
+.auth-admin-link {
+  border-color: rgba(255, 209, 102, 0.62);
+  background: linear-gradient(135deg, #ffe49b, #ffc857);
+  color: #2d2208;
+  box-shadow: 0 8px 18px rgba(119, 79, 18, 0.18);
+}
+
+.auth-admin-link:hover {
+  border-color: rgba(255, 209, 102, 0.9);
+  background: linear-gradient(135deg, #fff0bd, #ffd166);
+  color: #1f1705;
+}
+
+.admin-center-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  align-items: start;
+  gap: 14px;
+}
+
+.admin-center-layout > .admin-center-hero,
+.admin-center-layout > .admin-dashboard,
+.admin-center-layout > .admin-ops-grid,
+.admin-center-layout > #admin-backup {
+  grid-column: 1 / -1;
+}
+
+.admin-center-layout .admin-review-section {
+  margin: 0;
+}
+
+.admin-center-hero {
+  border: 1px solid rgba(255, 209, 102, 0.3);
+  background:
+    radial-gradient(circle at top left, rgba(255, 209, 102, 0.22), transparent 38%),
+    linear-gradient(135deg, #152032, #1d3142 52%, #233f48);
+  color: #f8efe0;
+}
+
+.admin-center-hero .section-title h2,
+.admin-center-hero .section-title p {
+  color: inherit;
+}
+
+.admin-center-hero .admin-status,
+.admin-center-hero .build-sync-status {
+  color: #f6dba3;
+}
+
+.admin-stats-grid {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-stat-card {
+  min-height: 74px;
+  border-radius: 13px;
+  padding: 12px 10px;
+}
+
+.admin-stat-card strong {
+  margin-top: 5px;
+  font-size: 20px;
+}
+
+.admin-stat-card small {
+  line-height: 1.25;
+}
+
+.admin-stat-ok {
+  border-color: rgba(34, 145, 94, 0.26);
+  background: linear-gradient(140deg, #f2fbf5, #ffffff);
+}
+
+.admin-stat-warn {
+  border-color: rgba(217, 139, 52, 0.36);
+  background: linear-gradient(140deg, #fff5e5, #ffffff);
+}
+
+.admin-center-layout .pending-reports,
+.admin-center-layout .admin-management-list {
+  max-height: 236px;
+  padding-right: 2px;
+}
+
+.admin-center-layout #approvedReports {
+  max-height: 236px;
+}
+
+.admin-management-card {
+  border-radius: 13px;
+  padding: 10px;
+}
+
+.admin-management-card strong {
+  font-size: 13px;
+}
+
+.admin-management-card span,
+.admin-management-card small {
+  font-size: 11px;
+}
+
+.admin-management-card .pending-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.admin-management-card .pending-actions button,
+.admin-management-card .pending-actions a {
+  min-height: 30px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+.admin-backup-grid {
+  margin-top: 0;
+}
+
+@media (max-width: 980px) {
+  .admin-center-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .admin-ops-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-center-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-management-card {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-management-card .pending-actions {
+    justify-content: flex-start;
+  }
+}

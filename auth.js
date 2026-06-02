@@ -4,6 +4,9 @@
     url: String(config.supabaseUrl || "").replace(/\/$/, ""),
     key: String(config.supabaseAnonKey || ""),
     profileTable: String(config.profileTable || "user_profiles"),
+    adminEmails: Array.isArray(config.adminEmails)
+      ? config.adminEmails.map((email) => String(email || "").trim().toLowerCase()).filter(Boolean)
+      : [],
   };
   const nicknameKey = "dukhubusters.authNickname";
   const nicknamePromptKey = "dukhubusters.nicknamePrompted";
@@ -108,7 +111,19 @@
     signOutButton.textContent = "로그아웃";
     signOutButton.addEventListener("click", signOut);
 
-    state.panel.append(profile, nicknameButton, signOutButton);
+    const adminButton = document.createElement("a");
+    adminButton.href = "./admin.html";
+    adminButton.className = "auth-button auth-button-secondary auth-admin-link";
+    adminButton.textContent = "관리자 센터";
+
+    state.panel.append(profile);
+    if (isAdminUser(user)) state.panel.appendChild(adminButton);
+    state.panel.append(nicknameButton, signOutButton);
+  }
+
+  function isAdminUser(user) {
+    const email = String(user?.email || "").trim().toLowerCase();
+    return Boolean(email && authConfig.adminEmails.includes(email));
   }
 
   function openNicknameModal(options = {}) {
