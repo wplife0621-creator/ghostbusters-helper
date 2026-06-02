@@ -165,7 +165,6 @@ const els = {
   visitorTotal: document.querySelector("#visitorTotal"),
   visitorStatus: document.querySelector("#visitorStatus"),
   homeNoticeFilters: document.querySelector("#homeNoticeFilters"),
-  homeNoticeCounts: document.querySelector("#homeNoticeCounts"),
   homeNoticeList: document.querySelector("#homeNoticeList"),
   homeNoticePagination: document.querySelector("#homeNoticePagination"),
   homeNoticeStatus: document.querySelector("#homeNoticeStatus"),
@@ -1013,18 +1012,6 @@ async function loadHomeNotices() {
 }
 
 function renderHomeNotices() {
-  const types = [
-    { key: "essence", label: "정수" },
-    { key: "numbers", label: "넘버스" },
-    { key: "build", label: "빌드" },
-    { key: "guide", label: "게시판" },
-  ];
-  els.homeNoticeCounts.innerHTML = types.map((type) => `
-    <span class="home-notice-count type-${type.key}">
-      <b>${escapeHtml(type.label)}</b>
-      <strong>${homeNotices.filter((item) => item.type === type.key).length}</strong>
-    </span>
-  `).join("");
   const visible = activeHomeNoticeFilter === "all"
     ? homeNotices
     : homeNotices.filter((item) => item.type === activeHomeNoticeFilter);
@@ -1046,11 +1033,27 @@ function renderHomeNotices() {
     `).join("")
     : `<div class="home-notice-empty">최근 7일 내 공개된 ${activeHomeNoticeFilter === "all" ? "새 소식이" : "항목이"} 없습니다.</div>`;
   els.homeNoticePagination.innerHTML = visible.length > homeNoticePageSize
-    ? Array.from({ length: pageCount }, (_, index) => {
-      const page = index + 1;
-      return `<button type="button" data-notice-page="${page}" class="${page === activeHomeNoticePage ? "is-active" : ""}"${page === activeHomeNoticePage ? ' aria-current="page"' : ""}>${page}</button>`;
-    }).join("")
+    ? noticePaginationMarkup(pageCount, activeHomeNoticePage)
     : "";
+}
+
+function noticePaginationMarkup(pageCount, currentPage) {
+  const pages = new Set([1, pageCount, currentPage - 1, currentPage, currentPage + 1]);
+  const validPages = [...pages]
+    .filter((page) => page >= 1 && page <= pageCount)
+    .sort((a, b) => a - b);
+  const parts = [];
+  let previous = 0;
+  validPages.forEach((page) => {
+    if (page - previous > 1) parts.push(`<span class="home-notice-page-gap">...</span>`);
+    parts.push(`<button type="button" data-notice-page="${page}" class="${page === currentPage ? "is-active" : ""}"${page === currentPage ? ' aria-current="page"' : ""}>${page}</button>`);
+    previous = page;
+  });
+  return `
+    <button type="button" data-notice-page="${Math.max(1, currentPage - 1)}"${currentPage === 1 ? " disabled" : ""}>이전</button>
+    ${parts.join("")}
+    <button type="button" data-notice-page="${Math.min(pageCount, currentPage + 1)}"${currentPage === pageCount ? " disabled" : ""}>다음</button>
+  `;
 }
 
 function initNumbers() {

@@ -7985,6 +7985,45 @@ body {
   display: none;
 }
 
+.home-notice-pagination {
+  justify-content: center;
+  gap: 3px;
+  margin-top: -2px;
+  padding: 2px 0;
+}
+
+.home-notice-pagination button {
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 999px;
+  box-shadow: none;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0 8px;
+}
+
+.home-notice-pagination button:first-child,
+.home-notice-pagination button:last-child {
+  min-width: 42px;
+  font-weight: 800;
+}
+
+.home-notice-pagination button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  transform: none;
+}
+
+.home-notice-page-gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .home-popular-item {
   min-height: 54px;
 }
