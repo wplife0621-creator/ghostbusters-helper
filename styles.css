@@ -8471,16 +8471,16 @@ body {
 .admin-analytics-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 14px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .admin-analytics-grid section {
   min-width: 0;
-  border: 1px solid rgba(50, 93, 128, 0.16);
-  border-radius: 20px;
-  background: #ffffff;
-  padding: 14px;
+  border: 1px solid rgba(50, 93, 128, 0.1);
+  border-radius: 14px;
+  background: #fbfdff;
+  padding: 10px;
 }
 
 .admin-analytics-grid h3 {
@@ -8493,47 +8493,48 @@ body {
 .admin-visitor-chart,
 .admin-stay-chart,
 .admin-activity-chart {
-  height: 220px;
+  height: 132px;
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(32px, 1fr);
+  grid-auto-columns: minmax(22px, 1fr);
   align-items: end;
-  gap: 8px;
+  gap: 5px;
   overflow-x: auto;
-  border: 1px solid rgba(50, 93, 128, 0.16);
-  border-radius: 16px;
-  background: #ffffff;
-  padding: 14px 10px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f8fbff, #ffffff);
+  padding: 8px 4px 4px;
+  scrollbar-width: thin;
 }
 
 .admin-chart-bar {
-  height: 174px;
+  height: 106px;
   display: grid;
   grid-template-rows: 1fr auto auto;
   align-items: end;
   justify-items: center;
-  gap: 4px;
+  gap: 2px;
   color: #243447;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
 }
 
 .admin-chart-bar span {
-  width: 100%;
-  min-height: 10px;
-  border-radius: 999px 999px 6px 6px;
-  background: linear-gradient(180deg, #ffd166, #c87928);
-  box-shadow: 0 8px 16px rgba(163, 98, 24, 0.16);
+  width: 11px;
+  min-height: 8px;
+  border-radius: 999px;
+  background: #d7902f;
+  box-shadow: none;
 }
 
 .admin-stay-bar span {
-  background: linear-gradient(180deg, #7dd3fc, #2563eb);
-  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.16);
+  background: #2563eb;
+  box-shadow: none;
 }
 
 .admin-activity-bar span {
-  background: linear-gradient(180deg, #c4b5fd, #7c3aed);
-  box-shadow: 0 8px 16px rgba(124, 58, 237, 0.16);
+  background: #7c3aed;
+  box-shadow: none;
 }
 
 .admin-stats-controls {
@@ -8625,8 +8626,8 @@ body {
 }
 
 .admin-chart-bar small {
-  color: #617083;
-  font-size: 10px;
+  color: #7b8797;
+  font-size: 9px;
 }
 
 .admin-stay-list {
