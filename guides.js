@@ -52,6 +52,7 @@ const fields = {
   status: document.querySelector("#guideStatus"),
   count: document.querySelector("#guideCount"),
   posts: document.querySelector("#guidePosts"),
+  pagination: document.querySelector("#guidePagination"),
   viewer: document.querySelector("#guideViewer"),
   search: document.querySelector("#guideSearch"),
   categories: document.querySelector(".guide-categories"),
@@ -65,6 +66,8 @@ let guideLikeIpPromise = null;
 let activeReplyId = "";
 let retainedMedia = [];
 let activeCategory = "전체";
+let guidePage = 1;
+const guidePageSize = 10;
 const linkedPostId = new URLSearchParams(window.location.search).get("post") || "";
 let selectedPostId = linkedPostId;
 let pendingLinkedView = linkedPostId;
@@ -1241,5 +1244,76 @@ fields.composer.addEventListener("paste", (event) => {
   queueMediaFiles(files);
 });
 fields.media.addEventListener("change", () => queueMediaFiles(fields.media.files));
+fields.search.addEventListener("input", () => {
+  guidePage = 1;
+  renderPosts();
+});
+fields.categories.addEventListener("click", (event) => {
+  if (event.target.closest("button[data-guide-category]")) {
+    guidePage = 1;
+    renderPosts();
+  }
+});
+fields.pagination?.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  const visiblePosts = filteredPosts();
+  const totalPages = Math.max(1, Math.ceil(visiblePosts.length / guidePageSize));
+  if (button.dataset.guidePagePrev !== undefined) guidePage -= 1;
+  else if (button.dataset.guidePageNext !== undefined) guidePage += 1;
+  else if (button.dataset.guidePage) guidePage = Number(button.dataset.guidePage);
+  guidePage = Math.min(Math.max(1, guidePage), totalPages);
+  renderPosts();
+});
+
+function renderPosts() {
+  const visiblePosts = filteredPosts();
+  const totalPages = Math.max(1, Math.ceil(visiblePosts.length / guidePageSize));
+  guidePage = Math.min(Math.max(1, guidePage), totalPages);
+  const startIndex = (guidePage - 1) * guidePageSize;
+  const pagePosts = visiblePosts.slice(startIndex, startIndex + guidePageSize);
+  fields.count.textContent = `${activeCategory === "전체" ? "전체글" : activeCategory} ${visiblePosts.length}개 · ${guidePage}/${totalPages}쪽`;
+  fields.posts.innerHTML = pagePosts.length ? pagePosts.map((post) => `
+    <article class="guide-row" data-guide-id="${escapeHtml(post.id)}">
+      <span class="guide-row-number">${posts.length - posts.indexOf(post)}</span>
+      <span class="guide-row-category ${categoryClass(post.category)}">${escapeHtml(post.category)}</span>
+      <button type="button" class="guide-row-title" data-guide-action="view">
+        ${escapeHtml(post.title)}
+        ${post.acceptedCommentId ? `<small class="guide-accepted-mini">답변 채택</small>` : ""}
+        ${post.media.length ? `<small>첨부 ${post.media.length}</small>` : ""}
+        ${post.commentCount ? `<small>댓글 ${post.commentCount}</small>` : ""}
+      </button>
+      <span class="guide-row-author">${escapeHtml(post.author)}</span>
+      <span class="guide-row-date">${escapeHtml(dateLabel(post.updatedAt))}</span>
+      <span class="guide-row-metrics">
+        <span class="guide-row-views">조회 ${post.views}</span>
+        <span class="guide-row-likes">좋아요 ${post.likes}</span>
+      </span>
+    </article>
+  `).join("") : `<div class="empty compact-empty">조건에 맞는 게시글이 없습니다.</div>`;
+  renderGuidePagination(totalPages);
+  renderViewer();
+}
+
+function renderGuidePagination(totalPages) {
+  if (!fields.pagination) return;
+  if (totalPages <= 1) {
+    fields.pagination.innerHTML = "";
+    return;
+  }
+  const pages = [];
+  for (let page = 1; page <= totalPages; page += 1) {
+    pages.push(`
+      <button type="button" class="${page === guidePage ? "is-active" : ""}" data-guide-page="${page}" aria-current="${page === guidePage ? "page" : "false"}">
+        ${page}
+      </button>
+    `);
+  }
+  fields.pagination.innerHTML = `
+    <button type="button" data-guide-page-prev ${guidePage <= 1 ? "disabled" : ""}>이전</button>
+    ${pages.join("")}
+    <button type="button" data-guide-page-next ${guidePage >= totalPages ? "disabled" : ""}>다음</button>
+  `;
+}
 revealCurrentNavItem();
 loadPosts();

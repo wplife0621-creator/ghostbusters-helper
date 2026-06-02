@@ -3,29 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>정수 확인하기 · 덕후버스터즈</title>
-  <meta name="description" content="몬스터 정수의 스탯, 패시브, 액티브, 추천 캐릭터, 층과 구역 정보를 검색하고 비교합니다.">
-  <link rel="stylesheet" href="./styles.css?v=20260602-adsense-ready">
+  <title>?뺤닔 ?뺤씤?섍린 쨌 ?뺥썑踰꾩뒪?곗쫰</title>
+  <meta name="description" content="紐ъ뒪???뺤닔???ㅽ꺈, ?⑥떆釉? ?≫떚釉? 異붿쿇 罹먮┃?? 痢듦낵 援ъ뿭 ?뺣낫瑜?寃?됲븯怨?鍮꾧탳?⑸땲??">
+  <link rel="stylesheet" href="./styles.css?v=20260602-admin-analytics">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
 <body>
   <header class="topbar compact">
     <div class="topbar-inner">
-      <h1>정수 확인하기</h1>
-      <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="./index.html">홈</a>
+      <h1>?뺤닔 ?뺤씤?섍린</h1>
+      <nav class="site-nav" aria-label="二쇱슂 硫붾돱">
+        <a href="./index.html">??/a>
         <details class="nav-dropdown">
-          <summary aria-current="page">도감</summary>
+          <summary aria-current="page">?꾧컧</summary>
           <div class="nav-submenu">
-            <a href="./essences.html" aria-current="page">정수</a>
-            <a href="./numbers.html">넘버스</a>
+            <a href="./essences.html" aria-current="page">?뺤닔</a>
+            <a href="./numbers.html">?섎쾭??/a>
           </div>
         </details>
-        <a href="./builds.html">빌드</a>
-        <a href="./guides.html">게시판</a>
-        <a href="./report.html">정보 제보/수정</a>
-        <a href="./maze-time.html">미궁 시간 계산기</a>
+        <a href="./builds.html">鍮뚮뱶</a>
+        <a href="./guides.html">寃뚯떆??/a>
+        <a href="./report.html">?뺣낫 ?쒕낫/?섏젙</a>
+        <a href="./maze-time.html">誘멸턿 ?쒓컙 怨꾩궛湲?/a>
       </nav>
     </div>
   </header>
@@ -33,75 +33,75 @@
   <main class="layout compact-layout">
     <section class="panel page-intro">
       <p class="home-kicker">ESSENCE CODEX</p>
-      <h2>정수 정보 검색과 비교</h2>
-      <p>몬스터별 정수의 스탯, 패시브, 액티브, 추천 캐릭터, 항해 여부와 획득 구역을 정리한 도감입니다. 체크박스로 여러 정수를 고정해 비교하고, 효과·스탯·층별 정렬로 원하는 빌드 재료를 빠르게 찾을 수 있습니다.</p>
+      <h2>?뺤닔 ?뺣낫 寃?됯낵 鍮꾧탳</h2>
+      <p>紐ъ뒪?곕퀎 ?뺤닔???ㅽ꺈, ?⑥떆釉? ?≫떚釉? 異붿쿇 罹먮┃?? ??빐 ?щ?? ?띾뱷 援ъ뿭???뺣━???꾧컧?낅땲?? 泥댄겕諛뺤뒪濡??щ윭 ?뺤닔瑜?怨좎젙??鍮꾧탳?섍퀬, ?④낵쨌?ㅽ꺈쨌痢듬퀎 ?뺣젹濡??먰븯??鍮뚮뱶 ?щ즺瑜?鍮좊Ⅴ寃?李얠쓣 ???덉뒿?덈떎.</p>
     </section>
     <section class="panel controls compact-card essence-controls">
       <label class="field wide">
-        <span>정수 검색</span>
-        <input id="searchInput" type="search" placeholder="몬스터, 스탯, 패시브, 액티브 검색">
+        <span>?뺤닔 寃??/span>
+        <input id="searchInput" type="search" placeholder="紐ъ뒪?? ?ㅽ꺈, ?⑥떆釉? ?≫떚釉?寃??>
       </label>
       <label class="field">
-        <span>층</span>
+        <span>痢?/span>
         <select id="floorFilter"></select>
       </label>
       <label class="field">
-        <span>구역</span>
+        <span>援ъ뿭</span>
         <select id="areaFilter"></select>
       </label>
       <label class="field">
-        <span>등급</span>
+        <span>?깃툒</span>
         <select id="gradeFilter"></select>
       </label>
       <label class="field">
-        <span>추천 캐릭터</span>
+        <span>異붿쿇 罹먮┃??/span>
         <select id="characterFilter"></select>
       </label>
       <label class="field check-field sailing-filter">
-        <span>항해 정수</span>
+        <span>??빐 ?뺤닔</span>
         <span class="check-control">
           <input id="sailingFilter" type="checkbox">
-          <strong>항해만 보기</strong>
+          <strong>??빐留?蹂닿린</strong>
         </span>
       </label>
       <label class="field">
-        <span>정렬</span>
+        <span>?뺣젹</span>
         <select id="sortFilter">
-          <option value="default">층 낮은 순</option>
-          <option value="sailing">항해 정수 우선</option>
-          <option value="recommend:비요른">비요른 추천 우선</option>
-          <option value="recommend:에르웬">에르웬 추천 우선</option>
-          <option value="recommend:미샤">미샤 추천 우선</option>
-          <option value="recommend:아이나르">아이나르 추천 우선</option>
-          <option value="recommend:레이븐">레이븐 추천 우선</option>
-          <option value="recommend:아우옌">아우옌 추천 우선</option>
-          <option value="floor-desc">층 높은 순</option>
-          <option value="cooldown">쿨타임 짧은 순</option>
+          <option value="default">痢???? ??/option>
+          <option value="sailing">??빐 ?뺤닔 ?곗꽑</option>
+          <option value="recommend:鍮꾩슂瑜?>鍮꾩슂瑜?異붿쿇 ?곗꽑</option>
+          <option value="recommend:?먮Ⅴ??>?먮Ⅴ??異붿쿇 ?곗꽑</option>
+          <option value="recommend:誘몄깶">誘몄깶 異붿쿇 ?곗꽑</option>
+          <option value="recommend:?꾩씠?섎Ⅴ">?꾩씠?섎Ⅴ 異붿쿇 ?곗꽑</option>
+          <option value="recommend:?덉씠釉?>?덉씠釉?異붿쿇 ?곗꽑</option>
+          <option value="recommend:?꾩슦??>?꾩슦??異붿쿇 ?곗꽑</option>
+          <option value="floor-desc">痢??믪? ??/option>
+          <option value="cooldown">荑⑦???吏㏃? ??/option>
         </select>
       </label>
       <label class="field">
-        <span>스탯 선택</span>
+        <span>?ㅽ꺈 ?좏깮</span>
         <select id="statSortFilter"></select>
       </label>
     </section>
     <section class="panel effect-panel">
       <div class="section-title compact-title">
-        <h2>효과 정렬</h2>
-        <p id="effectSortSummary">패시브와 액티브에서 원하는 효과를 찾아 먼저 표시합니다.</p>
+        <h2>?④낵 ?뺣젹</h2>
+        <p id="effectSortSummary">?⑥떆釉뚯? ?≫떚釉뚯뿉???먰븯???④낵瑜?李얠븘 癒쇱? ?쒖떆?⑸땲??</p>
       </div>
-      <div id="effectSortChips" class="effect-chip-row" aria-label="효과 정렬 선택"></div>
+      <div id="effectSortChips" class="effect-chip-row" aria-label="?④낵 ?뺣젹 ?좏깮"></div>
     </section>
     <details class="panel stat-panel stat-sort-panel">
       <summary class="stat-sort-toggle">
-        <strong>스탯 정렬</strong>
-        <span id="statSortSummary">스탯을 누르면 높은 순으로 정렬됩니다.</span>
+        <strong>?ㅽ꺈 ?뺣젹</strong>
+        <span id="statSortSummary">?ㅽ꺈???꾨Ⅴ硫??믪? ?쒖쑝濡??뺣젹?⑸땲??</span>
       </summary>
       <div id="statChips" class="stat-chip-row"></div>
     </details>
     <section class="panel results-panel">
       <div class="section-title compact-title">
-        <h2 id="resultTitle">정수 목록</h2>
-        <p id="resultCount">0건</p>
+        <h2 id="resultTitle">?뺤닔 紐⑸줉</h2>
+        <p id="resultCount">0嫄?/p>
       </div>
       <div id="results" class="essence-results"></div>
     </section>
@@ -111,78 +111,78 @@
     <form id="quickEditForm" class="quick-edit-dialog">
       <div class="quick-edit-head">
         <div>
-          <strong>정수 정보 바로 수정</strong>
-          <span>수정 내용은 검수 대기에 등록됩니다.</span>
+          <strong>?뺤닔 ?뺣낫 諛붾줈 ?섏젙</strong>
+          <span>?섏젙 ?댁슜? 寃???湲곗뿉 ?깅줉?⑸땲??</span>
         </div>
-        <button id="quickEditClose" type="button" aria-label="닫기">×</button>
+        <button id="quickEditClose" type="button" aria-label="?リ린">횞</button>
       </div>
       <input id="quickEditOriginalMonster" type="hidden">
       <div class="quick-edit-grid">
         <label class="field">
-          <span>올린사람 닉네임</span>
-          <input id="quickEditNickname" maxlength="24" placeholder="예: 겜바바덕후">
+          <span>?щ┛?щ엺 ?됰꽕??/span>
+          <input id="quickEditNickname" maxlength="24" placeholder="?? 寃쒕컮諛붾뜒??>
         </label>
         <label class="field">
-          <span>몬스터명</span>
+          <span>紐ъ뒪?곕챸</span>
           <input id="quickEditMonster" required>
         </label>
         <label class="field">
-          <span>등급</span>
+          <span>?깃툒</span>
           <input id="quickEditGrade" required>
         </label>
         <label class="field">
-          <span>층</span>
+          <span>痢?/span>
           <select id="quickEditFloor" required></select>
         </label>
         <label class="field">
-          <span>구역</span>
+          <span>援ъ뿭</span>
           <select id="quickEditArea" required></select>
         </label>
         <label class="field check-field">
-          <span>항해 관련 정수</span>
+          <span>??빐 愿???뺤닔</span>
           <span class="check-control">
             <input id="quickEditSailing" type="checkbox">
-            <strong>항해 정수로 표시</strong>
+            <strong>??빐 ?뺤닔濡??쒖떆</strong>
           </span>
         </label>
         <label class="field wide">
-          <span>주요 스탯</span>
+          <span>二쇱슂 ?ㅽ꺈</span>
           <input id="quickEditStats" required>
         </label>
         <label class="field wide">
-          <span>패시브</span>
+          <span>?⑥떆釉?/span>
           <input id="quickEditPassive" required>
         </label>
       </div>
       <fieldset class="recommendation-fields">
-        <legend>추천 캐릭터 <small>복수 선택 가능</small></legend>
+        <legend>異붿쿇 罹먮┃??<small>蹂듭닔 ?좏깮 媛??/small></legend>
         <div class="recommendation-checks">
-          <label><input class="quick-edit-recommendation" type="checkbox" value="비요른"><span>비요른</span></label>
-          <label><input class="quick-edit-recommendation" type="checkbox" value="에르웬"><span>에르웬</span></label>
-          <label><input class="quick-edit-recommendation" type="checkbox" value="미샤"><span>미샤</span></label>
-          <label><input class="quick-edit-recommendation" type="checkbox" value="아이나르"><span>아이나르</span></label>
-          <label><input class="quick-edit-recommendation" type="checkbox" value="레이븐"><span>레이븐</span></label>
-          <label><input class="quick-edit-recommendation" type="checkbox" value="아우옌"><span>아우옌</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="鍮꾩슂瑜?><span>鍮꾩슂瑜?/span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="?먮Ⅴ??><span>?먮Ⅴ??/span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="誘몄깶"><span>誘몄깶</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="?꾩씠?섎Ⅴ"><span>?꾩씠?섎Ⅴ</span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="?덉씠釉?><span>?덉씠釉?/span></label>
+          <label><input class="quick-edit-recommendation" type="checkbox" value="?꾩슦??><span>?꾩슦??/span></label>
         </div>
       </fieldset>
       <fieldset class="active-skill-fields wide">
-        <legend>액티브 <small>최대 3개</small></legend>
+        <legend>?≫떚釉?<small>理쒕? 3媛?/small></legend>
         <label class="field">
-          <span>액티브 1</span>
+          <span>?≫떚釉?1</span>
           <input id="quickEditActive">
         </label>
         <label class="field">
-          <span>액티브 2</span>
+          <span>?≫떚釉?2</span>
           <input id="quickEditActive2">
         </label>
         <label class="field">
-          <span>액티브 3</span>
+          <span>?≫떚釉?3</span>
           <input id="quickEditActive3">
         </label>
       </fieldset>
       <div class="quick-edit-actions">
         <p id="quickEditStatus"></p>
-        <button class="submit-report" type="submit">수정 제보 등록</button>
+        <button class="submit-report" type="submit">?섏젙 ?쒕낫 ?깅줉</button>
       </div>
     </form>
   </div>
@@ -197,7 +197,7 @@
   </script>
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js?v=20260602-admin-center"></script>
-  <script src="./app.js?v=20260602-build-label"></script>
+  <script src="./auth.js?v=20260602-admin-analytics"></script>
+  <script src="./app.js?v=20260602-admin-analytics"></script>
 </body>
 </html>

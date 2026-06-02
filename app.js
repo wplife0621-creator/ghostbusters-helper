@@ -58,6 +58,7 @@ const visitorBuildMarkers = {
   total: "__visitor_total__",
   daily: "__visitor_daily__",
 };
+const sessionTimeMarker = "__session_time__";
 const buildLikeMarker = "__build_like__";
 const buildDeleteMarker = "__build_deleted__";
 const buildReviewMarker = "__build_review__";
@@ -1627,7 +1628,7 @@ function normalizeRemoteBuild(row) {
 }
 
 function isVisitorBuild(build) {
-  return build?.title === visitorBuildMarkers.total || build?.title === visitorBuildMarkers.daily;
+  return build?.title === visitorBuildMarkers.total || build?.title === visitorBuildMarkers.daily || build?.title === sessionTimeMarker;
 }
 
 function isBuildLike(build) {
@@ -4372,6 +4373,154 @@ function renderAdminQuality(posts, builds) {
       </div>
     </article>
   `).join("");
+}
+
+async function loadAdminCenter() {
+  if (!els.adminStatsGrid) return;
+  if (!adminUnlocked || !isAdminUser()) {
+    renderAdminCenter();
+    return;
+  }
+  els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
+  const [guideResult, buildResult, userResult, visitorResult, dailyResult] = await Promise.allSettled([
+    fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
+    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc"),
+    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc"),
+    fetchAdminRows(visitorBackend, visitorBackend.visitorTable, "?select=visitor_id"),
+    fetchAdminRows(visitorBackend, visitorBackend.dailyTable, "?select=visitor_id,visit_date&order=visit_date.desc"),
+  ]);
+  const buildRows = buildResult.status === "fulfilled" ? buildResult.value : [];
+  const buildVisitorStats = adminBuildVisitorStats(buildRows);
+  const dailyRows = dailyResult.status === "fulfilled" ? dailyResult.value : [];
+  const tableDaily = adminDailyVisitorCounts(dailyRows);
+  const dailyCounts = buildVisitorStats.dailyCounts.length ? buildVisitorStats.dailyCounts : tableDaily;
+  const today = todayKey();
+  adminCenterData = {
+    guides: guideResult.status === "fulfilled" ? guideResult.value.map(normalizeAdminGuide) : [],
+    builds: buildRows,
+    users: userResult.status === "fulfilled" ? userResult.value : [],
+    visitors: {
+      total: buildVisitorStats.total || (visitorResult.status === "fulfilled" ? visitorResult.value.length : null),
+      today: buildVisitorStats.today ?? tableDaily.find((row) => row.date === today)?.count ?? null,
+      dailyCounts,
+      stayStats: adminSessionStayStats(buildRows),
+    },
+    errors: {
+      guides: guideResult.status !== "fulfilled",
+      builds: buildResult.status !== "fulfilled",
+      users: userResult.status !== "fulfilled",
+      visitors: buildResult.status !== "fulfilled" && (visitorResult.status !== "fulfilled" || dailyResult.status !== "fulfilled"),
+    },
+    loadedAt: new Date().toISOString(),
+  };
+  renderAdminCenter();
+}
+
+function adminBuildVisitorStats(rows) {
+  const dailyRows = rows.filter((row) => textOf(row.title) === visitorBuildMarkers.daily);
+  const dailyMap = new Map();
+  dailyRows.forEach((row) => {
+    const date = textOf(row.note) || textOf(row.created_at || row.createdAt).slice(0, 10);
+    if (!date) return;
+    dailyMap.set(date, (dailyMap.get(date) || 0) + 1);
+  });
+  const dailyCounts = [...dailyMap.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-14);
+  return {
+    total: dailyRows.length,
+    today: dailyMap.get(todayKey()) || 0,
+    dailyCounts,
+  };
+}
+
+function adminDailyVisitorCounts(rows) {
+  const dailyMap = new Map();
+  rows.forEach((row) => {
+    const date = textOf(row.visit_date);
+    if (!date) return;
+    dailyMap.set(date, (dailyMap.get(date) || 0) + 1);
+  });
+  return [...dailyMap.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-14);
+}
+
+function adminSessionStayStats(rows) {
+  const dailyMap = new Map();
+  rows.filter((row) => textOf(row.title) === sessionTimeMarker).forEach((row) => {
+    const parsed = parseBuildMarkerNote(row.note);
+    const date = textOf(parsed.date) || textOf(row.created_at || row.createdAt).slice(0, 10);
+    const seconds = Math.max(0, Number(parsed.seconds || 0));
+    if (!date || !seconds) return;
+    const bucket = dailyMap.get(date) || { date, seconds: 0, records: 0 };
+    bucket.seconds += Math.min(seconds, 600);
+    bucket.records += 1;
+    dailyMap.set(date, bucket);
+  });
+  return [...dailyMap.values()]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-14);
+}
+
+function adminFormatMinutes(seconds) {
+  const minutes = Math.round(Number(seconds || 0) / 60);
+  if (minutes < 60) return `${minutes}분`;
+  return `${Math.floor(minutes / 60)}시간 ${minutes % 60}분`;
+}
+
+function adminVisitorChartMarkup(rows) {
+  if (!rows?.length) return `<div class="empty compact-empty">아직 표시할 일자별 방문 기록이 없습니다.</div>`;
+  const max = Math.max(...rows.map((row) => row.count), 1);
+  return `
+    <div class="admin-visitor-chart" aria-label="일자별 방문자 수 그래프">
+      ${rows.map((row) => {
+        const height = Math.max(10, Math.round((row.count / max) * 100));
+        return `
+          <div class="admin-chart-bar" title="${escapeHtml(row.date)} ${row.count}명">
+            <span style="height:${height}%"></span>
+            <b>${row.count}</b>
+            <small>${escapeHtml(row.date.slice(5).replace("-", "/"))}</small>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderAdminSiteStats() {
+  if (!els.adminSiteStats) return;
+  const total = adminCenterData.visitors.total ?? "확인 실패";
+  const today = adminCenterData.visitors.today ?? "확인 실패";
+  const stayRows = adminCenterData.visitors.stayStats || [];
+  const todayStay = stayRows.find((row) => row.date === todayKey());
+  const avgStaySeconds = todayStay?.records ? todayStay.seconds / todayStay.records : 0;
+  els.adminSiteStats.innerHTML = `
+    <article class="admin-site-overview">
+      <div class="admin-site-metric">
+        <span>오늘 방문</span>
+        <strong>${escapeHtml(today)}명</strong>
+      </div>
+      <div class="admin-site-metric">
+        <span>누적 방문</span>
+        <strong>${escapeHtml(total)}명</strong>
+      </div>
+      <div class="admin-site-metric">
+        <span>오늘 평균 체류</span>
+        <strong>${avgStaySeconds ? escapeHtml(adminFormatMinutes(avgStaySeconds)) : "-"}</strong>
+      </div>
+      <small>마지막 갱신 ${escapeHtml(dateLabel(adminCenterData.loadedAt))}</small>
+    </article>
+    ${adminVisitorChartMarkup(adminCenterData.visitors.dailyCounts)}
+    <div class="admin-stay-list">
+      <strong>로그인 사용자 일자별 체류 시간</strong>
+      ${stayRows.length ? stayRows.map((row) => `
+        <span>${escapeHtml(row.date)} · 총 ${escapeHtml(adminFormatMinutes(row.seconds))} · 기록 ${row.records}회</span>
+      `).join("") : `<span>로그인 사용자 체류 기록이 아직 없습니다.</span>`}
+    </div>
+  `;
 }
 
 init();

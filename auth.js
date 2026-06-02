@@ -4,12 +4,14 @@
     url: String(config.supabaseUrl || "").replace(/\/$/, ""),
     key: String(config.supabaseAnonKey || ""),
     profileTable: String(config.profileTable || "user_profiles"),
+    buildTable: String(config.buildTable || "builds"),
     adminEmails: Array.isArray(config.adminEmails)
       ? config.adminEmails.map((email) => String(email || "").trim().toLowerCase()).filter(Boolean)
       : [],
   };
   const nicknameKey = "dukhubusters.authNickname";
   const nicknamePromptKey = "dukhubusters.nicknamePrompted";
+  const sessionTimeMarker = "__session_time__";
   const bannedNicknamePatterns = [
     /섹스|성관계|성기|음란|야동|자위|정액|질싸|오랄|강간/i,
     /보지|자지|좆|꼬추|유두|젖꼭지/i,
@@ -21,6 +23,9 @@
     user: null,
     panel: null,
     checkedNickname: "",
+    stayTimer: null,
+    stayStartedAt: 0,
+    staySequence: 0,
   };
 
   window.DUKHUBUSTERS_AUTH = {
@@ -77,6 +82,7 @@
     renderAuthPanel(state.user);
     applyUserToAuthorFields(state.user);
     announceAuthChange();
+    startStayTracking();
     if (options.promptNickname) maybePromptNickname();
   }
 
@@ -352,7 +358,65 @@
 
   async function signOut() {
     if (!state.client) return;
+    await flushStayTime();
     await state.client.auth.signOut();
+  }
+
+  function startStayTracking() {
+    stopStayTracking();
+    if (!state.user || !authConfig.url || !authConfig.key || !authConfig.buildTable) return;
+    state.stayStartedAt = Date.now();
+    state.stayTimer = window.setInterval(flushStayTime, 60000);
+  }
+
+  function stopStayTracking() {
+    if (state.stayTimer) window.clearInterval(state.stayTimer);
+    state.stayTimer = null;
+    state.stayStartedAt = 0;
+  }
+
+  async function flushStayTime() {
+    if (!state.user || !state.stayStartedAt) return;
+    const now = Date.now();
+    const seconds = Math.max(0, Math.round((now - state.stayStartedAt) / 1000));
+    if (seconds < 20) return;
+    state.stayStartedAt = now;
+    state.staySequence += 1;
+    try {
+      await fetch(`${authConfig.url}/rest/v1/${authConfig.buildTable}`, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          apikey: authConfig.key,
+          Authorization: `Bearer ${authConfig.key}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=ignore-duplicates,return=minimal",
+        },
+        body: JSON.stringify({
+          id: `session-${todayKey()}-${state.user.id}-${Date.now()}-${state.staySequence}`,
+          title: sessionTimeMarker,
+          author: displayName(state.user).slice(0, 40) || "login",
+          members: [],
+          note: JSON.stringify({
+            date: todayKey(),
+            seconds: Math.min(seconds, 600),
+            path: window.location.pathname,
+          }),
+          created_at: new Date().toISOString(),
+        }),
+      });
+    } catch {
+      // Stay-time analytics are optional and should never interrupt login.
+    }
+  }
+
+  function todayKey() {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
   }
 
   function displayName(user) {
@@ -398,4 +462,12 @@
       detail: { user: state.user },
     }));
   }
+
+  window.addEventListener("beforeunload", () => {
+    flushStayTime();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushStayTime();
+    else if (state.user) state.stayStartedAt = Date.now();
+  });
 })();

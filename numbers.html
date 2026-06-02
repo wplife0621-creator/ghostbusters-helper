@@ -3,29 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>넘버스 · 덕후버스터즈</title>
-  <meta name="description" content="넘버스의 번호, 이름, 착용부위, 효과, 아이템 레벨, 획득처를 검색하고 층과 구역별로 정렬합니다.">
-  <link rel="stylesheet" href="./styles.css?v=20260602-adsense-ready">
+  <title>?섎쾭??쨌 ?뺥썑踰꾩뒪?곗쫰</title>
+  <meta name="description" content="?섎쾭?ㅼ쓽 踰덊샇, ?대쫫, 李⑹슜遺?? ?④낵, ?꾩씠???덈꺼, ?띾뱷泥섎? 寃?됲븯怨?痢듦낵 援ъ뿭蹂꾨줈 ?뺣젹?⑸땲??">
+  <link rel="stylesheet" href="./styles.css?v=20260602-admin-analytics">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
 <body>
   <header class="topbar compact">
     <div class="topbar-inner">
-      <h1>넘버스</h1>
-      <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="./index.html">홈</a>
+      <h1>?섎쾭??/h1>
+      <nav class="site-nav" aria-label="二쇱슂 硫붾돱">
+        <a href="./index.html">??/a>
         <details class="nav-dropdown">
-          <summary aria-current="page">도감</summary>
+          <summary aria-current="page">?꾧컧</summary>
           <div class="nav-submenu">
-            <a href="./essences.html">정수</a>
-            <a href="./numbers.html" aria-current="page">넘버스</a>
+            <a href="./essences.html">?뺤닔</a>
+            <a href="./numbers.html" aria-current="page">?섎쾭??/a>
           </div>
         </details>
-        <a href="./builds.html">빌드</a>
-        <a href="./guides.html">게시판</a>
-        <a href="./report.html">정보 제보/수정</a>
-        <a href="./maze-time.html">미궁 시간 계산기</a>
+        <a href="./builds.html">鍮뚮뱶</a>
+        <a href="./guides.html">寃뚯떆??/a>
+        <a href="./report.html">?뺣낫 ?쒕낫/?섏젙</a>
+        <a href="./maze-time.html">誘멸턿 ?쒓컙 怨꾩궛湲?/a>
       </nav>
     </div>
   </header>
@@ -33,37 +33,37 @@
   <main class="layout numbers-layout">
     <section class="panel page-intro">
       <p class="home-kicker">NUMBERS CODEX</p>
-      <h2>넘버스 정보 도감</h2>
-      <p>넘버스의 번호, 이름, 착용부위, 효과, 아이템 레벨과 획득처를 한곳에서 확인합니다. 번호가 미확인인 항목도 따로 표시하고, 층·구역·효과별 정렬로 필요한 넘버스를 빠르게 찾을 수 있습니다.</p>
+      <h2>?섎쾭???뺣낫 ?꾧컧</h2>
+      <p>?섎쾭?ㅼ쓽 踰덊샇, ?대쫫, 李⑹슜遺?? ?④낵, ?꾩씠???덈꺼怨??띾뱷泥섎? ?쒓납?먯꽌 ?뺤씤?⑸땲?? 踰덊샇媛 誘명솗?몄씤 ??ぉ???곕줈 ?쒖떆?섍퀬, 痢돠룰뎄??룻슚怨쇰퀎 ?뺣젹濡??꾩슂???섎쾭?ㅻ? 鍮좊Ⅴ寃?李얠쓣 ???덉뒿?덈떎.</p>
     </section>
     <section class="panel numbers-panel">
       <div class="section-title compact-title">
-        <h2>넘버스 정보</h2>
-        <p>번호, 이름, 효과, 착용부위, 획득처와 아이템 레벨을 확인하세요.</p>
+        <h2>?섎쾭???뺣낫</h2>
+        <p>踰덊샇, ?대쫫, ?④낵, 李⑹슜遺?? ?띾뱷泥섏? ?꾩씠???덈꺼???뺤씤?섏꽭??</p>
       </div>
       <div class="numbers-controls">
         <label class="field wide">
-          <span>검색</span>
-          <input id="numbersSearch" type="search" placeholder="이름, 번호, 효과, 착용부위, 획득처 검색">
+          <span>寃??/span>
+          <input id="numbersSearch" type="search" placeholder="?대쫫, 踰덊샇, ?④낵, 李⑹슜遺?? ?띾뱷泥?寃??>
         </label>
         <label class="field">
-          <span>층</span>
+          <span>痢?/span>
           <select id="numbersFloor"></select>
         </label>
         <label class="field">
-          <span>구역</span>
+          <span>援ъ뿭</span>
           <select id="numbersArea"></select>
         </label>
         <label class="field">
-          <span>아이템 레벨</span>
+          <span>?꾩씠???덈꺼</span>
           <select id="numbersLevel"></select>
         </label>
         <label class="field">
-          <span>정렬</span>
+          <span>?뺣젹</span>
           <select id="numbersSort">
-            <option value="number">번호 순</option>
-            <option value="level-desc">레벨 높은 순</option>
-            <option value="level-asc">레벨 낮은 순</option>
+            <option value="number">踰덊샇 ??/option>
+            <option value="level-desc">?덈꺼 ?믪? ??/option>
+            <option value="level-asc">?덈꺼 ??? ??/option>
           </select>
         </label>
       </div>
@@ -71,19 +71,19 @@
 
     <section class="panel effect-panel numbers-effect-panel">
       <div class="section-title compact-title">
-        <h2>효과 정렬</h2>
-        <p id="numbersEffectSortSummary">원하는 효과를 누르면 해당 넘버스가 먼저 표시됩니다.</p>
+        <h2>?④낵 ?뺣젹</h2>
+        <p id="numbersEffectSortSummary">?먰븯???④낵瑜??꾨Ⅴ硫??대떦 ?섎쾭?ㅺ? 癒쇱? ?쒖떆?⑸땲??</p>
       </div>
-      <div id="numbersEffectSortChips" class="effect-chip-row" aria-label="넘버스 효과 정렬 선택"></div>
+      <div id="numbersEffectSortChips" class="effect-chip-row" aria-label="?섎쾭???④낵 ?뺣젹 ?좏깮"></div>
     </section>
 
     <section class="panel numbers-panel">
       <div class="section-title compact-title">
-        <h2>목록</h2>
-        <p id="numbersCount">0건</p>
+        <h2>紐⑸줉</h2>
+        <p id="numbersCount">0嫄?/p>
       </div>
       <div id="numbersResults"></div>
-      <div id="numbersPagination" class="numbers-pagination" aria-label="넘버스 목록 페이지"></div>
+      <div id="numbersPagination" class="numbers-pagination" aria-label="?섎쾭??紐⑸줉 ?섏씠吏"></div>
     </section>
   </main>
 
@@ -100,7 +100,7 @@
   </script>
   <script src="./config.js?v=20260601-nickname-check"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js?v=20260602-admin-center"></script>
-  <script src="./app.js?v=20260602-build-label"></script>
+  <script src="./auth.js?v=20260602-admin-analytics"></script>
+  <script src="./app.js?v=20260602-admin-analytics"></script>
 </body>
 </html>
