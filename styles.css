@@ -8790,6 +8790,22 @@ body {
   padding-right: 0;
 }
 
+body.admin-review-page .admin-review-layout {
+  width: min(1480px, calc(100% - 32px)) !important;
+}
+
+body.admin-review-page .admin-center-layout > #admin-stats.admin-site-stats-section {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+body.admin-review-page #adminSiteStats {
+  max-height: none !important;
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+
 @media (max-width: 640px) {
   .guide-pagination {
     flex-wrap: nowrap;
