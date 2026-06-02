@@ -4451,6 +4451,7 @@ function adminDailyVisitorCounts(rows) {
 function adminSessionStayStats(rows) {
   const dailyMap = new Map();
   const accountMap = new Map();
+  const pageMap = new Map();
   rows.filter((row) => textOf(row.title) === sessionTimeMarker).forEach((row) => {
     const parsed = parseBuildMarkerNote(row.note);
     const date = textOf(parsed.date) || textOf(row.created_at || row.createdAt).slice(0, 10);
@@ -4467,13 +4468,49 @@ function adminSessionStayStats(rows) {
     accountBucket.seconds += Math.min(seconds, 600);
     accountBucket.records += 1;
     accountMap.set(key, accountBucket);
+    const path = normalizeAdminPagePath(parsed.path);
+    const pageBucket = pageMap.get(path) || { path, label: adminPageLabel(path), seconds: 0, records: 0, accounts: new Set() };
+    pageBucket.seconds += Math.min(seconds, 600);
+    pageBucket.records += 1;
+    pageBucket.accounts.add(account);
+    pageMap.set(path, pageBucket);
   });
   return {
     daily: [...dailyMap.values()].sort((a, b) => a.date.localeCompare(b.date)).slice(-14),
     accounts: [...accountMap.values()]
       .sort((a, b) => b.date.localeCompare(a.date) || b.seconds - a.seconds)
       .slice(0, 80),
+    pages: [...pageMap.values()]
+      .map((row) => ({ ...row, accounts: row.accounts.size, averageSeconds: row.records ? row.seconds / row.records : 0 }))
+      .sort((a, b) => b.seconds - a.seconds)
+      .slice(0, 20),
   };
+}
+
+function normalizeAdminPagePath(path) {
+  const raw = textOf(path) || "/";
+  const cleaned = raw.split("?")[0].split("#")[0] || "/";
+  return cleaned.endsWith("/") ? `${cleaned}index.html` : cleaned;
+}
+
+function adminPageLabel(path) {
+  const file = normalizeAdminPagePath(path).split("/").pop() || "index.html";
+  const labels = {
+    "index.html": "홈",
+    "codex.html": "도감",
+    "essences.html": "정수",
+    "numbers.html": "넘버스",
+    "builds.html": "빌드",
+    "guides.html": "게시판",
+    "report.html": "정보 제보/수정",
+    "maze-time.html": "미궁 시간 계산기",
+    "admin.html": "관리자 센터",
+    "about.html": "사이트 소개",
+    "privacy.html": "개인정보처리방침",
+    "terms.html": "운영정책",
+    "contact.html": "문의하기",
+  };
+  return labels[file] || file;
 }
 
 function adminFormatMinutes(seconds) {
@@ -4547,16 +4584,51 @@ function adminAccountStayTableMarkup(rows) {
   `;
 }
 
+function adminPageStayTableMarkup(rows) {
+  if (!rows?.length) {
+    return `<div class="empty compact-empty">페이지별 체류 기록이 아직 없습니다. 로그인 사용자가 사이트에 머문 뒤부터 집계됩니다.</div>`;
+  }
+  return `
+    <div class="admin-page-stay-summary">
+      <strong>가장 오래 머문 페이지: ${escapeHtml(rows[0].label)}</strong>
+      <span>총 ${escapeHtml(adminFormatMinutes(rows[0].seconds))} · 평균 ${escapeHtml(adminFormatMinutes(rows[0].averageSeconds))} · 계정 ${rows[0].accounts}명</span>
+    </div>
+    <div class="admin-page-stay-table">
+      <div class="admin-page-stay-head">
+        <span>페이지</span>
+        <span>총 체류</span>
+        <span>평균</span>
+        <span>계정</span>
+        <span>기록</span>
+      </div>
+      ${rows.map((row) => `
+        <div class="admin-page-stay-row">
+          <span>
+            <b>${escapeHtml(row.label)}</b>
+            <small>${escapeHtml(row.path)}</small>
+          </span>
+          <strong>${escapeHtml(adminFormatMinutes(row.seconds))}</strong>
+          <span>${escapeHtml(adminFormatMinutes(row.averageSeconds))}</span>
+          <span>${row.accounts}명</span>
+          <span>${row.records}회</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderAdminSiteStats() {
   if (!els.adminSiteStats) return;
   const total = adminCenterData.visitors.total ?? "확인 실패";
   const today = adminCenterData.visitors.today ?? "확인 실패";
   const stayRows = adminCenterData.visitors.stayStats?.daily || [];
   const accountRows = adminCenterData.visitors.stayStats?.accounts || [];
+  const pageRows = adminCenterData.visitors.stayStats?.pages || [];
   const todayStay = stayRows.find((row) => row.date === todayKey());
   const avgStaySeconds = todayStay?.records ? todayStay.seconds / todayStay.records : 0;
   const totalStaySeconds = stayRows.reduce((sum, row) => sum + row.seconds, 0);
   const activeAccountsToday = new Set(accountRows.filter((row) => row.date === todayKey()).map((row) => row.account)).size;
+  const topPage = pageRows[0];
   els.adminSiteStats.innerHTML = `
     <article class="admin-site-overview">
       <div class="admin-site-metric">
@@ -4583,6 +4655,10 @@ function renderAdminSiteStats() {
         <span>계정별 집계</span>
         <strong>${accountRows.length}건</strong>
       </div>
+      <div class="admin-site-metric">
+        <span>최장 체류 페이지</span>
+        <strong>${topPage ? escapeHtml(topPage.label) : "-"}</strong>
+      </div>
       <small>마지막 갱신 ${escapeHtml(dateLabel(adminCenterData.loadedAt))}</small>
     </article>
     <div class="admin-analytics-grid">
@@ -4598,6 +4674,10 @@ function renderAdminSiteStats() {
     <div class="admin-stay-list admin-account-stay">
       <strong>계정별 일자별 체류 시간</strong>
       ${adminAccountStayTableMarkup(accountRows)}
+    </div>
+    <div class="admin-stay-list admin-page-stay">
+      <strong>페이지별 체류 시간</strong>
+      ${adminPageStayTableMarkup(pageRows)}
     </div>
   `;
 }
