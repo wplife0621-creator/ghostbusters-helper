@@ -25,6 +25,7 @@ const storageKeys = {
 
 const adminCode = "0621";
 const siteConfig = window.DUKHUBUSTERS_CONFIG || {};
+const staticDataVersion = textOf(siteConfig.staticDataVersion) || "20260607-static-index";
 const buildBackend = {
   url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
   anonKey: textOf(siteConfig.supabaseAnonKey),
@@ -994,6 +995,24 @@ function renderHomePopularGuides(rows) {
 }
 
 async function loadHomeNotices() {
+  try {
+    const [reports, builds, guides] = await Promise.all([
+      fetchStaticRows("reports-index"),
+      fetchStaticRows("builds-index"),
+      fetchStaticRows("guides-index"),
+    ]);
+    homeNotices = [
+      ...reports.map(noticeFromReport).filter(Boolean),
+      ...homeBuildNotices(builds),
+      ...homeGuideNotices(guides),
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+    renderHomePopularGuides(guides);
+    els.homeNoticeStatus.textContent = "가벼운 공개 목록으로 최근 소식을 표시합니다.";
+    renderHomeNotices();
+    return;
+  } catch {
+    // Static data is the free-tier path. Fall back to Firestore when the snapshot is not available yet.
+  }
   if (!reportBackend.url || !reportBackend.anonKey || !buildBackend.url || !buildBackend.anonKey
     || !guideBackend.url || !guideBackend.anonKey) {
     els.homeNoticeStatus.textContent = "공개 저장소가 연결되면 최근 공지사항이 표시됩니다.";
@@ -1624,6 +1643,18 @@ function buildStoreUrl(query = "") {
   return `${buildBackend.url}/rest/v1/${buildBackend.table}${query}`;
 }
 
+function staticDataUrl(name) {
+  return `./data/${name}.json?v=${encodeURIComponent(staticDataVersion)}`;
+}
+
+async function fetchStaticRows(name) {
+  const response = await fetch(staticDataUrl(name), { cache: "force-cache" });
+  if (!response.ok) throw new Error(`static data unavailable: ${name}`);
+  const payload = await response.json();
+  if (Array.isArray(payload)) return payload;
+  return Array.isArray(payload.rows) ? payload.rows : [];
+}
+
 function publicBuildRowsQuery(limit = 2000) {
   const excludedTitles = [visitorBuildMarkers.total, visitorBuildMarkers.daily, sessionTimeMarker]
     .map((title) => `title=neq.${encodeURIComponent(title)}`)
@@ -1717,10 +1748,22 @@ function prependBuild(build) {
   saveStoredRows(storageKeys.builds, savedBuilds);
 }
 
-async function loadPublicBuilds() {
+async function loadPublicBuilds(options = {}) {
   if (!hasPublicBuildStore()) {
     setBuildSyncStatus("공개 저장소 연결 전입니다. 지금 등록한 빌드는 이 브라우저에만 임시 저장됩니다.", "is-offline");
     return;
+  }
+  if (!options.preferLive) {
+    try {
+      collectPublicBuildRows(await fetchStaticRows("builds-index"));
+      saveStoredRows(storageKeys.builds, savedBuilds);
+      renderBuilds();
+      markLikedBuildsForVisitor();
+      setBuildSyncStatus("가벼운 공개 빌드 목록을 불러왔습니다. 등록과 좋아요는 정상 저장됩니다.", "is-online");
+      return;
+    } catch {
+      // Fall through to the live store for pages deployed before the static index exists.
+    }
   }
   setBuildSyncStatus("공개 빌드 목록을 불러오는 중입니다.", "is-online");
   try {
@@ -1791,7 +1834,7 @@ async function savePublicBuildLike(build) {
   });
   if (!response.ok && response.status !== 409) throw new Error(`like failed: ${response.status}`);
   likedBuildIds.add(build.id);
-  await loadPublicBuilds();
+  await loadPublicBuilds({ preferLive: true });
 }
 
 async function savePublicBuildReview(build, content) {
@@ -1820,7 +1863,7 @@ async function savePublicBuildReview(build, content) {
       }),
     });
     if (!response.ok) throw new Error(`review failed: ${response.status}`);
-    await loadPublicBuilds();
+    await loadPublicBuilds({ preferLive: true });
   } else {
     const list = buildReviews.get(build.id) || [];
     buildReviews.set(build.id, [{ ...review, content: cleanContent }, ...list]);

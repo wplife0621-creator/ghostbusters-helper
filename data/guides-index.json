@@ -1,0 +1,2841 @@
+{
+  "generatedAt": "2026-06-06T15:33:52.313Z",
+  "rows": [
+    {
+      "id": "73546605-e335-43ea-a234-b5f977e4cec8",
+      "title": "[정보] 6층 지도(수정2)",
+      "author": "에르웬",
+      "content": "수정1 : 4등급 몹 2종 추가(무덤지기 알레톤, 엘프로트)\n수정2 : 4등급 몹 1종 추가(열쇠지기)\n{{media:media-c596e333-b225-4c7d-82fc-6173621b58ec}}",
+      "media": [
+        {
+          "ref": "media-c596e333-b225-4c7d-82fc-6173621b58ec",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/73546605-e335-43ea-a234-b5f977e4cec8/5cfa0d3e-959e-4066-8620-b9bde7506f0a-__1.png",
+          "name": "그림1.png",
+          "path": "73546605-e335-43ea-a234-b5f977e4cec8/5cfa0d3e-959e-4066-8620-b9bde7506f0a-__1.png",
+          "type": "image/png"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 180
+        },
+        {
+          "kind": "guide-password",
+          "salt": "3c29b647-fbba-46b3-9052-8469093059eb",
+          "digest": "337b077f6c49ca634691f2bca5e598865830f5b59a3005f561ef33c50838b56b"
+        }
+      ],
+      "created_at": "2026-05-27T07:53:52.271+00:00",
+      "updated_at": "2026-06-05T14:06:22.43+00:00"
+    },
+    {
+      "id": "88696809-5661-498c-a51a-727b8edc232a",
+      "title": "아우옌 록로브 영입조건(높은 확률)",
+      "author": "한스36",
+      "content": "1. 초급항해사 고용과는 관계없다 2. 6레벨 달성해야 한다.\n3. 모든 섬을 돌아다니지 않아도 된다.(하지만 공적치랑 정수를 위해선 하는걸 추천)\n4. 4등급 제외(3마리)한 나머지 몹들을 최대한 많이 사냥해봐야 한다.(전부 안 잡았는데도 영입한 사실 있음)\n5. 화산석을 먹는다(가끔 섬마다 심어져있는데 상호작용으로 먹을 수 있음)6. 표류 경험과 관계없다.\n\n대다수 탐험가들의 의견 종합이라 100% 는 아닙니다.\n*위 조건을 다 충족했음에도 아우옌 영입이 안된 케이스도 있다 ㅠ\n\n*알아두면 좋은 꿀팁\n1. 아우옌은 정수를 좋아한다. 전투참여안하니 항해관련 정수로 주자\n2. 폭풍항해선 구매가 가능해진다.  폭풍항해선 재료는 라이미아 10개 + 화산석 10개 + 2,500만스톤이 필요하다.\n3. 폭풍항해선 능력치 : 내구 70, 속도 +20%, 풍향영향 약화, 표류확률 -15%",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 32
+        },
+        {
+          "kind": "guide-password",
+          "salt": "fa45e899-54a9-4ea6-aae4-8d75ec400b9c",
+          "digest": "ac1871ac0cb967e36c7fa186f9d2f329ae38d95fa88be3a6e6da8608af59eb1c"
+        }
+      ],
+      "created_at": "2026-06-05T12:09:50.594+00:00",
+      "updated_at": "2026-06-05T12:18:34.821+00:00"
+    },
+    {
+      "id": "guide-like-dbd4ec5bcb5cec1dce8726af59aa83a7f50166e12676341743c233c9a0e58d19",
+      "title": "__guide_like__:88696809-5661-498c-a51a-727b8edc232a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-05T12:10:34.07+00:00",
+      "updated_at": "2026-06-05T12:10:34.07+00:00"
+    },
+    {
+      "id": "a146e788-9eb0-4abd-a534-53869eac8805",
+      "title": "__guide_comment__:f799bb0d-e364-4f3b-b7da-ef0478612c47",
+      "author": "디른",
+      "content": "컨 깔끔하네요 전 환영일격 패링성공률 30퍼 정도인데...",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "ace7df40-1abc-4d16-afee-4ef50fc9f781",
+          "digest": "eb723a1162ee5dfca02cf9db9ccb8db37158acbdfa7a9fa85a20e7d5b9a72ebf"
+        }
+      ],
+      "created_at": "2026-06-05T09:15:25.576+00:00",
+      "updated_at": "2026-06-05T09:15:25.576+00:00"
+    },
+    {
+      "id": "e6481856-bfb1-42d6-b645-ed4e13d9d76d",
+      "title": "__guide_comment__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "에르웬",
+      "content": "아직 직접 본 사람은 없는걸로 알고 있어요. 제작자님이 히든피스를 아직 추가 안하셨을 수도 있어서..",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "d0f083a7-0799-4580-bf08-50f336187a65",
+          "digest": "cd4e92b699717b2e4dba1edff53dda4029bcc83cd71ae113143f4edad71802fd"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "980a35ca-ba02-4b32-b436-ca997f02e2ec"
+        }
+      ],
+      "created_at": "2026-06-05T08:50:09.902+00:00",
+      "updated_at": "2026-06-05T08:50:09.902+00:00"
+    },
+    {
+      "id": "f799bb0d-e364-4f3b-b7da-ef0478612c47",
+      "title": "[정보] 5층이 처음이세요? 다키리온 풀패링 사냥 가이드(뉴비필독)",
+      "author": "겜바바 버스터즈",
+      "content": "{{media:media-b14f3bfa-d437-4ac2-9a32-86c2f2dee636}}\n다키리온 풀패링 가이드\n\n1. 평타는 딜레이바 보면서 패링\n\n2. 첫 어둠 분출은 스턴기로 끊기\n\n3. '그림자관통' 스킬 패링 후 평타 2번 혹은 1번 (약 4~5초 후) 환영의 일격 패링\n※환영의 일격 패링이 가장 어려운데, 그림자 관통 후 평타 2번 패링 후\n환영의 일격 주황색 보이자 마자 패링키를 누르면 쉽게 막을 수 있음.\n\n스펙 6각 기준, 5각도 가능.",
+      "media": [
+        {
+          "ref": "media-b14f3bfa-d437-4ac2-9a32-86c2f2dee636",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/f799bb0d-e364-4f3b-b7da-ef0478612c47/e8f688e1-bf0e-4b82-9c67-a72d08ff296f-________.mkv",
+          "name": "다키리온 풀패링.mkv",
+          "path": "f799bb0d-e364-4f3b-b7da-ef0478612c47/e8f688e1-bf0e-4b82-9c67-a72d08ff296f-________.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 32
+        },
+        {
+          "kind": "guide-password",
+          "salt": "47452439-481a-492f-850e-aed75f9d450b",
+          "digest": "1ff71c6eb012218917898a635a02ea0aa8757e571460283e2ff0976d29a442be"
+        }
+      ],
+      "created_at": "2026-06-05T08:20:21.243+00:00",
+      "updated_at": "2026-06-05T08:20:21.243+00:00"
+    },
+    {
+      "id": "8bac2528-ff01-48e8-a219-cadf061c9296",
+      "title": "4층 균열 보스 영상",
+      "author": "한스36",
+      "content": "{{media:media-484fd107-0801-4a61-afbf-90a2194e5cc1}}\n\n부득이한 사유로 영상속도 1.8배속입니다.  영상 옵션에 속도조절 있으니 잘 안보이시는 분은 속도줄여서 보시면 됩니다\n\n보스 패턴, 페이즈 정보같은 거 알고가시면 좋을거같아서 올려요\n\n비요른 7각인 4정수, 아이나르 6각인 4정수  정도가 특이사항입니다. \n\n첫 사냥이지만, 체감으로 활 든 백색신전기사 버전느낌이었네요",
+      "media": [
+        {
+          "ref": "media-484fd107-0801-4a61-afbf-90a2194e5cc1",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/8bac2528-ff01-48e8-a219-cadf061c9296/54096a8c-dd7e-480b-a112-b1d24ee67658-4_______.mp4",
+          "name": "4층 균열 보스.mp4",
+          "path": "8bac2528-ff01-48e8-a219-cadf061c9296/54096a8c-dd7e-480b-a112-b1d24ee67658-4_______.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 21
+        },
+        {
+          "kind": "guide-password",
+          "salt": "b5d51de0-e277-4f75-ad29-55e95f1a5102",
+          "digest": "7b1a5672a123b5f6f9f7dcdb18364adb6a8483fb680356d483e5a97ab628ea4b"
+        }
+      ],
+      "created_at": "2026-06-05T07:49:38.26+00:00",
+      "updated_at": "2026-06-05T07:50:49.149+00:00"
+    },
+    {
+      "id": "guide-like-7d5b74a135e2486205d237495b769761515383062422f1e1168dff6ca8a79da9",
+      "title": "__guide_like__:7866b04c-9f7c-4ea8-90da-36b1abb85039",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-05T06:05:21.8+00:00",
+      "updated_at": "2026-06-05T06:05:21.8+00:00"
+    },
+    {
+      "id": "guide-like-69c692d7e96ec237577f55e9be7bf586730bb4019f7572af541c3f1a6b6a902a",
+      "title": "__guide_like__:1cd0e13f-eb32-43ff-9a28-8406a74dd98f",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-05T06:05:18.375+00:00",
+      "updated_at": "2026-06-05T06:05:18.375+00:00"
+    },
+    {
+      "id": "guide-like-47b20d330a012858e3f99dfbb2609551827833bfa0a71fe2368ff83cd165c310",
+      "title": "__guide_like__:915c64ae-a896-4050-b50d-868e9eec7c74",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-05T06:05:16.633+00:00",
+      "updated_at": "2026-06-05T06:05:16.633+00:00"
+    },
+    {
+      "id": "420cc575-2e3b-4313-b037-1d50918317e5",
+      "title": "6등급 몹 1대1 칩",
+      "author": "베헬라",
+      "content": "6등급까지는 평타가 평타로 캔슬이 됨그러니까 스킬만 끊어주면 사실상 평타는 맞을일이 없는데 무지성 평타 연타하면 또 스테미너가 모자람\n\n이 때 에르웬 or 미샤랑 공격을 번갈아가면서 치면 스테미너 문재도 해결됨\n팀원이 한대 치면 나도 약간 기다렸다가 한대 쳐주면 몹 평타를 번갈아가면서 끊어줄 수 있음\n\n첫 스킬 범위기는 스턴 or 단일기는 가드로끊고 미샤 모션 보고 한타이밍 쉬고 평타 모션보고 평타 반복\n\n그러면 몹이 윽엑하고 아무것도 못하고 죽을거임",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 43
+        },
+        {
+          "kind": "guide-password",
+          "salt": "8b9304c8-f5e1-4a4b-ba4d-7a48453a67a1",
+          "digest": "99b0d29ce0a87a82f0ab09eea23c570c157f2f29f53c9dae0015d7d2f0e789e2"
+        }
+      ],
+      "created_at": "2026-06-05T03:19:23.776+00:00",
+      "updated_at": "2026-06-05T03:19:23.776+00:00"
+    },
+    {
+      "id": "edfa14ac-0833-4fa2-9104-3b7de71551cf",
+      "title": "[정보] 오크히어로 안전빵으로 잡는 스펙, 패링 방법(뉴비필독)",
+      "author": "겜바바러브",
+      "content": "{{media:media-dcf07c9a-bf73-4848-a4ef-b23ec3f765e0}}\n\n스펙 6각, 5랩 아루루 약화 배움\n\n5각으로는 포션 좀 먹어야하고 6각에는 3페이즈때 패링만 잘하면 노포션 가능\n\n1페 2페는 맞딜.\n\n3페는 패링\n\n타이밍은 읏-따 혹은 따당 혹은 넷플릭스 두둥과 같은 타이밍\n\n노랑색 바가 꽉 찼을때 (따) 패링버튼을 (당) 타이밍에 누르면 된다.\n\n노랑색 바가 꽉 찼을때 (두) 패링버튼을 (둥)",
+      "media": [
+        {
+          "ref": "media-dcf07c9a-bf73-4848-a4ef-b23ec3f765e0",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/edfa14ac-0833-4fa2-9104-3b7de71551cf/87d0f8e3-3101-4fe6-9300-10d1d8382c0c-_____6_.mp4",
+          "name": "오크히어로6각.mp4",
+          "path": "edfa14ac-0833-4fa2-9104-3b7de71551cf/87d0f8e3-3101-4fe6-9300-10d1d8382c0c-_____6_.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 60
+        },
+        {
+          "kind": "guide-password",
+          "salt": "1c817eeb-687e-4a36-9c83-0ae28a11ffe2",
+          "digest": "7b97df5ba6981cecc491e5cbfa3ebf40f1c1bb74bac3dd883c10d3ded02d18ff"
+        }
+      ],
+      "created_at": "2026-06-04T19:26:16.246+00:00",
+      "updated_at": "2026-06-04T19:26:16.247+00:00"
+    },
+    {
+      "id": "guide-like-4635c959bba5af9255fa3e2526f0f2f679dac4b7f27fdd8db689902bcb8121cd",
+      "title": "__guide_like__:249c26d7-a88b-40f9-b81f-4d4ba209a289",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-04T18:31:02.035+00:00",
+      "updated_at": "2026-06-04T18:31:02.035+00:00"
+    },
+    {
+      "id": "guide-like-91754cccb9d4f5da5532cf8d8510085eccef6cb3735b440ba71c939f43b98ed7",
+      "title": "__guide_like__:500e3954-b17e-4507-9e43-880025eb57dc",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-04T17:15:50.098+00:00",
+      "updated_at": "2026-06-04T17:15:50.098+00:00"
+    },
+    {
+      "id": "guide-like-5b28179ec8cb63ab7db90b353534bd841de34050d0c6aff535283d622a4d70d4",
+      "title": "__guide_like__:35321117-9743-465a-a27c-40b605a3b5c6",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-04T17:14:19.857+00:00",
+      "updated_at": "2026-06-04T17:14:19.857+00:00"
+    },
+    {
+      "id": "0da84510-fff0-45fe-a5fe-b781b1dac96d",
+      "title": "__guide_comment__:500e3954-b17e-4507-9e43-880025eb57dc",
+      "author": "잠룽",
+      "content": "그 카니바로 어떻게 하면 만나나요? 지금 한번도 못봤습니다.",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "9106aab7-d8b0-458e-b4f1-d172bc3e9c8e",
+          "digest": "7b3663812c2b52d352deeb95221575df1b1d7d8ff322be84e5f6c2486c6730f5"
+        }
+      ],
+      "created_at": "2026-06-04T16:30:01.121+00:00",
+      "updated_at": "2026-06-04T16:30:01.121+00:00"
+    },
+    {
+      "id": "guide-like-74ab9694004262fd03a430b616d68867713aec72758333cfd1621759f22937e0",
+      "title": "__guide_like__:500e3954-b17e-4507-9e43-880025eb57dc",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-04T16:28:52.915+00:00",
+      "updated_at": "2026-06-04T16:28:52.915+00:00"
+    },
+    {
+      "id": "980a35ca-ba02-4b32-b436-ca997f02e2ec",
+      "title": "__guide_comment__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "뉴비",
+      "content": "소설처럼 보물섬에 미믹있어요??",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "7aef381f-e769-433a-8463-0e41e75a087b",
+          "digest": "b808c1f89d76d9bf468cb591930749f15de814956ee0d55cf6bf53b86b341789"
+        }
+      ],
+      "created_at": "2026-06-04T14:51:27.82+00:00",
+      "updated_at": "2026-06-04T14:51:27.82+00:00"
+    },
+    {
+      "id": "guide-like-dac6e8a0618104b63d617e50bb5f29ef2b99a97471488d12bc2fc29660e5c4a6",
+      "title": "__guide_like__:51022c38-6a81-4a64-9b77-a13b765840fb",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-04T06:29:08.281+00:00",
+      "updated_at": "2026-06-04T06:29:08.281+00:00"
+    },
+    {
+      "id": "8b672838-b2c6-410f-b713-94f45ef28351",
+      "title": "__guide_comment__:1cd0e13f-eb32-43ff-9a28-8406a74dd98f",
+      "author": "간절한 이한수",
+      "content": "독무는 한방딜보다는 도트딜이라\n다음 패링타이밍 어긋나는게 크고요\n독무보다는 다른 장판기가 진짜 아파요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "f99525b8-3f35-4532-ad5d-12dd53055b10",
+          "digest": "f4e7b3a62c4991dba35f9b9b91e008a3732fe4e7b7158065bf15b9726c5adcf6"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "79843d77-644a-4db7-9dd3-36b5cd34c66f"
+        }
+      ],
+      "created_at": "2026-06-03T19:55:57.92+00:00",
+      "updated_at": "2026-06-03T19:55:57.92+00:00"
+    },
+    {
+      "id": "79843d77-644a-4db7-9dd3-36b5cd34c66f",
+      "title": "__guide_comment__:1cd0e13f-eb32-43ff-9a28-8406a74dd98f",
+      "author": "카카오코",
+      "content": "독무분사(회피) 많이 아픈가요?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "5a654b04-939d-4cfa-b6c7-a060e4d03f2d",
+          "digest": "0c5aceac02627647eec515fe07809f9ee22f51c6ecbd32cb90a116b933857ac1"
+        }
+      ],
+      "created_at": "2026-06-03T19:05:12.002+00:00",
+      "updated_at": "2026-06-03T19:05:12.002+00:00"
+    },
+    {
+      "id": "53c5c316-514e-48ca-8112-ec0267d14d38",
+      "title": "__guide_comment__:0f45d131-9c38-4551-9221-6eec48997c68",
+      "author": "베헬라",
+      "content": "트롤보다 약하지않음...?\n5층 갈정도면 못잡을리는 없지싶은데",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "ab954b0d-95bb-438c-aa90-fda8470e88cd",
+          "digest": "8a5f652e237e324d7b59cc095b5378948bb0c222fdf6bdedb35d5abc06e54399"
+        }
+      ],
+      "created_at": "2026-06-03T15:21:09.956+00:00",
+      "updated_at": "2026-06-03T15:21:09.956+00:00"
+    },
+    {
+      "id": "52eb245c-610c-400b-939e-2423245717a5",
+      "title": "__guide_comment__:d517cdef-8551-4951-982b-3f57b72d9c3a",
+      "author": "카니바로학살자",
+      "content": "투쟁심 추가 테스트결과 \n-------------------------------\n가설1 : 컨디션 저하에 따른 딜감소 10% -> 30% -> 50%를 어느정도 무마시켜줄것이다.\n결과1 : X 정직하게 데미지 감소함\n\n가설2 : 컨디션 감소에 따른 맞는데미지 증가를 줄여 줄 것이다.\n결과2 : 놀랍게도 컨디션 감소시 맞는데미지는 원래부터 똑같았다. \n컨디션 100기준 맞는데미지35\n컨디션0기준 맞는데미지35\n\n가설3 : 전투가 길어지면 데미지가 증가할 것이다.\n결과3 :  3분간 전투해보았으니 동일\n\n가설4 : 전투가 길어지면 공속이 증가할 것이다.\n결과4 : 3분간 전투해보았으니 동일",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "27304b65-a477-4472-9a37-e6c4bbebf4c5",
+          "digest": "d8aa7357f7fbe25332e67756d9699472ce06793f8eea75df27f27829f6387b73"
+        }
+      ],
+      "created_at": "2026-06-03T12:02:44.529+00:00",
+      "updated_at": "2026-06-03T12:02:44.529+00:00"
+    },
+    {
+      "id": "guide-like-e46400848350aa586666cf85708fdccfd0eebf7e50a58fa4732108863b3ff84a",
+      "title": "__guide_like__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-03T10:43:14.738+00:00",
+      "updated_at": "2026-06-03T10:43:14.738+00:00"
+    },
+    {
+      "id": "915c64ae-a896-4050-b50d-868e9eec7c74",
+      "title": "[보스] 4등급 무덤지기 노포션 공략",
+      "author": "간절한 이한수",
+      "content": "{{media:media-e8865b20-0484-4474-ae97-b6721ba86344}}",
+      "media": [
+        {
+          "ref": "media-e8865b20-0484-4474-ae97-b6721ba86344",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/915c64ae-a896-4050-b50d-868e9eec7c74/485f4961-550d-479d-9199-1ab83926dcb7-2026_06_03_17_47.mp4",
+          "name": "2026_06_03 17_47.mp4",
+          "path": "915c64ae-a896-4050-b50d-868e9eec7c74/485f4961-550d-479d-9199-1ab83926dcb7-2026_06_03_17_47.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 39
+        },
+        {
+          "kind": "guide-password",
+          "salt": "edc22b08-df22-47cb-9740-df4d83900d4c",
+          "digest": "43642688d7db2fa51a5e14ad32b07743d27b6f385d809e79f5feb9aa1277ae45"
+        }
+      ],
+      "created_at": "2026-06-03T08:47:49.587+00:00",
+      "updated_at": "2026-06-03T08:47:49.588+00:00"
+    },
+    {
+      "id": "1cd0e13f-eb32-43ff-9a28-8406a74dd98f",
+      "title": "[보스] 4등급 엘프로트 노포션 공략",
+      "author": "간절한 이한수",
+      "content": "{{media:media-9e873095-0522-4a5a-9d3d-795b06bb6b01}}",
+      "media": [
+        {
+          "ref": "media-9e873095-0522-4a5a-9d3d-795b06bb6b01",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/1cd0e13f-eb32-43ff-9a28-8406a74dd98f/06345126-4033-455a-b5d4-cae59d205a60-2026_06_03_17_30.mp4",
+          "name": "2026_06_03 17_30.mp4",
+          "path": "1cd0e13f-eb32-43ff-9a28-8406a74dd98f/06345126-4033-455a-b5d4-cae59d205a60-2026_06_03_17_30.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 85
+        },
+        {
+          "kind": "guide-password",
+          "salt": "34a8fe1c-5886-46db-a070-d15929937d22",
+          "digest": "e6c15414e6f3e792f6fa95513b4d0def1479b6d7ecd4cc9b01a88b4900a271ef"
+        }
+      ],
+      "created_at": "2026-06-03T08:32:13.451+00:00",
+      "updated_at": "2026-06-03T08:32:13.451+00:00"
+    },
+    {
+      "id": "guide-like-523850fa755efbfeb23b7092f36a689760ad63dc06c3cf1171e12a8451c0f2d9",
+      "title": "__guide_like__:d517cdef-8551-4951-982b-3f57b72d9c3a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-03T03:49:34.031+00:00",
+      "updated_at": "2026-06-03T03:49:34.031+00:00"
+    },
+    {
+      "id": "0f45d131-9c38-4551-9221-6eec48997c68",
+      "title": "[정보] 소울이터 만나는 방법(뉴비필독)",
+      "author": "겜바바러브",
+      "content": "{{media:media-b761d8de-911c-49e1-b1e3-f323b8a05e84}}\n감각 30 맞추고 대마경 남쪽 망령의 협곡으로 오면 랜덤으로 젠 됩니다.\n최소 4각 이상 맞추고 도전하는걸 추천합니다",
+      "media": [
+        {
+          "ref": "media-b761d8de-911c-49e1-b1e3-f323b8a05e84",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/0f45d131-9c38-4551-9221-6eec48997c68/5804da2d-8448-48f4-9c64-79b00c8e7085-image.png",
+          "name": "image.png",
+          "path": "0f45d131-9c38-4551-9221-6eec48997c68/5804da2d-8448-48f4-9c64-79b00c8e7085-image.png",
+          "type": "image/png"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 109
+        },
+        {
+          "kind": "guide-password",
+          "salt": "4d88d70d-2321-4b87-989c-416dc84f4295",
+          "digest": "bf718ea52dbef51d6bbcb18fd5e6e8f91946ac4471c64ae048ee1f301fbc18e5"
+        }
+      ],
+      "created_at": "2026-06-03T00:11:30.198+00:00",
+      "updated_at": "2026-06-03T00:11:30.198+00:00"
+    },
+    {
+      "id": "434f2820-a6de-43da-8c2b-6ab8b521a5b0",
+      "title": "__guide_comment__:d517cdef-8551-4951-982b-3f57b72d9c3a",
+      "author": "베헬라",
+      "content": "고통저항 늘어나면 경직시간도 줄어드는거 아닐까\n죽고살아나니까 뭔가 cc기 지속시간 길어졋던데",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "64ac6f5b-12c4-4a21-9e55-d0fedd242fa2",
+          "digest": "5028dfa06d8f7b92e1dda564925d1c5aef436a880670da89716a5664a9d8f85b"
+        }
+      ],
+      "created_at": "2026-06-03T00:04:17.079+00:00",
+      "updated_at": "2026-06-03T00:04:17.079+00:00"
+    },
+    {
+      "id": "b1191435-6c3d-48cc-984d-65cce4582d9a",
+      "title": "[파밍] 5층 최적화 앵벌이사냥",
+      "author": "한스36",
+      "content": "*사전 준비물: 영구야영도구, 5각인 이상, 망령협곡과 바람협곡 입구 열려있어야 함\n\n바람협곡-망령협곡 순회사냥 1번 돌때 15~20만스톤  시간 최대한 단축하는 소소한 팁입니다.\n\n가끔 몹들 젠위치가 입구에서 멀리 있으면, 입구까지 걸어가는거 엄청 귀찮거든요 몹들도 피해가야하고... \n\n협곡마다 안쪽에 6층포탈있는데, 포탈들어갔다가 바로 나오면 5층 정중앙 야영지 위로 스폰됩니다\n\n이 점 이용해서, 협곡 하나 빠르게 턴 다음에 포탈써서 야영지 회복하고 바로 다음 협곡가서 털고 다시 포탈... 이거 무한반복하시믄 됩니다\n\n혈윈귀랑 트롤은 1마리 또는 2마리 젠이거든요. 근데 2마리 사냥 빠른 상태면 근처 다른 쫄몹 잡을때마다 1 - 2 마리 바뀝니다. 2마리로 바꾼담에 사냥하는게 더 나은거같아요\n\n대충 한 턴당 7~800만 스톤 벌 수 있습니다",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 121
+        },
+        {
+          "kind": "guide-password",
+          "salt": "b67108c4-81ce-4948-b204-dd5415c722b5",
+          "digest": "787400f654378dd3fefa597d7c6f950b7c972f8b51c539646823f4062d04f682"
+        }
+      ],
+      "created_at": "2026-06-02T16:36:03.253+00:00",
+      "updated_at": "2026-06-02T16:41:07.319+00:00"
+    },
+    {
+      "id": "5a4679ac-ca8e-4ed6-bd7b-fc1c61168373",
+      "title": "__guide_comment__:d517cdef-8551-4951-982b-3f57b72d9c3a",
+      "author": "겜바바 버스터즈",
+      "content": "연구글 개추ㅊㅊㅊㅊ",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "1f54e725-f62e-47d2-86f5-a124dd4ce419",
+          "digest": "ae39655fef001cd87dac6e4e6f7d8cdf62f6e9455c952c639cb4774e9710f365"
+        }
+      ],
+      "created_at": "2026-06-02T15:54:22.313+00:00",
+      "updated_at": "2026-06-02T15:54:22.313+00:00"
+    },
+    {
+      "id": "guide-like-00aa88d8547c3dcc019f1cf572e65142e57c7d664b08b50086b034eb16b2a1c3",
+      "title": "__guide_like__:d517cdef-8551-4951-982b-3f57b72d9c3a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-02T15:54:13.183+00:00",
+      "updated_at": "2026-06-02T15:54:13.183+00:00"
+    },
+    {
+      "id": "guide-like-d099619dcc8366d8c22688235d57c6bbad014be847551c75e6c3e28a2995c864",
+      "title": "__guide_like__:4e207932-371b-416a-abfa-465d04b6c13a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-02T15:04:26.431+00:00",
+      "updated_at": "2026-06-02T15:04:26.431+00:00"
+    },
+    {
+      "id": "d517cdef-8551-4951-982b-3f57b72d9c3a",
+      "title": "[정보] 스텟별 능력치 테스트결과",
+      "author": "카니바로학살자",
+      "content": "내구력1 -> 체력5\n근력1 -> 체력2\n지구력1 -> 스테미너3\n\n에르웬은 근력 딜계수가 0이다. 순수 민첩비례딜이다.\n폭풍의궁수 정수를 착용시 영혼력50%만큼 계수가붙는다.\n※2렙 에르웬 카니바로 착용 전/후 비교딜※\n근력17 : 평타딜14\n근력47 : 평타딜14\n\n고통저항은 물약쿨타임이다.\n고통저항10기준 10%가량쿨타임이 줄어들었다.\n고통저항x 물약쿨타임 4.8초 /  고통저항10 물약쿨타임 4.3초 \n\n투쟁심/정신력 스텟이 어떤능력일지 예상되는대로 적어주시면 테스트해보겠습니다.\nCC기 풀리는시간은 절대 아님.\n투쟁심366 + 정신력53 아이나르 VS 투쟁심123 + 정신력83 미샤\n둘이 CC풀리는 시간이 동일합니다.",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 94
+        },
+        {
+          "kind": "guide-password",
+          "salt": "5cef6ce6-c295-4c42-a65e-df790969ae38",
+          "digest": "c364d13d5351ab8d3c65f08deb919d773f310b993d615250fa8b8c2f9690718a"
+        }
+      ],
+      "created_at": "2026-06-02T14:10:49.815+00:00",
+      "updated_at": "2026-06-02T14:10:49.815+00:00"
+    },
+    {
+      "id": "c86ef9a6-5dfd-40f6-8479-32bd0071267b",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "스런",
+      "content": "히든피스 위치를 안다는 가정하에 못먹은 적은 없긴한데 제가 시행횟수가 그렇게 많지않아서 확답은 못하겠네요 대신 톡방에 운영자님이 ?에서 아무것도 안나오는건 버그라고 하신적은 있으심",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "9fc52935-d26b-43df-b15b-03b7d66f2e24",
+          "digest": "cfe7e11849d30c288b60d93c694d9207cd809a52475435d3a1ae29679a4d3db9"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "615c4956-b753-4efc-b019-9c45ba28d640"
+        }
+      ],
+      "created_at": "2026-06-02T12:28:33.798+00:00",
+      "updated_at": "2026-06-02T12:28:33.798+00:00"
+    },
+    {
+      "id": "0e383feb-8055-4bc1-8dda-41b0b064436b",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "스런",
+      "content": "댓글을 이제봤네요 전 기본으로 주는 포션3개만 씁니다.\n 식인쿨을 최대한 많이 돌리구요 다른 분들 반응 보니깐 좀 힘드시면 하루더 파밍하셔서 포션을 많이사가시는것도 좋을듯합니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "07501fec-f489-4fbb-87e2-2307ee249849",
+          "digest": "3380c796b8078d14caa2ab3fb48ae1a6a6a27ff77c635c3729b979b09fe421c7"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "615c4956-b753-4efc-b019-9c45ba28d640"
+        }
+      ],
+      "created_at": "2026-06-02T12:25:38.691+00:00",
+      "updated_at": "2026-06-02T12:25:38.691+00:00"
+    },
+    {
+      "id": "guide-like-2305176cfbdf44fa8cb3313b77eb4821b924b64be5a6910a5ebac54845f979f6",
+      "title": "__guide_like__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-02T12:23:14.116+00:00",
+      "updated_at": "2026-06-02T12:23:14.116+00:00"
+    },
+    {
+      "id": "guide-like-d5fb0d04d16cde48a50db679345ac2241771ed2cd5508e26b20b0040d6d7b6aa",
+      "title": "__guide_like__:4e207932-371b-416a-abfa-465d04b6c13a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-02T09:47:59.748+00:00",
+      "updated_at": "2026-06-02T09:47:59.748+00:00"
+    },
+    {
+      "id": "9a6c229c-cf79-4b8f-94f2-9a20e17e0e99",
+      "title": "__guide_comment__:e394c4f1-1b97-48ef-b1bf-b278954610f1",
+      "author": "겜바바러브",
+      "content": "이전 게시글 중에\n'각 층별 균열 나타나는 시기(4층까지 정리)'\n보시면 있어요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "65688473-dbde-4828-819f-bf092556f913",
+          "digest": "c7427b52cf524cabaf7093255fb4728cd5678e3370b55147c28c41eb1f3ddd83"
+        }
+      ],
+      "created_at": "2026-06-02T09:41:17.448+00:00",
+      "updated_at": "2026-06-02T09:41:17.448+00:00"
+    },
+    {
+      "id": "e394c4f1-1b97-48ef-b1bf-b278954610f1",
+      "title": "[질문] 층마다 미궁 나오는 시간이 어떻게 되나요?",
+      "author": "비요른",
+      "content": "층마다 미궁 나오는 시간이 어떻게 되나요? 궁금합니다",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 124
+        },
+        {
+          "kind": "guide-password",
+          "salt": "e1efd4d8-0877-4b03-a32d-c7960799dceb",
+          "digest": "37642e7295f059e84c2c0503ca0bf46772be9c73892bc5c2c0d4cf2d07f8c0f5"
+        }
+      ],
+      "created_at": "2026-06-02T08:54:56.136+00:00",
+      "updated_at": "2026-06-02T08:54:56.136+00:00"
+    },
+    {
+      "id": "4d9a3816-a58b-4d53-ab9c-3625626549b3",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "베헬라",
+      "content": "내가 착각했엇네\n소울이터 등장 조건 감각 30이고\n핏칼늑만 먹은 에르웬은 25라서 조건 안됨\n용병궁수가 감각 30 넘어서 나온걸 착각했었나봐",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "d565eeb4-aa9a-47fb-b709-2c55c0e5e118",
+          "digest": "a1773369038f2bd4568e36bda655ad7ace0bf5a671affa8e9cca11b0441e4acf"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "0c1747cf-3e0c-41a6-a2c7-336eac94449f"
+        }
+      ],
+      "created_at": "2026-06-02T07:28:45.919+00:00",
+      "updated_at": "2026-06-02T07:28:45.919+00:00"
+    },
+    {
+      "id": "e7dbb916-9e43-467f-8b6d-65bdb8653c6f",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "123",
+      "content": "그리고 2일차에 강철의묘 가실때는 혹시 포션 몇개 챙겨 가시나요??\n비요른 에르웬이랑 둘이서 깨시는거 같은데 너무 어려워서 2각에 중급포션14개  +강철영약 먹고도 포션3개 남고 겨우 잡았는데 너무 어렵습니다....ㅠ",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "e22c8913-089c-46c8-8a80-90b9283e7e71",
+          "digest": "80e9a2934012671fb5aab8242487fa7518bfbaad124e394b573b41759be11d53"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "615c4956-b753-4efc-b019-9c45ba28d640"
+        }
+      ],
+      "created_at": "2026-06-02T05:29:30.076+00:00",
+      "updated_at": "2026-06-02T05:29:30.076+00:00"
+    },
+    {
+      "id": "9e2a2c07-a397-4a22-8acd-c5d841923346",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "123",
+      "content": "아 동료출연 조건이 등급이 아니라 레벨이군요 감사합니다\n그리고 혹시 강철의묘 두번째방 ?에서는 아무것도 안줄때도 있나요? F눌러서 상호작용하면 그냥 고대 어쩌구 습득했다고 뜨고 인벤에 템이 있다거나 스톤이 늘어나지 않더라구요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "5c41cfd1-a235-4a70-bddb-5be7ef9889dd",
+          "digest": "2f10ec20214563f58fa77e7985080b649f8066b6f6a1c944b6a91739c2e9ca7b"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "615c4956-b753-4efc-b019-9c45ba28d640"
+        }
+      ],
+      "created_at": "2026-06-02T05:26:04.391+00:00",
+      "updated_at": "2026-06-02T05:26:04.391+00:00"
+    },
+    {
+      "id": "guide-like-2ee6173725fb3c4867f7459f2079760144b631873ba5409656864c3d09f9e173",
+      "title": "__guide_like__:d74a1849-8628-4c0e-b27a-ca1066b104c4",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-01T10:44:39.558+00:00",
+      "updated_at": "2026-06-01T10:44:39.558+00:00"
+    },
+    {
+      "id": "guide-like-05378ec388459c884f5f0ee38bf0820ec99fc63176e99c0d62e982c306550674",
+      "title": "__guide_like__:e862b6c9-b304-4fa0-9a32-4a139de2fc22",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-01T10:38:00.464+00:00",
+      "updated_at": "2026-06-01T10:38:00.464+00:00"
+    },
+    {
+      "id": "guide-like-c1d8cbe99d7ef7cf30e9e47b09582cbc3b21b3d24412d8a95facc3f46c9c64e9",
+      "title": "__guide_like__:c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-01T05:11:32.062+00:00",
+      "updated_at": "2026-06-01T05:11:32.063+00:00"
+    },
+    {
+      "id": "guide-like-de18145f471f842988bb376ea1446466e12bcc7c822597cf0f0de8e73d3df84e",
+      "title": "__guide_like__:249c26d7-a88b-40f9-b81f-4d4ba209a289",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-01T02:59:39.391+00:00",
+      "updated_at": "2026-06-01T02:59:39.391+00:00"
+    },
+    {
+      "id": "guide-like-62594dad85aa02b72b385dd56aa7690d8171dbc24bea5be86f4889434a7364c1",
+      "title": "__guide_like__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-06-01T00:00:09.368+00:00",
+      "updated_at": "2026-06-01T00:00:09.368+00:00"
+    },
+    {
+      "id": "guide-like-bdc929c01fb7c689af1cc2d2efe6b39975f47620c22a76a104e9780d2319bd17",
+      "title": "__guide_like__:d74a1849-8628-4c0e-b27a-ca1066b104c4",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-31T23:56:39.723+00:00",
+      "updated_at": "2026-05-31T23:56:39.724+00:00"
+    },
+    {
+      "id": "746ffee9-4784-49bc-92b0-8660b6338611",
+      "title": "5층 만만한 몹 골라잡고 빠른 5렙 찍자",
+      "author": "ㅇㅇ",
+      "content": "트롤을 포션 없이 잡을 정도 되면 5층 올라가도 됨\n5렙 아루루 성능이 말이 안되기 때문에 바로 올라가서 공적치 벌어서 5렙 빨리 찍는게 중요함\n\n자신있으면 상급포션 챙겨서 올라가보자\n평타 패링은 타이밍 다 고만고만하고, 스킬은 모르면 그냥 맞고 포션빨면 죽진 않으\n대부분 원거리는 패링2타 하고 스킬스고, 근거리는 패링1타 하고 스킬쓰니까 눈치껏 스턴으로 끊을 순 있는데, 5층애들은 스킬을 2번 쓰니까 그부분은 조심.... \n\n중간에 있는 보스급 5등급은 피하고\n그리고 몹 밑에 마릿수 잘 보고 잡아야함 2만 달랑 적혀있면 그건 5등급 2마리임 다른 몹 잡으면 랜덤하게 마릿수 변경되니까 1마리로 만들고 잡자\n\n6시: 다키리온 제외 모두 다 만만함\n특히 소울이터가 경험치 120인가 주기 때문에 6시방향을 가장 먼저 가게됨\n\n9시: 프로스트로드는 절대 안되고, 한기의권속도 약간 쎈 편임\n나머지는 머 잡을만 함\n\n3시: 폭풍의거인 피하고, 정령술사, 폭풍의 궁수도 그닥 추천하진 않음\n나머지는 잡을만 한듯\n\n12시: 위에 3군데만 가도 5렙 찍히긴 하더라...이프리트 절대 건들지말고 나머지는 할만함",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 107
+        },
+        {
+          "kind": "guide-password",
+          "salt": "3047c9d2-fb80-4222-a0f3-b65bd4f49c28",
+          "digest": "42befb434baba149fda79704aba8aa91f1578ee77d8b37aa0add5a4d97b0a5f3"
+        }
+      ],
+      "created_at": "2026-05-29T15:15:48.243+00:00",
+      "updated_at": "2026-05-31T23:27:57.633+00:00"
+    },
+    {
+      "id": "5b40c608-5750-496d-b080-4b959da53248",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "JS",
+      "content": "동료 반대편에서 서 계시다가\n스킬 쓰면 동료로 넘어갔다가 다시 원위치요..\n\n동료 보스 나\n나 동료 보스  무한반복",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "53a91778-7c9d-4fa9-bea8-02676f17b8dd",
+          "digest": "259ec0ef2248cdc6f5123c4ad1ca61ed37593065bafb8aede64610087c15c4a1"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "c9438f4b-b638-45c6-8282-9f428f0a3d2c"
+        }
+      ],
+      "created_at": "2026-05-31T20:02:47.136+00:00",
+      "updated_at": "2026-05-31T20:02:47.136+00:00"
+    },
+    {
+      "id": "c9438f4b-b638-45c6-8282-9f428f0a3d2c",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "익명",
+      "content": "일디움 잡는데 패링만하는데 스테미나가 너무 딸려요 무빙치면 어그로가 동료한테가서 애들뒤지는데 어케하나요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "e6e46f3d-f521-427f-99a3-d3f5e202949a",
+          "digest": "2f4a2e4d85c54117bd1db5a728ed404e26ab44952606654fe14e9d8487d996b0"
+        }
+      ],
+      "created_at": "2026-05-31T15:08:06.028+00:00",
+      "updated_at": "2026-05-31T15:08:06.028+00:00"
+    },
+    {
+      "id": "guide-like-ced4db7d8c30a460d02c21f0b6a90fc81125a1ad360b2811d943dfa37a095ad3",
+      "title": "__guide_like__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-31T13:50:41.349+00:00",
+      "updated_at": "2026-05-31T13:50:41.349+00:00"
+    },
+    {
+      "id": "6736f6ae-3b1a-4d68-8c59-912949c73a79",
+      "title": "__guide_comment__:d41a4f15-3105-47a7-9521-311561063ce3",
+      "author": "익명",
+      "content": "3,4각정도면 동료 다 죽어도 혼자 와리가리치면서 5분이상 체력 깎으면 잡을수 있어요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "fed6dd8b-96f5-4435-a64d-de51aaa5c372",
+          "digest": "30d9dd23b0aa92dd8ae04dcd8f3d54bf306d14608bd15ad41e03515da65ab33c"
+        }
+      ],
+      "created_at": "2026-05-31T13:50:17.416+00:00",
+      "updated_at": "2026-05-31T13:50:17.416+00:00"
+    },
+    {
+      "id": "a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "title": "[빌드] 난 초반 골드노가다가 싫어요 숙련자 참고용 초반빌드와 잡소리",
+      "author": "스런",
+      "content": "게임에 상당히 익숙해진 패링 ㅈ고수 혹은 강종컨을 기가막히게 해서 실력을 키울 초보환영\n핵심은 단순 골드파밍을 극도로 혐오하는 나를위한것 정수를 위해 파밍하다보니 골드도 따라왔네~? 와 렄키비키잖아~!\n잡다한 설명은 좀 줄이고 핵심만 요약해보려함\n\n2일차:카나 미노타 3렙찍고 > 강철 묘 수호자 정수 or 무한야영도구 둘 중 하나 챙기기 안뜨면 과감하게 리셋(자살). 대충 사냥 후 토탈 80만골쯤 맞추고 귀환(강철 묘 히든 피스 50+보스방 20+ 상자 반대편 강철의 영약 반드시 챙기기) 귀환 후 2각에 소모품 돈 무게 최대한 고려해서 채우기\n\n3일차:용병궁수 고용 후 4층 파밍 수호자 정수 없으면 (철수 데나 타락)뜨는거 먹기 [흑요] 필수 못 먹으면 쩔수 \n활 거치대 핏늑 먹이기 and 용병에 플미나스 고블린 궁수 도트딜(경직있음) 등등 저층용 cc 챙기기 있음 좋고 없음 패스 큰의미없는 친구임미샤 근접용 기본세팅 ->1(대전or미노)2(데나or타기) 3층 주변 몹스폰이 매번달라지니 꾸준히 살피고 공적치 챙기자\n\n4일차:아이나르도 미샤와 마찬가지 세팅, 균열 열리는 시간 전까지 123층 공적 싹싹김치해먹기\n고블린2층 - 1층 - 사막2층 왕복하면서 균열 노리기 (돈 부스팅, 미약하지만 확실한 내실인 여러균열의 영약들, 강철묘 1트더, 미샤cc셔틀용 등) 세팅과 균열 순서는 상관없음 딜은 비요른으로 충분\n균열과 기본세팅 이후 4층파밍 ㄱㄱ 럭키트롤먹으면 5층 찍먹 가능, 전날 못 먹은 정수 파밍\n(렙 낮고 각인 없을때 관통딜 존나 쌔서 트럴 억지 파밍 ㄴㄴ, 실력 소모템 상황 고려)\n\n5일차 전날 균열안떳으면 한번더 \n전날 못먹은 정수 파밍 - 다먹으면 미노삭제\n\n6일차 위와 같음 - 미우 지웠으면 바이쿤으로 채울 생각, 이날까지 쉬지않고 파밍했다면 4각 가능함 \n 동료들 무기, 가방, 육포, 물약 금액맞춰 잘채우기 (방어구는 나중에, 동료가 죽는 가장큰이유는 어글이 튀어서인데 아직까진 각인스킬이랑 몹 대가리만 잘돌리면됨)\n\n7일차 망령협곡군주 가능 물리딜 스킬이라 생각보다 맞을만함 균열 3개 이상 소울이터까지 먹었다면 5렙이거나 매우 가까울것 \n소울이터를 찾기위한 감각스텟용 정수는 취향껏 고를것 핏늑 + (플미나스, 건맨두목, 풍사, 와이번, 그림자박쥐 등등)\n아직까지도 못먹은 정수있다면 파밍 아님 5층에서 노가다 무한야영도구 없다면 소모품 오링날때 복귀\n\n8일차 아루루가 합류했다면 4층파밍은 훨씬 쾌적해질것 딜스킬 억지로 안열어도 강함.  왜곡은 가능한 빨리(7각인 재료 혈원귀 트롤 파밍), 라이트는 인권, 탐지는 밀라로돈 파밍을 위함\n\n2층 균열도 이제 여유로운 상태 하지만 자신이 이 게임에 익숙하지 않거나 초면인 보스&균열은 소모품이 충분한 상태에서만 교전\n\n- 이후엔 솔직히 정수,균열 뽀록이 너무커서 상세한 루트 짜기엔 너무 방대\n- 꾸준한 균열 파밍 - 밀라로돈 - 골드파밍 > \n넘버스와 수호자정수 - 레드우드와 베르타스 - 각인, 장비, 아루루 스킬, 배 \n\n- 대충 6각찍고 방어구 맞추고 오히잡기~~ / 오히잡을땐 3페전까지 물약빨면서 맞딜로 빡어글 생성후 3페후 도망만 다니셈 심심하면 패링도 쳐보셈 생각보다 쉬움\n\n- 숙련될수록 불필요한 정수는 쳐내는게 정석, 용병으로 소울이터 찾는데 쓰고 버리는것도 그런이유 하지만 비요른은 예외 4층을 2정수로 아득바득 기어오르는게 더 고통스럽기 때문에 뭐라도 맥이는것, 거대오크도 생각했으나 스킬밸류 너무 구림 지속시간 캐스팅 스텟 다맘에 안듬\n- 오픈톡에 특이한 빌드 짜시는분꺼 카피해도 좋을듯함 미샤(다이로우터 + 키메라울프)같은 신기한 조합을 쓰심 체감 상당히 좋음\n- 항상 정수 1자리를 비워두는걸 선호 어떤 우연한 뽀록이 터질지 모르니\n- 잘풀려서 6일차에 5렙도 찍히고 균열뽀록만 잘터지면 5일차에도 가능할듯 \n- 숙련자 기준이라 하면 1층 균열 성채뺴고 강철 무기 두자루 들고 개패는 수준이라 생각\n- 담금질한 정수는 왜 없냐고 하면 나같은 게이는 강종컨하다 실수해서 5월 첫쨰주 이후 기록이 없음 모조리 기록말살 당함 ㅋㅋㅋ \n\n작성한 내용보다 훨씬 빨리 목표에 도달한적도 훨씬늦게 도달하기도 했으니 자신의 성향과 운을 고려하여 미궁에서의 계획을 세운다면 더욱 즐거운 게임이 될수있을듯함",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 158
+        },
+        {
+          "kind": "guide-password",
+          "salt": "e3e3511e-9fd7-4251-8687-e10502e7b16f",
+          "digest": "8bce7d4f3802a370685c5e25b25bfab1143108f7a6479643e63a4c4a00022280"
+        }
+      ],
+      "created_at": "2026-05-30T23:34:40.603+00:00",
+      "updated_at": "2026-05-31T12:31:51.297+00:00"
+    },
+    {
+      "id": "ec8c3514-0ed6-4128-b29a-51c3f19ae54b",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "JS",
+      "content": "아~ 좋은 정보 감사합니다!",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "e88e3a6f-41e1-4ea8-9f7f-78b51501bfc2",
+          "digest": "ed2b305c2b354356432a84b00a7458c53e1f4703112ed572f9842d22bb4574e0"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "77bab1e7-cbd9-4e68-8486-e8ad692e2eba"
+        }
+      ],
+      "created_at": "2026-05-31T12:15:14.908+00:00",
+      "updated_at": "2026-05-31T12:15:14.908+00:00"
+    },
+    {
+      "id": "572d23be-e3e7-4deb-b8d1-64f07e385ebf",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "스런",
+      "content": "소울이터 조건을 잘모르겠던데 ㄳ\n\n2층균열이였긴한데 하루 뒤에 열리긴함 암튼 2층 1층 둘다 노리는 거라 상관없을듯 꽤나 타율 좋음 1층 무한대기는 추천안함",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "7fcaa7e7-73a5-41ba-bdab-553a27061650",
+          "digest": "7131dba2798425b666c6be18f7e0690b4da464827fab41a34da0c52ac23cc669"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "0c1747cf-3e0c-41a6-a2c7-336eac94449f"
+        }
+      ],
+      "created_at": "2026-05-31T12:06:21.21+00:00",
+      "updated_at": "2026-05-31T12:06:21.21+00:00"
+    },
+    {
+      "id": "15c83ab5-2823-4515-bb17-c2b7a8338e38",
+      "title": "__guide_comment__:4e207932-371b-416a-abfa-465d04b6c13a",
+      "author": "뉴비",
+      "content": "현제 핏빛칼날늑대 먹여줘서 후각이 47인상태라 3이 부족해서 50효과를 받지 못한느데, 다른분들은 추가로 후각정수 먹여줘서 50효과를 받으시나요 ?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "75cb2ceb-1286-4c3c-921f-38718a1b9764",
+          "digest": "939c3d7b242a06095ed95d6df89eca093f87c1b7bddb7abc1c20332c3f00f3f5"
+        }
+      ],
+      "created_at": "2026-05-31T11:34:23.44+00:00",
+      "updated_at": "2026-05-31T11:34:23.44+00:00"
+    },
+    {
+      "id": "dde2202e-617e-4a03-90bf-46a2a8c2863d",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "ㅇㅇ",
+      "content": "레이븐 필수임... 돈 앵벌이로 5각 해봤자 물스펙일 뿐",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "ba2ba0b5-439e-456e-bd46-803a6c2523ce",
+          "digest": "e2976979f7d3518cec924dba969d056df3b02c75b7aa050dd271ac2955ea4755"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "4233566e-820c-4b5c-a8a4-89686a2d9f3e"
+        }
+      ],
+      "created_at": "2026-05-31T11:30:52.624+00:00",
+      "updated_at": "2026-05-31T11:30:52.624+00:00"
+    },
+    {
+      "id": "0c1747cf-3e0c-41a6-a2c7-336eac94449f",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "ㅇㅇ",
+      "content": "에르웬 핏칼늑만 먹이면 소울이터 바로 뜸\n\n그리고 2일차에 인공균열을 열었는데 4~5일차에 자연균열이 열리나...?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "8f2cc75c-a00c-4400-90f0-5ee35235e03b",
+          "digest": "375f5b147cffd02647e638d159bd2ab83bc41aa284ca2943205e844aa6e05cbc"
+        }
+      ],
+      "created_at": "2026-05-31T10:41:42.359+00:00",
+      "updated_at": "2026-05-31T10:41:42.359+00:00"
+    },
+    {
+      "id": "60c6099d-c4ac-41e5-b90c-72b5d65ea1b7",
+      "title": "__guide_comment__:d41a4f15-3105-47a7-9521-311561063ce3",
+      "author": "ㅇㅇ",
+      "content": "5각이면 갓 입문이랑은 거리가 먼데...?\n스펙 남아돌지...",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "3085706c-56d2-497c-b025-16b62b14c09d",
+          "digest": "45622c861a91fb6856feb2e9d0889ded8094da92ab858154b052c93776db4e3f"
+        }
+      ],
+      "created_at": "2026-05-31T10:31:44.863+00:00",
+      "updated_at": "2026-05-31T10:31:44.863+00:00"
+    },
+    {
+      "id": "a13d07e4-a7ba-45ee-9ba2-c44097cb9f0e",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "ㅇㅇ",
+      "content": "글고 동료 출연 조건은 레벨임 공적치 6 30 150일때 렙업",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "7ab54fbd-ccc9-4eda-8861-85db997eda77",
+          "digest": "9542633f6a68f435667146eef0aff0a7b07c305e413ae4b2a19e8ff9aa50d3e0"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "615c4956-b753-4efc-b019-9c45ba28d640"
+        }
+      ],
+      "created_at": "2026-05-31T10:27:53.731+00:00",
+      "updated_at": "2026-05-31T10:27:53.731+00:00"
+    },
+    {
+      "id": "070c8a06-c216-4942-95dd-389218b6b635",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "ㅇㅇ",
+      "content": "저거 기준으로 비요른 미샤 아이나르 3기절에 본체 2각이상이면 떡을침 \n 스타트 패링후 존나 붙어서 광역기절 묻히고 맨뒤에 몹 치거나 패링 생각 후속 기절 타이밍에 딜링 하면 여유로움 \n쫄지마 한대맞으면 강종하고 다시해 연습만이 살길이다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "cf7f6aba-083f-41b2-ab79-3fa7d4c81e3f",
+          "digest": "44d510e9d561d97534d0938016c3cec5f369ef6339e511d059a77b77f626ded8"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "615c4956-b753-4efc-b019-9c45ba28d640"
+        }
+      ],
+      "created_at": "2026-05-31T10:26:38.269+00:00",
+      "updated_at": "2026-05-31T10:26:38.269+00:00"
+    },
+    {
+      "id": "26a1fe08-6aa3-43ac-8333-afe41f28b7c0",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "00",
+      "content": "4일차에 아이나르 뽑는건 그냥 1층 2층 3층 몹 전부 잡으면 4랩되서 가능 근데 4랩 되면 4명이여서 7등급이 3마리가 한번에 등장해서 3각 아니면 죽을수 있음",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "a507a848-8af1-4d52-988e-26df8c00703f",
+          "digest": "6c42e41b81c0f79c80d681d8f7113604a285ddd799936add68848b6e4ce8b1a8"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "615c4956-b753-4efc-b019-9c45ba28d640"
+        }
+      ],
+      "created_at": "2026-05-31T10:04:06.199+00:00",
+      "updated_at": "2026-05-31T10:04:06.199+00:00"
+    },
+    {
+      "id": "d41a4f15-3105-47a7-9521-311561063ce3",
+      "title": "[보스] 5층 갓 들어온 초보 탐험가가 폭풍거인을 잡는다면? 가이드",
+      "author": "파라브",
+      "content": "1. 바람협곡 군주라고도 불리는 폭풍거인은 몸이 단단하고 딜이 약한 편임.\n\n2. 캐릭터는 현재 4랩 5각 비요른,\n\n3. 체력이 허락하는 하에 맞딜하면서 잡고(야성분출로 어그로 관리)\n\n4. 이후 체력이 간당간당해지면 와리가리 패링을 한다.\n\n5. 딜이 딸려서 광역기에 미샤 아이나르가 죽는건 어쩔 수 없음.\n\n-한줄 요약\n공적치가 필요하다면 시도해봐도 좋으나, 각인 재료를 수급해야 한다면 아루루 뇌창 또는 무기에 바람 인챈트를 해오자!",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 106
+        },
+        {
+          "kind": "guide-password",
+          "salt": "f818f45a-697e-4c5b-9d08-f643c5764b5a",
+          "digest": "da2293095bdcef36c7103ad2c7967171ad4742b2d0619a34b2f3021e3d41f5a6"
+        }
+      ],
+      "created_at": "2026-05-31T09:18:55.218+00:00",
+      "updated_at": "2026-05-31T09:18:55.218+00:00"
+    },
+    {
+      "id": "40250840-b092-486c-a976-930903abec3b",
+      "title": "__guide_comment__:7866b04c-9f7c-4ea8-90da-36b1abb85039",
+      "author": "간절한 이한수",
+      "content": "제 스펙으로 4층균열, 특별한 공략없이 맞딜로\n물약 6개 이하 먹으면서 두들겨팬것 같아요.\n\n이번에 추가된 4등급 몬스터 중\n무덤지기는 팔푸와 동일스펙 가능하고\n엘프로드는 더 높아야합니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "ac27b4a9-68ff-4e10-a8a7-5ee4591f9f05",
+          "digest": "205f4ebe2f335ba026746baa0e8a6d85d8c4167d88663987676a3b3137acc98e"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "0dd697d9-de63-4317-a8ea-aad61a90c3b8"
+        }
+      ],
+      "created_at": "2026-05-31T07:46:45.925+00:00",
+      "updated_at": "2026-05-31T07:46:45.925+00:00"
+    },
+    {
+      "id": "guide-like-e07ea79e2cc74d5bf2839fe1e31ccced0f7a32a90dd324f5c65809438caf6a5f",
+      "title": "__guide_like__:249c26d7-a88b-40f9-b81f-4d4ba209a289",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-31T06:27:10.936+00:00",
+      "updated_at": "2026-05-31T06:27:10.936+00:00"
+    },
+    {
+      "id": "615c4956-b753-4efc-b019-9c45ba28d640",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "123",
+      "content": "완전 쌩초보인데 2일차에 3렙찍고 의뢰해서 4렙 찍으려면 4번인가 5번 더 가야하지 않나요?? 더빠르게 4일차에 아이나르 뽑는 방법이 있는건지 궁금합니다요...",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "65c5854a-e964-43ca-b022-086c4ab2baf7",
+          "digest": "86b4444c0abe82177096b670c36e8effc3b65b00931dbf7b44f72cbc21b9be6f"
+        }
+      ],
+      "created_at": "2026-05-31T02:59:02.478+00:00",
+      "updated_at": "2026-05-31T02:59:02.478+00:00"
+    },
+    {
+      "id": "0dd697d9-de63-4317-a8ea-aad61a90c3b8",
+      "title": "__guide_comment__:7866b04c-9f7c-4ea8-90da-36b1abb85039",
+      "author": "뉴비",
+      "content": "공략영상 감사합니다. \n\n혹시 팔푸푸라 잡을 수 있는 스팩이라면, 4층균열도 잡을 수 있을까요 ?\n\n+ 이번에 4층에 추가된 4등급 몬스터들도 팔푸잡을 스팩이면 가능한가요?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "6fd1c075-51f1-431a-94eb-b0322efb0cc4",
+          "digest": "a8f65248dccd04e5a523c6868dce39bacf5df6e8140fe08d719ff2a122be674f"
+        }
+      ],
+      "created_at": "2026-05-31T02:02:47.333+00:00",
+      "updated_at": "2026-05-31T02:02:47.333+00:00"
+    },
+    {
+      "id": "5374c0fb-0a4b-4f6e-ad8d-86a88b20249d",
+      "title": "__guide_comment__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "ㅇㅇ",
+      "content": "4층 파밍방법에 대해 추가로 설명하면 5의 배수로 야영지가 확정적으로 등장하는데, 50층을 기준으로 1번계단(용기)만 누르다 60~75일때 5칸씩 내려가는 계단을 활용하자 트롤 키메라는 딱히 매력적인 정수도 아닌데다 소모품과 시간만 털어가기에 80층 이상 파밍은 비추 둘은 5층에서 파밍하는게 더낫다 (주로 흑요 핏늑을 위한 파밍)",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "724d4740-dc59-49e4-8aee-013155b1ce53",
+          "digest": "4ff26ca997af272dbe2aca5d745f81a7725d5504b55e96034a3bddddef63d103"
+        }
+      ],
+      "created_at": "2026-05-31T00:35:55.256+00:00",
+      "updated_at": "2026-05-31T00:35:55.256+00:00"
+    },
+    {
+      "id": "guide-like-a007deacec8f90ca4202a30f41d379b66c026a91a949b8fb7b3abd41ec723366",
+      "title": "__guide_like__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-30T23:41:50.742+00:00",
+      "updated_at": "2026-05-30T23:41:50.742+00:00"
+    },
+    {
+      "id": "guide-like-09d265532840e35736c8d8390677a540264811f8669c9b40dfb2ee1a06a98f53",
+      "title": "__guide_like__:a9ce30a7-6aa9-4f97-850d-f4d74968907a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-30T23:36:57.673+00:00",
+      "updated_at": "2026-05-30T23:36:57.673+00:00"
+    },
+    {
+      "id": "7e70d111-3b65-47df-b28d-78f0a62d84fb",
+      "title": "__guide_comment__:b0dc9030-bc70-418a-93d9-2bc90a084361",
+      "author": "익명",
+      "content": "보스방에 상자기준으로 오른쪽에 영약있음 다른 균열들에서도 흔히보이는 영약류근력 +3",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "2b2564b5-b48d-4cfe-86e6-23638cfa734a",
+          "digest": "ddf0657c94ff816dd0a1a9b2cf71aa23986f04a546cd4d12b94600ba627e0890"
+        }
+      ],
+      "created_at": "2026-05-30T19:47:17.769+00:00",
+      "updated_at": "2026-05-30T19:47:17.769+00:00"
+    },
+    {
+      "id": "23eabd67-c1ca-4c1f-a7c1-701e28ab1d4b",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "익명",
+      "content": "아 히든피스 ?보이는 기준 말입니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "7fa07305-945f-4e59-b8af-370e3f8da847",
+          "digest": "892f549fe91414fe0387bc7e490654bcf24910ca1c50b4f3eea360f24876146a"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "77bab1e7-cbd9-4e68-8486-e8ad692e2eba"
+        }
+      ],
+      "created_at": "2026-05-30T13:52:54.434+00:00",
+      "updated_at": "2026-05-30T13:52:54.434+00:00"
+    },
+    {
+      "id": "3596e7c8-6c2a-4e70-b27b-8ab538f79995",
+      "title": "__guide_comment__:7a6a915a-3e23-459f-8309-f1d2afccabe5",
+      "author": "ㅇㅇ",
+      "content": "프로스트로드는 첫 스킬을 끊어주는게 좋음\n팀원 피닳잖아\n\n두번째 세번째 스킬은 오른쪽으로 붙으면 안맞음",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "120066fc-357f-420f-85fe-26eaaf8d31fa",
+          "digest": "dc11c754b738ddb3bf53f832c680f73d8ab04a9135b0fcc13bc37bf50e1067ca"
+        }
+      ],
+      "created_at": "2026-05-30T12:25:57.118+00:00",
+      "updated_at": "2026-05-30T12:25:57.118+00:00"
+    },
+    {
+      "id": "guide-like-4fd50001c26d6e83fb3394a04ce4363cd71f288dede69d280e21df505204f6d3",
+      "title": "__guide_like__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-30T12:14:17.443+00:00",
+      "updated_at": "2026-05-30T12:14:17.443+00:00"
+    },
+    {
+      "id": "7a6a915a-3e23-459f-8309-f1d2afccabe5",
+      "title": "1스턴으로 프로스트로드와 정령술사 잡기",
+      "author": "정근상수상자",
+      "content": "근접몹은 평타 한 번 후, 원거리 몹은 평타 두 번 후 첫 스킬을 사용함\n스킬이 여러게인 몹은 평타 두 번 후 쿨이 남은 스킬을 사용함\n콤보에 패링 사이의 평타는 표시하지 않음.\n\n프로스트 로드\n\n패링 > 패링 > 뒷무빙 > 패링 > 패링 > 기절스킬 > 패링하며 거리벌리기 > 스킬 회피 후 붙어서 패링 평타\n\n가끔 두번째 스킬부터 쓸때가 있는데 그떄는 기절스킬로 캔슬시키고 첫번째 스킬, 후에 세번째 스킬 순서로 사용하니 유의 바람\n\n{{media:media-86460ebb-2a4a-45e9-b332-6e754e1ce23a}}\n\n정령술사\n\n패링 > 패링 > 기절스킬 > 패링 > 패링 > 뒷무빙 > 패링X4 하며 거리벌리기 > 스킬 회피 후 붙어서 패링 평타\n\n가끔 평타 한 번만 치고 스킬로 넘어갈 떄가 있으니 주의\n\n{{media:media-92749551-09ff-4dd6-83ef-9d36246de025}}",
+      "media": [
+        {
+          "ref": "media-86460ebb-2a4a-45e9-b332-6e754e1ce23a",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/7a6a915a-3e23-459f-8309-f1d2afccabe5/c578f78b-ef88-4561-a4d8-59ac0d1ef7fd-_______.mp4",
+          "name": "프로스트 로드.mp4",
+          "path": "7a6a915a-3e23-459f-8309-f1d2afccabe5/c578f78b-ef88-4561-a4d8-59ac0d1ef7fd-_______.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "ref": "media-92749551-09ff-4dd6-83ef-9d36246de025",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/7a6a915a-3e23-459f-8309-f1d2afccabe5/43c11168-26e5-4c00-a4b2-2209876d9545-____.mp4",
+          "name": "정령술사.mp4",
+          "path": "7a6a915a-3e23-459f-8309-f1d2afccabe5/43c11168-26e5-4c00-a4b2-2209876d9545-____.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 116
+        },
+        {
+          "kind": "guide-password",
+          "salt": "c7bcdbd4-1a57-451a-bae3-0f53b53b9035",
+          "digest": "c23af8f937b72bcae539b859310813e8455e15a9c309f208ef5d7fed6fe4a1b2"
+        }
+      ],
+      "created_at": "2026-05-30T11:12:09.159+00:00",
+      "updated_at": "2026-05-30T11:12:09.159+00:00"
+    },
+    {
+      "id": "40ad8bef-742b-447e-aefb-dc9fb9604cd9",
+      "title": "__guide_comment__:7866b04c-9f7c-4ea8-90da-36b1abb85039",
+      "author": "간절한 이한수",
+      "content": "야성분출 쓰고요, 범위기 피할때 빼고는\n계속 몹이랑 평타거리 유지하는거 아닐까요?\n저도 좀 멀리가면 어그로 풀려요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "434d6f20-d1a0-449a-aff9-5b5db961e805",
+          "digest": "91f7e0fc697887a75c07c48700f8c9b9a3dfda7a4b87668f527e18cdc921ac15"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "1eab66a4-bfab-4c67-936c-e5c570b86e51"
+        }
+      ],
+      "created_at": "2026-05-30T10:43:40.36+00:00",
+      "updated_at": "2026-05-30T10:43:40.36+00:00"
+    },
+    {
+      "id": "1eab66a4-bfab-4c67-936c-e5c570b86e51",
+      "title": "__guide_comment__:7866b04c-9f7c-4ea8-90da-36b1abb85039",
+      "author": "ㅇㅇ",
+      "content": "어떻게해야 아루루한테 어그로가 안가는거임",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "ead656a5-7f21-4bd1-bbfc-4dce52d085b5",
+          "digest": "d5127107884ca280b6ea343f73238a157803ef6ce0c2f997ef0d1060f88dbab7"
+        }
+      ],
+      "created_at": "2026-05-30T10:29:20.756+00:00",
+      "updated_at": "2026-05-30T10:29:20.756+00:00"
+    },
+    {
+      "id": "9cf50a5a-db6a-49f0-b45e-96058fc01b87",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "JS",
+      "content": "엥? 누가요? 후각 맞습니다\n여러번 검증된겁니다\n\n후각 50기준으로 4층 균열도 스테이지 확정 층수 알려주는데..",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "0495da03-3cc5-4092-936f-4017fa44cb23",
+          "digest": "fab421ae562ea3f0b2ace2ddb4709289c597625445c11061cdb9827c37be007a"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "77bab1e7-cbd9-4e68-8486-e8ad692e2eba"
+        }
+      ],
+      "created_at": "2026-05-30T09:57:44.227+00:00",
+      "updated_at": "2026-05-30T09:57:44.227+00:00"
+    },
+    {
+      "id": "guide-like-2af10648d384ac82a9b5769f0098e5ee9ae29586fe663f4aef80806bfa41c3f7",
+      "title": "__guide_like__:fce2a354-285c-4f07-8784-34d0d696ec22",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-30T08:44:23.005+00:00",
+      "updated_at": "2026-05-30T08:44:23.005+00:00"
+    },
+    {
+      "id": "7866b04c-9f7c-4ea8-90da-36b1abb85039",
+      "title": "[보스] 4등급 팔푸푸라 노포션 공략",
+      "author": "간절한 이한수",
+      "content": "{{media:media-0d365fd8-5e97-4e61-863f-5294d964ab51}}\n영상의식하다보니, 몇대 맞긴했는데.\n집중해서 하시면 한대도 안 맞고 가능하실거에요",
+      "media": [
+        {
+          "ref": "media-0d365fd8-5e97-4e61-863f-5294d964ab51",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/7866b04c-9f7c-4ea8-90da-36b1abb85039/bf11dda0-fdb0-425f-b893-7916cd296a1c-2026_05_30_15_40.mp4",
+          "name": "2026_05_30 15_40.mp4",
+          "path": "7866b04c-9f7c-4ea8-90da-36b1abb85039/bf11dda0-fdb0-425f-b893-7916cd296a1c-2026_05_30_15_40.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 119
+        },
+        {
+          "kind": "guide-password",
+          "salt": "13cc2f03-6556-4222-8b77-4fc47d2cc354",
+          "digest": "ba43a1d84e1a181f3d6236649f4ef16b95ba5386096b46ad939ace3c4d0680a6"
+        }
+      ],
+      "created_at": "2026-05-30T06:41:05.691+00:00",
+      "updated_at": "2026-05-30T06:41:05.691+00:00"
+    },
+    {
+      "id": "77bab1e7-cbd9-4e68-8486-e8ad692e2eba",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "익명",
+      "content": "기준이 후각이 아니라 감각이라는데요?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "0a0d8afb-1d87-4702-89a8-a226c0150807",
+          "digest": "9e60178b8913795c4eff48980961bc275d62311bb11ad3752451ea13d32ad7fa"
+        }
+      ],
+      "created_at": "2026-05-30T00:17:58.909+00:00",
+      "updated_at": "2026-05-30T00:17:58.909+00:00"
+    },
+    {
+      "id": "guide-like-2b84164d3efa489e9761e4e7bf2df2db29d4152d5cb0b552db7247fc4b20538d",
+      "title": "__guide_like__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T19:33:15.425+00:00",
+      "updated_at": "2026-05-29T19:33:15.425+00:00"
+    },
+    {
+      "id": "guide-like-3d9c5af6dcb349a0b6baacd771a4e4d6434b27e4e176b74aa1f7c8370b669d88",
+      "title": "__guide_like__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T19:33:05.587+00:00",
+      "updated_at": "2026-05-29T19:33:05.587+00:00"
+    },
+    {
+      "id": "guide-like-03b0eb3c9a869b31da799e19a06473898abe4dc5c1f7a716aa0d82fbf2a68323",
+      "title": "__guide_like__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T13:56:55.898+00:00",
+      "updated_at": "2026-05-29T13:56:55.898+00:00"
+    },
+    {
+      "id": "d5ccf624-1bfc-446e-8a9b-90470c178374",
+      "title": "__guide_comment__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "ㅇㅇ",
+      "content": "타룬바스가 안적혀있는데 3스택씩 쌓이더라...",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "a25f9d8f-bca3-47ce-a8d7-b082223455e1",
+          "digest": "e6f408114905ca71eb458ef51c77e458f4c3fb0c3d307e214c762a00e01b838b"
+        }
+      ],
+      "created_at": "2026-05-29T12:12:42.195+00:00",
+      "updated_at": "2026-05-29T12:12:42.195+00:00"
+    },
+    {
+      "id": "guide-like-7c3862d2837c1bdd7f4115cb47d39ab36174afb78f9d6ee440b91688459e18ca",
+      "title": "__guide_like__:4e207932-371b-416a-abfa-465d04b6c13a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T12:08:03.401+00:00",
+      "updated_at": "2026-05-29T12:08:03.401+00:00"
+    },
+    {
+      "id": "b6d38e7e-6347-4ec8-9604-377e06f9a046",
+      "title": "2층 바위사막 거석 참고용",
+      "author": "카니바로학살자",
+      "content": "{{media:media-c7af41d5-62bc-4044-ad79-6f2a635c5b2d}}\n저도 처음이라 그냥 맞아주다 끝나버림.\n장판기술도 늦게 패링하면 패링되는듯",
+      "media": [
+        {
+          "ref": "media-c7af41d5-62bc-4044-ad79-6f2a635c5b2d",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b6d38e7e-6347-4ec8-9604-377e06f9a046/13559568-e5a7-47fe-9c9d-34018dd7e09d-1000042060.mp4",
+          "name": "1000042060.mp4",
+          "path": "b6d38e7e-6347-4ec8-9604-377e06f9a046/13559568-e5a7-47fe-9c9d-34018dd7e09d-1000042060.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 32
+        },
+        {
+          "kind": "guide-password",
+          "salt": "3bc98ca3-76a6-4edf-8d39-7affcdb2e7b1",
+          "digest": "70172cf39f88faec36c88a4f4f1bd809decc711c3e00620acd2b40fca6b17df6"
+        }
+      ],
+      "created_at": "2026-05-29T12:06:49.824+00:00",
+      "updated_at": "2026-05-29T12:06:49.824+00:00"
+    },
+    {
+      "id": "guide-like-1060cbd449a5cd4965d2a63a8fd79b9dc8319313ec49f034abf8b1981c678a34",
+      "title": "__guide_like__:249c26d7-a88b-40f9-b81f-4d4ba209a289",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T11:16:36.398+00:00",
+      "updated_at": "2026-05-29T11:16:36.398+00:00"
+    },
+    {
+      "id": "guide-like-0abda475cf7b602e00c137ae0a088487bbc973f72e7434ea6507354258f9a1ac",
+      "title": "__guide_like__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T11:16:27.448+00:00",
+      "updated_at": "2026-05-29T11:16:27.448+00:00"
+    },
+    {
+      "id": "c1ca04e9-8b4f-4f86-8e15-5c127ad915c0",
+      "title": "__guide_comment__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "JS",
+      "content": "개추요 고트입니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "bcaaa2cd-9789-4cba-9d75-f14c6cb05b27",
+          "digest": "1225c583d7ca9ce6392c3e91980ac8116a2a4958db131cbe9b112fdf78c8bfcc"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "5bde0f05-693d-4161-a977-b5d0a23ab84c"
+        }
+      ],
+      "created_at": "2026-05-29T10:59:49.728+00:00",
+      "updated_at": "2026-05-29T10:59:49.728+00:00"
+    },
+    {
+      "id": "guide-like-b527a7394210925e5d62a8c80a67b6071ff5fb364b771fea4dd28c04b5130128",
+      "title": "__guide_like__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T10:43:35.079+00:00",
+      "updated_at": "2026-05-29T10:43:35.079+00:00"
+    },
+    {
+      "id": "guide-like-41ed53b8b549b37898fa58d566285f1c3b26b27dbfdccaea1f024169d9532385",
+      "title": "__guide_like__:b0dc9030-bc70-418a-93d9-2bc90a084361",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T10:39:13.057+00:00",
+      "updated_at": "2026-05-29T10:39:13.057+00:00"
+    },
+    {
+      "id": "guide-like-f493b0241afccc398220a7fa241f391cf7d419dcd82f1d62f0df2583b4ea1fc8",
+      "title": "__guide_like__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T10:22:42.811+00:00",
+      "updated_at": "2026-05-29T10:22:42.811+00:00"
+    },
+    {
+      "id": "guide-like-b3ff447824cca58e1bce7fd35fd12880ccde8f349c93b2b709b291b3c877f143",
+      "title": "__guide_like__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T10:00:38.993+00:00",
+      "updated_at": "2026-05-29T10:00:38.993+00:00"
+    },
+    {
+      "id": "1a366aec-e995-418c-9031-2c33c51b4f14",
+      "title": "__guide_comment__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "카니바로학살자",
+      "content": "개추드립니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "7583eb72-3c91-4625-9f8e-9a9ce0d2dea5",
+          "digest": "219425175e05d8d103042a720a7c5d20dbd6a40e45dae429cee01e0952feb8dc"
+        }
+      ],
+      "created_at": "2026-05-29T09:54:25.872+00:00",
+      "updated_at": "2026-05-29T09:54:25.872+00:00"
+    },
+    {
+      "id": "guide-like-0505760c002b59bff4a10efab1c58a97454a93f5640d8ff9747032f075c15122",
+      "title": "__guide_like__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T09:44:14.977+00:00",
+      "updated_at": "2026-05-29T09:44:14.977+00:00"
+    },
+    {
+      "id": "f7bf6a04-a55c-4b7a-9c60-d5447504aae0",
+      "title": "__guide_comment__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "파라브",
+      "content": "ㅁㅊ 개추요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "1d0eeb83-d8fd-4f27-9b5f-a57b831ea219",
+          "digest": "5645f2a79e76a59103708e2026d19e8481a8708c254d528821cd23594b6c55ed"
+        }
+      ],
+      "created_at": "2026-05-29T09:44:11.365+00:00",
+      "updated_at": "2026-05-29T09:44:11.365+00:00"
+    },
+    {
+      "id": "5bde0f05-693d-4161-a977-b5d0a23ab84c",
+      "title": "__guide_comment__:726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "author": "JS",
+      "content": "와 이거 ㄹㅇ임..?\n\n충격인데",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "c0425dc8-a132-49a8-9da6-7df9780e129b",
+          "digest": "87b11dc05eef84faa43cf9b2ddee979074afd5c7cf8b2f817cd686b9e2cab70b"
+        }
+      ],
+      "created_at": "2026-05-29T09:36:52.561+00:00",
+      "updated_at": "2026-05-29T09:36:52.561+00:00"
+    },
+    {
+      "id": "726d47ed-8628-438e-a8e6-9e6ae9ccf843",
+      "title": "[정보] 속성에 대하여 (연구글)",
+      "author": "멘~헬라",
+      "content": "불 평타: 틱뎀 50/폭발 (10초 쿨)\n독 평타: 틱뎀 50/마비 (10초 쿨)\n빙결 평타: 슬로우 50/빙결 (10초 쿨)\n어둠 평타: ??? 50/공포 (10초 쿨)\n50스택을 빠르게 쌓아도 10초가 지나지 않으면 cc에 안걸림.\n \n바람 평타: ??? 50/넉백 (쿨 모름, 폭풍 거인)\n대지 평타: 확률적 짧은 경직 50/경직 (쿨 모름, 골렘 순찰병, 수호 석궁상)\n물 평타: 적 디버프? 50/슬로우? (쿨 모름, 세이렌, 나가 궁수)\n번개 평타: 확률적 짧은 경직 50/감전 (노쿨, 폴미나스, 폭풍정령)\n\n이 4가지 속성들은 hit에 속성이 묻어나는 정수는 괄호 안의 한 두 개체 뿐임.\n디버프를 주는 속성은 추측일 뿐이며 정확히 무슨 역할을 하는지 모르겠음. 체감상 물 속성은 적 재생력 감소일거 같음.\n\n번개 속성은 코볼트 검사와 다이로우터와 연계해서 50/확정 cc를 빠르게 걸어도 내부 쿨 없이 바로 감전이 걸림. 나중에 무한 감전 빌드를 연구해 봐도 좋을 듯.\n\n다이로우터 2연타: hit 2번 스택 2번 쌓임\n엘더구울 3연타: hit 1번 스택 1번 쌓임\n코볼트 검사 3연타: hit 3번 스택 3번 쌓임\n \n속성 “저항”은 그냥 속성 저항 탱커용 스탯. 스택이 더 쌓이는 건 없음.\n속성 “감응도”는 스택이 더 쌓이는 건 없음. 추측하자면 5층 정령술사의 “4속성 데미지 +5%씩”처럼 감응도 1당 속성 데미지 1%가 증가할 거 같음\n\n{{media:media-c7751cba-2c8e-4f91-bb52-d24741f8f459}}\n\n모든 스킬에 나오는 속성 공격은 스택이 쌓이지 않음. 프로그맨의 독침 혀를 맞아도 독 스택이 안 나타남. \n속성 스킬에는 별개의 틱 뎀 or 속성 뎀이 틀어감. 틱뎀은 hit 판정이 아니라 속성이 안 묻음. 하지만 스킬의 hit 하는 것에 스택이 쌓임. 스킬의 속성과 상관없이 3회 연속 공격 스킬이면 스택이 3번 쌓임.\n\nHit당 2회 이상 속성 적용되는 정수\n폭군 타룬바스 (수호자): 빙결 스택 +3\n\n빙해 제독, 변종 예티: 빙결 스택 +2\n\n지옥불 선봉장 화염스택 가속: 스택 +2 (전투 시간이 길어질 수록 스택이 더 늘어나거나 가속하는 것과는 전혀 관련이 없음. 그냥 스택 +2가 전부임)\n\n헬플레임, 이프리트: 화염 스택 +2\n\n나가궁수: 물 스택 +2\n\n스톰거인: 풍 스택 +2\n\n타락한 노움: 15퍼센트 확률 독스택 +2\n\n웨어울프: 어둠 스택 +2\n\n{{media:media-9cf00a79-b78c-4178-b8f9-a81b53b5137d}}\n\n저 정수들을 제외하고 이런 나머지 숫자 안 적혀 있는 정수들은 그냥 전부 속성 +1.\n고블린 폭탄병의 화염 원소 부여도 화염 스택 +1.\n\n미노타우로스의 공격 시 10% 확률로 적 넉백\n가고일 석상의 10% 확률로 적 1초 경직\n불카르의 공격 시 20% 확률로 넉백 \n넘버스 615 뇌신의 활의 15% 확률 1초 감전\n\n이런 정수의 패시브/액티브에 달려있는 cc기들은 속성 50/확정 cc기와 달리 내부 쿨 없이 연속 cc 가능.\n\nCC 셔틀로 용병이나 초반을 굴리고 싶으면 속성 보다 패시브/액티브 cc있는 정수를 먹는 것이 근력 스탯도 더 얻을 수 있고 cc도 더 자주 터짐. \n\n결론: 근력만이 모든것을 능가한다. \n\n{{media:media-18095df5-818c-4d4e-b1dd-9ec60b149334}}\n\n속성을 메인으로 정수 맞춰주려고 스탯 이상한거 붙은거 먹이면 망캐 됩니다. \n\n근력이나 민첩같은 주 스탯을 위주로 정수를 맞춰주고 속성을 자연스럽게 따라오도록 합시다.\n\n틀린 정보나 추가 정보 있으면 수정하겠습니다. \n바람, 어둠, 물 속성 효과에 대한 제보 받습니다.",
+      "media": [
+        {
+          "ref": "media-c7751cba-2c8e-4f91-bb52-d24741f8f459",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/726d47ed-8628-438e-a8e6-9e6ae9ccf843/185f51bc-c48b-4508-b6c1-a2d028a22129-image.png",
+          "name": "image.png",
+          "path": "726d47ed-8628-438e-a8e6-9e6ae9ccf843/185f51bc-c48b-4508-b6c1-a2d028a22129-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-9cf00a79-b78c-4178-b8f9-a81b53b5137d",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/726d47ed-8628-438e-a8e6-9e6ae9ccf843/5a7edf93-8d99-4bd4-90c3-1691b6604c49-image.png",
+          "name": "image.png",
+          "path": "726d47ed-8628-438e-a8e6-9e6ae9ccf843/5a7edf93-8d99-4bd4-90c3-1691b6604c49-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-18095df5-818c-4d4e-b1dd-9ec60b149334",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/726d47ed-8628-438e-a8e6-9e6ae9ccf843/7b7f2944-70a6-4791-b68b-247339677f24-image.png",
+          "name": "image.png",
+          "path": "726d47ed-8628-438e-a8e6-9e6ae9ccf843/7b7f2944-70a6-4791-b68b-247339677f24-image.png",
+          "type": "image/png"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 65
+        },
+        {
+          "kind": "guide-password",
+          "salt": "ba0eecb6-320f-4aa7-a79d-f9c4317ba33b",
+          "digest": "3f7b50770a3f5955fdb8bf1b69fcc190a59d92119ddd09490a137b708d629f57"
+        }
+      ],
+      "created_at": "2026-05-29T09:17:35.772+00:00",
+      "updated_at": "2026-05-29T09:25:58.979+00:00"
+    },
+    {
+      "id": "9f8eab11-cefa-4bb3-b67d-2faf878abcd2",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "JS",
+      "content": "화이팅입니다~",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "737f318f-8e10-4216-958a-c20dcf66420d",
+          "digest": "80b77f8c0a29965a56d7479f2f3c744b8111c84f668fcc48b7f879b3dce3f3e5"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "c18f4e7d-f5d9-4226-8346-6f519e49d242"
+        }
+      ],
+      "created_at": "2026-05-29T08:55:48.04+00:00",
+      "updated_at": "2026-05-29T08:55:48.04+00:00"
+    },
+    {
+      "id": "52507a39-9dc2-4aa2-aa9c-cadcf60a0460",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "JS",
+      "content": "아 이제 4층이 무조건 한마리 고정이라서\n용병한테 후각 주는것도 좋겠네요\n\n그러면 후각이 모자를 수도 있어서\n용병한테 칼늑, 웨어울프, 거대늑대 다 줘야겠네요;;\n\n전 안해봐서 ㅠ.ㅠ 좋은 방법 같습니",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "1c63bc28-910a-44b4-9542-736ad923fef5",
+          "digest": "197fd151f3f59fdcb46617e705df92f269fc55e0bb78457781220a63686508d1"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "a27c587e-4f91-4b2f-88c1-032ce6218892"
+        }
+      ],
+      "created_at": "2026-05-29T08:55:28.761+00:00",
+      "updated_at": "2026-05-29T08:55:28.761+00:00"
+    },
+    {
+      "id": "d349e768-b48c-46dd-b22b-ba9d7aeb6372",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "JS",
+      "content": "까먹고 비전 하나 안 풀었네요;;\n\n참고로 버그로 템이나 골드가 안 나오는 경우도 있습니다,\n\n? 나오는 맵 몹을 다 잡고 고기 먹으면서\n풀 컨디션 맞추고 부수면 버그 발생 안하고\n\n확정 드랍ㄴ입니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "7ccae044-d6c9-4bbc-9983-93d67f024b46",
+          "digest": "b2d676717287afc2962225287351331a8aba29513eb98f8d1262779dfa91ba06"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "e2fb8fe4-a4bf-4148-9f34-8ac42d134227"
+        }
+      ],
+      "created_at": "2026-05-29T08:54:25.267+00:00",
+      "updated_at": "2026-05-29T08:54:25.267+00:00"
+    },
+    {
+      "id": "45422ec3-f8e1-4222-a666-ddb8b0b40e13",
+      "title": "__guide_comment__:51022c38-6a81-4a64-9b77-a13b765840fb",
+      "author": "ㄷㄷ",
+      "content": "와.. 아티팩트 둘둘된거봐",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "85693bdb-f186-42f9-bec0-330278310a81",
+          "digest": "cfed1cb88c028e8cff12fb25f96e3be5385c97c4a79f4bba814fafe74546b051"
+        }
+      ],
+      "created_at": "2026-05-29T07:54:11.058+00:00",
+      "updated_at": "2026-05-29T07:54:11.058+00:00"
+    },
+    {
+      "id": "a62f062b-18f9-4fb6-8c31-45fa73705ef4",
+      "title": "__guide_comment__:249c26d7-a88b-40f9-b81f-4d4ba209a289",
+      "author": "ㅇㅇ",
+      "content": "최대한 빨리 올라가서 경험치 찍먹 하고 아루루 뽑는게 쾌적하긴 한듯",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "928a9bf7-b4cf-4dfd-80f8-f84f44347b30",
+          "digest": "d58ebaba9977ef1c34fff2a6b6e0f5ac52dd6a67c9c9f3636211f56a43485f1b"
+        }
+      ],
+      "created_at": "2026-05-29T06:09:13.29+00:00",
+      "updated_at": "2026-05-29T06:09:13.29+00:00"
+    },
+    {
+      "id": "guide-like-cb51fb6c6d2316164617357a8883d4e7848cd50e543204a8a58ce7b3b6bf7340",
+      "title": "__guide_like__:4e207932-371b-416a-abfa-465d04b6c13a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T05:54:18.248+00:00",
+      "updated_at": "2026-05-29T05:54:18.248+00:00"
+    },
+    {
+      "id": "b6f460d2-d11d-4af5-98fa-7f8567953f38",
+      "title": "__guide_comment__:249c26d7-a88b-40f9-b81f-4d4ba209a289",
+      "author": "69호",
+      "content": "이론상 40일차에도 진입 가능",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "d0d4d763-bac8-42a6-a86b-e0af49c4aa4d",
+          "digest": "121cb05c28997faa2efcc3eb89023ae4fdc1cbd825cc1384cf7cc93eea6c4bd4"
+        }
+      ],
+      "created_at": "2026-05-29T05:13:31.696+00:00",
+      "updated_at": "2026-05-29T05:13:31.696+00:00"
+    },
+    {
+      "id": "249c26d7-a88b-40f9-b81f-4d4ba209a289",
+      "title": "[빌드] 50일차 5층등반하는루트",
+      "author": "69호",
+      "content": "{{media:media-9cec444e-c9d3-4da7-9569-ac05f3343328}}\n\n본인이 좀 고였다 싶은사람을위해 5층까지 시간박아서 회차빠르고 탬포빠르게 올리는방법\n다른건없고 핵심은 1회차임 \n\n담금질될만한게없으면 1회차 카니바로정수파밍하러간다음 파밍하고나서 그냥죽으시고(시간절약,담금질로 다음기수한태 주기) \n\n그럼 1회차 담금질 카니바로인상태로 시작해서 스타트 5천골드로 상점에서 고기9개 건빵4개사면 100골드남기고 인벤꽉찰꺼\n\n그러고나면 1회차부터 똑같이 카니바로만 주구장창잡으셈 최대로 땡기면 15만마석까지도 먹을수있으니  시간얼마안남았을때 남은 3공적치채우고마을로복귀 \n\n마을오고 그돈으로 우선 궁수 용병고용, 활두개사고(에르웬,용병용) 라이티늄한부위(본인이 좀친다? 무기강추), 배낭3개사고, 남은돈싹다 고기or육포 공간비율보고 사셈\n\n2회차입장에선 님들도알다시피 대전사파밍or 담금질로 기절기(EX 흑요석)있으면 신규몹인미노나 무명조각상 , 리자드맨(댐감패시브에 기절기추가)도 나쁘진않음 안정성을추구하면 추천드림\n대전사잡는 겸사겸사 오크궁수정수도 에르웬 용병쪽에 파밍해주고 마녀의숲쪽에 플미나스있으면 그것도 에르웬 먹여놓으셈 (패시브랑 액티브딜 나름쏠쏠함) \n그렇게 다파밍하고나선 보이는대로 공적치채우고(30채워서 3렙) 리자드맨있는쪽에서 남은시간싹다박아줘서 마석파밍하고나면 대강 20만이상쯤 벌고 7등급달성가능  \n\n마을 복귀후 마석량에따라 다른대 \n20만~30만 > 상점에서 20~30만으로 남은 라이티늄 부위, 미샤 쌍검 사주셈 고기랑육포잊지말고,중급포션도 몇개만챙겨주셈 3회차다보니 길드 의뢰나오니 잊지말고 받아주고 \n30만이상   > 비요른 불사자 1각후 남는돈으로 미샤무기+육포+고기+중급포션 돈이더 많다싶으면 라이티늄 한두부위 \n입장후에 균열확정(봉헌)으로 강철의묘 (바위사막쪽마석)입장 > 운좋으면영구야영도구나 일디움 비요른에 먹고 \n끝나는대로 바로 3층에 대전사or미노파밍가서 미샤먹이고 의뢰끝내고나서 4층입장 \n4층 50층까지 미로타고 쭉 올라가면 6등급몹들이 패치후 4명이여도 1마리씩만 나올탠대 패턴익숙하면 잡을만함 \n \n\n얘내들 잡아서 비요른빈칸있으면 흑요석 (없으면 동료먹이고난다음 비우고 먹을때까지 \n에르웬 핏빛 칼늑\n미샤는 데스나이트추천\n 본인은 운이좋아서 4회차안에 셋다먹임 \n이렇게 애들 정수셋팅끝내고나면 \n비요른 각인도 좀하고 2층에 안잡았던몹들도 잡아주면서 4렙까지 공적치(150)금방올려주고\n1층균열런을좀 뛰거나해야함 균열관련은 운이니깐 일단 제외 (본인도 안뜸)\n\n4렙찍고나선 아이나르 합류할탠대 (이시점쯤엔 전보통 2각~3각인) 용병해고하고(탬다벗기시고)\n합류후에 2층 사막에서 데쓰웜파밍 뜨면 아이나르에먹여주고 안뜨면 그냥 마석파밍했다생각하셈 \n2층닫히고나면 어찌저찌 몇회차정도 리자드맨 노가다나 근성이좀있는사람이다싶으면 4층에서 돈좀땡기고(데스나이트정수또나오면 아이나르추천) \n시간되면 아이나르 미노 하나정돈 확실히줄만함 (미샤안줬다는가정하에)\n\n3각인후에는 80층까지 등반후 트롤/키메라파밍 \n트롤은 패링만잘해도 죽을일절때없고(대신어글관리는확실하게) 키메라는 조우하고 달려가서 패링후 브레스 스킬로만끊어주고 페링평타만치면 죽을일 잘없음\n이후 5층등반완료 하시면됨 \n전 하면서 자연균열은 한번도 안떳지만 정수드랍이 빠르게빠르게 잘되었어서\n빠르게 50일차(5회차)만에 5층등반했고 일반적으로는 50~100일차안 정도봄\n\n참고로 5층가서 5등급애들한태 잘못깝치면 여태한거날릴확률이높으니깐조심하고 (트롤/키메라/데쓰웜이랑은 많이다른난이도)\n\n 지금은 80일차 끝나고 레이븐 합류,\n90일차 5각후 5층파밍중",
+      "media": [
+        {
+          "ref": "media-9cec444e-c9d3-4da7-9569-ac05f3343328",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/249c26d7-a88b-40f9-b81f-4d4ba209a289/f25ac197-dd61-43e4-a3d1-7b437297c209-image.png",
+          "name": "image.png",
+          "path": "249c26d7-a88b-40f9-b81f-4d4ba209a289/f25ac197-dd61-43e4-a3d1-7b437297c209-image.png",
+          "type": "image/png"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 69
+        },
+        {
+          "kind": "guide-password",
+          "salt": "60543a8e-8ac9-40c6-a6ea-f37e9ac086fa",
+          "digest": "46cf341d4ac909aa66010bf71fab75ce47df6696599f6b1ca09e6fae3d55c033"
+        }
+      ],
+      "created_at": "2026-05-29T05:12:27.85+00:00",
+      "updated_at": "2026-05-29T05:12:27.85+00:00"
+    },
+    {
+      "id": "a27c587e-4f91-4b2f-88c1-032ce6218892",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "ㅇㅇ",
+      "content": "근데 에르웬은 이상한거 주면 나중에 지우는데 돈드니까 용병으로 후각 맞춰주는게 낫지않냐?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "5cedbcde-a096-4296-a889-19fb4a425eaf",
+          "digest": "2feddc008e7ba6f5061f910d45985bcb892bec204a8a851fc7f5993a91163441"
+        }
+      ],
+      "created_at": "2026-05-29T04:33:02.356+00:00",
+      "updated_at": "2026-05-29T04:33:02.356+00:00"
+    },
+    {
+      "id": "guide-like-9e769b6d0b0141403c136a0db5923793fcc09c081128e76e853f7a4f83a72ac1",
+      "title": "__guide_like__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T04:14:09.412+00:00",
+      "updated_at": "2026-05-29T04:14:09.413+00:00"
+    },
+    {
+      "id": "guide-like-bfc6dc3289a60a145cfae63ea77e38d64d409872f3ec424d3568293d90479be7",
+      "title": "__guide_like__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-29T03:21:32.956+00:00",
+      "updated_at": "2026-05-29T03:21:32.956+00:00"
+    },
+    {
+      "id": "e2fb8fe4-a4bf-4148-9f34-8ac42d134227",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "오호",
+      "content": "히든피스가 랜덤이 아니엇구나?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "f0fe7653-d0b5-47ec-b02c-55c561426aa8",
+          "digest": "2b7e37296901f12faca8181e19a0cb557597ed24abc37d818d73aa87a7efd778"
+        }
+      ],
+      "created_at": "2026-05-29T01:55:52.627+00:00",
+      "updated_at": "2026-05-29T01:55:52.627+00:00"
+    },
+    {
+      "id": "c18f4e7d-f5d9-4226-8346-6f519e49d242",
+      "title": "__guide_comment__:4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "author": "나요랜",
+      "content": "감사합니다감사합니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "4921c8ff-737b-49e5-a953-685c647a6ab7",
+          "digest": "afa57bda4860fe88b558084e61ccf65c147c3e00418604e1eb4682a9b3e83285"
+        }
+      ],
+      "created_at": "2026-05-28T23:58:42.342+00:00",
+      "updated_at": "2026-05-28T23:58:42.342+00:00"
+    },
+    {
+      "id": "863da62a-3e18-4390-90ec-97232a5000d2",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "간절한 이한수",
+      "content": "팔푸 건드릴거 아니면.\n이프 잡을 수준이면 가능해보입니다.\n\n6층에 나오는 5등급들은 피통이 조금 더 커서\n1.1 이프 정도로 추정 되네여",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "65c9c60f-2844-4b02-bd99-0b8dc508eb1e",
+          "digest": "ef14453d45c39f5c87df64cd59651aafeaf16d706e947d4ef485f035f1f2453f"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "7a4b7a4c-33df-4606-b17a-ad41c320d0ab"
+        }
+      ],
+      "created_at": "2026-05-28T23:22:53.973+00:00",
+      "updated_at": "2026-05-28T23:22:53.973+00:00"
+    },
+    {
+      "id": "00a648fe-f4aa-4037-bd28-10d874b57d82",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "간절한 이한수",
+      "content": "제가 작성자인데\n저는 항상 널널하게 육성했고.\n\n저는 5각에 잡았서 올린건데.\n애도를 표합니다 ㅜ\n\n위에글은 입장컷이고.\n초보자면 +1각인 하라했는데\n디테일한 설명이 부족했네요\n\n안전하게 6각인 오히+레이븐으로 가야\n초보분들이 즐기시겠네여 ㅠ\n\n죄송해요 ㅜ",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "b3e4e154-2db1-4abe-8a21-a2a2fef4c905",
+          "digest": "555ec0eaa6e10e224096bd1b528c8c457a1d761f59b75c5dc8fff73499fb577e"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "4233566e-820c-4b5c-a8a4-89686a2d9f3e"
+        }
+      ],
+      "created_at": "2026-05-28T23:21:41.882+00:00",
+      "updated_at": "2026-05-28T23:21:41.882+00:00"
+    },
+    {
+      "id": "4a77f8b4-4aaa-4012-a393-96db101f7392",
+      "title": "[파밍] 초반 골드 가장 쉽게 빨리 버는법",
+      "author": "JS",
+      "content": "죽어서 다시 시작할 때 \n\n가장 귀찮은게 골드파밍이라 생각함,\n\n3층 리자드맨 뺑뺑이, 2층 짐승 런 등이 있지만 \n피로도 대비 효율이 개똥망이라 공략 남김.\n\n먼저 최소 조건은\n마을 복귀 1~2회차까지 최소 3렙(미샤)을 맞추고\n비요른 3정수(최소 거대오크 카나바로 대전사) 및 동료 2~3정수\n비요른 일반 갑옷 세트 or 라이티늄 세트\n\n그리고 중급포션을 최대한 많이 사기,\n보통 정수들 다 맞춰서 채워주면 \n구매에 필요한 골드가 자연스럽게 모임\n\n**여기서 중요한 점은 아르웬의 후각 감각을 채워야함**\n웨어울프 + 거대늑대 정수를 먹여주자\n특히 웨어울프는 공포cc기로 \n초중반 최고의 효율을 보여줌\n\n후각 감각을 채우는 이유는 균열에서 나오는\n“?” << 가 보이기 시작함\n(없어도 부술 수는 있음 다만 안보임)\n\n?를 j키로 부술 경우 약 50만골드를 추가로 얻고,\n모든 파팅원의 각종 스텟 저항템을 올리는 소비템을 얻을 수 있음.\n*** 냉기영단, 고즐쿼츠 등 소비템은 파티6인 모이고 쓰셈***\n\n———————————————————————————-\n자 그럼 이제 간단함 \n균열에 들어가서\n?부수고 보스 보물상자를 열어서\n균열 1회당 50~100만골드를 얻으면 됨(평균 70)\n\n균열 젠 대기타임에는\n그냥 1층 구석에 짱박아놓고 볼일 보면 됨\n\n1층 균열의 경우 \n첫트는 3렙찍고 기다리면 나옴\n\n2회차 부터는 마을복귀 4번하면\n그 다음부터 또 랜덤으로 나옴\n\n필자의 경우 자연균열 암거나 들가서 깨고\n담턴에 바로 *인공균열로 안 가본 균열 생성해서\n약 100-120만 골드 벌고 시작함\n\n2층 균열은 첫트 이후\n약 5-6회 귀환 후 출현\n다만 생성되는 균열은 랜덤임(그냥 다 돌아다니셈)\n거석, 검귀, 어늑은 아직 어려우니 들어가지 말것\n\n*금일 패치 후 더 짧아 졌을수도 있음\n**. 1층 균열 남은기간 3일 12시간 이후 열림\n** 2층 균열 남은기간 2일 12시간 이후 열림\n\n보스 정수까지 다 챙기고 싶은 \n극한의 효율을 뽑고 싶으면\n4층가서 4렙 찍고 정수 한칸 비워두고 가셈\n\n물론 넘버스도 먹으면 ㄱㅇㄷ\n\n*골드 파밍은 균열당 1회 제한임\n\n———————————————————————————-\n\n추천 보스 (난이도)\n일디움(강철) > 타룬바스(빙하) > 2층 건맨(총포) > 블라터(핏빛) > 킹슬라임(황금) + 2층 홉고블린(기억안남)\n\n패턴 모르면 라이티늄 갑옷 입고 가셈(동료 정수 채우고, 중급포션 두둑히)\n\n타룬바스는 많이 쉽지만\n지금 패치먹고도 50만 골드정도 밖에 못먹음 \n가장 적게 벌음\n\n이렇게 대충 1층에 던져놓고 균열 돌다보면\n피로도 대비 골드를 쉽게 파밍해서\n\n비요른 각인 및 라이티늄 방어구 풀세트도 금방 맞춤\n\n그 다음부터는 4층 5층 등반하면서\n정수 지우고 채우면서 스펙 맞춘 후에\n\n5층 앵벌이하면 끝\n\n반응 좋으면 괜찮은 비전 또 올릴게요",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 108
+        },
+        {
+          "kind": "guide-password",
+          "salt": "9c3f9225-1b4f-4edf-ba70-5cc108379356",
+          "digest": "2c9a5d553dae401803911a3fdfed020b613f56e86382ed1fc7b9171d6654ea9c"
+        }
+      ],
+      "created_at": "2026-05-28T22:37:41.094+00:00",
+      "updated_at": "2026-05-28T23:00:25.802+00:00"
+    },
+    {
+      "id": "4d6166c1-198f-41cf-82c0-efadab9f1187",
+      "title": "__guide_comment__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "JS",
+      "content": "개추욘",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "d80c0d6a-c8b8-41d9-bb11-949cb0c8c488",
+          "digest": "11b86164c089d6bb05682197f238036dcbbc9a8b09b691e4c2978ab85d3478d1"
+        }
+      ],
+      "created_at": "2026-05-28T22:42:13.775+00:00",
+      "updated_at": "2026-05-28T22:42:13.775+00:00"
+    },
+    {
+      "id": "4233566e-820c-4b5c-a8a4-89686a2d9f3e",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "익명",
+      "content": "거석(5각인)  이거  수정부탁드립니다    4렙 5각인상태로 갔다가 뒤졌네요;; 피통은 둘째치고 광역공격기에 물방 너무 높아서 비요른 딜도 안들어가고요..... 3일간 키웠던 캐릭 죽었습니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "c6b7175a-472b-4bec-969c-8ce2cc4ac973",
+          "digest": "03df57619ffd4101cfb0ebb068c3b3e63735b291b665e7b9ac51d152b80ff247"
+        }
+      ],
+      "created_at": "2026-05-28T16:52:07.316+00:00",
+      "updated_at": "2026-05-28T16:52:07.316+00:00"
+    },
+    {
+      "id": "b0dc9030-bc70-418a-93d9-2bc90a084361",
+      "title": "[보스] 2층 균열 홉고블린 요새 따라하기",
+      "author": "파라브",
+      "content": "{{media:media-30226828-a274-4155-908c-f0a45cac2049}}\n4각으로 홉고블린요새에 들어옴.\n난이도는 총포사막과 동급.\n\n{{media:media-91854859-4981-4834-9fb6-10bc4109ef9e}}\n첫 번째 방.\n\n{{media:media-ca86ccc8-6dab-4107-8333-06da8c201889}}\n두 번째 방.\n\n{{media:media-ef8b3422-adad-4879-8079-c8a0ea790d77}}\n세 번째방.\n\n{{media:media-a6529c60-b6b2-4b90-9c35-82dd3b120607}}\n마지막 보스방.\n\n{{media:media-04acb1e6-a3be-4059-b1a1-3e9e8ec6f200}}\n4각 기준 그냥 맞으면서 패도 잡음.",
+      "media": [
+        {
+          "ref": "media-30226828-a274-4155-908c-f0a45cac2049",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b0dc9030-bc70-418a-93d9-2bc90a084361/830fb013-aad2-48ad-8f40-a8e7fbf55cf8-image.png",
+          "name": "image.png",
+          "path": "b0dc9030-bc70-418a-93d9-2bc90a084361/830fb013-aad2-48ad-8f40-a8e7fbf55cf8-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-91854859-4981-4834-9fb6-10bc4109ef9e",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b0dc9030-bc70-418a-93d9-2bc90a084361/0c78fa07-cd7c-4427-87af-29e910674186-image.png",
+          "name": "image.png",
+          "path": "b0dc9030-bc70-418a-93d9-2bc90a084361/0c78fa07-cd7c-4427-87af-29e910674186-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-ca86ccc8-6dab-4107-8333-06da8c201889",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b0dc9030-bc70-418a-93d9-2bc90a084361/a0239d54-c6bb-4752-a724-f32bfecb17f0-image.png",
+          "name": "image.png",
+          "path": "b0dc9030-bc70-418a-93d9-2bc90a084361/a0239d54-c6bb-4752-a724-f32bfecb17f0-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-ef8b3422-adad-4879-8079-c8a0ea790d77",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b0dc9030-bc70-418a-93d9-2bc90a084361/995a9f8f-4be8-43cc-b3ac-e71ec3716eec-image.png",
+          "name": "image.png",
+          "path": "b0dc9030-bc70-418a-93d9-2bc90a084361/995a9f8f-4be8-43cc-b3ac-e71ec3716eec-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-a6529c60-b6b2-4b90-9c35-82dd3b120607",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b0dc9030-bc70-418a-93d9-2bc90a084361/fd554d71-a85b-42c3-8cee-07e9d3ffeab6-image.png",
+          "name": "image.png",
+          "path": "b0dc9030-bc70-418a-93d9-2bc90a084361/fd554d71-a85b-42c3-8cee-07e9d3ffeab6-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-04acb1e6-a3be-4059-b1a1-3e9e8ec6f200",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b0dc9030-bc70-418a-93d9-2bc90a084361/3404cc75-ed06-4596-9449-dfaa955f2432-______.mkv",
+          "name": "홉고블린요새.mkv",
+          "path": "b0dc9030-bc70-418a-93d9-2bc90a084361/3404cc75-ed06-4596-9449-dfaa955f2432-______.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 156
+        },
+        {
+          "kind": "guide-password",
+          "salt": "2d623a30-1066-4ede-83dc-cca73472eab1",
+          "digest": "dedc37367f803dc888383f54b31a0a5160d39b0f6fc398e61030506bb46deb88"
+        }
+      ],
+      "created_at": "2026-05-28T16:17:33.86+00:00",
+      "updated_at": "2026-05-28T16:17:33.86+00:00"
+    },
+    {
+      "id": "08b32c05-7491-4544-bda9-03c3f8976c48",
+      "title": "[보스] 1층 균열 강철의묘(일디움) 따라하기",
+      "author": "파라브",
+      "content": "{{media:media-90f39fe1-900c-4eb6-9240-49ccf544ab69}}\n강철묘에 들어가 보자.\n어쩌다 보니 4각에 처음으로 강철묘를 들어가게 됨.\n\n{{media:media-6f1c5f2a-c7ca-4c26-a79d-5ec3728f8519}}\n첫 번째 방.\n머미를 잡아주자.\n\n{{media:media-7d3d8e4d-a8e0-4cb5-9ccb-5235cca236b7}}\n두 번째 방.\n오른쪽의 ? 를 꼭 먹어주자 f키 누르면 됨.\n\n{{media:media-8f4edaa1-4a0c-4ad6-8e36-452ca377fad1}}\n세 번째 방.\n\n{{media:media-934a99d2-bb32-40f7-a8f8-0895a38c1c8d}}\n네 번째 보스방.\n보물상자와 오른쪽 ? 를 먹고\n?를 부수면 강철의 영약을 얻을 수 있다\n\n{{media:media-ecd3bc66-c776-4857-901e-d963bee4400a}}\n보스일디움을 패주자.\n\n4각이라 그냥 딜찍누...\n\n{{media:media-cd405e2e-db33-4ef5-8719-e6b8c17e3246}}",
+      "media": [
+        {
+          "ref": "media-90f39fe1-900c-4eb6-9240-49ccf544ab69",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/08b32c05-7491-4544-bda9-03c3f8976c48/f5335729-0946-421c-968b-68c50a1a01d4-image.png",
+          "name": "image.png",
+          "path": "08b32c05-7491-4544-bda9-03c3f8976c48/f5335729-0946-421c-968b-68c50a1a01d4-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-6f1c5f2a-c7ca-4c26-a79d-5ec3728f8519",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/08b32c05-7491-4544-bda9-03c3f8976c48/22640be4-c8e6-4942-bd1d-06c395d73179-image.png",
+          "name": "image.png",
+          "path": "08b32c05-7491-4544-bda9-03c3f8976c48/22640be4-c8e6-4942-bd1d-06c395d73179-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-7d3d8e4d-a8e0-4cb5-9ccb-5235cca236b7",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/08b32c05-7491-4544-bda9-03c3f8976c48/8dafe124-746d-4eb7-b14e-248f62b03d50-image.png",
+          "name": "image.png",
+          "path": "08b32c05-7491-4544-bda9-03c3f8976c48/8dafe124-746d-4eb7-b14e-248f62b03d50-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-8f4edaa1-4a0c-4ad6-8e36-452ca377fad1",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/08b32c05-7491-4544-bda9-03c3f8976c48/4fb9784e-3a65-4fd1-bde4-7ec41703241d-image.png",
+          "name": "image.png",
+          "path": "08b32c05-7491-4544-bda9-03c3f8976c48/4fb9784e-3a65-4fd1-bde4-7ec41703241d-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-934a99d2-bb32-40f7-a8f8-0895a38c1c8d",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/08b32c05-7491-4544-bda9-03c3f8976c48/f8202ecb-81b3-4a22-a389-131c612b1442-image.png",
+          "name": "image.png",
+          "path": "08b32c05-7491-4544-bda9-03c3f8976c48/f8202ecb-81b3-4a22-a389-131c612b1442-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-ecd3bc66-c776-4857-901e-d963bee4400a",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/08b32c05-7491-4544-bda9-03c3f8976c48/d7e9f498-31b8-4128-8c93-d2c84a4d97de-image.png",
+          "name": "image.png",
+          "path": "08b32c05-7491-4544-bda9-03c3f8976c48/d7e9f498-31b8-4128-8c93-d2c84a4d97de-image.png",
+          "type": "image/png"
+        },
+        {
+          "ref": "media-cd405e2e-db33-4ef5-8719-e6b8c17e3246",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/08b32c05-7491-4544-bda9-03c3f8976c48/e81332e0-7c88-48bf-bb4f-fb215500703a-______.mkv",
+          "name": "일디움 잡기.mkv",
+          "path": "08b32c05-7491-4544-bda9-03c3f8976c48/e81332e0-7c88-48bf-bb4f-fb215500703a-______.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 121
+        },
+        {
+          "kind": "guide-password",
+          "salt": "b23e3281-be81-4f76-8523-595cf5849b7a",
+          "digest": "6ea018db3d2def2a8eb7a48d39c1aaa1701e5403a9e02aed42ec4bf17477e353"
+        }
+      ],
+      "created_at": "2026-05-28T15:55:37.795+00:00",
+      "updated_at": "2026-05-28T15:55:37.795+00:00"
+    },
+    {
+      "id": "guide-like-16a926768004f2f4d0d0592fd061aaf28e247bc90b4d5c7ddb27f8effacaf380",
+      "title": "__guide_like__:4d3586c6-2388-4710-8fbd-654dc77e7aea",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-28T13:35:38.611+00:00",
+      "updated_at": "2026-05-28T13:35:38.611+00:00"
+    },
+    {
+      "id": "guide-like-6ceb8c88424bf2c79c3b20c9cfb4739c591917d5ae55592e6db5c2f292db67ba",
+      "title": "__guide_like__:500e3954-b17e-4507-9e43-880025eb57dc",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-28T12:24:46.272+00:00",
+      "updated_at": "2026-05-28T12:24:46.272+00:00"
+    },
+    {
+      "id": "4e207932-371b-416a-abfa-465d04b6c13a",
+      "title": "[정보] 4층 균열 찾기 후각(연구글)",
+      "author": "파라브",
+      "content": "✅나른한 프렌즈님께서 공유해주셨습니다.\n\n일단 4층균열 지금까지알아낸정보정리\n후각 30or35이상일시 균열 위치를 10층 범위내로 알려줌 \nex)40~50층에 균열이 생성되었다\n\n후각 50이상일시 정확한 층수를 알려줌\n1,2,3층 균열과 다르게 가만히 세워둔다고 균열알림이 뜨는게 아니고 \n\n균열생성 후 층수에 변화가 생길때 \n최초 1회에 한해 균열알림 발생\n\n시간내에 균열을 못찾으면 사라지기때문에 \n지혜의 계단 실패로 1층씩 올라가는 방식 권장X \n\n전투중에는 시간이 흐르지않는걸 이용해 \n용기의계단or인내의계단을 이용해 찾는걸 추천\n\n지금까지 가장 빨리뜬일자는 18일남았을때,\n가장 늦게뜬일자는 13일 남았을때로 \n대략 추정범위 20일~11일 내로 균열알림 안뜨면 \n그 회차에는 균열생성 안될확률 높음",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 100
+        },
+        {
+          "kind": "guide-password",
+          "salt": "12ad3d70-4ac3-4ae7-8694-f68237e4c402",
+          "digest": "3ff50955a20019ea34e4890214548fac6e7570822ebbae43bde920db9d52171e"
+        }
+      ],
+      "created_at": "2026-05-28T11:37:38.898+00:00",
+      "updated_at": "2026-05-28T11:37:38.898+00:00"
+    },
+    {
+      "id": "guide-like-ea8cdc4bccbdf5f6be22006e004d291177119c76bfb6ac4cd11a8f9461ce1f09",
+      "title": "__guide_like__:fce2a354-285c-4f07-8784-34d0d696ec22",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-28T03:20:02.499+00:00",
+      "updated_at": "2026-05-28T03:20:02.506+00:00"
+    },
+    {
+      "id": "b02a9bd5-19c6-4c17-be2a-268505e0bfe7",
+      "title": "__guide_comment__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "에르웬",
+      "content": "비싸서 그렇긴 하지만 시작의 섬에서 항해사(450만) 고용하시는게 젤 좋긴 합니다. 표류 될 확률을 조금 더 낮추시려면 2티어 배를 제작하시거나 아우옌 얻어서 항해 관련 정수를 얻으셔야 합니다.\n표류하게 되면 hp20%, 컨디션 50이 감소하면서 섬의 중앙으로 이동하게 됩니다. 운이 없어서 그 섬의 중앙에 몹이 있으면 바로 전투상황이라 이 상황이 제일 위험합니다.",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "b2e5662c-2884-4975-aa5b-7a758583f1f7",
+          "digest": "9fa6e511037d80aaa260c283a2da6735659cdf8fcc8f7a882f996b98c66ddd5c"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "57898f16-7c92-4459-bf90-3445d1ffd1ea"
+        }
+      ],
+      "created_at": "2026-05-28T02:57:00.082+00:00",
+      "updated_at": "2026-05-28T02:57:00.082+00:00"
+    },
+    {
+      "id": "6a53c638-f591-4aa4-a7de-b2f0854ac5a7",
+      "title": "__guide_comment__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "뉴비",
+      "content": "표류를 안당하기 위한 팁이라던지.. 방법이 있을까요? \n\n순수 경험이 필요한 컨텐츠인가요 ?\n\n5층 5등급 몬스터와 비슷한 수준이라면, 팔푸푸라를 제외하면, 위험한 상황은 없는건가요 ?",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "ae28a961-60de-44dd-9fd1-3c71c4d6939b",
+          "digest": "88278d85245d2c449b0d281daf6d16ba215322de8a765fc6108da997279a31e0"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "57898f16-7c92-4459-bf90-3445d1ffd1ea"
+        }
+      ],
+      "created_at": "2026-05-27T16:39:10.479+00:00",
+      "updated_at": "2026-05-27T16:39:10.479+00:00"
+    },
+    {
+      "id": "guide-like-7e8b3d7d4c48ab1a16d38585569e11f1cbfdeb5f1b46e3cf34ee3b831d91d1d4",
+      "title": "__guide_like__:2ef8af61-4bcc-47e5-b640-6a3e76c17f6a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-27T16:31:32.895+00:00",
+      "updated_at": "2026-05-27T16:31:32.895+00:00"
+    },
+    {
+      "id": "guide-like-b51576e920a1636c8e308e08992cf21c0d97b1b25a3ddcaa03d7fd4e9c1952cc",
+      "title": "__guide_like__:500e3954-b17e-4507-9e43-880025eb57dc",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-27T16:31:24.118+00:00",
+      "updated_at": "2026-05-27T16:31:24.118+00:00"
+    },
+    {
+      "id": "guide-like-bbdad56904f70fc4245142fbc66fad0dc5bb15e877c6b4a9ef0ffb4acbeaabe9",
+      "title": "__guide_like__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-27T10:07:32.257+00:00",
+      "updated_at": "2026-05-27T10:07:32.257+00:00"
+    },
+    {
+      "id": "4fa6a727-3ea5-4237-8128-9dac1e3b4edc",
+      "title": "__guide_comment__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "에르웬",
+      "content": "몹 난이도는 4등급인 팔푸푸라 제외하고 5층 5등급 몹이랑 비슷한 수준입니다. 몹 잡는 것 보다는 항해하다가 표류되는 경우가 많아서 멘탈 나가시는 분들 많이 봤어요. 첫 항해하시는 거면 항해사 고용하시는 것도 방법입니다. 이동하실 때는 표류 덜 당하게 징검다리처럼 최대한 육지(섬) 이용해서 다니시고요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "14376fc8-928a-4967-b7c3-dc8847e8d996",
+          "digest": "5d04848672ce5ab1a5725a0460292968272b90863beaa8a285566f3caa76311b"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "57898f16-7c92-4459-bf90-3445d1ffd1ea"
+        }
+      ],
+      "created_at": "2026-05-27T10:04:59.084+00:00",
+      "updated_at": "2026-05-27T10:04:59.084+00:00"
+    },
+    {
+      "id": "57898f16-7c92-4459-bf90-3445d1ffd1ea",
+      "title": "__guide_comment__:73546605-e335-43ea-a234-b5f977e4cec8",
+      "author": "뉴비",
+      "content": "지도정보 감사합니다.\n\n혹시 6층 파밍 난이도가 얼마나 어려울까요 ? \n5층은 무리없이 파밍가능하고 수호자 정수 제외하고는 5층까지 얻을 수 있는 정수는 다 얻긴 했는데",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "14c84773-079f-44e9-8615-b4993b2f4df3",
+          "digest": "e51964d019610f18a2be9845dbd2586c2d76610d976ad44276cf178fb054d1a7"
+        }
+      ],
+      "created_at": "2026-05-27T09:11:15.91+00:00",
+      "updated_at": "2026-05-27T09:11:15.91+00:00"
+    },
+    {
+      "id": "2ef8af61-4bcc-47e5-b640-6a3e76c17f6a",
+      "title": "6층 모든 정수정보 모음",
+      "author": "카니바로학살자",
+      "content": "{{media:media-d38dbaf1-c0ee-4dde-98e4-63cf77620adb}}",
+      "media": [
+        {
+          "ref": "media-d38dbaf1-c0ee-4dde-98e4-63cf77620adb",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/2ef8af61-4bcc-47e5-b640-6a3e76c17f6a/bcb35f83-70a3-46a4-aed4-218ca7e22a0f-1000041820.png",
+          "name": "1000041820.png",
+          "path": "2ef8af61-4bcc-47e5-b640-6a3e76c17f6a/bcb35f83-70a3-46a4-aed4-218ca7e22a0f-1000041820.png",
+          "type": "image/png"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 142
+        },
+        {
+          "kind": "guide-password",
+          "salt": "adecd7b1-6c55-4e9f-9621-38dfae67a471",
+          "digest": "ccd6118bd2bf57c884f4cefe59c92befd21334c24f6ef16b5b661b409a431291"
+        }
+      ],
+      "created_at": "2026-05-27T07:07:44.818+00:00",
+      "updated_at": "2026-05-27T07:07:44.818+00:00"
+    },
+    {
+      "id": "7a4b7a4c-33df-4606-b17a-ad41c320d0ab",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "응애뉴비",
+      "content": "잘 읽었습니다. 5층은 잡을만한데요, 6층은 무서워서 한발도 못땟는데 제가 균열입장한 적이없어서 넘버스세팅 좀 하고 6층 탐험해야할까요 ?\n\n혹시 시간 여유되시면 6층 파밍과 항해공략에대해 알고싶습니다.",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "06f78afb-8752-4106-8e7e-abfa822d1d53",
+          "digest": "fc216551f5c69daf53f9b572e1cbc3aa50eff8a9793fed475478b8cb2a4ef7ce"
+        }
+      ],
+      "created_at": "2026-05-27T02:18:49.835+00:00",
+      "updated_at": "2026-05-27T02:18:49.835+00:00"
+    },
+    {
+      "id": "guide-like-99baea81bd6b56f4142807bfce0c0a87c86356698d1a22435d5000132926245a",
+      "title": "__guide_like__:500e3954-b17e-4507-9e43-880025eb57dc",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-27T00:18:00.945+00:00",
+      "updated_at": "2026-05-27T00:18:00.945+00:00"
+    },
+    {
+      "id": "guide-like-b4c62f2388870ec11f48a7d469b1311c347fc837eb803152e32a91f615557627",
+      "title": "__guide_like__:b4829df3-39c5-431a-8bc5-198012f62f1a",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-27T00:16:37.34+00:00",
+      "updated_at": "2026-05-27T00:16:37.34+00:00"
+    },
+    {
+      "id": "guide-like-7d63e9efa656c7d2e21197e6dc4b96a6a52c8de846e34d70827243dddb0b796e",
+      "title": "__guide_like__:e18f3a32-92db-40b5-b494-263342f5fc2c",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-26T20:25:47.914+00:00",
+      "updated_at": "2026-05-26T20:25:47.914+00:00"
+    },
+    {
+      "id": "500e3954-b17e-4507-9e43-880025eb57dc",
+      "title": "죽은김에 써보는 뉴비 이것만 따라하면 나도 5층 바바리안!",
+      "author": "파라브",
+      "content": "이 글의 컨셉은 무조건! 안전하게 가자입니다.\n이정도면 되겠지? 하는 순간 골로간것만 58632번입니다. 그럼 시작합니다.\n비요른 불사자 각인 기준!\n\n1. 시작하면 용병궁수를 사줍니다.\n\n2. 2렙 안되게 조심하면서 카니바로로 16000마석(8마리 잡기)을 만듭니다.(9등급 잡는거 보다 돈 잘벌림)\n*사냥방법은 '카니바로 런 1렙 컨트롤 공략' 영상 참고.\n*운좋게 8트 안에 카니바로 정수 나오면 비요른 먹이기.\n\n3. 16000스톤을 벌었으면 공적치 6을 만들어 에르웬으로 마을에 귀환합니다.\n\n4. 상점에서 고블린활 2개 사서 에르웬, 용병궁수 1개씩 들고, 고기 꽉채우기.\n\n5. 20일차, 다시 카니바로만 겁나 잡기.(하프트롤, 오크대전사, 리자드맨 같은 애들 욕심내지 않기)\n*야영 도구, 고기 적절히 써서 잡기.\n*카니바로 나오면 비요른 먹이기.\n\n6. 1각 할 금액 쌓일때 까지 반복.\n\n7. 1각 돈 모였으면 3랩 만들고 마을 귀환.\n\n8. 미샤가 왔으니 용병궁수 해고 하고 오크대전사 파밍.\n\n9. 오크대전사 비요른, 미샤 이렇게 먹여주는게 안정적임.\n\n10. 둘다 먹였다면 이제 짐승굴 파밍이 가능함. 다시 용병궁수, 떠돌이전사를 고용해서 5인으로 짐승굴 파밍.\n\n11. 최소 3각 까지 파밍.\n\n12. 3각이 되었다면 1층 균열 빙하굴, 강철의묘, 2층 균열 총포사막, 홉고블린의 요새 최소 클리어가 가능함 볼때마다 클리어 해주면서 4층 등반.\n\n13. 4층에서 먹을 정수는 비요른(흑요석 골렘), 에르웬(핏빛칼날늑대) 이 두가지다.*최근 패치로 4층에서는 4인 파티든 5인 파티든 6등급 5등급 몹은 1마리만 나온다.\n\n14. 2가지 정수를 먹었다면 다시 2층 짐승굴, 3층 7등급 애들을 패면서 4각을 만든다.\n\n15. 여기서 선택, 힘겹게 와리가리 하면서 4층의 트롤을 잡을것이냐, 2~3번 더 마석 파밍을 하고 5각인을 하고 트롤을 잡을 것이냐.\n*본인의 선택!\n\n16. 이제 비요른이 트롤 정수를 먹었다면! 5층가서 안전하게 암흑땅(남쪽), 바람땅(오른쪽)에서 파밍을 해야한다.\n*주의해야할 애들은 혈원귀 2마리, 트롤 2마리(5등급 2마리가 위험함)\n\n17. 끝!\n\n이거대로 하면 너도 나도 5층 쌉가능!",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 380
+        },
+        {
+          "kind": "guide-password",
+          "salt": "e07c18a3-30a3-4924-9d88-6d697379e92d",
+          "digest": "a8021d5a9302ef8290c5b23530728ba3b82986b0288b98e1686cccdf0eaf679a"
+        }
+      ],
+      "created_at": "2026-05-26T15:50:33.372+00:00",
+      "updated_at": "2026-05-26T16:03:59.004+00:00"
+    },
+    {
+      "id": "guide-like-fbbaef3f3750ad725856bf2bc436fdc8e3e4b5589a00ff489083554dc8e1c89d",
+      "title": "__guide_like__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-26T10:07:55.652+00:00",
+      "updated_at": "2026-05-26T10:07:55.652+00:00"
+    },
+    {
+      "id": "87f51551-1734-4e90-987c-bae560d31fdc",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "5층 쯤이야",
+      "content": "4각으로도 등반하면 소울이터만 딸수는 있는데.\n소울이터 하나때문에 올라가는건 귀찮아서 비효율이에요\n차라리 자연스럽게 5각인 이후 올라오면 좋아요",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "37a9cada-e9b8-4633-bca3-ebc831e1b5c8",
+          "digest": "3f038fdec5c3932f4c006156ac698e48ee6a49714985ddda37a6c9465ced434b"
+        }
+      ],
+      "created_at": "2026-05-26T09:34:28.921+00:00",
+      "updated_at": "2026-05-26T09:34:28.921+00:00"
+    },
+    {
+      "id": "6be98728-9ed1-49ca-a588-cea54da9644b",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "파라브",
+      "content": "5층은 최소 5~6각으로 도전해보시기 바랍니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "38f74543-f765-43b7-b1e3-6f632f340090",
+          "digest": "a95b89ed99bd15c91f487d596f1362d16183bb1831443d187c15693d9a9a0e63"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "195b8a45-cbbe-4b34-beec-0dff9d4b68b6"
+        }
+      ],
+      "created_at": "2026-05-26T09:11:41.776+00:00",
+      "updated_at": "2026-05-26T09:11:41.776+00:00"
+    },
+    {
+      "id": "00c71784-3703-4985-9a0e-77e78cfcd6b3",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "파라브",
+      "content": "크 정성글 개추",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "5bd925e5-8e04-4816-b8c4-7620f6c98fca",
+          "digest": "1d015a7f14084851d0d8f4632c250e8eab34e4c8ac68a572dd2e7a0d44a76b4d"
+        }
+      ],
+      "created_at": "2026-05-26T09:11:04.288+00:00",
+      "updated_at": "2026-05-26T09:11:04.288+00:00"
+    },
+    {
+      "id": "guide-like-b3ee4a49363cc760cda97b39eb8ca98f1f09f7ed3952237b82d0cb6e2449c7e0",
+      "title": "__guide_like__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-26T09:10:34.017+00:00",
+      "updated_at": "2026-05-26T09:10:34.017+00:00"
+    },
+    {
+      "id": "195b8a45-cbbe-4b34-beec-0dff9d4b68b6",
+      "title": "__guide_comment__:d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "author": "익명",
+      "content": "소울이터는 난이도 어떤가요? 몇각으로 가야할지",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "1abdf223-6d8b-43e7-a27e-122062908963",
+          "digest": "dac0e135423f3b116007c465eb64102e6fd84612d8c13ded0db4397bfdea91de"
+        }
+      ],
+      "created_at": "2026-05-26T08:13:28.564+00:00",
+      "updated_at": "2026-05-26T08:13:28.564+00:00"
+    },
+    {
+      "id": "d39cc136-5ba5-48c8-9c92-c7d3188c962c",
+      "title": "자주하는 질문",
+      "author": "5층 쯤이야",
+      "content": "Q1.비요른 어떤 정수가 좋아요?\nA1.(카니바로, 오크대전사, 흑요석 등등) - 빌드의 자율성이 있으나, 앞 3가지는 초반 국밥 정수임\n\nQ2.카니바로 어디서 나와요?\nA2. 3층 맵 정중앙 네모난 공터에서 다른 몹한테 어그로 끌리지 않고. 10초이상 가만히 있으면. 카니바로가 쫒아옴\n      (카니바로는 몇명이 가든 1마리만 젠 됨/ 천공탑 제외)\n\nQ3.에르웬 초반에 무슨 정수 주나요?\nA3.오크궁수 / 플미너스 / 그림자 추격자 <- 얘네들을 많이 추천함. 하지만 필자는 노정수 추천. 피빛칼날늑대를 첫정수로 추천\n\nQ4.이 스펙에 이거 가능하나요?\nA4. 디테일하게 스펙과 컨트롤을 봐야하지만. 비요른 각인을 기준으로 입장컷생각해 보면 좋음.\n     내가 질문할 정도로 경험이 부족하다면, 입장컷보다 +1 각인 추천.\n\n-빙하의 길(1각인) / 강철의 묘(2각인) / 총포균열(2각인) / 피빛성채블라터 (3각인) / 피빛성채 뱀파이어(5각인)\n 녹색탄광(3각인) / 검귀균열(5각인) / 거석(5각인) / 망자균열 (5각인) / 백색균열(6각인+오크히어로) / 4층균열(6각인 5정수 세팅이상)\n 오크히어로(6각인+레이븐) / 데스웜(3각인) / 4층 흑요석, 피빛칼날늑대(2각인) / 트롤, 키메라(4각인) \n- 5층\n암흑(5각인 이상) / 바람(폭궁 5각인 / 정령 6각인 폭풍전사 6각인) / 얼음(프로스트 6각인 항마정수 유/ 돌연변이 5각인 / 한기권속 5각인)\n불(6각인 항마정수 유) / 베르타스(6각인)\n\n각인을 기준으로 본 후, 그 다음 정수 디테일까지 봐야 가능한지 더 정확히 볼 수 있음",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 204
+        },
+        {
+          "kind": "guide-password",
+          "salt": "5c27b6ac-7448-41cc-b8b3-45b9689b8200",
+          "digest": "e81a78a2acd8e4e6be5a6944a18c434bd27b06c4d652c00eb2fe690f5f35c46d"
+        }
+      ],
+      "created_at": "2026-05-26T07:33:59.192+00:00",
+      "updated_at": "2026-05-26T07:33:59.192+00:00"
+    },
+    {
+      "id": "guide-like-f41804ac1320b0131f63180369e8f8b8fbf7687e2be984ae0c0da7e24b617ed3",
+      "title": "__guide_like__:c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-26T06:14:13.989+00:00",
+      "updated_at": "2026-05-26T06:14:13.989+00:00"
+    },
+    {
+      "id": "cb727885-e89e-4760-8626-986dbb3c3816",
+      "title": "__guide_comment__:c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10",
+      "author": "파라브",
+      "content": "대박! 감사합니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "b233f408-8936-4ff6-ba70-025e9cadf0cd",
+          "digest": "716ed5e3e911013df9254ecc8296db2cd0609a9957c4d845ed57ab36570ae370"
+        }
+      ],
+      "created_at": "2026-05-26T06:14:12.445+00:00",
+      "updated_at": "2026-05-26T06:14:12.445+00:00"
+    },
+    {
+      "id": "76d34efe-7052-463f-992e-7d8674a74ec7",
+      "title": "__guide_comment__:e862b6c9-b304-4fa0-9a32-4a139de2fc22",
+      "author": "파라브",
+      "content": "오! 이건 몰랐네요!",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "c5e9c4e1-6dfe-4046-bcd2-48d316b7cd10",
+          "digest": "30c5624e55ed73d95c7ce346de049d84dda85838abfa3b33625a7267a2724dd4"
+        }
+      ],
+      "created_at": "2026-05-26T06:13:58.941+00:00",
+      "updated_at": "2026-05-26T06:13:58.941+00:00"
+    },
+    {
+      "id": "guide-like-16d851bd36baf8dceb2d858b596e43808c0beeec348e5d47c1b14ef3743b6eb6",
+      "title": "__guide_like__:e862b6c9-b304-4fa0-9a32-4a139de2fc22",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-26T06:13:38.247+00:00",
+      "updated_at": "2026-05-26T06:13:38.247+00:00"
+    },
+    {
+      "id": "c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10",
+      "title": "[정보] 3층 지도",
+      "author": "로트밀러",
+      "content": "3층 지도입니다\n\n3층균열 + 가는길 추가했습니다",
+      "media": [
+        {
+          "ref": "c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10/30cccea8-874e-4e05-b373-5d523c95097e-__.jpg",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10/30cccea8-874e-4e05-b373-5d523c95097e-__.jpg",
+          "name": "밝음.jpg",
+          "path": "c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10/30cccea8-874e-4e05-b373-5d523c95097e-__.jpg",
+          "type": "image/jpeg"
+        },
+        {
+          "ref": "c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10/fd302b94-b5c8-4b5c-ad13-5e9ff7414ee9-____________.jpg",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10/fd302b94-b5c8-4b5c-ad13-5e9ff7414ee9-____________.jpg",
+          "name": "아이나르도 갈 수 있는.jpg",
+          "path": "c2f956aa-2ffe-4fdf-9d0c-b20b90f7ec10/fd302b94-b5c8-4b5c-ad13-5e9ff7414ee9-____________.jpg",
+          "type": "image/jpeg"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 142
+        },
+        {
+          "kind": "guide-password",
+          "salt": "b40ba943-9366-4d83-8c67-97a46c50b150",
+          "digest": "818279c5a889a26776ebd778df388d86ddc5568db97a98cd08d01ffbbc0be375"
+        }
+      ],
+      "created_at": "2026-05-26T04:35:47.945+00:00",
+      "updated_at": "2026-05-26T05:17:17.48+00:00"
+    },
+    {
+      "id": "e862b6c9-b304-4fa0-9a32-4a139de2fc22",
+      "title": "[정보] 렙 오를시 주는 기본스텟",
+      "author": "디은",
+      "content": "근력2\n민첩1 \n내구력2\n골강도1\n\n체질1추정 \n\n동료들 전부 같은 상승량입니다 법사는 모르겠어요",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 155
+        },
+        {
+          "kind": "guide-password",
+          "salt": "37f5ea61-fe96-4e12-9e7e-fb4254e20ddb",
+          "digest": "1b0ce88132f536625771128d3ea93775da8fcab78d1f11686b81ecd2c5f44b18"
+        }
+      ],
+      "created_at": "2026-05-25T17:58:02.333+00:00",
+      "updated_at": "2026-05-25T17:58:02.333+00:00"
+    },
+    {
+      "id": "e2495993-ce96-4010-82b4-003fe0450c98",
+      "title": "__guide_comment__:d74a1849-8628-4c0e-b27a-ca1066b104c4",
+      "author": "디은",
+      "content": "1층 3일12시간 이상 남았을 때도 나왔던 경험이 있고 카톡방에서본 몇번 본적이 있으니 남은시간 4일부터가 맞는것 같습니다",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "291fe29b-8817-4988-812a-20196f003c38",
+          "digest": "4cbcb23a7ef6ae6f32fb15a96cc9023b32a608f5201240280b2059bf379fde64"
+        }
+      ],
+      "created_at": "2026-05-25T17:32:22.06+00:00",
+      "updated_at": "2026-05-25T17:32:22.06+00:00"
+    },
+    {
+      "id": "bccddc5a-b360-4cd4-89fd-5ac84649eed8",
+      "title": "[보스] 4랩 기준 데쓰웜 파밍(안전제일)",
+      "author": "파라브",
+      "content": "공략 스펙\n\n비요른 3각 라이티늄  셋\n- 오크대전사, 카니바로, 흑요석 골렘\n\n에르웬(정수없음)\n\n용병궁수(행운세팅)\n- 호문쿨루스, 위치스램프\n\n미샤(빙하마수 Lv1)\n- 오크대전사, 폭군 타룬바스\n\n아이나르(정수없음)\n\n\n초반 야성분출, 식인으로 피뻥하고\n데쓰웜 첫타 패링, 스킬 cc기로 끊고 무지성 j 연타",
+      "media": [
+        {
+          "ref": "bccddc5a-b360-4cd4-89fd-5ac84649eed8/7793e427-4981-4558-84ff-56e133f49d6e-_4_______.mkv",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/bccddc5a-b360-4cd4-89fd-5ac84649eed8/7793e427-4981-4558-84ff-56e133f49d6e-_4_______.mkv",
+          "name": "랩4 데쓰웜 파밍.mkv",
+          "path": "bccddc5a-b360-4cd4-89fd-5ac84649eed8/7793e427-4981-4558-84ff-56e133f49d6e-_4_______.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 138
+        },
+        {
+          "kind": "guide-password",
+          "salt": "17980596-5841-4a96-a434-5bc6dfc65026",
+          "digest": "ef4c1bb2ddb7c6965cf3ad46c1330b089dcee0c2423c03f975d291888e198c08"
+        }
+      ],
+      "created_at": "2026-05-25T10:38:00.617+00:00",
+      "updated_at": "2026-05-25T10:38:24.866+00:00"
+    },
+    {
+      "id": "guide-like-e1f120a7e265a5c49627c3eb23f2c7bcb81acba3287cbb629c31d9aeb4467d03",
+      "title": "__guide_like__:4d3586c6-2388-4710-8fbd-654dc77e7aea",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-25T10:13:35.244+00:00",
+      "updated_at": "2026-05-25T10:13:35.244+00:00"
+    },
+    {
+      "id": "d74a1849-8628-4c0e-b27a-ca1066b104c4",
+      "title": "[정보] 각 층별 균열 나타나는 시기(4층까지 정리)",
+      "author": "파라브",
+      "content": "남은시간 기준\n1층 - 3일 ~ 12시간\n2층 - 10일 ~ 3일\n3층 - 10일 ~ 5일\n4층 - 무작위(시간 지나도 없어지지 않음)\n\n✅개인적인 경험에 의한 수치입니다",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 335
+        },
+        {
+          "kind": "guide-password",
+          "salt": "8898573f-a84f-47b9-be2a-8898cf6b2415",
+          "digest": "2a822720087cca69a038f008efcca5ffb0b134578ed9eeb9592b86a901d28447"
+        }
+      ],
+      "created_at": "2026-05-24T17:06:13.171+00:00",
+      "updated_at": "2026-05-25T10:07:19.584+00:00"
+    },
+    {
+      "id": "f6d3e6bc-2945-4095-b1ee-d634c70637bb",
+      "title": "__guide_comment__:51022c38-6a81-4a64-9b77-a13b765840fb",
+      "author": "한스",
+      "content": "ㄷㄷ",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "642154a6-f8f0-48e0-be9b-1b7f19b45b23",
+          "digest": "628d9fe8a4cb30c917540f2072bd1ecdca9ef99873787012ee14208d634e1047"
+        }
+      ],
+      "created_at": "2026-05-25T07:57:02.759+00:00",
+      "updated_at": "2026-05-25T07:57:02.759+00:00"
+    },
+    {
+      "id": "0fce7b2b-e2cd-4810-aa53-11e0b5b0e81d",
+      "title": "__guide_comment__:4d3586c6-2388-4710-8fbd-654dc77e7aea",
+      "author": "파라브",
+      "content": "곧 업로드하겠습니다!",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "49b74007-e214-4d34-b958-b054f26e2702",
+          "digest": "aecb6190f975937f20b009b030cdd2bc090c6ce9ba1f113ea59d95165617efef"
+        },
+        {
+          "kind": "guide-comment-parent",
+          "parentId": "043c5ee9-f002-4a17-b01a-4c131d8dbd8d"
+        }
+      ],
+      "created_at": "2026-05-25T03:06:44.6+00:00",
+      "updated_at": "2026-05-25T03:06:44.6+00:00"
+    },
+    {
+      "id": "guide-like-a061da01c2441168e01d7c2edd6c47c8f8e5dc2fda06802762c570f92d65139c",
+      "title": "__guide_like__:cb7967f1-f844-4025-acd6-185bb11f71dd",
+      "author": "like",
+      "content": "like",
+      "media": [],
+      "created_at": "2026-05-25T03:06:11.632+00:00",
+      "updated_at": "2026-05-25T03:06:11.632+00:00"
+    },
+    {
+      "id": "cb7967f1-f844-4025-acd6-185bb11f71dd",
+      "title": "[정보] 레벨별 필요 공적치 정리",
+      "author": "파라브",
+      "content": "Lv2: 6\nLv3: 30\nLv4: 150\nLv5: 400\nLv6: 800",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 342
+        },
+        {
+          "kind": "guide-password",
+          "salt": "2c106857-4da9-434c-9579-14cb2df5167a",
+          "digest": "2d02e3ebb9ce0217fcba759ce63ede304edb28c05f56eeb5c4a6a1b4a6656817"
+        }
+      ],
+      "created_at": "2026-05-24T15:05:50.442+00:00",
+      "updated_at": "2026-05-25T02:49:48.903+00:00"
+    },
+    {
+      "id": "e18f3a32-92db-40b5-b494-263342f5fc2c",
+      "title": "[정보] 6층 지도",
+      "author": "파라브",
+      "content": "✅에르웬 초상화 버프 기원 님께서 만드신 6층 지도입니다",
+      "media": [
+        {
+          "ref": "e18f3a32-92db-40b5-b494-263342f5fc2c/1cb4b1ae-c189-4413-aac9-1884a8aaad36-6____.png",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/e18f3a32-92db-40b5-b494-263342f5fc2c/1cb4b1ae-c189-4413-aac9-1884a8aaad36-6____.png",
+          "name": "6층 지도.png",
+          "path": "e18f3a32-92db-40b5-b494-263342f5fc2c/1cb4b1ae-c189-4413-aac9-1884a8aaad36-6____.png",
+          "type": "image/png"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 82
+        },
+        {
+          "kind": "guide-password",
+          "salt": "3afb49e9-9536-4073-ac53-bf279ac145da",
+          "digest": "b106cddd0ee155bc1d7263d87fbe30a0c5ad8a691b97dbe0de650010a88ebb79"
+        }
+      ],
+      "created_at": "2026-05-24T16:47:52.708+00:00",
+      "updated_at": "2026-05-24T16:47:52.708+00:00"
+    },
+    {
+      "id": "043c5ee9-f002-4a17-b01a-4c131d8dbd8d",
+      "title": "__guide_comment__:4d3586c6-2388-4710-8fbd-654dc77e7aea",
+      "author": "익명",
+      "content": "일디움이랑 핏빛기사 공략도 올려주실 수 있나요??",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "81432b08-e155-4969-a54a-ef19b34d715b",
+          "digest": "f74851fe776a8462d1b9f8b69d8fc14c28a1ea42a8fc40bb49235d400631e161"
+        }
+      ],
+      "created_at": "2026-05-24T16:20:38.424+00:00",
+      "updated_at": "2026-05-24T16:20:38.424+00:00"
+    },
+    {
+      "id": "7a907942-8f83-4687-ba8c-0ac3e67f3b7c",
+      "title": "__guide_comment__:bdbecd96-8189-4501-ac7a-715bb8a83f11",
+      "author": "디은",
+      "content": "재생력은 회복능력과 소량의 체력도 올려주고 내구력도 체력+방어력이라고 추측됨",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "8ff4a0d2-1bc7-4bf6-8f80-6b2ebaa320d6",
+          "digest": "d3bcdfc7d2829d7695c22b2eb290fe8ca67c792849925fc6a1cb776a7187d764"
+        }
+      ],
+      "created_at": "2026-05-24T14:34:29.692+00:00",
+      "updated_at": "2026-05-24T14:34:29.692+00:00"
+    },
+    {
+      "id": "68793a97-5422-422d-9afc-a854bd6093e8",
+      "title": "__guide_comment__:bdbecd96-8189-4501-ac7a-715bb8a83f11",
+      "author": "익명",
+      "content": "혹시 투쟁심은뭔가여",
+      "media": [
+        {
+          "kind": "guide-password",
+          "salt": "0d3b46bf-bff7-4874-812d-1fb7e45dbb10",
+          "digest": "e8304f19ea3f36b67e751d23097ee19cc1c1d2ee21876b7fd416fc0bd7ea5fc9"
+        }
+      ],
+      "created_at": "2026-05-24T12:55:14.418+00:00",
+      "updated_at": "2026-05-24T12:55:14.418+00:00"
+    },
+    {
+      "id": "fce2a354-285c-4f07-8784-34d0d696ec22",
+      "title": "5층 프로스트로드",
+      "author": "카니바로학살자",
+      "content": "전진하면서 패링, 패링, 평타, 평타, 기절기술 -> 평타, 패링 -> 평타, 패링 -> 평타, 기절기술",
+      "media": [
+        {
+          "ref": "fce2a354-285c-4f07-8784-34d0d696ec22/2657acf9-6a95-4a54-9741-fa841cee1f6c-___.mp4",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/fce2a354-285c-4f07-8784-34d0d696ec22/2657acf9-6a95-4a54-9741-fa841cee1f6c-___.mp4",
+          "name": "프로드.mp4",
+          "path": "fce2a354-285c-4f07-8784-34d0d696ec22/2657acf9-6a95-4a54-9741-fa841cee1f6c-___.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 155
+        },
+        {
+          "kind": "guide-password",
+          "salt": "a3205dc2-fe19-44ff-90d4-ec72dfcc730f",
+          "digest": "04ffc693236f34410e4afd724e509d3d106e6c2456a862c8d773791e583d8b7d"
+        }
+      ],
+      "created_at": "2026-05-24T12:53:42.698+00:00",
+      "updated_at": "2026-05-24T12:53:42.698+00:00"
+    },
+    {
+      "id": "9520eea4-2e80-4616-8084-e09065fbc36c",
+      "title": "5층 폭풍의 궁수",
+      "author": "카니바로학살자",
+      "content": "전진하면서 패링 / 패링 -> 평타 평타 기절기술 -> 평타 , 패링 -> 평타 , 패링 -> 평타 , 기절기술",
+      "media": [
+        {
+          "ref": "9520eea4-2e80-4616-8084-e09065fbc36c/90862583-5fdb-4c8b-a166-7f0fecb684d0-__.mp4",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/9520eea4-2e80-4616-8084-e09065fbc36c/90862583-5fdb-4c8b-a166-7f0fecb684d0-__.mp4",
+          "name": "폭궁.mp4",
+          "path": "9520eea4-2e80-4616-8084-e09065fbc36c/90862583-5fdb-4c8b-a166-7f0fecb684d0-__.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 150
+        },
+        {
+          "kind": "guide-password",
+          "salt": "a8eabd62-2c09-4f99-8d56-a11e9d61460a",
+          "digest": "449f37a3d15ef08c8069cd7f2407fed43e9aae8859c87074bab019080fd36cc8"
+        }
+      ],
+      "created_at": "2026-05-24T12:52:48.671+00:00",
+      "updated_at": "2026-05-24T12:52:48.671+00:00"
+    },
+    {
+      "id": "985d9231-6818-4779-991b-9b896eee47bf",
+      "title": "5층 정령술사",
+      "author": "카니바로학살자",
+      "content": "패링 -> 패링 -> 평타, 평타, 기절기술 -> 평타 , 패링 -> 평타, 패링 -> 기절기술",
+      "media": [
+        {
+          "ref": "985d9231-6818-4779-991b-9b896eee47bf/6064e993-e421-493b-8ac8-39e860292e58-____.mp4",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/985d9231-6818-4779-991b-9b896eee47bf/6064e993-e421-493b-8ac8-39e860292e58-____.mp4",
+          "name": "정령술사.mp4",
+          "path": "985d9231-6818-4779-991b-9b896eee47bf/6064e993-e421-493b-8ac8-39e860292e58-____.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 122
+        },
+        {
+          "kind": "guide-password",
+          "salt": "811260a7-d9cd-4ad0-a603-22a262b4b9eb",
+          "digest": "23dbf0d9fca06624e4a3cd368e76a96abe11254bfb8c26526769c1c6ad58ec73"
+        }
+      ],
+      "created_at": "2026-05-24T12:51:36.58+00:00",
+      "updated_at": "2026-05-24T12:51:36.58+00:00"
+    },
+    {
+      "id": "01d005d1-0a36-4334-b0cc-bf59e7c0451c",
+      "title": "5층 이프리트",
+      "author": "카니바로학살자",
+      "content": "전진->패링, 패링 붙어서 평타 평타 -> 기절기술 -> 평타 -> 패링 -> 평타 -> 패링 -> 평타  -> 기절기술 -> 마무리",
+      "media": [
+        {
+          "ref": "01d005d1-0a36-4334-b0cc-bf59e7c0451c/b0017a05-c596-46eb-a7f6-a6f3d1b7caa1-____.mp4",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/01d005d1-0a36-4334-b0cc-bf59e7c0451c/b0017a05-c596-46eb-a7f6-a6f3d1b7caa1-____.mp4",
+          "name": "이프리트.mp4",
+          "path": "01d005d1-0a36-4334-b0cc-bf59e7c0451c/b0017a05-c596-46eb-a7f6-a6f3d1b7caa1-____.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 155
+        },
+        {
+          "kind": "guide-password",
+          "salt": "82feb8cb-097a-4070-a045-f0a0cbcbfb8c",
+          "digest": "97d652caa13ae7af57d810d0119419271823deb8d5d1c26960e33f6efa3ff76c"
+        }
+      ],
+      "created_at": "2026-05-24T12:50:23.635+00:00",
+      "updated_at": "2026-05-24T12:50:23.635+00:00"
+    },
+    {
+      "id": "bdbecd96-8189-4501-ac7a-715bb8a83f11",
+      "title": "[정보] 스탯 기능",
+      "author": "파라브",
+      "content": "근력 : 공격력과 체력이 증가.\n민첩 : 공격 속도와 방어 속도 증가.(에르웬 공격력 증가)\n내구력 : 체력 증가(=체질)\n재생력 : 체력 회복 속도 증가\n지구력 : 스테미나 회복속도 증가\n골강도 : 방어력 증가\n물리내성 : 방어력 증가\n감각 : 히든 피스 발견, 소울이터 발견(30)\n정신력 : cc기 해제\n행운 : 아이템 및 정수 드랍율 상승\n항마력 : 마법저항력 증가\n후각 : 10 야영지 방향 파악 가능, 20 야영지 좌표 및 균열 방향 파악 가능, 30 균열 좌표 표시",
+      "media": [
+        {
+          "kind": "guide-view-counter",
+          "views": 177
+        },
+        {
+          "kind": "guide-password",
+          "salt": "b6116c27-be63-437c-8422-2a8b7aaea1a2",
+          "digest": "584b1a0982b420b85a6d19f428dc9b80149adbab89a81905f211a1ab655b5a3f"
+        }
+      ],
+      "created_at": "2026-05-24T12:10:43.615+00:00",
+      "updated_at": "2026-05-24T12:10:43.615+00:00"
+    },
+    {
+      "id": "4d3586c6-2388-4710-8fbd-654dc77e7aea",
+      "title": "[보스] 타룬바스 공략 극초반",
+      "author": "파라브",
+      "content": "에르웬과 미샤는 말뚝딜하게 놔두기.\n포션 넉넉하게.\n광역스킬은 무빙으로 피하고, 단일 스킬은 패링하기.\n\n1. 빙결돌진(단일)\n2. 서리 휘두르기(단일)\n3. 얼음 내리치기(광역)\n2. 얼음분쇄(광역)",
+      "media": [
+        {
+          "ref": "4d3586c6-2388-4710-8fbd-654dc77e7aea/fff91f5f-7e18-4244-9da4-05fcab303adf-_____3_.mkv",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/4d3586c6-2388-4710-8fbd-654dc77e7aea/fff91f5f-7e18-4244-9da4-05fcab303adf-_____3_.mkv",
+          "name": "타룬바스 3인.mkv",
+          "path": "4d3586c6-2388-4710-8fbd-654dc77e7aea/fff91f5f-7e18-4244-9da4-05fcab303adf-_____3_.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 304
+        },
+        {
+          "kind": "guide-password",
+          "salt": "af093b08-98e7-436b-ab08-c4e1b52ac4d2",
+          "digest": "8271d83d8014afd2daedf13610692e2fff3f5cfad26df88b63d790a0a8408a4c"
+        }
+      ],
+      "created_at": "2026-05-24T11:56:55.343+00:00",
+      "updated_at": "2026-05-24T11:56:55.343+00:00"
+    },
+    {
+      "id": "b4829df3-39c5-431a-8bc5-198012f62f1a",
+      "title": "초반 대전사 파밍",
+      "author": "파라브",
+      "content": "초반에 비요른과 미샤에게 cc기가 있는 오크 대전사 정수를 먹여주면 안정적인 사냥이 가능함.\n대지분쇄를 무빙으로 피해주는게 포인트.",
+      "media": [
+        {
+          "ref": "b4829df3-39c5-431a-8bc5-198012f62f1a/fa16a305-9b10-4df9-8244-686a7f00ceed-______3____.mkv",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/b4829df3-39c5-431a-8bc5-198012f62f1a/fa16a305-9b10-4df9-8244-686a7f00ceed-______3____.mkv",
+          "name": "오크대전사 3인 사냥.mkv",
+          "path": "b4829df3-39c5-431a-8bc5-198012f62f1a/fa16a305-9b10-4df9-8244-686a7f00ceed-______3____.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 179
+        },
+        {
+          "kind": "guide-password",
+          "salt": "83782501-7bf6-490d-9779-604296285b68",
+          "digest": "78d7476e1ce88e96c765b643f3a563932360b9be12e1fc2e5441a0ff9b2f49c2"
+        }
+      ],
+      "created_at": "2026-05-24T11:54:15.246+00:00",
+      "updated_at": "2026-05-24T11:54:15.246+00:00"
+    },
+    {
+      "id": "d9a17386-8821-4eb3-a3d7-8ca73e40c145",
+      "title": "카니바로 런 2렙 컨트롤 공략",
+      "author": "파라브",
+      "content": "기본적으로 같음.\n떠돌이 궁수 하나 사서가면 안정적.",
+      "media": [
+        {
+          "ref": "d9a17386-8821-4eb3-a3d7-8ca73e40c145/80db3163-eb9f-4705-a30e-1822e0319158-_____3____.mkv",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/d9a17386-8821-4eb3-a3d7-8ca73e40c145/80db3163-eb9f-4705-a30e-1822e0319158-_____3____.mkv",
+          "name": "카니바로 3인 사냥.mkv",
+          "path": "d9a17386-8821-4eb3-a3d7-8ca73e40c145/80db3163-eb9f-4705-a30e-1822e0319158-_____3____.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 145
+        },
+        {
+          "kind": "guide-password",
+          "salt": "dd54faab-dbc7-43da-b8ea-01f8902e85f7",
+          "digest": "51cc209b7af0f62b913a30c7c56bc6d171dd4322ad471b1f941f5843d3cd19ad"
+        }
+      ],
+      "created_at": "2026-05-24T11:52:49.814+00:00",
+      "updated_at": "2026-05-24T11:52:49.814+00:00"
+    },
+    {
+      "id": "35321117-9743-465a-a27c-40b605a3b5c6",
+      "title": "카니바로 런 1렙 컨트롤 공략",
+      "author": "파라브",
+      "content": "패링 1~2번 후 붙어서 평타 갈기기",
+      "media": [
+        {
+          "ref": "35321117-9743-465a-a27c-40b605a3b5c6/4be0966b-3d05-4917-ad72-b9ebdafc90d0-_____1_.mkv",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/35321117-9743-465a-a27c-40b605a3b5c6/4be0966b-3d05-4917-ad72-b9ebdafc90d0-_____1_.mkv",
+          "name": "카니바로 1인.mkv",
+          "path": "35321117-9743-465a-a27c-40b605a3b5c6/4be0966b-3d05-4917-ad72-b9ebdafc90d0-_____1_.mkv",
+          "type": "video/matroska"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 191
+        },
+        {
+          "kind": "guide-password",
+          "salt": "c3d095a3-ca3a-4e49-b2e3-31f080c124a2",
+          "digest": "a28376708986ce7845fd389ffd82f19b9d8912ab831de2d932aa60adf60349ce"
+        }
+      ],
+      "created_at": "2026-05-24T11:51:44.577+00:00",
+      "updated_at": "2026-05-24T11:51:44.577+00:00"
+    },
+    {
+      "id": "51022c38-6a81-4a64-9b77-a13b765840fb",
+      "title": "[보스] 6층 보스 팔푸푸라 공략 영상",
+      "author": "파라브",
+      "content": "에르웬 초상화 버프 기원님께서 공유해주셨습니다.\n\n비요른 스펙 6각\n흑요석 골렘, 트롤, 오크히어로, 백색신전 기사, 다키리온, 바이쿤두스\n\n보스 패턴\n1. 기본 공격\n2. 조수파도(광역)\n3. 산호분출(광역)\n4. 리바이어던의 손아귀(단일)\n5. 마력연사",
+      "media": [
+        {
+          "ref": "51022c38-6a81-4a64-9b77-a13b765840fb/20459982-041f-4ca0-aefd-b38870659e45-6______.mp4",
+          "url": "https://bjlykfxfminmjfgilowj.supabase.co/storage/v1/object/public/guide-media/51022c38-6a81-4a64-9b77-a13b765840fb/20459982-041f-4ca0-aefd-b38870659e45-6______.mp4",
+          "name": "6층 팔푸푸라.mp4",
+          "path": "51022c38-6a81-4a64-9b77-a13b765840fb/20459982-041f-4ca0-aefd-b38870659e45-6______.mp4",
+          "type": "video/mp4"
+        },
+        {
+          "kind": "guide-view-counter",
+          "views": 271
+        }
+      ],
+      "created_at": "2026-05-24T11:22:16.623+00:00",
+      "updated_at": "2026-05-24T11:22:16.623+00:00"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ window.DUKHUBUSTERS_CONFIG = {
   supabaseUrl: "https://bjlykfxfminmjfgilowj.supabase.co",
   supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
   backendMode: "firebase",
+  staticDataVersion: "20260607-static-data",
   firebaseConfig: {
     apiKey: "AIzaSyB1Nvaz_Vmz201izN0vwx3mK9hDbLwDB4A",
     authDomain: "dukhubusters.firebaseapp.com",

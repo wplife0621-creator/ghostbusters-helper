@@ -1,0 +1,4405 @@
+{
+  "generatedAt": "2026-06-06T15:33:52.305Z",
+  "rows": [
+    {
+      "id": "deleted-681aad58-0a02-44a8-abea-95935d99fc66",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "4e0040ad-d97d-4013-bc38-f28c897ef6c5",
+      "created_at": "2026-06-04T23:45:19.889+00:00"
+    },
+    {
+      "id": "like-2a14157955d6ffe5ca963c539879d077b84404f969e9505c68001a6960fb42c4",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "a2a1a745-0355-4ceb-b5b1-0f3016936c0a",
+      "created_at": "2026-06-04T10:42:25.157+00:00"
+    },
+    {
+      "id": "build-review-9218e9b9-1185-4859-ada4-4dcac530740b",
+      "title": "__build_review__",
+      "author": "123",
+      "members": [],
+      "note": "{\"buildId\":\"ed45e637-aa3d-4822-978d-5df0168c356d\",\"content\":\"목표로 삼고 정진하고 싶은데 지금 시점에서도 종결빌드가 맞는지 궁금합니다\"}",
+      "created_at": "2026-06-04T04:10:51.574+00:00"
+    },
+    {
+      "id": "like-f05e7ffa9eb6e2bee78e3003950480d3218f84bc27839f0ae5258820608fe477",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "created_at": "2026-06-04T04:09:37.508+00:00"
+    },
+    {
+      "id": "deleted-8fe3ba9e-7177-4b1e-a630-958c9f0101e2",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "614b26c7-4306-48cc-8d3a-a3105badf7db",
+      "created_at": "2026-06-04T00:18:34.327+00:00"
+    },
+    {
+      "id": "deleted-d15c5ccc-7acd-4465-8f92-9c4838f3b52d",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "27bfc530-7300-408b-8662-9e843346b66b",
+      "created_at": "2026-06-04T00:18:19.328+00:00"
+    },
+    {
+      "id": "a2a1a745-0355-4ceb-b5b1-0f3016936c0a",
+      "title": "아이나르 연타",
+      "author": "겜바바러브",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "베르타스",
+            "해적 선장",
+            "해적 검사",
+            "니겔 펜서",
+            "뱀파이어(수호자)",
+            "돌연변이"
+          ],
+          "character": "아이나르",
+          "_deleteHash": "ece6a14cf4f01dcaafdddeae808392d0cd2b530d53874180672323a465dff23c",
+          "activeColors": [
+            "빨강",
+            "",
+            "",
+            "",
+            "",
+            "보라"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-03T01:08:43.719+00:00"
+    },
+    {
+      "id": "3fa1d86e-8a51-472b-a716-0c9aca834658",
+      "title": "아이나르 연타",
+      "author": "겜바바러브",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "베르타스",
+            "해적 선장",
+            "해적 검사",
+            "니겔 펜서",
+            "뱀파이어(수호자)",
+            "돌연변이"
+          ],
+          "character": "아이나르",
+          "_deleteHash": "f29a442546f60473cd5e7b198ee1a8b791e736474509a217a4b578aeeefe7bf2",
+          "activeColors": [
+            "검정",
+            "",
+            "",
+            "",
+            "",
+            "보라"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-03T01:08:16.247+00:00"
+    },
+    {
+      "id": "4e0040ad-d97d-4013-bc38-f28c897ef6c5",
+      "title": "목표빌드",
+      "author": "카니바로학살자",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "오크 히어로",
+            "레드우드",
+            "카니바로",
+            "팔푸푸라",
+            "백색신전 기사",
+            "다키리온"
+          ],
+          "character": "비요른",
+          "_deleteHash": "5ac90e655a36565207841cca8cc3702980f9984efd3d847443fe493d84367e7b",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "파랑",
+            "",
+            "보라"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off",
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "세이렌(청록)",
+            "신탁사수",
+            "정령술사",
+            "폭풍의궁수",
+            "나가 궁수",
+            "요정 여왕"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "청록",
+            "청록",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "베르타스",
+            "해적 선장(빨강)",
+            "해적명사수",
+            "니겔 펜서",
+            "빙해 제독",
+            "데쓰웜"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "검정",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-02T14:05:51.498+00:00"
+    },
+    {
+      "id": "614b26c7-4306-48cc-8d3a-a3105badf7db",
+      "title": "목표빌드",
+      "author": "카니바로학살자",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "오크 히어로",
+            "레드우드",
+            "카니바로",
+            "팔푸푸라",
+            "백색신전 기사",
+            "다키리온"
+          ],
+          "character": "비요른",
+          "_deleteHash": "fc2797405c4a2d1fd37a228266cfd547684b0d28a5291284ed793bf03044c8f4",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "파랑",
+            "",
+            "보라"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off",
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭풍의궁수",
+            "정령술사",
+            "세이렌",
+            "",
+            "",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "노랑",
+            "청록",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "레이븐",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-02T14:02:43.439+00:00"
+    },
+    {
+      "id": "27bfc530-7300-408b-8662-9e843346b66b",
+      "title": "목표빌드",
+      "author": "카니바로학살자",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "오크 히어로",
+            "레드우드",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "9fb55014625e7a216e3f1832999a0a5c1701ebb1d3fbe7b181e38f701c33c2b7",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "레이븐",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-02T14:00:17.607+00:00"
+    },
+    {
+      "id": "like-cd4421cddd35d728a31dad422b63120bf009b727d2c8b40d39c04bcf82be6459",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "c47226f5-e1bf-42c6-ad35-74f2eb257d56",
+      "created_at": "2026-06-02T13:18:14.788+00:00"
+    },
+    {
+      "id": "dd3a362e-8e6a-4739-b0c5-7d1007297036",
+      "title": "5층까지 정수 추천",
+      "author": "겜바바러브",
+      "members": [
+        {
+          "level": 5,
+          "essences": [
+            "카니바로",
+            "미노타우로스",
+            "흑요석골렘",
+            "다키리온",
+            "베르타스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "ae74f4152d3881681d79b3644eeec12ee643b61e1525b843af51c537ceb56048",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "무색",
+            "검정"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "플미나스",
+            "핏빛칼날늑대",
+            "풍령",
+            "폭풍의궁수",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "노랑",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "카니바로",
+            "저주받은 기사 블라터",
+            "와이번",
+            "돌연변이",
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "빨강",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "카니바로",
+            "데쓰웜",
+            "데스나이트",
+            "트롤",
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-02T09:45:02.9+00:00"
+    },
+    {
+      "id": "f2bf7eeb-63fa-4297-afdd-2ad7d2572c78",
+      "title": "내가 쓰려고 만든(5층이하)",
+      "author": "겜바바러브",
+      "members": [
+        {
+          "level": 5,
+          "essences": [
+            "베르타스",
+            "오크 히어로",
+            "백색신전 기사",
+            "다키리온",
+            "레드우드"
+          ],
+          "character": "비요른",
+          "_deleteHash": "866977a8dabadacb7e83bd80815374cc3120cbeaa396a3061a5ecff04c127d29",
+          "activeColors": [
+            "검정",
+            "",
+            "",
+            "무색",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "폭풍의궁수",
+            "핏빛칼날늑대",
+            "신탁사수",
+            "정령술사",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "청록",
+            "",
+            "",
+            "갈색",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "저주받은 기사 블라터",
+            "돌연변이",
+            "프로스트로드",
+            "",
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "보라",
+            "파랑",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "바이쿤두스",
+            "헬프레임",
+            "이프리트",
+            "데쓰웜",
+            "홉고블린대족장"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "빨강",
+            "노랑",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "5층이하 정수셋",
+      "created_at": "2026-06-02T03:45:19.005+00:00"
+    },
+    {
+      "id": "like-14eafe43b3cc5cc44bea3ce6194292645b68bbd027b23865ff6ad19aba6c7d69",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "c47226f5-e1bf-42c6-ad35-74f2eb257d56",
+      "created_at": "2026-06-02T01:05:19.693+00:00"
+    },
+    {
+      "id": "deleted-c6bf590c-3f54-44f0-8dbb-15fce61f6816",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "ccb0146a-4d8a-42b0-8cf6-d44587534079",
+      "created_at": "2026-06-01T22:35:18.28+00:00"
+    },
+    {
+      "id": "deleted-6254aef4-7d81-4827-8678-f38f0b69543b",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "9e6b9d47-5a8a-4adc-9ebf-3b457b4a9e0c",
+      "created_at": "2026-06-01T22:35:13.052+00:00"
+    },
+    {
+      "id": "deleted-8bb546d2-20b1-4464-84be-9b1f4ba9df35",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "f9f38cc9-b096-4cc1-b776-c25fc8f052a0",
+      "created_at": "2026-06-01T22:35:06.251+00:00"
+    },
+    {
+      "id": "deleted-eb4d9ea9-87bd-4d66-8c26-65537ce34dcc",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "0b06d493-8a4c-40b8-85c7-a10b557193f2",
+      "created_at": "2026-06-01T22:35:01.201+00:00"
+    },
+    {
+      "id": "deleted-af9df308-e818-4e12-876e-582b5c084dbf",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "9ecfb58c-2f31-4d7d-9c96-82053bd40fa2",
+      "created_at": "2026-06-01T22:34:54.95+00:00"
+    },
+    {
+      "id": "c47226f5-e1bf-42c6-ad35-74f2eb257d56",
+      "title": "비요른",
+      "author": "채널오렌지",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "레드우드",
+            "오크 히어로",
+            "블랙 트리",
+            "팔푸푸라",
+            "깨어난 거석",
+            "베르타스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "9d36e48ddbfd8ab86b2405bdd800a7bc14cb800a5e28ad0da7fa4e42b9700ac9",
+          "activeColors": [
+            "",
+            "",
+            "갈색",
+            "파랑",
+            "",
+            "검정"
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "핏빛칼날늑대",
+            "어둠의 늑대인간",
+            "정령술사",
+            "나가 궁수",
+            "폭풍의궁수",
+            "요정 여왕"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "청록",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭군타룬바스",
+            "다키리온",
+            "돌연변이",
+            "해적 선장(빨강)",
+            "프로스트로드",
+            "빙해 제독"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "파랑",
+            "보라",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "뱀파이어(수호자)",
+            "이프리트",
+            "헬프레임",
+            "잿불 궁수",
+            "지옥불 선봉장",
+            "베르타스"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "노랑",
+            "빨강",
+            "",
+            "",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "off",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-01T21:54:49.789+00:00"
+    },
+    {
+      "id": "ccb0146a-4d8a-42b0-8cf6-d44587534079",
+      "title": "비요른",
+      "author": "채널오렌지",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "레드우드",
+            "오크 히어로",
+            "블랙 트리",
+            "팔푸푸라",
+            "깨어난 거석",
+            "베르타스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "aabc104991cabae0275d88c28a15edae9c043b783136a4121a7ec2c502f507b1",
+          "activeColors": [
+            "",
+            "",
+            "갈색",
+            "파랑",
+            "",
+            "검정"
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "핏빛칼날늑대",
+            "어둠의 늑대인간",
+            "정령술사",
+            "나가 궁수",
+            "폭풍의궁수",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "청록",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭군타룬바스",
+            "다키리온",
+            "돌연변이",
+            "해적 선장(빨강)",
+            "프로스트로드",
+            "빙해 제독"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "파랑",
+            "보라",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "뱀파이어(수호자)",
+            "이프리트",
+            "헬프레임",
+            "잿불 궁수",
+            "지옥불 선봉장",
+            "베르타스"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "노랑",
+            "빨강",
+            "",
+            "",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "off",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-01T21:04:09.448+00:00"
+    },
+    {
+      "id": "9e6b9d47-5a8a-4adc-9ebf-3b457b4a9e0c",
+      "title": "비요른",
+      "author": "채널오렌지",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "레드우드",
+            "오크 히어로",
+            "블랙 트리",
+            "팔푸푸라",
+            "깨어난 거석",
+            "베르타스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "22a645846e941d2742bcf9d2ab708ca876c14ea7b815122e170936f64401e9c2",
+          "activeColors": [
+            "",
+            "",
+            "갈색",
+            "파랑",
+            "",
+            "검정"
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "핏빛칼날늑대",
+            "어둠의 늑대인간",
+            "정령술사",
+            "나가 궁수",
+            "폭풍의궁수",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "청록",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭군타룬바스",
+            "다키리온",
+            "돌연변이",
+            "해적 선장(빨강)",
+            "프로스트로드",
+            "빙해 제독"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "파랑",
+            "보라",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "뱀파이어(수호자)",
+            "이프리트",
+            "헬프레임",
+            "잿불 궁수",
+            "지옥불 선봉장",
+            "베르타스"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "노랑",
+            "빨강",
+            "",
+            "",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-01T20:59:30.481+00:00"
+    },
+    {
+      "id": "f9f38cc9-b096-4cc1-b776-c25fc8f052a0",
+      "title": "비요른",
+      "author": "채널오렌지",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "레드우드",
+            "오크 히어로",
+            "블랙 트리",
+            "팔푸푸라",
+            "깨어난 거석",
+            "베르타스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "377cd7533aefc8159995d2c3ece42fdec672f0b04d8dd82aeaf4ebaaa9389f1c",
+          "activeColors": [
+            "",
+            "",
+            "갈색",
+            "파랑",
+            "",
+            "검정"
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "핏빛칼날늑대",
+            "어둠의 늑대인간",
+            "정령술사",
+            "나가 궁수",
+            "폭풍의궁수",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "청록",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭군타룬바스",
+            "다키리온",
+            "돌연변이",
+            "해적 선장(빨강)",
+            "프로스트로드",
+            "빙해 제독"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "파랑",
+            "보라",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "뱀파이어(수호자)",
+            "이프리트",
+            "헬프레임",
+            "잿불 궁수",
+            "지옥불 선봉장",
+            "베르타스"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "노랑",
+            "빨강",
+            "",
+            "",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-01T20:10:04.934+00:00"
+    },
+    {
+      "id": "0b06d493-8a4c-40b8-85c7-a10b557193f2",
+      "title": "비요른",
+      "author": "채널오렌지",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "레드우드",
+            "오크 히어로",
+            "블랙 트리",
+            "팔푸푸라",
+            "깨어난 거석",
+            "베르타스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "74c3f2ad254fa7b348218f24a18986f49f48b2452c333852e9584bdcf7ab83c4",
+          "activeColors": [
+            "",
+            "",
+            "갈색",
+            "파랑",
+            "",
+            "검정"
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "핏빛칼날늑대",
+            "어둠의 늑대인간",
+            "정령술사",
+            "나가 궁수",
+            "폭풍의궁수",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "청록",
+            "",
+            "청록",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off"
+            ],
+            [
+              "off",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-01T20:01:54.854+00:00"
+    },
+    {
+      "id": "9ecfb58c-2f31-4d7d-9c96-82053bd40fa2",
+      "title": "비요른",
+      "author": "채널오렌지",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "카니바로",
+            "오크 히어로",
+            "흑요석골렘",
+            "바이쿤두스",
+            "깨어난 거석",
+            "베르타스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "89278fc0de1370a49e770d563647203ec1bca875cc6157deb49f220c5afbd057",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-01T19:50:40.852+00:00"
+    },
+    {
+      "id": "a5a414d5-1819-494a-a62e-6025458f6023",
+      "title": "미샤 빌드 바리에이션",
+      "author": "디른",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "폭군타룬바스",
+            "프로스트로드",
+            "얼음와이번",
+            "빙해 제독",
+            "한기의 권속",
+            "니겔 펜서"
+          ],
+          "character": "미샤",
+          "_deleteHash": "9add277109ec19fb42ec9d79fe19bf8f5aca8686f543c35a9ca75dc6ca639763",
+          "activeColors": [
+            "",
+            "무색",
+            "",
+            "",
+            "파랑",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "베르타스",
+            "해적 선장",
+            "니겔 펜서",
+            "해적 명사수",
+            "빙해 제독",
+            "저주받은 기사 블라터"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "빨강",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "엘프로트",
+            "다키리온",
+            "베르타스",
+            "니겔 펜서",
+            "해적 명사수",
+            "빙해 제독"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "무색",
+            "빨강",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "1. 빙결미샤 - 기존에 가던 빌드지만 타룬 상위 수호자, 빙결 cc쿨타임 문제로 폐기된 빌드\n2. 베르타스 연타미샤 - 밸류 높은 베르타스 패시브에 집중한 빌드, 준수한 데미지와 디버프까지 챙길수 있다\n3. 소녀가장 미샤 - 2번 빌드에서 엘프로트와 다키리온 까지 몰아주어 체급을 끌어올렸다",
+      "created_at": "2026-06-01T19:25:47.433+00:00"
+    },
+    {
+      "id": "deleted-628ac73a-2d80-4c9d-90d4-f5f5ba4ff870",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "d0143111-c5eb-4295-80c2-74cbbf4754de",
+      "created_at": "2026-06-01T19:18:40.833+00:00"
+    },
+    {
+      "id": "d0143111-c5eb-4295-80c2-74cbbf4754de",
+      "title": ".",
+      "author": "디른",
+      "members": [
+        {
+          "level": 1,
+          "essences": [
+            "."
+          ],
+          "character": "비요른",
+          "_deleteHash": "44201763f657d57076744ff018384b9417473b955287048fcd1cf0ef13908817",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        }
+      ],
+      "note": "왜 안올라가지지",
+      "created_at": "2026-06-01T19:18:35.11+00:00"
+    },
+    {
+      "id": "f881615e-ce1e-4dd9-9dd8-3facede716dd",
+      "title": "초반 깡패미샤",
+      "author": "겜바바 버스터즈",
+      "members": [
+        {
+          "level": 3,
+          "essences": [
+            "샤벨타이거",
+            "다이로우터",
+            ""
+          ],
+          "character": "미샤",
+          "_deleteHash": "9927d198ee662637fc1c322247834c91412f5d99c400203b50455016dd56d905",
+          "activeColors": [
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-06-01T14:40:54.435+00:00"
+    },
+    {
+      "id": "like-54e0db0e933cfcc4365667be6f262ba74db56037c31a9bc4908fe62a8cd08431",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "66cfbfac-895c-40df-a2f8-98f881776581",
+      "created_at": "2026-05-31T22:11:55.75+00:00"
+    },
+    {
+      "id": "deleted-d104c5c1-5a5c-45d8-af73-9146d32db492",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "8b2d6b60-4254-4cc0-bfb7-5c956973718d",
+      "created_at": "2026-05-31T17:25:15.571+00:00"
+    },
+    {
+      "id": "deleted-3bea4563-da3d-4c08-a17b-06971a7c6f07",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "c152e1a2-4075-4211-9c54-d66a9548c841",
+      "created_at": "2026-05-31T14:35:54.769+00:00"
+    },
+    {
+      "id": "52c8e926-b2a3-4944-9519-c5818e272645",
+      "title": "나만의비요른 5렙",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 5,
+          "essences": [
+            "카니바로",
+            "오크대전사",
+            "흑요석 골렘",
+            "바이쿤두스",
+            "오크 히어로"
+          ],
+          "character": "비요른",
+          "_deleteHash": "99d6af39e57e09c9f599137d9559727ee1355df70f1798b85da87a2bc77d3fa2",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "오크 궁수",
+            "웨어울프",
+            "핏빛 칼날늑대",
+            "",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "폭군타룬바스",
+            "오크 대전사",
+            "얼음와이번",
+            "다키리온",
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "파랑",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "키메라",
+            "트롤",
+            "이프리트",
+            "헬프레임",
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "빨강",
+            "빨강",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 1,
+          "essences": [
+            ""
+          ],
+          "character": "레이븐",
+          "activeColors": [
+            ""
+          ],
+          "activeSkillStates": [
+            []
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-31T14:35:45.707+00:00"
+    },
+    {
+      "id": "like-6817e757b2308299566048de8e87cc5b5dc3298d94a9cb62651f53b16b528d9f",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "8b2d6b60-4254-4cc0-bfb7-5c956973718d",
+      "created_at": "2026-05-30T11:28:38.322+00:00"
+    },
+    {
+      "id": "like-80c050acde9168a180c973f860dce50568daec38f19c282153c33a3f042de74e",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "created_at": "2026-05-30T09:30:14.726+00:00"
+    },
+    {
+      "id": "like-197ccee8fd866a5c20e5b3e4f0e929ca9ddae3d136d6aee86f52e85e5b47d62e",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "8b2d6b60-4254-4cc0-bfb7-5c956973718d",
+      "created_at": "2026-05-29T13:05:04.337+00:00"
+    },
+    {
+      "id": "like-418b66d3f8ad9a19d75099c011b78a95e49478e5249b2838280f28080630f8c0",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "created_at": "2026-05-29T12:27:19.058+00:00"
+    },
+    {
+      "id": "like-9001fbb2abae23c71dd9861e6014e5e63f0fe83b33f5412eda909b7c9e71f367",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "8b2d6b60-4254-4cc0-bfb7-5c956973718d",
+      "created_at": "2026-05-26T23:49:20.005+00:00"
+    },
+    {
+      "id": "deleted-5d06fc5c-b0dd-4186-a561-21dad57d5d63",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "63948174-eb59-433c-929b-00859355ac50",
+      "created_at": "2026-05-26T23:49:14.136+00:00"
+    },
+    {
+      "id": "deleted-037da4e7-31e8-4cee-bbc2-c5ad69ac69c5",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "0ee4cc73-c5a1-49b8-a038-55da3276e1e0",
+      "created_at": "2026-05-26T22:05:22.064+00:00"
+    },
+    {
+      "id": "c152e1a2-4075-4211-9c54-d66a9548c841",
+      "title": "나만의비요른 4렙",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 4,
+          "essences": [
+            "카니바로",
+            "깨어난 거석",
+            "흑요석 골렘",
+            "바이쿤두스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "ad86c6e446b93c23376b682c731779d725395bf72158a778ba585a9f2333aa22",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "오크 궁수",
+            "플미나스",
+            "핏빛 칼날늑대",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "폭군타룬바스",
+            "오크 대전사",
+            "얼음와이번",
+            "다키리온"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "파랑"
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "키메라",
+            "트롤",
+            "베르타스",
+            "헬프레임"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "빨강",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T22:05:15.798+00:00"
+    },
+    {
+      "id": "deleted-d40dc788-008d-4b83-8200-ed72803b1b8f",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "fb12abe8-db52-47f7-be35-8212656b800c",
+      "created_at": "2026-05-26T21:48:08.496+00:00"
+    },
+    {
+      "id": "0ee4cc73-c5a1-49b8-a038-55da3276e1e0",
+      "title": "나만의비요른 4렙",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 4,
+          "essences": [
+            "카니바로",
+            "오크 대전사",
+            "흑요석 골렘",
+            "바이쿤두스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "7f9f5a1cabc360f063f5118b7229efc18deafa0c1071a357d77dbcfff3460b1b",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [],
+            [],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "오크 궁수",
+            "플미나스",
+            "핏빛 칼날늑대",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "폭군타룬바스",
+            "오크 대전사",
+            "얼음와이번",
+            "다키리온"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "파랑"
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "키메라",
+            "트롤",
+            "베르타스",
+            "헬프레임"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "빨강",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:48:03.221+00:00"
+    },
+    {
+      "id": "deleted-a9395e42-7443-4255-aa61-961277a33d9b",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "d2c6f0f4-245f-472b-8fe6-0f84e80772de",
+      "created_at": "2026-05-26T21:45:08.944+00:00"
+    },
+    {
+      "id": "fb12abe8-db52-47f7-be35-8212656b800c",
+      "title": "나만의비요른 4렙",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 4,
+          "essences": [
+            "카니바로",
+            "오크 대전사",
+            "흑요석 골렘",
+            "바이쿤두스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "7f20b79b7651a36b85dd568cf68654bfbc8c10424ef0b6f2507f397f7e49ea00",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [],
+            [],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "오크 궁수",
+            "플미나스",
+            "핏빛 칼날늑대",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "폭군타룬바스",
+            "오크 대전사",
+            "와이번",
+            "얼음와이번"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "키메라",
+            "트롤",
+            "베르타스",
+            "헬프레임"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "빨강",
+            "빨강"
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:45:01.956+00:00"
+    },
+    {
+      "id": "deleted-75374bed-197c-42e8-9e3b-e84fac7b67f4",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "534476e8-d9b5-45f0-b032-33f8d080578f",
+      "created_at": "2026-05-26T21:44:02.989+00:00"
+    },
+    {
+      "id": "d2c6f0f4-245f-472b-8fe6-0f84e80772de",
+      "title": "나만의비요른 4렙",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 4,
+          "essences": [
+            "카니바로",
+            "오크 대전사",
+            "흑요석 골렘",
+            "바이쿤두스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "c619ae047a64b96647123eec4527f68b62df1eef1e3ac3dd20d27db1700c5a2e",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [],
+            [],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "오크 궁수",
+            "플미나스",
+            "핏빛 칼날늑대",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "폭군타룬바스",
+            "오크 대전사",
+            "와이번",
+            "얼음와이번"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "키메라",
+            "트롤",
+            "바이쿤두스",
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:43:58.228+00:00"
+    },
+    {
+      "id": "deleted-dd4fbb13-7cba-4a16-a28e-f147d0536310",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "b00832b1-7600-498c-bc9b-c00814b3224c",
+      "created_at": "2026-05-26T21:42:56.673+00:00"
+    },
+    {
+      "id": "534476e8-d9b5-45f0-b032-33f8d080578f",
+      "title": "나만의비요른",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 4,
+          "essences": [
+            "카니바로",
+            "오크 대전사",
+            "흑요석 골렘",
+            "바이쿤두스"
+          ],
+          "character": "비요른",
+          "_deleteHash": "afde7b940b677e5c27dbd982975c1dc9979d77004afe144407dc82ede351df1c",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [],
+            [],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "오크 궁수",
+            "플미나스",
+            "핏빛 칼날늑대",
+            "풍령"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "폭군타룬바스",
+            "오크 대전사",
+            "와이번",
+            "얼음와이번"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "키메라",
+            "트롤",
+            "데스웜",
+            "바이쿤두스"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:42:40.255+00:00"
+    },
+    {
+      "id": "deleted-11a911bc-ef30-491f-9550-7b22ee039025",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "288a055f-ce04-4fe3-a9c7-4daabd5b0e80",
+      "created_at": "2026-05-26T21:21:53.29+00:00"
+    },
+    {
+      "id": "deleted-899e1d29-014f-4794-a555-3f808c94c821",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "929cfbd7-bf86-4fca-8477-5df5ca1c28ec",
+      "created_at": "2026-05-26T21:21:48.842+00:00"
+    },
+    {
+      "id": "deleted-4b982c3d-79d0-417f-befb-1b527ad749e2",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "7d8b4128-ff76-4a88-955a-8184da558cbd",
+      "created_at": "2026-05-26T21:21:43.514+00:00"
+    },
+    {
+      "id": "b00832b1-7600-498c-bc9b-c00814b3224c",
+      "title": "나만의비요른",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 4,
+          "essences": [
+            "카니바로",
+            "오크 대전사",
+            "흑요석 골렘",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "6a8defa8e0c4b39b3dc846087a4451914628fc1c760f11de20306145d0fe4104",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "오크 궁수",
+            "플미나스",
+            "핏빛 칼날늑대",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "폭군타룬바스",
+            "오크 대전사",
+            "와이번",
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 4,
+          "essences": [
+            "키메라",
+            "트롤",
+            "",
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:21:28.454+00:00"
+    },
+    {
+      "id": "7d8b4128-ff76-4a88-955a-8184da558cbd",
+      "title": "나만의비요른",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 5,
+          "essences": [
+            "깨어난 거석",
+            "베르타스",
+            "카니바로",
+            "오크 히어로",
+            "흑요석"
+          ],
+          "character": "비요른",
+          "_deleteHash": "495ce0018161ec9922415bd3b617fbc142dbedcdc6c354c38d2c6cb0d803c7a0",
+          "activeColors": [
+            "",
+            "검정",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "풍령",
+            "오크궁수",
+            "플미나스",
+            "",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "폭군타룬바스",
+            "와이번",
+            "",
+            "",
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "키메라",
+            "트롤",
+            "",
+            "",
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "character": "레이븐",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [],
+            [],
+            [],
+            []
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:19:22.571+00:00"
+    },
+    {
+      "id": "929cfbd7-bf86-4fca-8477-5df5ca1c28ec",
+      "title": "나만의비요른",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 5,
+          "essences": [
+            "깨어난 거석",
+            "베르타스",
+            "",
+            "",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "602266c238eb87a8e252d5b26e7c42f69a7a3127f64a6502daaa411395b6c118",
+          "activeColors": [
+            "",
+            "빨강",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "풍령",
+            "오크궁수",
+            "플미나스",
+            "",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "폭군타룬바스",
+            "와이번",
+            "",
+            "",
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "키메라",
+            "트롤",
+            "",
+            "",
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "character": "레이븐",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [],
+            [],
+            [],
+            []
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:18:25.194+00:00"
+    },
+    {
+      "id": "288a055f-ce04-4fe3-a9c7-4daabd5b0e80",
+      "title": "나만의비요른",
+      "author": "나요른",
+      "members": [
+        {
+          "level": 5,
+          "essences": [
+            "깨어난 거석",
+            "바이쿤두스",
+            "",
+            "",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "5332076d3ea5c5be8b427b50d9614ea42a800dd6bf16a7c323a6e8ef40a09d80",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "풍령",
+            "오크궁수",
+            "플미나스",
+            "",
+            ""
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "폭군타룬바스",
+            "와이번",
+            "",
+            "",
+            ""
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "키메라",
+            "트롤",
+            "",
+            "",
+            ""
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "level": 5,
+          "essences": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "character": "레이븐",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [],
+            [],
+            [],
+            []
+          ]
+        }
+      ],
+      "note": "나요른2호기 현재+다음목표",
+      "created_at": "2026-05-26T21:09:02.455+00:00"
+    },
+    {
+      "id": "deleted-96e11efa-1687-42ff-a13b-ef78df5c81e8",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "b632a879-86cb-4aa4-a694-977407b2bf25",
+      "created_at": "2026-05-26T12:11:26.498+00:00"
+    },
+    {
+      "id": "b632a879-86cb-4aa4-a694-977407b2bf25",
+      "title": "11111",
+      "author": "11111",
+      "members": [
+        {
+          "level": 5,
+          "essences": [
+            "백색신전 기사",
+            "오크 히어로",
+            "팔푸푸라",
+            "다키리온",
+            "레드우드"
+          ],
+          "character": "비요른",
+          "_deleteHash": "3370be9654582782f09230d06f9de4b7be58ed730b2e27853dc4e09d99dc6273",
+          "activeColors": [
+            "",
+            "",
+            "무색",
+            "무색",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "on",
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "",
+      "created_at": "2026-05-26T12:10:38.399+00:00"
+    },
+    {
+      "id": "8b2d6b60-4254-4cc0-bfb7-5c956973718d",
+      "title": "현시점 종결빌드",
+      "author": "넘버스먹고싶어",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "백색신전 기사",
+            "레드우드",
+            "오크 히어로",
+            "바이쿤두스",
+            "팔푸푸라",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "c0b88cb4501c485845afdb11745360f2937f269c32ebbee87b3995e2b194b5c6",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            "파랑",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "신탁사수",
+            "정령술사",
+            "폭풍의 궁수",
+            "풍령",
+            "나가 궁수",
+            "요정 여왕"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "청록",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "지옥불 선봉장",
+            "잿불 궁수",
+            "이프리트",
+            "헬프레임",
+            "베르타스",
+            "뱀파이어(수호자)"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "노랑",
+            "빨강",
+            "빨강",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭군타룬바스",
+            "프로스트로드",
+            "돌연변이",
+            "빙해 제독",
+            "해적 선장",
+            "다키리온"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "청록",
+            "보라",
+            "",
+            "",
+            "파랑"
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "베르타스 디카리온 근접주는빌드들도 있다보니  6번정수는 취향껏 항마챙기셔도되고 피흡류 회복류 챙기셔도됩니다 근딜안준다면 베르타스도괜찮아요 피회복+항마있어서\n에르웬은 정령 갈색or청록먹음됨 청록먹었을경우 화염피해 추가로들어오니까 블랙트리채용해줘도좋고 상황에따라 다름 \n지금빌드가 현시점 종결이긴하지만 보유정수에따라 몇개씩틀려도상관없음 어차피 초기화비용이비싸기때문에 적당히타협하면서 끼워넣기",
+      "created_at": "2026-05-26T12:07:06.463+00:00"
+    },
+    {
+      "id": "like-c94badbf72267e7d02ce8a269650f5fe08e63e5aad5e13b52231ca397cf2a798",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "63948174-eb59-433c-929b-00859355ac50",
+      "created_at": "2026-05-26T05:14:32.223+00:00"
+    },
+    {
+      "id": "deleted-eabfabdf-1abf-4480-8b85-0d39e831ef3b",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "3d772e85-54ca-4d0c-b6e0-bda02e39360b",
+      "created_at": "2026-05-26T05:14:29.505+00:00"
+    },
+    {
+      "id": "63948174-eb59-433c-929b-00859355ac50",
+      "title": "현시점 종결빌드",
+      "author": "넘버스먹고싶어",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "백색신전 기사",
+            "레드우드",
+            "오크 히어로",
+            "바이쿤두스",
+            "팔푸푸라",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "52423ded00022c9b02aaca8a7ac852e2212e43a8ec1fa4535d473115b8eadd07",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            "무색",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "신탁사수",
+            "정령술사",
+            "폭풍의 궁수",
+            "풍령",
+            "나가 궁수",
+            "요정 여왕"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "청록",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "지옥불 선봉장",
+            "잿불 궁수",
+            "이프리트",
+            "헬프레임",
+            "베르타스",
+            "뱀파이어(수호자)"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "노랑",
+            "빨강",
+            "빨강",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭군타룬바스",
+            "프로스트로드",
+            "돌연변이",
+            "빙해 제독",
+            "해적 선장",
+            "다키리온"
+          ],
+          "character": "미샤",
+          "activeColors": [
+            "",
+            "청록",
+            "보라",
+            "",
+            "",
+            "파랑"
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "베르타스 디카리온 근접주는빌드들도 있다보니  6번정수는 취향껏 항마챙기셔도되고 피흡류 회복류 챙기셔도됩니다 근딜안준다면 베르타스도괜찮아요 피회복+항마있어서\n에르웬은 정령 갈색or청록먹음됨 청록먹었을경우 화염피해 추가로들어오니까 블랙트리채용해줘도좋고 상황에따라 다름 \n지금빌드가 현시점 종결이긴하지만 보유정수에따라 몇개씩틀려도상관없음 어차피 초기화비용이비싸기때문에 적당히타협하면서 끼워넣기",
+      "created_at": "2026-05-26T05:14:23.937+00:00"
+    },
+    {
+      "id": "deleted-3b149b78-15af-4789-8eaf-30e89b00facd",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "4e40678b-d593-4c7b-b856-4c2fb5a89bb2",
+      "created_at": "2026-05-26T05:06:49.547+00:00"
+    },
+    {
+      "id": "like-59886494497ce6a8fe0b3028f0d2f9369044bcf4d107baf4b64165e1045ceeb0",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "3d772e85-54ca-4d0c-b6e0-bda02e39360b",
+      "created_at": "2026-05-26T05:06:41.697+00:00"
+    },
+    {
+      "id": "like-3aed0dd4ef3fd04a74a6d98cd069fd3a522cab9ea8ccc269d79878c35be844d3",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "3d772e85-54ca-4d0c-b6e0-bda02e39360b",
+      "created_at": "2026-05-26T05:05:22.204+00:00"
+    },
+    {
+      "id": "like-47bf29b33c58ebab5d7258cc337566898468bb44c6e433459c1b322fb1c3e67e",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "66cfbfac-895c-40df-a2f8-98f881776581",
+      "created_at": "2026-05-26T05:05:12.325+00:00"
+    },
+    {
+      "id": "3d772e85-54ca-4d0c-b6e0-bda02e39360b",
+      "title": "비요른 에르웬 아이나르 종결",
+      "author": "넘버스먹고싶어",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "백색신전 기사",
+            "레드우드",
+            "오크 히어로",
+            "바이쿤두스",
+            "팔푸푸라",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "755ddcec07c8f23bcda75b7e330f8f8625e6cc6adbdfd502999aefa0023c9157",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            "무색",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "신탁사수(수호자)",
+            "정령술사",
+            "폭풍의 궁수",
+            "풍령",
+            "나가 궁수",
+            "요정 여왕"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "청록",
+            "청록",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "지옥불 선봉장",
+            "잿불 궁수",
+            "이프리트",
+            "헬프레임",
+            "베르타스",
+            "뱀파이어 수호자"
+          ],
+          "character": "아이나르",
+          "activeColors": [
+            "",
+            "",
+            "노랑",
+            "빨강",
+            "빨강",
+            ""
+          ],
+          "activeSkillStates": [
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on",
+              "on",
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "베르타스 디카리온 근접주는빌드들도 있다보니  6번정수는 취향껏 항마챙기셔도되고 피흡류 회복류 챙기셔도됩니다 근딜안준다면 베르타스도괜찮아요 피회복+항마있어서\n에르웬은 정령 갈색or청록먹음됨 청록먹었을경우 화염피해 추가로들어오니까 블랙트리채용해줘도좋고 상황에따라 정수먹는건다르지만 대충 이정도를 틀로잡으면 종결? 미샤 는 아직연구",
+      "created_at": "2026-05-26T05:05:00.114+00:00"
+    },
+    {
+      "id": "like-4452c26c21dda43704e6f589db61cb26d511ff9345b60a10bf6646bce15d2ab7",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "4e40678b-d593-4c7b-b856-4c2fb5a89bb2",
+      "created_at": "2026-05-25T23:06:54.557+00:00"
+    },
+    {
+      "id": "like-c5ffbb6b1367beeecd96430a0815f57bfb9a462bda4ad61b92ba249b24ecd2c5",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "created_at": "2026-05-25T23:06:52.385+00:00"
+    },
+    {
+      "id": "like-8f105b68f30c808bd645e65f96db1d0212465f37bb21f4ebc882f4d89310bc08",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "66cfbfac-895c-40df-a2f8-98f881776581",
+      "created_at": "2026-05-25T23:06:48.2+00:00"
+    },
+    {
+      "id": "66cfbfac-895c-40df-a2f8-98f881776581",
+      "title": "팔푸푸라 잡으려고 만든 비요른",
+      "author": "ㄹㅇ",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "베르타스",
+            "오크 히어로",
+            "흑요석 골렘",
+            "트롤",
+            "레드우드",
+            "깨어난 거석"
+          ],
+          "character": "비요른",
+          "_deleteHash": "2dcbe81a48b5911800213823068a85aa52f10e5d7e700854ddceb6ec36186903",
+          "activeColors": [
+            "검정",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "off",
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "스킬은 넘버즈 아이템 등의 상황과 취향에 맞게 사용하십셔",
+      "created_at": "2026-05-25T22:24:04.683+00:00"
+    },
+    {
+      "id": "like-1ce5608e4db292038f158c6d4f877555595bc131f6f168687c3965cb39b037b4",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "4e40678b-d593-4c7b-b856-4c2fb5a89bb2",
+      "created_at": "2026-05-25T14:41:00.598+00:00"
+    },
+    {
+      "id": "deleted-394c88cf-ef70-486e-8e1b-7071f3625bc9",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "8ddf6e1e-1ef9-42fa-8e9a-03958403976d",
+      "created_at": "2026-05-25T13:47:53.416+00:00"
+    },
+    {
+      "id": "4e40678b-d593-4c7b-b856-4c2fb5a89bb2",
+      "title": "비요른 에르웬 종결",
+      "author": "넘버스먹고싶어",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "백색신전 기사",
+            "레드우드",
+            "오크 히어로",
+            "바이쿤두스",
+            "팔푸푸라",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "61029d05ce2779a571a1ef5e952a640daa30bcef9305729c2e62a3fd9c944f4b",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "신탁사수(수호자)",
+            "정령술사",
+            "폭풍의 궁수",
+            "풍령",
+            "나가 궁수",
+            "요정 여왕"
+          ],
+          "character": "에르웬",
+          "activeColors": [
+            "",
+            "청록",
+            "청록",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "on",
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ]
+          ]
+        }
+      ],
+      "note": "베르타스 디카리온 근접주는빌드들도 있다보니  6번정수는 취향껏 항마챙기셔도되고 피흡류 회복류 챙기셔도됩니다 근딜안준다면 베르타스도괜찮아요 피회복+항마있어서\n에르웬은 정령 갈색or청록먹음됨 청록먹었을경우 화염피해 추가로들어오니까 블랙트리채용해줘도좋고 상황에따라 정수먹는건다르지만 대충 이정도를 틀로잡으면 종결? 미샤랑 아이나르는 아직연구중",
+      "created_at": "2026-05-25T13:47:42.647+00:00"
+    },
+    {
+      "id": "8ddf6e1e-1ef9-42fa-8e9a-03958403976d",
+      "title": "비요른종결",
+      "author": "익명",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "백색신전 기사",
+            "레드우드",
+            "오크 히어로",
+            "바이쿤두스",
+            "팔푸푸라",
+            ""
+          ],
+          "character": "비요른",
+          "_deleteHash": "9ac6b0a6d04b24723a123cd38c7da81420ca611df54863d8617dc2a8ceef460e",
+          "activeColors": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "activeSkillStates": [
+            [
+              "off",
+              "on",
+              "off"
+            ],
+            [
+              "off"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            [
+              "on"
+            ],
+            []
+          ]
+        }
+      ],
+      "note": "베르타스 디카리온 근접주는빌드들도 있다보니  6번정수는 취향껏 항마챙기셔도되고 피흡류 회복류 챙기셔도됩니다 근딜안준다면 베르타스도괜찮아요 피회복+항마있어서",
+      "created_at": "2026-05-25T13:28:21.225+00:00"
+    },
+    {
+      "id": "deleted-adbd03be-5e9b-4984-93ec-2cc3ba1b3bae",
+      "title": "__build_deleted__",
+      "author": "delete",
+      "members": [],
+      "note": "b4fa0362-4d00-4cfe-a840-6ac7f80b9021",
+      "created_at": "2026-05-25T12:02:40.04+00:00"
+    },
+    {
+      "id": "like-16a065ff706dde528113d3a5f3507b76c932b94581961ffc03a0d6c63f304e29",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "b4fa0362-4d00-4cfe-a840-6ac7f80b9021",
+      "created_at": "2026-05-25T11:58:09.519+00:00"
+    },
+    {
+      "id": "b4fa0362-4d00-4cfe-a840-6ac7f80b9021",
+      "title": "써보면 알음",
+      "author": "js",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "트롤",
+            "오크 히어로",
+            "레드우드",
+            "베르타스",
+            "뱀파이어 수호자(광란)",
+            "블랙 트리"
+          ],
+          "character": "비요른",
+          "activeStates": [
+            "off",
+            "on",
+            "off",
+            "on",
+            "",
+            "on"
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "잿불 궁수",
+            "이프리트",
+            "지옥불선봉장 (off)",
+            "헬프레임",
+            "바이쿤두스(선택)",
+            "백색신전 기사"
+          ],
+          "character": "아이나르",
+          "activeStates": [
+            "on",
+            "on",
+            "",
+            "off",
+            "",
+            "on"
+          ]
+        },
+        {
+          "level": 6,
+          "essences": [
+            "돌연변이",
+            "다키리온",
+            "프로스트로드",
+            "폭군 타룬바스",
+            "빙해 제독",
+            "변종 예티"
+          ],
+          "character": "미샤",
+          "activeStates": [
+            "off",
+            "on",
+            "on",
+            "on",
+            "on",
+            "on"
+          ]
+        }
+      ],
+      "note": "아이나르 \n잿불 궁수는 모르겠음.. (스킬 들어가면 10%정도 물딜 더 들어감)\n잿불 궁수 자리에 영혼력 높은 정수 넣어주면 좋을거 같음",
+      "created_at": "2026-05-25T11:01:23.47+00:00"
+    },
+    {
+      "id": "like-46c374ce5febc2be93cca8948306318b8b60bdefd08d74e762e1fe3d30f08da5",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "created_at": "2026-05-25T07:05:54.005+00:00"
+    },
+    {
+      "id": "like-52572994319959f2812e9ac4708bd610cdbeaf49ba5355216a0ee9a071b51744",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "created_at": "2026-05-25T02:59:00.78+00:00"
+    },
+    {
+      "id": "like-19af255f66027bf16460100b4906862f26a976332f7bd6bd3794015fe23426a7",
+      "title": "__build_like__",
+      "author": "like",
+      "members": [],
+      "note": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "created_at": "2026-05-25T02:53:58.44+00:00"
+    },
+    {
+      "id": "ed45e637-aa3d-4822-978d-5df0168c356d",
+      "title": "각 캐릭 종결",
+      "author": "디은",
+      "members": [
+        {
+          "level": 6,
+          "essences": [
+            "깨어난 거석",
+            "오크 히어로",
+            "베르타스",
+            "레드우드",
+            "블랙 트리",
+            "바이쿤두스"
+          ],
+          "character": "비요른"
+        },
+        {
+          "level": 6,
+          "essences": [
+            "어둠의 늑대인간",
+            "정령술사",
+            "나가 궁수",
+            "요정 여왕",
+            "폭풍의 궁수",
+            "핏빛 칼날늑대"
+          ],
+          "character": "에르웬"
+        },
+        {
+          "level": 6,
+          "essences": [
+            "폭군 타룬바스",
+            "프로스트로드",
+            "빙해 제독",
+            "얼음 와이번",
+            "돌연변이",
+            "해적 선장"
+          ],
+          "character": "미샤"
+        },
+        {
+          "level": 6,
+          "essences": [
+            "뱀파이어 수호자",
+            "이프리트",
+            "헬프레임",
+            "잿불 궁수",
+            "지옥의 선봉장",
+            "본 리치"
+          ],
+          "character": "아이나르"
+        }
+      ],
+      "note": "비요른 베르타스 아이나르 줬다면 흑요석골램 사용\n에르웬 핏늑칼 안쓰면 세이렌 사용\n미샤 다키리온, 다른 빙결정수 대체\n아이나르 트롤 데스웜 바이쿤 흑요석 순찰병 대체 사용",
+      "created_at": "2026-05-25T01:12:39.675+00:00"
+    },
+    {
+      "id": "ae271705-0ca7-4c14-aeee-a0f44bc15328",
+      "title": "초반학살자",
+      "author": "파라브",
+      "members": [
+        {
+          "level": 3,
+          "essences": [
+            "카니바로",
+            "오크 대전사",
+            ""
+          ],
+          "character": "비요른"
+        },
+        {
+          "level": 3,
+          "essences": [
+            "돌연변이 하급 정령",
+            "",
+            ""
+          ],
+          "character": "에르웬"
+        },
+        {
+          "level": 3,
+          "essences": [
+            "구울로드",
+            "다이로우터",
+            ""
+          ],
+          "character": "미샤"
+        }
+      ],
+      "note": "초반불사신 6등급이하 학살",
+      "created_at": "2026-05-24T07:50:06.105+00:00"
+    }
+  ]
+}

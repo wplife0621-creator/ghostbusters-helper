@@ -122,7 +122,7 @@
               <input id="guideMediaUrl" type="url" placeholder="이미지, 동영상, 유튜브 주소">
               <button type="button" id="guideMediaUrlButton">주소 넣기</button>
             </div>
-            <small id="guideMediaHint">R2 연결 전까지 파일 업로드는 잠시 쉬고, 이미지/동영상 주소를 넣어주세요.</small>
+            <small id="guideMediaHint">영상은 유튜브에 올린 뒤 링크를 넣어주세요. 유튜브 링크는 본문 원하는 위치에 크게 표시됩니다.</small>
           </div>
           <div id="guideComposer" class="guide-composer" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="공략 내용을 적어주세요."></div>
           <textarea id="guideContent" hidden></textarea>
@@ -151,6 +151,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260606-firebase-r2-migration"></script>
-  <script src="./guides.js?v=20260606-link-media-mode"></script>
+  <script src="./guides.js?v=20260607-static-data"></script>
 </body>
 </html>

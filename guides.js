@@ -20,6 +20,7 @@ const guideBackend = {
   r2UploadEndpoint: String(config.r2UploadEndpoint || ""),
   r2PublicBaseUrl: String(config.r2PublicBaseUrl || "").replace(/\/$/, ""),
 };
+const staticDataVersion = String(config.staticDataVersion || "20260607-static-index");
 const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
 const commentTitlePrefix = "__guide_comment__:";
@@ -93,7 +94,7 @@ function configureMediaInputMode() {
   }
   if (fields.media) fields.media.disabled = true;
   fields.media?.closest(".guide-insert-media")?.classList.add("is-disabled");
-  if (fields.mediaHint) fields.mediaHint.textContent = "R2 연결 전까지 파일 업로드는 잠시 쉬고, 이미지/동영상 주소 또는 유튜브 링크를 넣어주세요.";
+  if (fields.mediaHint) fields.mediaHint.textContent = "영상은 유튜브에 올린 뒤 링크를 넣어주세요. 유튜브 링크는 본문 원하는 위치에 크게 임베드됩니다.";
 }
 
 function hasPublicStore() {
@@ -146,6 +147,18 @@ function saveLocalComments() {
 function setStatus(message, mode = "") {
   fields.status.textContent = message;
   fields.status.className = `build-sync-status ${mode}`.trim();
+}
+
+function staticDataUrl(name) {
+  return `./data/${name}.json?v=${encodeURIComponent(staticDataVersion)}`;
+}
+
+async function fetchStaticRows(name) {
+  const response = await fetch(staticDataUrl(name), { cache: "force-cache" });
+  if (!response.ok) throw new Error(`static data unavailable: ${name}`);
+  const payload = await response.json();
+  if (Array.isArray(payload)) return payload;
+  return Array.isArray(payload.rows) ? payload.rows : [];
 }
 
 function currentAuthNickname() {
@@ -460,6 +473,20 @@ function loadLikeCounts(rows) {
 
 async function loadPosts() {
   renderPosts();
+  try {
+    const rows = await fetchStaticRows("guides-index");
+    comments = rows.filter(isStoredComment).map(normalizeComment);
+    posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row) && !isStoredReport(row)).map(normalizePost));
+    loadLikeCounts(rows);
+    loadCommentCounts();
+    renderPosts();
+    markLikedPostsForVisitor();
+    openLinkedPostIfAvailable();
+    setStatus("가벼운 공개 게시판 목록을 불러왔습니다. 작성과 댓글은 정상 저장됩니다.", "is-online");
+    return;
+  } catch {
+    // Fall back to the live store when the static snapshot has not been generated yet.
+  }
   if (!hasPublicStore()) {
     openLinkedPostIfAvailable();
     setStatus("공개 게시판 연결 전입니다. 이 기기에 임시 저장됩니다.", "is-offline");
