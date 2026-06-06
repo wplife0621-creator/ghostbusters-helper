@@ -139,12 +139,13 @@ const effectSortDefinitions = {
   },
 };
 
-const floorOptions = ["1층", "1층 균열", "2층", "2층 균열", "3층", "3층 균열", "4층", "4층 균열", "5층", "6층"];
+const floorOptions = ["1층", "1층 균열", "2층", "2층 균열", "3층", "3층 균열", "4층", "4층 균열", "5층", "5층 균열", "6층"];
 const crackAreasByFloor = {
   "1층 균열": ["강철의 묘", "녹색 탄광", "빙하굴", "핏빛 성채"],
   "2층 균열": ["검귀의 동굴", "망자의제단", "안개의 거석 폐허", "총포사막", "홉고블린 요새"],
   "3층 균열": ["백색신전"],
   "4층 균열": ["천공신탁소"],
+  "5층 균열": ["결빙의 성소"],
 };
 const areaFloorLookup = new Map(Object.entries(crackAreasByFloor)
   .flatMap(([floor, areas]) => areas.map((area) => [normalizeLocationName(area), floor])));
