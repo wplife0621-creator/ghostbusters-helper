@@ -218,6 +218,9 @@ const els = {
   reportNumberEffect: document.querySelector("#reportNumberEffect"),
   reportNumberSlot: document.querySelector("#reportNumberSlot"),
   reportNumberSourceFloor: document.querySelector("#reportNumberSourceFloor"),
+  reportNumberSourceCandidate: document.querySelector("#reportNumberSourceCandidate"),
+  reportNumberSourceAdd: document.querySelector("#reportNumberSourceAdd"),
+  reportNumberSourceTags: document.querySelector("#reportNumberSourceTags"),
   reportNumberSource: document.querySelector("#reportNumberSource"),
   monsterOptions: document.querySelector("#monsterOptions"),
   numberOptions: document.querySelector("#numberOptions"),
@@ -778,6 +781,37 @@ function refreshReportNumberSourceOptions() {
   const selected = selectedOptionValues(els.reportNumberSource);
   const options = numbersAreaOptionsForFloor(els.reportNumberSourceFloor?.value);
   multiOptionList(els.reportNumberSource, unique([...selected, ...options]));
+  optionList(els.reportNumberSourceCandidate, options, "획득처 선택");
+  renderReportNumberSourceTags();
+}
+
+function addReportNumberSource() {
+  const value = textOf(els.reportNumberSourceCandidate?.value);
+  if (!value || value === "획득처 선택") return;
+  const selected = unique([...selectedOptionValues(els.reportNumberSource), value]);
+  multiOptionList(els.reportNumberSource, selected);
+  setSelectedOptionValues(els.reportNumberSource, selected);
+  renderReportNumberSourceTags();
+}
+
+function removeReportNumberSource(value) {
+  const selected = selectedOptionValues(els.reportNumberSource).filter((item) => item !== value);
+  const options = numbersAreaOptionsForFloor(els.reportNumberSourceFloor?.value);
+  multiOptionList(els.reportNumberSource, unique([...selected, ...options]));
+  setSelectedOptionValues(els.reportNumberSource, selected);
+  renderReportNumberSourceTags();
+}
+
+function renderReportNumberSourceTags() {
+  if (!els.reportNumberSourceTags) return;
+  const selected = selectedOptionValues(els.reportNumberSource);
+  els.reportNumberSourceTags.innerHTML = selected.length
+    ? selected.map((source) => `
+      <button type="button" class="source-tag" data-remove-number-source="${escapeHtml(source)}">
+        ${escapeHtml(source)} <span aria-hidden="true">×</span>
+      </button>
+    `).join("")
+    : `<span class="source-tag-empty">선택된 획득처가 없습니다.</span>`;
 }
 
 function escapeHtml(value) {
@@ -1249,6 +1283,16 @@ function initReport() {
   els.reportMode.addEventListener("change", updateReportMode);
   els.reportFloor.addEventListener("change", refreshReportAreaOptions);
   els.reportNumberSourceFloor.addEventListener("change", refreshReportNumberSourceOptions);
+  els.reportNumberSourceAdd?.addEventListener("click", addReportNumberSource);
+  els.reportNumberSourceCandidate?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    addReportNumberSource();
+  });
+  els.reportNumberSourceTags?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-number-source]");
+    if (button) removeReportNumberSource(button.dataset.removeNumberSource);
+  });
   els.reportMonster.addEventListener("input", handleReportMonsterInput);
   els.reportNumberName.addEventListener("input", handleReportNumberInput);
   els.editMonsterMatches.addEventListener("click", handleEditMonsterClick);
@@ -3325,6 +3369,7 @@ function fillNumberFromRow(row) {
   els.reportNumberSourceFloor.value = sourceFloors.length === 1 ? sourceFloors[0] : "전체 층";
   refreshReportNumberSourceOptions();
   setSelectedOptionValues(els.reportNumberSource, sourceAreas);
+  renderReportNumberSourceTags();
   renderEditNumberMatches();
 }
 
@@ -3751,9 +3796,16 @@ function skillText(value) {
   const skills = splitSkills(text);
   return `<div class="skill-list">${skills.map((skill) => {
     const [name, ...rest] = skill.split(":");
-    if (!rest.length) return `<span>${escapeHtml(skill)}</span>`;
-    return `<span><b>${escapeHtml(name.trim())}</b>: ${escapeHtml(rest.join(":").trim())}</span>`;
+    if (!rest.length) return `<span>${skillNameMarkup(skill)}</span>`;
+    return `<span>${skillNameMarkup(name)}: ${escapeHtml(rest.join(":").trim())}</span>`;
   }).join("")}</div>`;
+}
+
+function skillNameMarkup(value) {
+  const name = textOf(value);
+  const color = activeSkillColor(name);
+  if (!color) return `<b>${escapeHtml(name)}</b>`;
+  return `<b class="skill-color-text text-color-${escapeHtml(color)}">${escapeHtml(name.replace(activeColorPattern, ""))}</b>`;
 }
 
 function splitSkills(value) {
