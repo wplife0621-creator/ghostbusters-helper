@@ -9270,3 +9270,134 @@ body.admin-review-page #adminSiteStats {
     grid-template-columns: 1fr;
   }
 }
+
+/* Mobile stability pass: keep the menu and Google auth reachable without horizontal breakage. */
+@media (max-width: 720px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .topbar,
+  .topbar.compact {
+    padding: 8px;
+  }
+
+  .topbar-inner {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(72px, auto);
+    gap: 8px;
+    align-items: center;
+  }
+
+  .topbar h1 {
+    min-width: 0;
+    max-width: 32vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: clamp(18px, 5.4vw, 22px);
+  }
+
+  .site-nav {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    flex-wrap: nowrap;
+    border-radius: 999px;
+    padding: 3px;
+    scrollbar-width: none;
+  }
+
+  .site-nav::-webkit-scrollbar,
+  .topbar-auth::-webkit-scrollbar {
+    display: none;
+  }
+
+  .site-nav a,
+  .nav-dropdown summary {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 9px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .nav-submenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 30;
+  }
+
+  .topbar-auth {
+    display: flex !important;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    max-width: min(42vw, 180px);
+    min-width: 0;
+    margin: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .auth-panel {
+    min-width: 0;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .auth-button,
+  .topbar .auth-muted,
+  .auth-profile {
+    min-height: 34px;
+    padding: 0 9px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .auth-profile {
+    max-width: 82px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .layout,
+  .home-layout,
+  .calculator-layout,
+  .report-layout,
+  .build-layout,
+  .numbers-layout,
+  .guide-layout,
+  .library-layout,
+  .policy-layout,
+  .admin-review-layout {
+    width: min(100% - 12px, 100%);
+  }
+}
+
+@media (max-width: 420px) {
+  .topbar-inner {
+    grid-template-columns: auto minmax(92px, 1fr) minmax(68px, auto);
+    gap: 6px;
+  }
+
+  .topbar h1 {
+    max-width: 28vw;
+  }
+
+  .topbar-auth {
+    max-width: 34vw;
+  }
+}

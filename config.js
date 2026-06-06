@@ -8,6 +8,7 @@ window.DUKHUBUSTERS_CONFIG = {
   guideTable: "guide_posts",
   guideBucket: "guide-media",
   guideShareUrl: "https://bjlykfxfminmjfgilowj.supabase.co/functions/v1/guide-share",
+  canonicalSiteUrl: "https://busters.kr",
   profileTable: "user_profiles",
   adminEmails: ["wplife0621@gmail.com"],
 };

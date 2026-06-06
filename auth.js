@@ -5,6 +5,7 @@
     key: String(config.supabaseAnonKey || ""),
     profileTable: String(config.profileTable || "user_profiles"),
     buildTable: String(config.buildTable || "builds"),
+    canonicalSiteUrl: String(config.canonicalSiteUrl || "https://busters.kr").replace(/\/$/, ""),
     adminEmails: Array.isArray(config.adminEmails)
       ? config.adminEmails.map((email) => String(email || "").trim().toLowerCase()).filter(Boolean)
       : [],
@@ -346,14 +347,44 @@
     element.className = `auth-modal-status ${mode}`.trim();
   }
 
+  function authRedirectTo() {
+    const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+    const origin = localHosts.has(window.location.hostname)
+      ? window.location.origin
+      : authConfig.canonicalSiteUrl;
+    const path = (window.location.pathname || "/")
+      .replace(/^\/ghostbusters-helper(?=\/|$)/, "") || "/";
+    const query = new URLSearchParams(window.location.search);
+    ["code", "error", "error_code", "error_description", "state"].forEach((key) => query.delete(key));
+    const search = query.toString();
+    return `${origin}${path}${search ? `?${search}` : ""}${window.location.hash || ""}`;
+  }
+
   async function signInWithGoogle() {
     if (!state.client) return;
-    await state.client.auth.signInWithOAuth({
+    const button = state.panel?.querySelector(".auth-button");
+    if (button) {
+      button.disabled = true;
+      button.textContent = "로그인 이동 중";
+    }
+    const { error } = await state.client.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}${window.location.pathname}${window.location.search}`,
+        redirectTo: authRedirectTo(),
+        queryParams: {
+          prompt: "select_account",
+        },
       },
     });
+    if (error) {
+      renderAuthPanel(null);
+      if (state.panel) {
+        const message = document.createElement("span");
+        message.className = "auth-muted";
+        message.textContent = "Google 로그인 설정을 확인해주세요";
+        state.panel.appendChild(message);
+      }
+    }
   }
 
   async function signOut() {
