@@ -397,13 +397,27 @@
       try {
         const provider = new window.firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
-        await state.client.signInWithRedirect(provider);
-      } catch {
+        if (state.client.signInWithPopup) {
+          await state.client.signInWithPopup(provider);
+        } else {
+          await state.client.signInWithRedirect(provider);
+        }
+      } catch (error) {
+        if (error?.code === "auth/popup-blocked" || error?.code === "auth/cancelled-popup-request") {
+          try {
+            const provider = new window.firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: "select_account" });
+            await state.client.signInWithRedirect(provider);
+            return;
+          } catch (redirectError) {
+            error = redirectError;
+          }
+        }
         renderAuthPanel(null);
         if (state.panel) {
           const message = document.createElement("span");
           message.className = "auth-muted";
-          message.textContent = "Firebase Google 로그인 설정을 확인해주세요";
+          message.textContent = firebaseAuthErrorMessage(error);
           state.panel.appendChild(message);
         }
       }
@@ -427,6 +441,23 @@
         state.panel.appendChild(message);
       }
     }
+  }
+
+  function firebaseAuthErrorMessage(error) {
+    const code = String(error?.code || "");
+    if (code === "auth/unauthorized-domain") {
+      return "Firebase 승인 도메인에 busters.kr을 추가해주세요.";
+    }
+    if (code === "auth/popup-closed-by-user") {
+      return "로그인 창이 닫혔습니다. 다시 시도해주세요.";
+    }
+    if (code === "auth/operation-not-allowed") {
+      return "Firebase에서 Google 로그인을 활성화해주세요.";
+    }
+    if (code === "auth/network-request-failed") {
+      return "네트워크 문제로 로그인하지 못했습니다.";
+    }
+    return "Firebase Google 로그인 설정을 확인해주세요.";
   }
 
   async function signOut() {
