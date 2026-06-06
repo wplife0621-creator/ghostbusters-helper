@@ -1512,37 +1512,6 @@ select[multiple] option:checked {
   white-space: nowrap;
 }
 
-.guide-permalink {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-  align-items: center;
-  margin-top: 8px;
-  max-width: 100%;
-  font-size: 12px;
-}
-
-.guide-permalink span {
-  border-radius: 999px;
-  background: #eef4ff;
-  color: #24486f;
-  font-weight: 950;
-  padding: 4px 8px;
-}
-
-.guide-permalink a {
-  min-width: 0;
-  color: #526574;
-  font-weight: 800;
-  overflow-wrap: anywhere;
-  text-decoration: none;
-}
-
-.guide-permalink a:hover {
-  color: var(--brand-dark);
-  text-decoration: underline;
-}
-
 .guide-row-author,
 .guide-row-date,
 .guide-row-number,
@@ -9135,6 +9104,142 @@ body.admin-review-page #adminSiteStats {
   .community-result-actions {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+}
+
+.guide-viewer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: stretch;
+  border: 1px solid rgba(65, 78, 96, 0.13);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(248, 198, 94, 0.2), transparent 34%),
+    linear-gradient(135deg, #fff9ea, #f4f8ff);
+  box-shadow: 0 18px 42px rgba(31, 42, 58, 0.08);
+  margin-bottom: 14px;
+  padding: 18px;
+}
+
+.guide-viewer-titlebox {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.guide-viewer-titlebox h3 {
+  display: block;
+  margin: 0;
+  color: #172336;
+  font-size: clamp(21px, 3vw, 30px);
+  line-height: 1.25;
+  letter-spacing: -0.04em;
+}
+
+.guide-viewer-titlebox p {
+  margin: 0;
+  color: #5e6d7c;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.guide-viewer-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.guide-viewer-stats span {
+  border: 1px solid rgba(36, 72, 111, 0.13);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #324861;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 5px 9px;
+}
+
+.guide-viewer-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-end;
+  align-content: flex-start;
+}
+
+.guide-viewer-actions button {
+  min-height: 32px;
+  border: 1px solid rgba(83, 99, 121, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #34475d;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 0 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 8px 18px rgba(31, 42, 58, 0.06);
+}
+
+.guide-viewer-actions button:hover {
+  border-color: rgba(214, 166, 66, 0.55);
+  background: #fff8e9;
+  color: #5c3b08;
+}
+
+.guide-viewer-actions .guide-like-button {
+  border-color: rgba(255, 176, 66, 0.45);
+  background: linear-gradient(135deg, #fff4d9, #ffe0a3);
+  color: #5a3a08;
+}
+
+.guide-viewer-actions .guide-like-button.is-liked {
+  border-color: rgba(64, 131, 105, 0.24);
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.guide-viewer-content {
+  border: 1px solid rgba(65, 78, 96, 0.11);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 252, 255, 0.96));
+  color: #243449;
+  box-shadow: 0 14px 34px rgba(31, 42, 58, 0.06);
+  margin-bottom: 14px;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.guide-comments {
+  border: 1px solid rgba(65, 78, 96, 0.11);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 32%),
+    #fbfdff;
+  box-shadow: 0 14px 34px rgba(31, 42, 58, 0.05);
+  padding: clamp(16px, 2.5vw, 22px);
+}
+
+.guide-comments h4 {
+  color: #172336;
+}
+
+@media (max-width: 720px) {
+  .guide-viewer-head {
+    display: grid;
+    gap: 13px;
+    padding: 14px;
+  }
+
+  .guide-viewer-actions {
+    justify-content: flex-start;
+  }
+
+  .guide-viewer-actions button {
+    min-height: 36px;
+    padding: 0 11px;
   }
 }
 
