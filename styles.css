@@ -1574,7 +1574,8 @@ select[multiple] option:checked {
 }
 
 .guide-inline-media img,
-.guide-inline-media video {
+.guide-inline-media video,
+.guide-inline-media iframe {
   display: block;
   width: 100%;
   max-height: min(72vh, 720px);
@@ -1725,14 +1726,47 @@ select[multiple] option:checked {
 
 .guide-composer-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin: 8px 0;
 }
 
 .guide-composer-toolbar small {
+  flex: 1 1 100%;
   color: var(--muted);
   font-size: 12px;
+}
+
+.guide-link-media {
+  display: flex;
+  flex: 1 1 360px;
+  min-width: min(100%, 280px);
+  gap: 7px;
+  align-items: center;
+}
+
+.guide-link-media input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+}
+
+.guide-link-media button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  border: 1px solid #c9d7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #24486f;
+  font-weight: 950;
+  padding: 0 13px;
+  cursor: pointer;
+}
+
+.guide-link-media button:hover {
+  border-color: #8fb3df;
+  background: #eef6ff;
 }
 
 .guide-insert-media input {
@@ -1754,6 +1788,13 @@ select[multiple] option:checked {
   font-weight: 900;
   padding: 0 14px;
   cursor: pointer;
+}
+
+.guide-insert-media.is-disabled span {
+  border-style: dashed;
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
 .guide-composer {
@@ -1789,13 +1830,22 @@ select[multiple] option:checked {
 }
 
 .guide-composer-media img,
-.guide-composer-media video {
+.guide-composer-media video,
+.guide-composer-media iframe {
   display: block;
   width: min(100%, 720px);
   max-height: 380px;
   border-radius: 8px;
   background: #101827;
   object-fit: contain;
+}
+
+.guide-composer-media iframe,
+.guide-embed-video {
+  aspect-ratio: 16 / 9;
+  min-height: min(55vw, 380px);
+  border: 0;
+  background: #0f172a;
 }
 
 .guide-composer-media figcaption {

@@ -11,7 +11,7 @@
   <meta name="description" content="겜바바 팬게임 공략, 질문, 보스, 파밍, 빌드 정보를 이미지와 동영상으로 공유하는 게시판입니다.">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="게시판 · 덕후버스터즈">
-  <link rel="stylesheet" href="./styles.css?v=20260606-mobile-auth-fix">
+  <link rel="stylesheet" href="./styles.css?v=20260606-link-media-mode">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
@@ -118,7 +118,11 @@
               <input id="guideMedia" type="file" accept="image/*,video/*" multiple>
               <span>이미지 / 동영상 넣기</span>
             </label>
-            <small>커서를 원하는 위치에 두고 파일을 선택하거나 이미지를 붙여넣으세요.</small>
+            <div class="guide-link-media">
+              <input id="guideMediaUrl" type="url" placeholder="이미지, 동영상, 유튜브 주소">
+              <button type="button" id="guideMediaUrlButton">주소 넣기</button>
+            </div>
+            <small id="guideMediaHint">R2 연결 전까지 파일 업로드는 잠시 쉬고, 이미지/동영상 주소를 넣어주세요.</small>
           </div>
           <div id="guideComposer" class="guide-composer" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="공략 내용을 적어주세요."></div>
           <textarea id="guideContent" hidden></textarea>
@@ -147,6 +151,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-firebase-r2-migration"></script>
   <script src="./auth.js?v=20260606-firebase-r2-migration"></script>
-  <script src="./guides.js?v=20260606-firebase-r2-migration"></script>
+  <script src="./guides.js?v=20260606-link-media-mode"></script>
 </body>
 </html>

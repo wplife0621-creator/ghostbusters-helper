@@ -48,6 +48,9 @@ const fields = {
   content: document.querySelector("#guideContent"),
   composer: document.querySelector("#guideComposer"),
   media: document.querySelector("#guideMedia"),
+  mediaUrl: document.querySelector("#guideMediaUrl"),
+  mediaUrlButton: document.querySelector("#guideMediaUrlButton"),
+  mediaHint: document.querySelector("#guideMediaHint"),
   existingMedia: document.querySelector("#guideExistingMedia"),
   submit: document.querySelector("#guideSubmit"),
   cancel: document.querySelector("#guideCancelEdit"),
@@ -70,6 +73,7 @@ let retainedMedia = [];
 let activeCategory = "전체";
 let guidePage = 1;
 const guidePageSize = 10;
+const guideFileUploadEnabled = Boolean(config.enableGuideFileUpload && guideBackend.r2UploadEndpoint && guideBackend.r2PublicBaseUrl);
 const linkedPostId = new URLSearchParams(window.location.search).get("post") || "";
 let selectedPostId = linkedPostId;
 let pendingLinkedView = linkedPostId;
@@ -79,6 +83,17 @@ function revealCurrentNavItem() {
   if (current && window.innerWidth <= 720) {
     current.scrollIntoView({ block: "nearest", inline: "center" });
   }
+}
+
+function configureMediaInputMode() {
+  if (guideFileUploadEnabled) {
+    fields.media?.closest(".guide-insert-media")?.classList.remove("is-disabled");
+    if (fields.mediaHint) fields.mediaHint.textContent = `커서를 원하는 위치에 두고 파일을 선택하거나 이미지를 붙여넣으세요. 파일 합계 ${guideUploadLimitLabel}까지 업로드할 수 있습니다.`;
+    return;
+  }
+  if (fields.media) fields.media.disabled = true;
+  fields.media?.closest(".guide-insert-media")?.classList.add("is-disabled");
+  if (fields.mediaHint) fields.mediaHint.textContent = "R2 연결 전까지 파일 업로드는 잠시 쉬고, 이미지/동영상 주소 또는 유튜브 링크를 넣어주세요.";
 }
 
 function hasPublicStore() {
@@ -199,6 +214,51 @@ function preparedMedia(media) {
 
 function markerFor(ref) {
   return `{${"{"}media:${ref}}}`;
+}
+
+function youtubeEmbedUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    let id = "";
+    if (host === "youtu.be") id = parsed.pathname.split("/").filter(Boolean)[0] || "";
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (parsed.pathname.startsWith("/watch")) id = parsed.searchParams.get("v") || "";
+      else if (parsed.pathname.startsWith("/shorts/") || parsed.pathname.startsWith("/embed/")) {
+        id = parsed.pathname.split("/").filter(Boolean)[1] || "";
+      }
+    }
+    return id ? `https://www.youtube.com/embed/${encodeURIComponent(id)}` : "";
+  } catch {
+    return "";
+  }
+}
+
+function mediaFromUrl(value) {
+  const url = String(value || "").trim();
+  if (!/^https?:\/\//i.test(url)) throw new Error("bad-url");
+  const embedUrl = youtubeEmbedUrl(url);
+  if (embedUrl) {
+    return {
+      ref: `media-${idValue()}`,
+      kind: "embed",
+      type: "text/html",
+      name: "YouTube 영상",
+      url,
+      embedUrl,
+    };
+  }
+  const cleanUrl = url.split("?")[0].toLowerCase();
+  const isImage = /\.(png|jpe?g|gif|webp|avif|svg)$/i.test(cleanUrl);
+  const isVideo = /\.(mp4|webm|mov|m4v|ogg)$/i.test(cleanUrl);
+  if (!isImage && !isVideo) throw new Error("unsupported-url");
+  return {
+    ref: `media-${idValue()}`,
+    kind: isVideo ? "video" : "image",
+    type: isVideo ? "video/mp4" : "image/*",
+    name: isVideo ? "외부 동영상" : "외부 이미지",
+    url,
+  };
 }
 
 function postUrl(postId) {
@@ -576,7 +636,9 @@ let composerRange = null;
 function composerMediaMarkup(item) {
   const url = escapeHtml(item.previewUrl || item.url);
   const label = escapeHtml(item.name || "첨부 파일");
-  const preview = String(item.type).startsWith("video/")
+  const preview = item.kind === "embed"
+    ? `<iframe src="${escapeHtml(item.embedUrl || item.url)}" title="${label}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+    : String(item.type).startsWith("video/")
     ? `<video controls preload="metadata" src="${url}" aria-label="${label}"></video>`
     : `<img src="${url}" alt="${label}">`;
   return `<figure class="guide-composer-media" data-media-ref="${escapeHtml(item.ref)}" contenteditable="false">${preview}<figcaption>${label}</figcaption></figure>`;
@@ -616,6 +678,11 @@ function insertComposerMedia(item) {
 }
 
 function queueMediaFiles(files) {
+  if (!guideFileUploadEnabled) {
+    setStatus("파일 업로드는 R2 연결 후 다시 켤 예정입니다. 지금은 이미지/동영상 주소를 넣어주세요.", "is-offline");
+    if (fields.media) fields.media.value = "";
+    return;
+  }
   [...files]
     .filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"))
     .forEach((file) => {
@@ -631,6 +698,22 @@ function queueMediaFiles(files) {
     });
   fields.media.value = "";
   showRetainedMedia();
+}
+
+function insertMediaUrl() {
+  try {
+    const item = mediaFromUrl(fields.mediaUrl.value);
+    retainedMedia.push(item);
+    insertComposerMedia(item);
+    fields.mediaUrl.value = "";
+    showRetainedMedia();
+    setStatus("미디어 주소를 본문에 넣었습니다.", "is-online");
+  } catch (error) {
+    const message = error.message === "bad-url"
+      ? "https://로 시작하는 주소를 입력해주세요."
+      : "이미지, 동영상 파일 주소 또는 유튜브 링크만 넣을 수 있습니다.";
+    setStatus(message, "is-offline");
+  }
 }
 
 function composerContent() {
@@ -751,6 +834,9 @@ function mediaMarkup(media) {
   return media.map((item) => {
     const url = escapeHtml(item.url);
     const label = escapeHtml(item.name || "첨부 파일");
+    if (item.kind === "embed") {
+      return `<iframe class="guide-video guide-embed-video" src="${escapeHtml(item.embedUrl || item.url)}" title="${label}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+    }
     if (String(item.type).startsWith("video/")) {
       return `<video class="guide-video" controls preload="metadata" src="${url}" aria-label="${label}"></video>`;
     }
@@ -1289,6 +1375,12 @@ fields.composer.addEventListener("paste", (event) => {
   queueMediaFiles(files);
 });
 fields.media.addEventListener("change", () => queueMediaFiles(fields.media.files));
+fields.mediaUrlButton?.addEventListener("click", insertMediaUrl);
+fields.mediaUrl?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  insertMediaUrl();
+});
 fields.search.addEventListener("input", () => {
   guidePage = 1;
   renderPosts();
@@ -1361,4 +1453,5 @@ function renderGuidePagination(totalPages) {
   `;
 }
 revealCurrentNavItem();
+configureMediaInputMode();
 loadPosts();
