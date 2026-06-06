@@ -35,6 +35,9 @@ const guideUploadLimitBytes = 50 * 1024 * 1024;
 const guideUploadLimitLabel = "50MB";
 const guideSiteTitle = "겜바바 버스터즈";
 const guideDefaultTitle = `게시판 · ${guideSiteTitle}`;
+const adminEmails = Array.isArray(config.adminEmails)
+  ? config.adminEmails.map((email) => String(email || "").trim().toLowerCase()).filter(Boolean)
+  : [];
 const fields = {
   board: document.querySelector("#guideBoard"),
   form: document.querySelector("#guideForm"),
@@ -404,12 +407,18 @@ async function makePasswordRecord(password) {
 }
 
 async function verifyPassword(item, action) {
+  if (isAdminUser()) return true;
   if (!item.password) return true;
   const password = window.prompt(`${action} 비밀번호를 입력하세요.`);
   if (!password) return false;
   const valid = await hashPassword(password, item.password.salt) === item.password.digest;
   if (!valid) setStatus("비밀번호가 일치하지 않습니다.", "is-offline");
   return valid;
+}
+
+function isAdminUser() {
+  const email = String(window.DUKHUBUSTERS_AUTH?.getUser?.()?.email || "").trim().toLowerCase();
+  return Boolean(email && adminEmails.includes(email));
 }
 
 function parsedTitle(row) {

@@ -210,6 +210,7 @@ const els = {
   reportActive: document.querySelector("#reportActive"),
   reportActive2: document.querySelector("#reportActive2"),
   reportActive3: document.querySelector("#reportActive3"),
+  reportActive4: document.querySelector("#reportActive4"),
   reportNumberName: document.querySelector("#reportNumberName"),
   reportNumberCode: document.querySelector("#reportNumberCode"),
   reportNumberLevel: document.querySelector("#reportNumberLevel"),
@@ -291,6 +292,7 @@ const els = {
   quickEditActive: document.querySelector("#quickEditActive"),
   quickEditActive2: document.querySelector("#quickEditActive2"),
   quickEditActive3: document.querySelector("#quickEditActive3"),
+  quickEditActive4: document.querySelector("#quickEditActive4"),
   quickEditSailing: document.querySelector("#quickEditSailing"),
   quickEditRecommendations: document.querySelectorAll(".quick-edit-recommendation"),
   quickEditStatus: document.querySelector("#quickEditStatus"),
@@ -3059,7 +3061,7 @@ function updateReportDataset() {
     field.required = !numbersMode;
     field.disabled = numbersMode;
   });
-  [els.reportActive, els.reportActive2, els.reportActive3, els.reportSailing, ...els.reportRecommendations].forEach((field) => {
+  [...reportActiveFields(), els.reportSailing, ...els.reportRecommendations].forEach((field) => {
     field.disabled = numbersMode;
   });
   [els.reportNumberName, els.reportNumberLevel, els.reportNumberEffect].forEach((field) => {
@@ -3174,10 +3176,18 @@ function fillReportFromRow(row) {
     field.checked = recommendedCharacters.includes(field.value);
   });
   const activeSkills = splitSkills(activeSkillsWithoutSailing(row["액티브"]));
-  els.reportActive.value = activeSkills[0] || "";
-  els.reportActive2.value = activeSkills[1] || "";
-  els.reportActive3.value = activeSkills[2] || "";
+  reportActiveFields().forEach((field, index) => {
+    if (field) field.value = activeSkills[index] || "";
+  });
   renderEditMonsterMatches();
+}
+
+function reportActiveFields() {
+  return [els.reportActive, els.reportActive2, els.reportActive3, els.reportActive4].filter(Boolean);
+}
+
+function quickEditActiveFields() {
+  return [els.quickEditActive, els.quickEditActive2, els.quickEditActive3, els.quickEditActive4].filter(Boolean);
 }
 
 function refreshQuickEditAreaOptions() {
@@ -3201,9 +3211,9 @@ function openQuickEditModal(row) {
     field.checked = recommendedCharacters.includes(field.value);
   });
   const activeSkills = splitSkills(activeSkillsWithoutSailing(row["액티브"]));
-  els.quickEditActive.value = activeSkills[0] || "";
-  els.quickEditActive2.value = activeSkills[1] || "";
-  els.quickEditActive3.value = activeSkills[2] || "";
+  quickEditActiveFields().forEach((field, index) => {
+    field.value = activeSkills[index] || "";
+  });
   els.quickEditStatus.textContent = "";
   els.quickEditModal.hidden = false;
   document.body.classList.add("modal-open");
@@ -3258,7 +3268,7 @@ async function submitQuickEditReport(event) {
       .filter((field) => field.checked)
       .map((field) => field.value)
       .join(", "),
-    active: [els.quickEditActive, els.quickEditActive2, els.quickEditActive3]
+    active: quickEditActiveFields()
       .map((field) => textOf(field.value))
       .filter(Boolean)
       .join("\n") || "-",
@@ -4242,7 +4252,7 @@ async function submitReport(event) {
       .filter((field) => field.checked)
       .map((field) => field.value)
       .join(", "),
-    active: [els.reportActive, els.reportActive2, els.reportActive3]
+    active: reportActiveFields()
       .map((field) => textOf(field.value))
       .filter(Boolean)
       .join("\n") || "-",

@@ -106,7 +106,7 @@
           <input id="reportPassive" required placeholder="예: 동상: 공격 시 빙결 스택 부여">
         </label>
         <fieldset class="active-skill-fields wide essence-report-field">
-          <legend>액티브 <small>최대 3개</small></legend>
+          <legend>액티브 <small>최대 4개</small></legend>
           <label class="field">
             <span>액티브 1 <em>선택</em></span>
             <input id="reportActive" placeholder="액티브가 있으면 입력">
@@ -118,6 +118,10 @@
           <label class="field">
             <span>액티브 3 <em>선택</em></span>
             <input id="reportActive3" placeholder="세 번째 액티브가 있으면 입력">
+          </label>
+          <label class="field">
+            <span>액티브 4 <em>선택</em></span>
+            <input id="reportActive4" placeholder="네 번째 액티브가 있으면 입력">
           </label>
         </fieldset>
         <label class="field numbers-report-field report-name-field" hidden>
@@ -205,6 +209,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-login-fix"></script>
-  <script src="./app.js?v=20260607-static-data"></script>
+  <script src="./app.js?v=20260607-active4-admin-edit"></script>
 </body>
 </html>
