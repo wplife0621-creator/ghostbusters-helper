@@ -774,7 +774,9 @@ function refreshNumbersControls() {
 }
 
 function refreshReportNumberSourceOptions() {
-  multiOptionList(els.reportNumberSource, numbersAreaOptionsForFloor(els.reportNumberSourceFloor?.value));
+  const selected = selectedOptionValues(els.reportNumberSource);
+  const options = numbersAreaOptionsForFloor(els.reportNumberSourceFloor?.value);
+  multiOptionList(els.reportNumberSource, unique([...selected, ...options]));
 }
 
 function escapeHtml(value) {
