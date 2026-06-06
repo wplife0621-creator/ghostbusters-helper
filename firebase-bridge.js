@@ -124,7 +124,7 @@
     for (const item of items) {
       const id = String(item.id || crypto.randomUUID?.() || Date.now());
       const row = { ...item, id };
-      await collectionRef(table).doc(id).set(row, { merge });
+      await collectionRef(table).doc(id).set(encodeFirestoreSafe(row), { merge });
       saved.push(row);
     }
     return saved;
@@ -136,7 +136,7 @@
     const saved = [];
     for (const row of rows) {
       const next = { ...row, ...payload, id: row.id };
-      await collectionRef(table).doc(row.id).set(next, { merge: true });
+      await collectionRef(table).doc(row.id).set(encodeFirestoreSafe(next), { merge: true });
       saved.push(next);
     }
     return saved;
@@ -173,7 +173,32 @@
   }
 
   function fromDoc(doc) {
-    return { id: doc.id, ...doc.data() };
+    return decodeFirestoreSafe({ id: doc.id, ...doc.data() });
+  }
+
+  function encodeFirestoreSafe(value) {
+    if (Array.isArray(value)) {
+      return {
+        __dukhubustersArray: value.map((item) => encodeFirestoreSafe(item)),
+      };
+    }
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, encodeFirestoreSafe(item)]));
+    }
+    return value;
+  }
+
+  function decodeFirestoreSafe(value) {
+    if (Array.isArray(value)) return value.map((item) => decodeFirestoreSafe(item));
+    if (value && typeof value === "object") {
+      if (Object.prototype.hasOwnProperty.call(value, "__dukhubustersArray")) {
+        return Array.isArray(value.__dukhubustersArray)
+          ? value.__dukhubustersArray.map((item) => decodeFirestoreSafe(item))
+          : [];
+      }
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, decodeFirestoreSafe(item)]));
+    }
+    return value;
   }
 
   function compareValue(a, b) {
