@@ -3341,6 +3341,13 @@ select[multiple] option:checked {
   display: none;
 }
 
+.edit-match-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: stretch;
+}
+
 .edit-monster-matches button {
   display: grid;
   gap: 3px;
@@ -3356,9 +3363,24 @@ select[multiple] option:checked {
   cursor: pointer;
 }
 
+.edit-monster-matches .edit-match-delete {
+  place-items: center;
+  min-width: 82px;
+  color: #8d2d20;
+  border-color: rgba(183, 78, 54, 0.34);
+  background: #fff1e9;
+  font-weight: 900;
+  text-align: center;
+}
+
 .edit-monster-matches button:hover {
   border-color: var(--brand);
   background: #edf4ff;
+}
+
+.edit-monster-matches .edit-match-delete:hover {
+  border-color: #b74e36;
+  background: #ffe5d9;
 }
 
 .edit-monster-matches strong {

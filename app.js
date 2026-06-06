@@ -458,6 +458,13 @@ function mergeApprovedRows(baseRows, approvedRows) {
   [...approvedRows].reverse().forEach((row) => {
     const monster = textOf(row["몬스터"]);
     const originalMonster = textOf(row["_originalMonster"]) || monster;
+    if (row["_mode"] === "delete" || row["출처"] === "삭제 승인") {
+      for (let index = merged.length - 1; index >= 0; index -= 1) {
+        const itemMonster = textOf(merged[index]["몬스터"]);
+        if (itemMonster === originalMonster || itemMonster === monster) merged.splice(index, 1);
+      }
+      return;
+    }
     const originalIndex = merged.findIndex((item) => textOf(item["몬스터"]) === originalMonster);
     const index = originalIndex >= 0
       ? originalIndex
@@ -477,6 +484,12 @@ function isNumbersReport(report) {
 
 function visibleReportName(report) {
   return isNumbersReport(report) ? textOf(report.monster).slice(numbersReportPrefix.length) : textOf(report.monster);
+}
+
+function reportModeLabel(report) {
+  if (report?.mode === "delete") return "삭제";
+  if (report?.mode === "edit") return "수정";
+  return "신규";
 }
 
 function cleanNumberSources(value) {
@@ -3175,7 +3188,7 @@ function applyReportQueryParams() {
 }
 
 function handleReportMonsterInput() {
-  if (els.reportMode.value !== "edit" || isNumbersReportMode()) return;
+  if (!["edit", "delete"].includes(els.reportMode.value) || isNumbersReportMode()) return;
   renderEditMonsterMatches();
 }
 
@@ -3186,12 +3199,22 @@ function handleReportNumberInput() {
 }
 
 function handleEditMonsterClick(event) {
+  const deleteButton = event.target.closest("button[data-delete-monster]");
+  if (deleteButton) {
+    fillDeleteReportFromRow(findMonsterRow(deleteButton.dataset.deleteMonster));
+    return;
+  }
   const button = event.target.closest("button[data-monster]");
   if (!button) return;
   fillReportFromRow(findMonsterRow(button.dataset.monster));
 }
 
 function handleEditNumberClick(event) {
+  const deleteButton = event.target.closest("button[data-delete-number-name]");
+  if (deleteButton) {
+    fillDeleteNumberFromRow(findNumberRow(deleteButton.dataset.deleteNumberName));
+    return;
+  }
   const button = event.target.closest("button[data-number-name]");
   if (!button) return;
   fillNumberFromRow(findNumberRow(button.dataset.numberName));
@@ -3227,6 +3250,14 @@ function fillReportFromRow(row) {
     if (field) field.value = activeSkills[index] || "";
   });
   renderEditMonsterMatches();
+}
+
+function fillDeleteReportFromRow(row) {
+  if (!row) return;
+  els.reportMode.value = "delete";
+  updateReportMode();
+  fillReportFromRow(row);
+  setReportSyncStatus(`${textOf(row["몬스터"])} 삭제 요청 정보가 자동으로 채워졌습니다. 로그인 후 등록하면 검수 대기에 올라갑니다.`);
 }
 
 function reportActiveFields() {
@@ -3373,6 +3404,15 @@ function fillNumberFromRow(row) {
   renderEditNumberMatches();
 }
 
+function fillDeleteNumberFromRow(row) {
+  if (!row) return;
+  els.reportMode.value = "delete";
+  updateReportMode();
+  fillNumberFromRow(row);
+  els.reportNumberEffect.value = `[삭제 요청] ${textOf(row["이름"])} 정보를 삭제해주세요.`;
+  setReportSyncStatus(`${textOf(row["이름"])} 삭제 요청 정보가 자동으로 채워졌습니다. 로그인 후 등록하면 검수 대기에 올라갑니다.`);
+}
+
 function renderEditMonsterMatches() {
   const query = textOf(els.reportMonster.value).toLowerCase();
   const rows = essenceRows
@@ -3384,13 +3424,16 @@ function renderEditMonsterMatches() {
     })
     .slice(0, 8);
 
-  els.editMonsterMatches.hidden = els.reportMode.value !== "edit";
+  els.editMonsterMatches.hidden = !["edit", "delete"].includes(els.reportMode.value);
   els.editMonsterMatches.innerHTML = rows.length
     ? rows.map((row) => `
-      <button type="button" data-monster="${escapeHtml(row["몬스터"])}">
-        <strong>${escapeHtml(row["몬스터"])}</strong>
-        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"] || "-")}${isSailingRow(row) ? " · 항해" : ""}</span>
-      </button>
+      <div class="edit-match-card">
+        <button type="button" data-monster="${escapeHtml(row["몬스터"])}">
+          <strong>${escapeHtml(row["몬스터"])}</strong>
+          <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"] || "-")}${isSailingRow(row) ? " · 항해" : ""}</span>
+        </button>
+        <button class="edit-match-delete" type="button" data-delete-monster="${escapeHtml(row["몬스터"])}">삭제 요청</button>
+      </div>
     `).join("")
     : `<div class="edit-match-empty">일치하는 몬스터가 없습니다.</div>`;
 }
@@ -3400,13 +3443,16 @@ function renderEditNumberMatches() {
   const rows = numbersRows
     .filter((row) => !query || textOf(row["이름"]).toLowerCase().includes(query) || textOf(row["효과"]).toLowerCase().includes(query))
     .slice(0, 8);
-  els.editNumberMatches.hidden = els.reportMode.value !== "edit" || !isNumbersReportMode();
+  els.editNumberMatches.hidden = !["edit", "delete"].includes(els.reportMode.value) || !isNumbersReportMode();
   els.editNumberMatches.innerHTML = rows.length
     ? rows.map((row) => `
-      <button type="button" data-number-name="${escapeHtml(row["이름"])}">
-        <strong>${escapeHtml(row["이름"])}</strong>
-        <span>${escapeHtml(displayNumber(row["번호"]))} · ${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span>
-      </button>
+      <div class="edit-match-card">
+        <button type="button" data-number-name="${escapeHtml(row["이름"])}">
+          <strong>${escapeHtml(row["이름"])}</strong>
+          <span>${escapeHtml(displayNumber(row["번호"]))} · ${escapeHtml(displayLevel(row["아이템 레벨(Lv)"]))}</span>
+        </button>
+        <button class="edit-match-delete" type="button" data-delete-number-name="${escapeHtml(row["이름"])}">삭제 요청</button>
+      </div>
     `).join("")
     : `<div class="edit-match-empty">일치하는 넘버스가 없습니다.</div>`;
 }
@@ -4240,6 +4286,7 @@ async function updatePublicReportStatus(id, status) {
 function reportToRow(report) {
   return {
     "_reportId": report.id,
+    "_mode": report.mode || "new",
     "_originalMonster": report.originalMonster || "",
     "층": report.floor,
     "구역": report.area,
@@ -4250,7 +4297,7 @@ function reportToRow(report) {
     "액티브": report.active,
     "항해": report.sailing ? "Y" : "",
     "추천 캐릭터": report.recommendedCharacters || "",
-    "출처": report.mode === "edit" ? "수정 승인" : "제보 승인",
+    "출처": report.mode === "delete" ? "삭제 승인" : report.mode === "edit" ? "수정 승인" : "제보 승인",
     "승인일": new Date().toISOString(),
   };
 }
@@ -4275,8 +4322,8 @@ async function submitReport(event) {
     }
     els.reportNumberCode.value = normalizedCode;
   }
-  if (!numbersMode && els.reportMode.value === "edit" && !textOf(els.reportOriginalMonster.value)) {
-    setReportSyncStatus("수정할 기존 몬스터를 목록에서 먼저 선택해주세요.", "is-offline");
+  if (!numbersMode && ["edit", "delete"].includes(els.reportMode.value) && !textOf(els.reportOriginalMonster.value)) {
+    setReportSyncStatus("수정/삭제할 기존 몬스터를 목록에서 먼저 선택해주세요.", "is-offline");
     return;
   }
   const report = numbersMode ? {
@@ -4296,7 +4343,7 @@ async function submitReport(event) {
     mode: els.reportMode.value,
     authorNickname,
     monster: textOf(els.reportMonster.value),
-    originalMonster: els.reportMode.value === "edit" ? textOf(els.reportOriginalMonster.value) : "",
+    originalMonster: ["edit", "delete"].includes(els.reportMode.value) ? textOf(els.reportOriginalMonster.value) : "",
     grade: textOf(els.reportGrade.value),
     floor: textOf(els.reportFloor.value),
     area: textOf(els.reportArea.value),
@@ -4389,13 +4436,13 @@ function renderPendingReports() {
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
-          <span>${report.mode === "edit" ? "수정" : "신규"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+          <span>${escapeHtml(reportModeLabel(report))} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
         <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
         <div class="pending-actions">
-          <button type="button" data-action="approve">승인해서 추가</button>
+          <button type="button" data-action="approve">${report.mode === "delete" ? "삭제 승인" : "승인해서 추가"}</button>
           <button type="button" data-action="reject">반려</button>
         </div>
       </article>
@@ -4403,14 +4450,14 @@ function renderPendingReports() {
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
+          <span>${report.mode === "delete" ? `삭제 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
         <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active)}</p>
         <div class="pending-actions">
-          <button type="button" data-action="approve">승인해서 추가</button>
+          <button type="button" data-action="approve">${report.mode === "delete" ? "삭제 승인" : "승인해서 추가"}</button>
           <button type="button" data-action="reject">반려</button>
         </div>
       </article>
