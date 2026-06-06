@@ -6,6 +6,7 @@
     profileTable: String(config.profileTable || "user_profiles"),
     buildTable: String(config.buildTable || "builds"),
     canonicalSiteUrl: String(config.canonicalSiteUrl || "https://busters.kr").replace(/\/$/, ""),
+    backendMode: String(config.backendMode || "supabase").toLowerCase(),
     adminEmails: Array.isArray(config.adminEmails)
       ? config.adminEmails.map((email) => String(email || "").trim().toLowerCase()).filter(Boolean)
       : [],
@@ -52,6 +53,11 @@
     if (visitorPanel) host.insertBefore(state.panel, visitorPanel);
     else host.appendChild(state.panel);
 
+    if (authConfig.backendMode === "firebase") {
+      await initFirebaseAuth();
+      return;
+    }
+
     if (!authConfig.url || !authConfig.key || !window.supabase?.createClient) {
       state.panel.innerHTML = `<span class="auth-muted">로그인 준비 중</span>`;
       return;
@@ -74,6 +80,21 @@
     state.client.auth.onAuthStateChange(async (_event, session) => {
       state.session = session || null;
       await setCurrentUser(session?.user || null, { promptNickname: true });
+    });
+  }
+
+  async function initFirebaseAuth() {
+    const ready = await window.DUKHUBUSTERS_FIREBASE?.ready?.();
+    if (!ready || !window.DUKHUBUSTERS_FIREBASE?.auth?.()) {
+      state.panel.innerHTML = `<span class="auth-muted">Firebase 설정 필요</span>`;
+      return;
+    }
+    state.client = window.DUKHUBUSTERS_FIREBASE.auth();
+    renderAuthPanel(null);
+    state.client.getRedirectResult?.().catch(() => {});
+    state.client.onAuthStateChanged(async (user) => {
+      state.session = user ? { access_token: authConfig.key || "firebase" } : null;
+      await setCurrentUser(user, { promptNickname: true });
     });
   }
 
@@ -226,7 +247,7 @@
   async function hydrateProfileNickname() {
     if (!state.client || !state.user || !authConfig.profileTable) return;
     try {
-      const response = await fetch(profileUrl(`?select=nickname&user_id=eq.${encodeURIComponent(state.user.id)}&limit=1`), {
+      const response = await fetch(profileUrl(`?select=nickname&user_id=eq.${encodeURIComponent(currentUserId())}&limit=1`), {
         headers: authHeaders(),
       });
       if (!response.ok) return;
@@ -261,7 +282,7 @@
       if (!response.ok) throw new Error("profile lookup failed");
       const rows = await response.json();
       const ownerId = rows?.[0]?.user_id || "";
-      if (ownerId && ownerId !== state.user.id) {
+      if (ownerId && ownerId !== currentUserId()) {
         return { ok: false, message: "이미 사용 중인 닉네임입니다.", nickname };
       }
       return { ok: true, message: "사용 가능한 닉네임입니다.", nickname };
@@ -288,10 +309,15 @@
     try {
       await saveNicknameProfile(available.nickname);
       localStorage.setItem(nicknameKey, available.nickname);
-      const { data, error } = await state.client.auth.updateUser({
-        data: { nickname: available.nickname, display_name: available.nickname },
-      });
-      if (!error && data?.user) state.user = data.user;
+      if (authConfig.backendMode === "firebase") {
+        await state.user.updateProfile?.({ displayName: available.nickname });
+        state.user.user_metadata = { ...(state.user.user_metadata || {}), nickname: available.nickname, display_name: available.nickname };
+      } else {
+        const { data, error } = await state.client.auth.updateUser({
+          data: { nickname: available.nickname, display_name: available.nickname },
+        });
+        if (!error && data?.user) state.user = data.user;
+      }
       renderAuthPanel(state.user);
       applyUserToAuthorFields(state.user, true);
       announceAuthChange();
@@ -304,13 +330,13 @@
 
   async function saveNicknameProfile(nickname) {
     const payload = {
-      user_id: state.user.id,
+      user_id: currentUserId(),
       email: state.user.email || "",
       nickname,
       nickname_normalized: normalizeNickname(nickname),
       updated_at: new Date().toISOString(),
     };
-    let response = await fetch(profileUrl(`?user_id=eq.${encodeURIComponent(state.user.id)}`), {
+    let response = await fetch(profileUrl(`?user_id=eq.${encodeURIComponent(currentUserId())}`), {
       method: "PATCH",
       headers: authHeaders({ Prefer: "return=representation" }),
       body: JSON.stringify(payload),
@@ -367,6 +393,22 @@
       button.disabled = true;
       button.textContent = "로그인 이동 중";
     }
+    if (authConfig.backendMode === "firebase") {
+      try {
+        const provider = new window.firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+        await state.client.signInWithRedirect(provider);
+      } catch {
+        renderAuthPanel(null);
+        if (state.panel) {
+          const message = document.createElement("span");
+          message.className = "auth-muted";
+          message.textContent = "Firebase Google 로그인 설정을 확인해주세요";
+          state.panel.appendChild(message);
+        }
+      }
+      return;
+    }
     const { error } = await state.client.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -390,12 +432,14 @@
   async function signOut() {
     if (!state.client) return;
     await flushStayTime();
-    await state.client.auth.signOut();
+    if (authConfig.backendMode === "firebase") await state.client.signOut();
+    else await state.client.auth.signOut();
   }
 
   function startStayTracking() {
     stopStayTracking();
-    if (!state.user || !authConfig.url || !authConfig.key || !authConfig.buildTable) return;
+    if (!state.user || !authConfig.buildTable) return;
+    if (authConfig.backendMode !== "firebase" && (!authConfig.url || !authConfig.key)) return;
     state.stayStartedAt = Date.now();
     state.stayTimer = window.setInterval(flushStayTime, 60000);
   }
@@ -424,7 +468,7 @@
           Prefer: "resolution=ignore-duplicates,return=minimal",
         },
         body: JSON.stringify({
-          id: `session-${todayKey()}-${state.user.id}-${Date.now()}-${state.staySequence}`,
+          id: `session-${todayKey()}-${currentUserId()}-${Date.now()}-${state.staySequence}`,
           title: sessionTimeMarker,
           author: displayName(state.user).slice(0, 40) || "login",
           members: [],
@@ -433,7 +477,7 @@
             seconds: Math.min(seconds, 600),
             path: window.location.pathname,
             email: state.user.email || "",
-            userId: state.user.id || "",
+            userId: currentUserId(),
             nickname: displayName(state.user),
           }),
           created_at: new Date().toISOString(),
@@ -464,7 +508,7 @@
 
   function fallbackName(user) {
     const meta = user?.user_metadata || {};
-    return String(meta.full_name || meta.name || user?.email || "로그인됨").trim();
+    return String(meta.full_name || meta.name || user?.displayName || user?.email || "로그인됨").trim();
   }
 
   function cleanNickname(value) {
@@ -476,7 +520,11 @@
   }
 
   function promptStorageKey() {
-    return `${nicknamePromptKey}.${state.user?.id || "guest"}`;
+    return `${nicknamePromptKey}.${currentUserId() || "guest"}`;
+  }
+
+  function currentUserId() {
+    return state.user?.id || state.user?.uid || "";
   }
 
   function applyUserToAuthorFields(user, overwrite = false) {

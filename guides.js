@@ -17,6 +17,8 @@ const guideBackend = {
   table: String(config.guideTable || "guide_posts"),
   bucket: String(config.guideBucket || "guide-media"),
   shareUrl: String(config.guideShareUrl || "").replace(/\/$/, ""),
+  r2UploadEndpoint: String(config.r2UploadEndpoint || ""),
+  r2PublicBaseUrl: String(config.r2PublicBaseUrl || "").replace(/\/$/, ""),
 };
 const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
@@ -514,6 +516,24 @@ async function uploadMedia(items, postId) {
     const file = item.file;
     const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_") || "media";
     const path = `${postId}/${idValue()}-${cleanName}`;
+    if (guideBackend.r2UploadEndpoint && guideBackend.r2PublicBaseUrl) {
+      const uploadUrl = `${guideBackend.r2UploadEndpoint}?path=${encodeURIComponent(path)}`;
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file,
+      });
+      if (!response.ok) throw new Error("r2-upload");
+      const row = await response.json().catch(() => ({}));
+      uploaded.push({
+        ref: item.ref,
+        path,
+        name: file.name,
+        type: file.type,
+        url: row.url || `${guideBackend.r2PublicBaseUrl}/${path}`,
+      });
+      continue;
+    }
     const response = await fetch(`${guideBackend.url}/storage/v1/object/${guideBackend.bucket}/${encodeURIComponent(path).replaceAll("%2F", "/")}`, {
       method: "POST",
       headers: authHeaders({ "Content-Type": file.type || "application/octet-stream", "x-upsert": "false" }),

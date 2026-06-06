@@ -1,6 +1,15 @@
 window.DUKHUBUSTERS_CONFIG = {
   supabaseUrl: "https://bjlykfxfminmjfgilowj.supabase.co",
   supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
+  backendMode: "supabase",
+  firebaseConfig: {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    appId: "",
+  },
+  r2UploadEndpoint: "/api/r2-upload",
+  r2PublicBaseUrl: "",
   buildTable: "builds",
   reportTable: "monster_reports",
   visitorTable: "site_visitors",
