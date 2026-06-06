@@ -64,7 +64,7 @@
           status: 503,
           headers: { "Content-Type": "application/json" },
         });
-        return await handleRest(parsed, init);
+        return await handleRest(parsed, init, nativeFetch, input);
       } catch (error) {
         return new Response(JSON.stringify({ message: error?.message || "Firebase bridge error" }), {
           status: 500,
@@ -82,10 +82,13 @@
     return { table, params: url.searchParams };
   }
 
-  async function handleRest(parsed, init) {
+  async function handleRest(parsed, init, nativeFetch, originalInput) {
     const method = String(init?.method || "GET").toUpperCase();
     if (method === "GET") {
       const rows = await readRows(parsed.table, parsed.params);
+      if (!rows.length && shouldFallbackToLegacy(parsed.table, parsed.params)) {
+        return nativeFetch(originalInput, init);
+      }
       return jsonResponse(rows, 200, { "Content-Range": `0-${Math.max(rows.length - 1, 0)}/${rows.length}` });
     }
     if (method === "POST") return jsonResponse(await writeRows(parsed.table, init, false), 201);
@@ -95,6 +98,11 @@
       return jsonResponse([], 204);
     }
     return jsonResponse({ message: "Unsupported method" }, 405);
+  }
+
+  function shouldFallbackToLegacy(table, params) {
+    if (params.get("no_legacy_fallback") === "1") return false;
+    return tableMap.has(table);
   }
 
   async function readRows(table, params) {
