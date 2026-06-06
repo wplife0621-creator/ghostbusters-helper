@@ -1,12 +1,12 @@
 window.DUKHUBUSTERS_CONFIG = {
   supabaseUrl: "https://bjlykfxfminmjfgilowj.supabase.co",
   supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
-  backendMode: "supabase",
+  backendMode: "firebase",
   firebaseConfig: {
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    appId: "",
+    apiKey: "AIzaSyB1Nvaz_Vmz201izN0vwx3mK9hDbLwDB4A",
+    authDomain: "dukhubusters.firebaseapp.com",
+    projectId: "dukhubusters",
+    appId: "1:112478053097:web:1c62da1fd66481a92f4678",
   },
   r2UploadEndpoint: "/api/r2-upload",
   r2PublicBaseUrl: "",
