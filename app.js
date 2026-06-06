@@ -1,4 +1,4 @@
-redirectLegacyGithubPages();
+﻿redirectLegacyGithubPages();
 
 const data = window.GHOST_DATA || {};
 
@@ -2956,7 +2956,7 @@ async function adminRestoreBuild(build) {
 function adminExportPayload(type) {
   const payload = {
     exportedAt: new Date().toISOString(),
-    site: "덕후버스터즈",
+    site: "겜바바 버스터즈",
   };
   if (type === "reports" || type === "all") {
     payload.reports = { pending: pendingReports, approved: approvedReportItems };

@@ -1,4 +1,4 @@
-redirectLegacyGithubPages();
+﻿redirectLegacyGithubPages();
 
 const config = window.DUKHUBUSTERS_CONFIG || {};
 
@@ -32,7 +32,7 @@ const acceptedCommentKind = "guide-accepted-comment";
 const mediaMarkerPattern = /\{\{media:([^}]+)\}\}/g;
 const guideUploadLimitBytes = 50 * 1024 * 1024;
 const guideUploadLimitLabel = "50MB";
-const guideSiteTitle = "덕후버스터즈";
+const guideSiteTitle = "겜바바 버스터즈";
 const guideDefaultTitle = `게시판 · ${guideSiteTitle}`;
 const fields = {
   board: document.querySelector("#guideBoard"),
@@ -187,8 +187,8 @@ function shareTitleForPost(post) {
 function updateGuideShareMeta(post = null) {
   const title = shareTitleForPost(post);
   const description = post
-    ? String(post.content || "").replace(mediaMarkerPattern, "").replace(/\s+/g, " ").trim().slice(0, 120) || "덕후버스터즈 게시글"
-    : "덕후버스터즈 게시판";
+    ? String(post.content || "").replace(mediaMarkerPattern, "").replace(/\s+/g, " ").trim().slice(0, 120) || "겜바바 버스터즈 게시글"
+    : "겜바바 버스터즈 게시판";
   const url = post ? postShareUrl(post.id).toString() : postUrl("").toString();
   document.title = title;
   setMetaContent("meta[property='og:title']", title);
