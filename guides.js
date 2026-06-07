@@ -265,9 +265,7 @@ function mediaFromUrl(value) {
     };
   }
   const cleanUrl = url.split("?")[0].toLowerCase();
-  const isImage = /\.(png|jpe?g|gif|webp|avif|svg)$/i.test(cleanUrl);
   const isVideo = /\.(mp4|webm|mov|m4v|ogg)$/i.test(cleanUrl);
-  if (!isImage && !isVideo) throw new Error("unsupported-url");
   return {
     ref: `media-${idValue()}`,
     kind: isVideo ? "video" : "image",
@@ -275,6 +273,10 @@ function mediaFromUrl(value) {
     name: isVideo ? "외부 동영상" : "외부 이미지",
     url,
   };
+}
+
+function firstUrlFromText(value) {
+  return String(value || "").match(/https?:\/\/[^\s<>"']+/i)?.[0] || "";
 }
 
 function postUrl(postId) {
@@ -1418,9 +1420,24 @@ fields.composer.addEventListener("mouseup", rememberComposerRange);
 fields.composer.addEventListener("paste", (event) => {
   const files = [...event.clipboardData.files]
     .filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"));
-  if (!files.length) return;
-  event.preventDefault();
-  queueMediaFiles(files);
+  if (files.length) {
+    event.preventDefault();
+    queueMediaFiles(files);
+    return;
+  }
+  const url = firstUrlFromText(event.clipboardData.getData("text/plain"));
+  if (!url) return;
+  try {
+    const item = mediaFromUrl(url);
+    event.preventDefault();
+    retainedMedia.push(item);
+    insertComposerMedia(item);
+    fields.content.value = composerContent();
+    showRetainedMedia();
+    setStatus(item.kind === "embed" ? "유튜브 링크를 본문에 넣었습니다." : "이미지 주소를 본문에 넣었습니다.", "is-online");
+  } catch {
+    // 일반 텍스트 붙여넣기는 브라우저 기본 동작을 유지합니다.
+  }
 });
 fields.media.addEventListener("change", () => queueMediaFiles(fields.media.files));
 fields.mediaUrlButton?.addEventListener("click", insertMediaUrl);
