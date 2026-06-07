@@ -1393,6 +1393,55 @@ select[multiple] option:checked {
   text-align: center;
 }
 
+.maze-log-add-row td {
+  padding: 12px !important;
+  background: #f7fbff;
+}
+
+.maze-log-add-round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 58px;
+  border: 1px dashed #9fb8dc;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 245, 255, 0.92));
+  color: #1b3d6d;
+  cursor: pointer;
+}
+
+.maze-log-add-round span {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #1f6feb, #164fb0);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.maze-log-add-round strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.maze-log-add-round small {
+  color: #657086;
+  font-weight: 800;
+}
+
+.maze-log-add-round:hover {
+  border-color: #1f6feb;
+  box-shadow: 0 12px 24px rgba(31, 111, 235, 0.12);
+  transform: translateY(-1px);
+}
+
 .maze-log-modal {
   position: fixed;
   inset: 0;
@@ -10544,6 +10593,21 @@ body.admin-review-page #adminSiteStats {
 
   .maze-log-edit {
     width: 100%;
+  }
+
+  .maze-log-add-row td {
+    display: block;
+    padding: 10px !important;
+  }
+
+  .maze-log-add-row td::before {
+    display: none;
+  }
+
+  .maze-log-add-round {
+    display: grid;
+    gap: 5px;
+    min-height: 74px;
   }
 
   .maze-log-dialog {

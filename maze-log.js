@@ -58,7 +58,6 @@ const CUSTOM_FLOOR_NUMBERS = [7, 8, 9, 10];
 const mazeLogEls = {
   head: document.querySelector("#mazeLogHead"),
   rows: document.querySelector("#mazeLogRows"),
-  add: document.querySelector("#mazeLogAdd"),
   export: document.querySelector("#mazeLogExport"),
   import: document.querySelector("#mazeLogImport"),
   importFile: document.querySelector("#mazeLogImportFile"),
@@ -325,8 +324,22 @@ function renderMazeLog() {
   if (!mazeLogEls.rows) return;
   const floors = activeMazeFloors();
   renderTableHead();
+  const addRow = `
+    <tr class="maze-log-add-row">
+      <td colspan="${floors.length + 2}">
+        <button type="button" class="maze-log-add-round" data-add-round>
+          <span>+</span>
+          <strong>회차 추가</strong>
+          <small>다음 기록은 ${nextRoundDay()}일로 생성됩니다.</small>
+        </button>
+      </td>
+    </tr>
+  `;
   if (!mazeLogEntries.length) {
-    mazeLogEls.rows.innerHTML = `<tr><td colspan="${floors.length + 2}" class="maze-log-empty">아직 기록이 없습니다. + 10일 추가를 눌러 시작하세요.</td></tr>`;
+    mazeLogEls.rows.innerHTML = `
+      <tr><td colspan="${floors.length + 2}" class="maze-log-empty">아직 기록이 없습니다. 아래 + 회차 추가를 눌러 시작하세요.</td></tr>
+      ${addRow}
+    `;
     updateSummary();
     return;
   }
@@ -345,7 +358,7 @@ function renderMazeLog() {
         </td>
       </tr>
     `;
-  }).join("");
+  }).join("") + addRow;
   updateSummary();
 }
 
@@ -575,7 +588,6 @@ function initMazeLog() {
   if (mazeLogEls.startDay) mazeLogEls.startDay.value = String(mazeLogStartDay);
   renderSettingsFields();
   renderMazeLog();
-  mazeLogEls.add?.addEventListener("click", addRound);
   mazeLogEls.export?.addEventListener("click", exportMazeLog);
   mazeLogEls.import?.addEventListener("click", () => mazeLogEls.importFile?.click());
   mazeLogEls.importFile?.addEventListener("change", (event) => importMazeLogFile(event.target.files?.[0]));
@@ -594,11 +606,20 @@ function initMazeLog() {
     if (event.target === mazeLogEls.modal) closeEditor();
   });
   mazeLogEls.rows?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-add-round]")) {
+      addRound();
+      return;
+    }
     const button = event.target.closest("[data-entry-id]");
     if (button) openEditor(button.dataset.entryId);
   });
   mazeLogEls.rows?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
+    if (event.target.closest("[data-add-round]")) {
+      event.preventDefault();
+      addRound();
+      return;
+    }
     const row = event.target.closest("[data-entry-id]");
     if (!row) return;
     event.preventDefault();
