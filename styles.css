@@ -1280,7 +1280,8 @@ select[multiple] option:checked {
 
 .maze-log-table {
   width: 100%;
-  min-width: 860px;
+  min-width: 920px;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;
@@ -1290,11 +1291,11 @@ select[multiple] option:checked {
 .maze-log-table td {
   border-bottom: 1px solid #e6edf7;
   border-right: 1px solid #edf2f8;
-  padding: 12px 10px;
+  padding: 10px 8px;
   color: #1c2940;
   line-height: 1.45;
   vertical-align: middle;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .maze-log-table th {
@@ -1302,15 +1303,52 @@ select[multiple] option:checked {
 }
 
 .maze-log-floor-cell {
-  max-width: 156px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: pointer;
   font-weight: 800;
+  min-height: 62px;
 }
 
 .maze-log-floor-cell.is-empty {
-  color: #9aa6b8;
+  color: #7d8ca2;
+}
+
+.maze-log-cell-label {
+  display: none;
+}
+
+.maze-log-cell-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid #dfe8f5;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #20304a;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.35;
   text-align: center;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  padding: 8px;
+}
+
+.maze-log-floor-cell:not(.is-empty) .maze-log-cell-value {
+  border-color: #b9ccef;
+  background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+  color: #153a68;
+}
+
+.maze-log-floor-cell.is-empty .maze-log-cell-value {
+  border-style: dashed;
+  background: #fbfdff;
+}
+
+.maze-log-floor-cell:hover .maze-log-cell-value,
+.maze-log-floor-cell:focus .maze-log-cell-value {
+  border-color: #1f6feb;
+  box-shadow: 0 8px 18px rgba(31, 111, 235, 0.12);
 }
 
 .maze-log-table thead th {
@@ -1328,7 +1366,7 @@ select[multiple] option:checked {
   min-width: 92px;
 }
 
-.maze-log-manage-head {
+.maze-log-manage-head > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1362,6 +1400,8 @@ select[multiple] option:checked {
   z-index: 2;
   background: #fffaf0;
   font-weight: 900;
+  width: 82px;
+  text-align: center;
 }
 
 .maze-log-table thead th:first-child {
@@ -1378,13 +1418,8 @@ select[multiple] option:checked {
   cursor: pointer;
 }
 
-.maze-log-table tbody tr:hover td,
 .maze-log-table tbody tr:hover th {
-  background: #f7fbff;
-}
-
-.maze-log-table tbody tr:nth-child(even) td:not(:first-child) {
-  background: #fbfdff;
+  background: #fff4dc;
 }
 
 .maze-log-empty {

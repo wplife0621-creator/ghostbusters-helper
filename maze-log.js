@@ -313,8 +313,10 @@ function renderTableHead() {
       <th>회차</th>
       ${floorHeaders}
       <th class="maze-log-manage-head">
-        <span>관리</span>
-        <button type="button" class="maze-log-column-add" aria-label="항목 추가">+</button>
+        <div>
+          <span>관리</span>
+          <button type="button" class="maze-log-column-add" aria-label="항목 추가">+</button>
+        </div>
       </th>
     </tr>
   `;
@@ -347,14 +349,20 @@ function renderMazeLog() {
     const cells = floors.map((config) => {
       const summary = floorSummary(entry, config);
       const emptyClass = summary === "-" ? " is-empty" : "";
-      return `<td class="maze-log-floor-cell${emptyClass}" data-label="${escapeHtml(config.label)}">${escapeHtml(summary)}</td>`;
+      const value = summary === "-" ? "입력" : summary;
+      return `
+        <td class="maze-log-floor-cell${emptyClass}" data-label="${escapeHtml(config.label)}" data-entry-id="${entry.id}" data-floor="${config.floor}" tabindex="0" title="${escapeHtml(config.label)} 기록 입력">
+          <span class="maze-log-cell-label">${escapeHtml(config.label)}</span>
+          <span class="maze-log-cell-value">${escapeHtml(value)}</span>
+        </td>
+      `;
     }).join("");
     return `
-      <tr data-entry-id="${entry.id}" tabindex="0">
+      <tr data-entry-row-id="${entry.id}">
         <th scope="row" data-label="회차">${entry.day}일</th>
         ${cells}
         <td data-label="관리">
-          <button type="button" class="maze-log-edit" data-entry-id="${entry.id}">수정</button>
+          <button type="button" class="maze-log-edit" data-entry-id="${entry.id}">전체 수정</button>
         </td>
       </tr>
     `;
@@ -386,12 +394,17 @@ function addRound() {
   setStatus(`${entry.day}일 기록을 추가했습니다.`, "ok");
 }
 
-function openEditor(entryId) {
+function openEditor(entryId, floorNumber = null) {
   const entry = mazeLogEntries.find((item) => item.id === entryId);
   if (!entry || !mazeLogEls.modal) return;
+  const floorConfig = floorNumber ? floorConfigByNumber(floorNumber) : null;
   mazeLogEls.roundId.value = entry.id;
   mazeLogEls.dayLabel.value = `${entry.day}일`;
-  mazeLogEls.floorFields.innerHTML = activeMazeFloors().map((config) => renderFloorEditor(entry, config)).join("");
+  const configs = floorConfig ? [floorConfig] : activeMazeFloors();
+  const title = document.querySelector("#mazeLogModalTitle");
+  if (title) title.textContent = floorConfig ? `${entry.day}일 · ${floorConfig.label}` : `${entry.day}일 전체 기록`;
+  if (mazeLogEls.delete) mazeLogEls.delete.hidden = Boolean(floorConfig);
+  mazeLogEls.floorFields.innerHTML = configs.map((config) => renderFloorEditor(entry, config)).join("");
   mazeLogEls.modal.hidden = false;
   document.body.classList.add("modal-open");
 }
@@ -610,8 +623,13 @@ function initMazeLog() {
       addRound();
       return;
     }
-    const button = event.target.closest("[data-entry-id]");
-    if (button) openEditor(button.dataset.entryId);
+    const editButton = event.target.closest(".maze-log-edit");
+    if (editButton) {
+      openEditor(editButton.dataset.entryId);
+      return;
+    }
+    const cell = event.target.closest(".maze-log-floor-cell");
+    if (cell) openEditor(cell.dataset.entryId, Number(cell.dataset.floor));
   });
   mazeLogEls.rows?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -620,10 +638,10 @@ function initMazeLog() {
       addRound();
       return;
     }
-    const row = event.target.closest("[data-entry-id]");
-    if (!row) return;
+    const cell = event.target.closest(".maze-log-floor-cell");
+    if (!cell) return;
     event.preventDefault();
-    openEditor(row.dataset.entryId);
+    openEditor(cell.dataset.entryId, Number(cell.dataset.floor));
   });
 }
 
