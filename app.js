@@ -1540,7 +1540,7 @@ function renderEssencePickerTable() {
             <td data-label="몬스터"><strong>${escapeHtml(row["몬스터"])}</strong>${isSailingRow(row) ? `<span class="sailing-pill">항해</span>` : ""}</td>
             <td data-label="주요 스탯">${escapeHtml(row["주요 스탯"] || "-")}</td>
             <td data-label="패시브">${skillText(row["패시브"])}</td>
-            <td data-label="액티브">${skillText(row["액티브"])}</td>
+            <td data-label="액티브">${skillText(row["액티브"], { colorMarkers: true })}</td>
           </tr>
         `).join("") || `<tr><td colspan="4">조건에 맞는 정수가 없습니다.</td></tr>`}
       </tbody>
@@ -4039,7 +4039,7 @@ function essenceRowTemplate(row) {
         <div class="stat-list">${statBadges(row["주요 스탯"])}</div>
       </td>
       <td data-label="패시브" class="skill-cell">${skillText(row["패시브"])}</td>
-      <td data-label="액티브" class="skill-cell">${skillText(row["액티브"])}</td>
+      <td data-label="액티브" class="skill-cell">${skillText(row["액티브"], { colorMarkers: true })}</td>
       <td data-label="수정" class="essence-edit-cell">
         <button type="button" class="quick-edit-button" data-edit-monster="${escapeHtml(row["몬스터"])}">수정</button>
       </td>
@@ -4060,22 +4060,22 @@ function statBadges(value) {
     .join("");
 }
 
-function skillText(value) {
+function skillText(value, options = {}) {
   const text = textOf(value) || "-";
   if (text === "-") return escapeHtml(text);
   const skills = splitSkills(text);
   return `<div class="skill-list">${skills.map((skill) => {
     const [name, ...rest] = skill.split(":");
-    if (!rest.length) return `<span>${skillNameMarkup(skill)}</span>`;
-    return `<span>${skillNameMarkup(name)}: ${escapeHtml(rest.join(":").trim())}</span>`;
+    if (!rest.length) return `<span>${skillNameMarkup(skill, options)}</span>`;
+    return `<span>${skillNameMarkup(name, options)}: ${escapeHtml(rest.join(":").trim())}</span>`;
   }).join("")}</div>`;
 }
 
-function skillNameMarkup(value) {
+function skillNameMarkup(value, options = {}) {
   const name = textOf(value);
   const color = activeSkillColor(name);
-  if (!color) return `<b>${escapeHtml(name)}</b>`;
-  return `<b class="skill-color-text text-color-${escapeHtml(color)}">${escapeHtml(activeSkillDisplayName(name))}</b>`;
+  if (!color || !options.colorMarkers) return `<b>${escapeHtml(name)}</b>`;
+  return `<b class="skill-color-text"><i class="skill-color-drop color-${escapeHtml(color)}" aria-label="${escapeHtml(color)}"></i>${escapeHtml(activeSkillDisplayName(name))}</b>`;
 }
 
 function splitSkills(value) {
