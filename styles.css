@@ -1181,6 +1181,50 @@ select[multiple] option:checked {
   gap: 12px;
 }
 
+.maze-log-guide {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #d8e4f4;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(31, 111, 235, 0.09), transparent 34%),
+    linear-gradient(135deg, #ffffff 0%, #f8fbff 58%, #fffaf0 100%);
+}
+
+.maze-log-guide strong {
+  color: #16243a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.maze-log-guide ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.maze-log-guide li {
+  min-height: 76px;
+  padding: 11px 12px;
+  border: 1px solid #e2eaf6;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #4c5d75;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.maze-log-guide b,
+.maze-log-guide span {
+  color: #164fb0;
+  font-weight: 900;
+}
+
 .maze-log-sheet-bar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -10662,6 +10706,19 @@ body.admin-review-page #adminSiteStats {
   .maze-log-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .maze-log-guide {
+    padding: 12px;
+  }
+
+  .maze-log-guide ul {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .maze-log-guide li {
+    min-height: 0;
   }
 
   .maze-log-sheet-bar {
