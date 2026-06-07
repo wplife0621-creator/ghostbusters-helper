@@ -1,0 +1,132 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>미궁 일지 · 겜바바 버스터즈</title>
+  <meta name="description" content="10일 단위로 미궁 균열, 봉헌 사용, 특수 몬스터 젠 여부를 기록하는 겜바바 버스터즈 미궁 일지입니다.">
+  <link rel="canonical" href="https://busters.kr/maze-log.html">
+  <meta property="og:title" content="미궁 일지 · 겜바바 버스터즈">
+  <meta property="og:site_name" content="겜바바 버스터즈">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://busters.kr/maze-log.html">
+  <meta property="og:description" content="10일 단위로 미궁 균열과 특수 몬스터 젠 기록을 브라우저에 저장해 관리하세요.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="미궁 일지 · 겜바바 버스터즈">
+  <meta name="twitter:description" content="10일 단위 미궁 균열, 봉헌, 밀라로돈, 베르타스 젠 기록 도구입니다.">
+  <link rel="stylesheet" href="./styles.css?v=20260607-maze-log">
+  <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
+</head>
+<body>
+  <header class="topbar compact">
+    <div class="topbar-inner">
+      <h1>미궁 일지</h1>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="./index.html">홈</a>
+        <details class="nav-dropdown">
+          <summary>도감</summary>
+          <div class="nav-submenu">
+            <a href="./essences.html">정수</a>
+            <a href="./numbers.html">넘버스</a>
+          </div>
+        </details>
+        <a href="./builds.html">빌드</a>
+        <a href="./guides.html">게시판</a>
+        <a href="./spec-qa.html">스펙 질문</a>
+        <a href="./report.html">정보 제보/수정</a>
+        <a href="./maze-time.html">미궁 시간 계산기</a>
+        <a href="./maze-log.html" aria-current="page">미궁 일지</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout maze-log-layout">
+    <section class="panel page-intro maze-log-intro">
+      <div>
+        <p class="home-kicker">MAZE JOURNAL</p>
+        <h2>10일 단위로 쌓는 미궁 기록</h2>
+        <p>미궁 1회 진입을 10일 단위로 보고, 각 회차별 균열 출현과 1층 봉헌 사용, 5층 특수 몬스터 젠 여부를 기록합니다. 기록은 기본적으로 이 기기의 브라우저에만 저장되어 서버 부담이 없습니다.</p>
+      </div>
+      <div class="maze-log-summary" aria-label="미궁 일지 요약">
+        <span>총 회차 <strong id="mazeLogTotalRounds">0</strong></span>
+        <span>최근 기록 <strong id="mazeLogLatestDay">-</strong></span>
+        <span>5층 특수 젠 <strong id="mazeLogSpecialCount">0</strong></span>
+      </div>
+    </section>
+
+    <section class="panel maze-log-tools" aria-label="미궁 일지 도구">
+      <div class="maze-log-actions">
+        <button type="button" class="primary-action" id="mazeLogAdd">+ 10일 추가</button>
+        <button type="button" id="mazeLogExport">백업하기</button>
+        <button type="button" id="mazeLogImport">불러오기</button>
+        <input id="mazeLogImportFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <p id="mazeLogStatus" class="maze-log-status">기록은 자동으로 이 브라우저에 저장됩니다.</p>
+    </section>
+
+    <section class="panel maze-log-panel" aria-label="미궁 일지 표">
+      <div class="section-title compact-title">
+        <div>
+          <h2>회차별 기록</h2>
+          <p>행을 누르면 1층부터 10층까지 상세 기록을 수정할 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="maze-log-table-wrap">
+        <table class="maze-log-table">
+          <thead>
+            <tr>
+              <th>회차</th>
+              <th>1층</th>
+              <th>2층</th>
+              <th>3층</th>
+              <th>4층</th>
+              <th>5층</th>
+              <th>6층</th>
+              <th>7층</th>
+              <th>8층</th>
+              <th>9층</th>
+              <th>10층</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="mazeLogRows">
+            <tr>
+              <td colspan="12" class="maze-log-empty">아직 기록이 없습니다. + 10일 추가를 눌러 시작하세요.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="maze-log-modal" id="mazeLogModal" hidden>
+    <div class="maze-log-dialog" role="dialog" aria-modal="true" aria-labelledby="mazeLogModalTitle">
+      <div class="maze-log-modal-head">
+        <div>
+          <p class="home-kicker">ROUND EDIT</p>
+          <h2 id="mazeLogModalTitle">미궁 기록 수정</h2>
+        </div>
+        <button type="button" id="mazeLogClose" aria-label="닫기">×</button>
+      </div>
+      <form id="mazeLogForm">
+        <input type="hidden" id="mazeLogRoundId">
+        <div class="maze-log-round-field">
+          <label class="field">
+            <span>회차 표시</span>
+            <input id="mazeLogDayLabel" type="text" readonly>
+          </label>
+        </div>
+        <div id="mazeLogFloorFields" class="maze-log-floor-fields"></div>
+        <div class="maze-log-modal-actions">
+          <button type="button" class="danger-action" id="mazeLogDelete">삭제</button>
+          <button type="button" id="mazeLogCancel">취소</button>
+          <button type="submit" class="primary-action">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="./maze-log.js?v=20260607-maze-log"></script>
+</body>
+</html>

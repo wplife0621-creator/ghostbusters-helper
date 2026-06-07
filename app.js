@@ -5347,6 +5347,7 @@ function adminPageLabel(path) {
     "guides.html": "게시판",
     "report.html": "정보 제보/수정",
     "maze-time.html": "미궁 시간 계산기",
+    "maze-log.html": "미궁 일지",
     "admin.html": "관리자 센터",
     "about.html": "사이트 소개",
     "privacy.html": "개인정보처리방침",
