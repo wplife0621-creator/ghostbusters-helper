@@ -207,5 +207,63 @@
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-login-fix"></script>
   <script src="./app.js?v=20260607-essence-render-fix"></script>
+  <script>
+    (function () {
+      function text(value) {
+        return String(value == null ? "" : value).trim();
+      }
+
+      function escapeHtml(value) {
+        return text(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function compact(value) {
+        return text(value).toLowerCase().replace(/\s+/g, "");
+      }
+
+      function skillList(value) {
+        var raw = text(value) || "-";
+        if (raw === "-") return "-";
+        return raw.split(/\r?\n+/).filter(Boolean).map(function (item) {
+          return "<span><b>" + escapeHtml(item) + "</b></span>";
+        }).join("");
+      }
+
+      function renderEssenceFallback() {
+        var data = (window.GHOST_DATA && window.GHOST_DATA["정수"]) || [];
+        var results = document.getElementById("results");
+        var count = document.getElementById("resultCount");
+        var search = document.getElementById("searchInput");
+        if (!results || !data.length) return;
+        var rendered = text(results.textContent);
+        if (rendered && rendered !== "조건에 맞는 정수가 없습니다. 필터를 조금 넓혀보세요.") return;
+
+        function draw() {
+          var query = compact(search && search.value);
+          var rows = data.filter(function (row) {
+            return !query || compact(row["몬스터"]).indexOf(query) >= 0;
+          });
+          if (count) count.textContent = rows.length + "건";
+          results.innerHTML = rows.length ? '<section class="essence-group"><div class="group-title"><h3>정수 목록</h3><span>기본 목록</span></div><div class="essence-table-wrap"><table class="essence-table"><thead><tr><th>고정</th><th>몬스터</th><th>위치</th><th>주요 스탯</th><th>패시브</th><th>액티브</th><th>추천</th><th>수정</th></tr></thead><tbody>' + rows.map(function (row) {
+            return '<tr><td data-label="고정"><input type="checkbox" aria-label="' + escapeHtml(row["몬스터"]) + ' 고정"></td><td data-label="몬스터"><strong>' + escapeHtml(row["몬스터"]) + '</strong><span>' + escapeHtml(row["등급"] || "-") + '</span></td><td data-label="위치">' + escapeHtml(row["층"] || "-") + ' · ' + escapeHtml(row["구역"] || "-") + '</td><td data-label="주요 스탯">' + escapeHtml(row["주요 스탯"] || "-") + '</td><td data-label="패시브"><div class="skill-list">' + skillList(row["패시브"]) + '</div></td><td data-label="액티브"><div class="skill-list">' + skillList(row["액티브"]) + '</div></td><td data-label="추천">' + escapeHtml(row["추천 캐릭터"] || "-") + '</td><td data-label="수정"><a class="mini-button" href="./report.html?dataset=essences&mode=edit&monster=' + encodeURIComponent(text(row["몬스터"])) + '">수정</a></td></tr>';
+          }).join("") + '</tbody></table></div></section>' : '<div class="empty">조건에 맞는 정수가 없습니다.</div>';
+        }
+
+        draw();
+        if (search && !search.dataset.fallbackBound) {
+          search.dataset.fallbackBound = "1";
+          search.addEventListener("input", draw);
+        }
+      }
+
+      window.addEventListener("load", function () {
+        setTimeout(renderEssenceFallback, 1200);
+      });
+    }());
+  </script>
 </body>
 </html>
