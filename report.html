@@ -92,7 +92,13 @@
         <div id="editMonsterMatches" class="edit-monster-matches essence-report-field" hidden></div>
         <label class="field essence-report-field report-medium-field">
           <span>구역</span>
-          <select id="reportArea" required></select>
+          <div class="source-add-row">
+            <select id="reportAreaCandidate"></select>
+            <button type="button" id="reportAreaAdd">추가</button>
+          </div>
+          <div id="reportAreaTags" class="source-tag-list" aria-live="polite"></div>
+          <select id="reportArea" multiple size="5" hidden></select>
+          <small class="field-hint">몬스터가 여러 구역에서 나오면 구역을 골라 추가하세요.</small>
         </label>
         <fieldset class="recommendation-fields essence-report-field">
           <legend>추천 캐릭터 <small>복수 선택 가능</small></legend>
@@ -240,6 +246,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-firebase-nickname-fix"></script>
-  <script src="./app.js?v=20260607-delete-apply-fix"></script>
+  <script src="./app.js?v=20260607-multi-essence-areas"></script>
 </body>
 </html>

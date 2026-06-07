@@ -219,6 +219,9 @@ const els = {
   reportOriginalMonster: document.querySelector("#reportOriginalMonster"),
   reportGrade: document.querySelector("#reportGrade"),
   reportFloor: document.querySelector("#reportFloor"),
+  reportAreaCandidate: document.querySelector("#reportAreaCandidate"),
+  reportAreaAdd: document.querySelector("#reportAreaAdd"),
+  reportAreaTags: document.querySelector("#reportAreaTags"),
   reportArea: document.querySelector("#reportArea"),
   reportSailing: document.querySelector("#reportSailing"),
   reportRecommendations: document.querySelectorAll(".report-recommendation"),
@@ -310,6 +313,9 @@ const els = {
   quickEditMonster: document.querySelector("#quickEditMonster"),
   quickEditGrade: document.querySelector("#quickEditGrade"),
   quickEditFloor: document.querySelector("#quickEditFloor"),
+  quickEditAreaCandidate: document.querySelector("#quickEditAreaCandidate"),
+  quickEditAreaAdd: document.querySelector("#quickEditAreaAdd"),
+  quickEditAreaTags: document.querySelector("#quickEditAreaTags"),
   quickEditArea: document.querySelector("#quickEditArea"),
   quickEditStats: document.querySelector("#quickEditStats"),
   quickEditPassive: document.querySelector("#quickEditPassive"),
@@ -800,17 +806,37 @@ function allConfiguredAreas() {
 function areaOptionsForFloor(floor, rows = []) {
   if (crackAreasByFloor[floor]) return crackAreasByFloor[floor];
   if (floor && floor !== "전체 층") {
-    return unique(rows.filter((row) => sameLocationName(row["층"], floor)).map((row) => row["구역"]));
+    const areas = [];
+    rows.filter((row) => sameLocationName(row["층"], floor)).forEach((row) => {
+      essenceAreaLabels(row["구역"]).forEach((area) => areas.push(area));
+    });
+    return unique(areas);
   }
-  return unique([...allConfiguredAreas(), ...rows.map((row) => row["구역"])]);
+  const rowAreas = [];
+  rows.forEach((row) => {
+    essenceAreaLabels(row["구역"]).forEach((area) => rowAreas.push(area));
+  });
+  return unique([...allConfiguredAreas(), ...rowAreas]);
 }
 
 function refreshEssenceAreaOptions() {
   optionList(els.area, areaOptionsForFloor(els.floor?.value, essenceRows), "전체 구역");
 }
 
+function essenceAreaLabels(value) {
+  return sourceAreaLabels(value);
+}
+
+function essenceAreaMatches(rowArea, area) {
+  return essenceAreaLabels(rowArea).some((item) => sameLocationName(item, area));
+}
+
 function refreshReportAreaOptions() {
-  placeholderOptionList(els.reportArea, areaOptionsForFloor(els.reportFloor?.value, essenceRows), "구역 선택");
+  const selected = selectedOptionValues(els.reportArea);
+  const options = areaOptionsForFloor(els.reportFloor?.value, essenceRows);
+  multiOptionList(els.reportArea, unique([...selected, ...options]));
+  optionList(els.reportAreaCandidate, options, "구역 선택");
+  renderReportAreaTags();
 }
 
 function sourceAreaLabels(source) {
@@ -910,6 +936,42 @@ function renderReportNumberSourceTags() {
       </button>
     `).join("")
     : `<span class="source-tag-empty">선택된 획득처가 없습니다.</span>`;
+}
+
+function addSelectedArea(select, candidate, tags) {
+  const value = textOf(candidate?.value);
+  if (!value || value === "구역 선택") return;
+  const selected = unique([...selectedOptionValues(select), value]);
+  multiOptionList(select, selected);
+  setSelectedOptionValues(select, selected);
+  renderAreaTags(select, tags);
+}
+
+function removeSelectedArea(select, tags, area) {
+  const selected = selectedOptionValues(select).filter((item) => item !== area);
+  multiOptionList(select, selected);
+  setSelectedOptionValues(select, selected);
+  renderAreaTags(select, tags);
+}
+
+function renderAreaTags(select, tags) {
+  if (!tags || !select) return;
+  const selected = selectedOptionValues(select);
+  tags.innerHTML = selected.length
+    ? selected.map((area) => `
+      <button type="button" class="source-tag" data-remove-area="${escapeHtml(area)}">
+        ${escapeHtml(area)} <span aria-hidden="true">×</span>
+      </button>
+    `).join("")
+    : `<span class="source-tag-empty">선택된 구역이 없습니다.</span>`;
+}
+
+function renderReportAreaTags() {
+  renderAreaTags(els.reportArea, els.reportAreaTags);
+}
+
+function renderQuickEditAreaTags() {
+  renderAreaTags(els.quickEditArea, els.quickEditAreaTags);
 }
 
 function escapeHtml(value) {
@@ -1358,6 +1420,16 @@ function initQuickEditModal() {
   placeholderOptionList(els.quickEditFloor, floorOptionValues(essenceRows), "층 선택");
   refreshQuickEditAreaOptions();
   els.quickEditFloor.addEventListener("change", refreshQuickEditAreaOptions);
+  els.quickEditAreaAdd?.addEventListener("click", () => addSelectedArea(els.quickEditArea, els.quickEditAreaCandidate, els.quickEditAreaTags));
+  els.quickEditAreaCandidate?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    addSelectedArea(els.quickEditArea, els.quickEditAreaCandidate, els.quickEditAreaTags);
+  });
+  els.quickEditAreaTags?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-area]");
+    if (button) removeSelectedArea(els.quickEditArea, els.quickEditAreaTags, button.dataset.removeArea);
+  });
   els.quickEditClose.addEventListener("click", closeQuickEditModal);
   els.quickEditModal.addEventListener("click", (event) => {
     if (event.target === els.quickEditModal) closeQuickEditModal();
@@ -1383,6 +1455,22 @@ function initReport() {
   els.reportMode.addEventListener("change", updateReportMode);
   els.reportModeCards?.addEventListener("click", handleReportModeCardClick);
   els.reportFloor.addEventListener("change", refreshReportAreaOptions);
+  els.reportAreaAdd?.addEventListener("click", () => {
+    addSelectedArea(els.reportArea, els.reportAreaCandidate, els.reportAreaTags);
+    renderReportPreview();
+  });
+  els.reportAreaCandidate?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    addSelectedArea(els.reportArea, els.reportAreaCandidate, els.reportAreaTags);
+    renderReportPreview();
+  });
+  els.reportAreaTags?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-area]");
+    if (!button) return;
+    removeSelectedArea(els.reportArea, els.reportAreaTags, button.dataset.removeArea);
+    renderReportPreview();
+  });
   els.reportNumberSourceFloor.addEventListener("change", refreshReportNumberSourceOptions);
   els.reportNumberSourceAdd?.addEventListener("click", addReportNumberSource);
   els.reportActiveAdd?.addEventListener("click", addReportActiveField);
@@ -3227,9 +3315,12 @@ function updateReportDataset() {
   document.querySelectorAll(".numbers-report-field").forEach((element) => {
     element.hidden = !numbersMode;
   });
-  [els.reportMonster, els.reportGrade, els.reportFloor, els.reportArea, els.reportStats, els.reportPassive].forEach((field) => {
+  [els.reportMonster, els.reportGrade, els.reportFloor, els.reportStats, els.reportPassive].forEach((field) => {
     field.required = !numbersMode;
     field.disabled = numbersMode;
+  });
+  [els.reportArea, els.reportAreaCandidate, els.reportAreaAdd].forEach((field) => {
+    if (field) field.disabled = numbersMode;
   });
   [...reportActiveFields(), els.reportSailing, ...els.reportRecommendations].forEach((field) => {
     field.disabled = numbersMode;
@@ -3371,7 +3462,10 @@ function fillReportFromRow(row) {
   els.reportGrade.value = normalizeGradeNumber(row["등급"]);
   els.reportFloor.value = textOf(row["층"]);
   refreshReportAreaOptions();
-  els.reportArea.value = textOf(row["구역"]);
+  const areas = essenceAreaLabels(row["구역"]);
+  multiOptionList(els.reportArea, unique([...areas, ...areaOptionsForFloor(els.reportFloor?.value, essenceRows)]));
+  setSelectedOptionValues(els.reportArea, areas);
+  renderReportAreaTags();
   els.reportStats.value = textOf(row["주요 스탯"]);
   els.reportPassive.value = textOf(row["패시브"]);
   els.reportSailing.checked = isSailingRow(row);
@@ -3435,7 +3529,11 @@ function quickEditActiveFields() {
 
 function refreshQuickEditAreaOptions() {
   if (!els.quickEditArea) return;
-  placeholderOptionList(els.quickEditArea, areaOptionsForFloor(els.quickEditFloor?.value, essenceRows), "구역 선택");
+  const selected = selectedOptionValues(els.quickEditArea);
+  const options = areaOptionsForFloor(els.quickEditFloor?.value, essenceRows);
+  multiOptionList(els.quickEditArea, unique([...selected, ...options]));
+  optionList(els.quickEditAreaCandidate, options, "구역 선택");
+  renderQuickEditAreaTags();
 }
 
 function openQuickEditModal(row) {
@@ -3445,7 +3543,10 @@ function openQuickEditModal(row) {
   els.quickEditGrade.value = textOf(row["등급"]);
   els.quickEditFloor.value = textOf(row["층"]);
   refreshQuickEditAreaOptions();
-  els.quickEditArea.value = textOf(row["구역"]);
+  const areas = essenceAreaLabels(row["구역"]);
+  multiOptionList(els.quickEditArea, unique([...areas, ...areaOptionsForFloor(els.quickEditFloor?.value, essenceRows)]));
+  setSelectedOptionValues(els.quickEditArea, areas);
+  renderQuickEditAreaTags();
   els.quickEditStats.value = textOf(row["주요 스탯"]);
   els.quickEditPassive.value = textOf(row["패시브"]);
   els.quickEditSailing.checked = isSailingRow(row);
@@ -3495,6 +3596,10 @@ function handleEssenceResultClick(event) {
 
 async function submitQuickEditReport(event) {
   event.preventDefault();
+  if (!selectedOptionValues(els.quickEditArea).length) {
+    els.quickEditStatus.textContent = "몬스터가 나오는 구역을 하나 이상 추가해주세요.";
+    return;
+  }
   const report = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: "edit",
@@ -3503,7 +3608,7 @@ async function submitQuickEditReport(event) {
     originalMonster: textOf(els.quickEditOriginalMonster.value),
     grade: textOf(els.quickEditGrade.value),
     floor: textOf(els.quickEditFloor.value),
-    area: textOf(els.quickEditArea.value),
+    area: selectedOptionValues(els.quickEditArea).join(", "),
     stats: textOf(els.quickEditStats.value),
     passive: textOf(els.quickEditPassive.value),
     sailing: Boolean(els.quickEditSailing.checked),
@@ -3585,7 +3690,7 @@ function reportCurrentEssenceValues() {
     "몬스터명": textOf(els.reportMonster.value),
     "등급": gradeLabelFromInput(els.reportGrade.value),
     "층": textOf(els.reportFloor.value),
-    "구역": textOf(els.reportArea.value),
+    "구역": selectedOptionValues(els.reportArea).join(", "),
     "스탯": textOf(els.reportStats.value),
     "패시브": textOf(els.reportPassive.value),
     "액티브": reportActiveFields().map((field) => textOf(field.value)).filter(Boolean).join(" / ") || "-",
@@ -3867,7 +3972,7 @@ function applyFilters(rows) {
   }
 
   if (els.area.value !== "전체 구역") {
-    rows = rows.filter(({ row }) => sameLocationName(row["구역"], els.area.value));
+    rows = rows.filter(({ row }) => essenceAreaMatches(row["구역"], els.area.value));
   }
 
   if (els.grade.value !== "전체 등급") {
@@ -4638,6 +4743,10 @@ async function submitReport(event) {
     setReportSyncStatus("수정/삭제할 기존 몬스터를 목록에서 먼저 선택해주세요.", "is-offline");
     return;
   }
+  if (!numbersMode && !selectedOptionValues(els.reportArea).length) {
+    setReportSyncStatus("몬스터가 나오는 구역을 하나 이상 추가해주세요.", "is-offline");
+    return;
+  }
   const report = numbersMode ? {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     mode: els.reportMode.value,
@@ -4660,7 +4769,7 @@ async function submitReport(event) {
     originalMonster: ["edit", "delete"].includes(els.reportMode.value) ? textOf(els.reportOriginalMonster.value) : "",
     grade: gradeLabelFromInput(els.reportGrade.value),
     floor: textOf(els.reportFloor.value),
-    area: textOf(els.reportArea.value),
+    area: selectedOptionValues(els.reportArea).join(", "),
     stats: els.reportMode.value === "delete" && !/삭제\s*요청/.test(textOf(els.reportStats.value))
       ? `[삭제 요청] ${textOf(els.reportOriginalMonster.value || els.reportMonster.value)} 정보를 삭제해주세요.`
       : textOf(els.reportStats.value),

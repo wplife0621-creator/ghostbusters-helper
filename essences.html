@@ -137,7 +137,13 @@
         </label>
         <label class="field">
           <span>구역</span>
-          <select id="quickEditArea" required></select>
+          <div class="source-add-row">
+            <select id="quickEditAreaCandidate"></select>
+            <button type="button" id="quickEditAreaAdd">추가</button>
+          </div>
+          <div id="quickEditAreaTags" class="source-tag-list" aria-live="polite"></div>
+          <select id="quickEditArea" multiple size="5" hidden></select>
+          <small class="field-hint">여러 출현 구역을 추가할 수 있습니다.</small>
         </label>
         <label class="field check-field">
           <span>항해 관련 정수</span>
@@ -206,7 +212,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-firebase-nickname-fix"></script>
-  <script src="./app.js?v=20260607-delete-apply-fix"></script>
+  <script src="./app.js?v=20260607-multi-essence-areas"></script>
   <script>
     (function () {
       function text(value) {
