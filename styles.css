@@ -1225,6 +1225,59 @@ select[multiple] option:checked {
   font-weight: 900;
 }
 
+.maze-log-rift-guide {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #cdd9ea;
+}
+
+.maze-log-rift-guide-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.maze-log-rift-guide-head p {
+  margin: 0;
+  color: #60708a;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.maze-log-rift-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.maze-log-rift-grid span {
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  padding: 10px;
+  border: 1px solid #dce6f4;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f7ff 100%);
+}
+
+.maze-log-rift-grid b {
+  color: #18324f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.maze-log-rift-grid em {
+  color: #164fb0;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
 .maze-log-sheet-bar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -10721,6 +10774,19 @@ body.admin-review-page #adminSiteStats {
     min-height: 0;
   }
 
+  .maze-log-rift-guide-head {
+    display: grid;
+    gap: 4px;
+  }
+
+  .maze-log-rift-guide-head p {
+    text-align: left;
+  }
+
+  .maze-log-rift-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .maze-log-sheet-bar {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -10902,5 +10968,9 @@ body.admin-review-page #adminSiteStats {
 
   .maze-log-actions .primary-action {
     grid-column: auto;
+  }
+
+  .maze-log-rift-grid {
+    grid-template-columns: 1fr;
   }
 }
