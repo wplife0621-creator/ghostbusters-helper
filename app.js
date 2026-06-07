@@ -1613,7 +1613,6 @@ function activeSkillsForEssence(name) {
 }
 
 const activeColorPattern = /^\(?\s*(빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|보라|보라색|검정|검은색|갈색|무색|백색|흰색|황금|금색)\s*\)?\s*(?:-|:|：|\)|\s+)\s*/;
-const activeColorSegmentPattern = /[,，]\s*(?=\(?\s*(?:빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|보라|보라색|검정|검은색|갈색|무색|백색|흰색|황금|금색)\s*\)?\s*(?:-|:|：|\)|\s+))/;
 const activeColorAliases = {
   빨간색: "빨강",
   주황색: "주황",
@@ -4109,12 +4108,32 @@ function skillNameMarkup(value, options = {}) {
 function splitSkills(value) {
   const skills = [];
   textOf(value).split(/\r?\n+/).forEach((line) => {
-    line.split(activeColorSegmentPattern).forEach((skill) => {
+    splitActiveSkillLine(line).forEach((skill) => {
       const trimmed = skill.trim();
       if (trimmed && trimmed !== "-") skills.push(trimmed);
     });
   });
   return skills;
+}
+
+function splitActiveSkillLine(line) {
+  const parts = textOf(line).split(/[,，]/);
+  if (parts.length <= 1) return [line];
+  const result = [];
+  parts.forEach((part) => {
+    const trimmed = part.trim();
+    if (!trimmed) return;
+    if (result.length && activeSkillColor(trimmed)) {
+      result.push(trimmed);
+      return;
+    }
+    if (!result.length) {
+      result.push(trimmed);
+      return;
+    }
+    result[result.length - 1] = `${result[result.length - 1]}, ${trimmed}`;
+  });
+  return result;
 }
 
 function renderNumbers() {
