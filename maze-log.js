@@ -1,5 +1,6 @@
 const MAZE_LOG_STORAGE_KEY = "dukhubusters.mazeLog.v1";
 const MAZE_LOG_CUSTOM_FLOORS_KEY = "dukhubusters.mazeLog.customFloors.v1";
+const MAZE_LOG_START_DAY_KEY = "dukhubusters.mazeLog.startDay.v1";
 
 const DEFAULT_MAZE_FLOORS = [
   {
@@ -65,7 +66,8 @@ const mazeLogEls = {
   totalRounds: document.querySelector("#mazeLogTotalRounds"),
   latestDay: document.querySelector("#mazeLogLatestDay"),
   specialCount: document.querySelector("#mazeLogSpecialCount"),
-  settingsToggle: document.querySelector("#mazeLogSettingsToggle"),
+  startDay: document.querySelector("#mazeLogStartDay"),
+  startSave: document.querySelector("#mazeLogStartSave"),
   settings: document.querySelector("#mazeLogSettings"),
   settingsForm: document.querySelector("#mazeLogSettingsForm"),
   customFloor: document.querySelector("#mazeLogCustomFloor"),
@@ -84,6 +86,7 @@ const mazeLogEls = {
 };
 
 let customFloorSettings = loadCustomFloorSettings();
+let mazeLogStartDay = loadStartDay();
 let mazeLogEntries = loadMazeLog();
 
 function activeMazeFloors() {
@@ -122,6 +125,11 @@ function splitList(value) {
     .filter(Boolean);
 }
 
+function normalizeDay(value) {
+  const day = Math.max(10, Math.floor(Number(value || 10) / 10) * 10);
+  return Number.isFinite(day) ? day : 10;
+}
+
 function createEmptyFloor(config) {
   const specials = {};
   (config.specialSpawns || []).forEach((name) => {
@@ -138,11 +146,12 @@ function createEmptyFloor(config) {
   };
 }
 
-function createEmptyEntry(roundNumber) {
+function createEmptyEntry(day) {
+  const normalizedDay = normalizeDay(day);
   return {
     id: `maze-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    round: roundNumber,
-    day: roundNumber * 10,
+    round: normalizedDay / 10,
+    day: normalizedDay,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     floors: activeMazeFloors().map(createEmptyFloor),
@@ -204,6 +213,22 @@ function loadCustomFloorSettings() {
 
 function saveCustomFloorSettings() {
   localStorage.setItem(MAZE_LOG_CUSTOM_FLOORS_KEY, JSON.stringify(customFloorSettings));
+}
+
+function loadStartDay() {
+  try {
+    return normalizeDay(localStorage.getItem(MAZE_LOG_START_DAY_KEY) || 10);
+  } catch (error) {
+    console.warn("Failed to load maze start day", error);
+    return 10;
+  }
+}
+
+function saveStartDay() {
+  mazeLogStartDay = normalizeDay(mazeLogEls.startDay?.value || 10);
+  localStorage.setItem(MAZE_LOG_START_DAY_KEY, String(mazeLogStartDay));
+  if (mazeLogEls.startDay) mazeLogEls.startDay.value = String(mazeLogStartDay);
+  setStatus(`${mazeLogStartDay}일부터 기록을 시작하도록 저장했습니다.`, "ok");
 }
 
 function loadMazeLog() {
@@ -275,10 +300,25 @@ function updateSummary() {
   if (mazeLogEls.specialCount) mazeLogEls.specialCount.textContent = String(countSpecialSpawns());
 }
 
+function openSettingsPanel() {
+  if (!mazeLogEls.settings) return;
+  mazeLogEls.settings.hidden = false;
+  mazeLogEls.settings.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+}
+
 function renderTableHead() {
   if (!mazeLogEls.head) return;
   const floorHeaders = activeMazeFloors().map((config) => `<th>${escapeHtml(config.label)}</th>`).join("");
-  mazeLogEls.head.innerHTML = `<tr><th>회차</th>${floorHeaders}<th>관리</th></tr>`;
+  mazeLogEls.head.innerHTML = `
+    <tr>
+      <th>회차</th>
+      ${floorHeaders}
+      <th class="maze-log-manage-head">
+        <span>관리</span>
+        <button type="button" class="maze-log-column-add" aria-label="항목 추가">+</button>
+      </th>
+    </tr>
+  `;
 }
 
 function renderMazeLog() {
@@ -318,13 +358,13 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function nextRoundNumber() {
-  const maxRound = mazeLogEntries.reduce((max, entry) => Math.max(max, Number(entry.round || 0)), 0);
-  return maxRound + 1;
+function nextRoundDay() {
+  const maxDay = mazeLogEntries.reduce((max, entry) => Math.max(max, Number(entry.day || 0)), 0);
+  return Math.max(maxDay + 10, mazeLogStartDay);
 }
 
 function addRound() {
-  const entry = createEmptyEntry(nextRoundNumber());
+  const entry = createEmptyEntry(nextRoundDay());
   mazeLogEntries.push(entry);
   mazeLogEntries.sort((a, b) => a.day - b.day);
   saveMazeLog();
@@ -532,15 +572,16 @@ function removeCustomFloor() {
 }
 
 function initMazeLog() {
+  if (mazeLogEls.startDay) mazeLogEls.startDay.value = String(mazeLogStartDay);
   renderSettingsFields();
   renderMazeLog();
   mazeLogEls.add?.addEventListener("click", addRound);
   mazeLogEls.export?.addEventListener("click", exportMazeLog);
   mazeLogEls.import?.addEventListener("click", () => mazeLogEls.importFile?.click());
   mazeLogEls.importFile?.addEventListener("change", (event) => importMazeLogFile(event.target.files?.[0]));
-  mazeLogEls.settingsToggle?.addEventListener("click", () => {
-    if (!mazeLogEls.settings) return;
-    mazeLogEls.settings.hidden = !mazeLogEls.settings.hidden;
+  mazeLogEls.startSave?.addEventListener("click", saveStartDay);
+  mazeLogEls.head?.addEventListener("click", (event) => {
+    if (event.target.closest(".maze-log-column-add")) openSettingsPanel();
   });
   mazeLogEls.customFloor?.addEventListener("change", renderSettingsFields);
   mazeLogEls.settingsForm?.addEventListener("submit", saveCustomFloor);
