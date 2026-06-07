@@ -828,7 +828,7 @@ async function submitPost(event) {
     media: [...keptMedia],
     views: previous?.views || 0,
     commentCount: previous?.commentCount || 0,
-    password: previous?.password || await makePasswordRecord(fields.password.value),
+    password: previous?.password || (fields.password.value ? await makePasswordRecord(fields.password.value) : null),
     createdAt: previous?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -1243,9 +1243,10 @@ async function startEdit(post) {
   fields.author.value = post.author === "익명" ? "" : post.author;
   fields.category.value = post.category || "일반";
   fields.password.value = "";
-  fields.password.required = !post.password;
-  fields.password.disabled = Boolean(post.password);
-  fields.password.placeholder = post.password ? "기존 비밀번호 유지" : "4자 이상 입력";
+  const adminEditing = isAdminUser();
+  fields.password.required = !adminEditing && !post.password;
+  fields.password.disabled = adminEditing || Boolean(post.password);
+  fields.password.placeholder = adminEditing ? "관리자는 비밀번호 없이 수정 가능" : post.password ? "기존 비밀번호 유지" : "4자 이상 입력";
   retainedMedia = preparedMedia(post.media);
   fillComposer(post.content, retainedMedia);
   fields.submit.textContent = "수정 완료";

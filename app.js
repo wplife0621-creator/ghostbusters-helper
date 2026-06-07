@@ -127,6 +127,14 @@ const effectSortDefinitions = {
       /([+-]?\d+(?:\.\d+)?)\s*초[^/\n]*감전/i,
     ],
   },
+  continuous: {
+    label: "연속",
+    pattern: /연속/i,
+    scorePatterns: [
+      /연속\s*([+-]?\d+(?:\.\d+)?)\s*(?:회|번|타|초)?/i,
+      /([+-]?\d+(?:\.\d+)?)\s*(?:회|번|타|초)?\s*연속/i,
+    ],
+  },
   vision: {
     label: "시야",
     pattern: /시야/i,
@@ -449,6 +457,10 @@ function monsterKey(value) {
   return textOf(value).toLowerCase();
 }
 
+function compactSearchText(value) {
+  return textOf(value).toLowerCase().replace(/\s+/g, "");
+}
+
 function isPinnedEssence(row) {
   return pinnedEssenceNames.map(monsterKey).includes(monsterKey(row?.["몬스터"]));
 }
@@ -512,6 +524,16 @@ function normalizeNumberCode(value) {
   if (!match) return "";
   const number = Number(match[0]);
   return number >= 0 && number <= 9999 ? String(number) : "";
+}
+
+function normalizeGradeNumber(value) {
+  const match = textOf(value).match(/\d+/);
+  return match ? match[0] : "";
+}
+
+function gradeLabelFromInput(value) {
+  const grade = normalizeGradeNumber(value);
+  return grade ? `${grade}등급` : "";
 }
 
 function hasConfirmedNumber(value) {
@@ -3271,7 +3293,7 @@ function fillReportFromRow(row) {
   if (!row) return;
   els.reportOriginalMonster.value = textOf(row["몬스터"]);
   els.reportMonster.value = textOf(row["몬스터"]);
-  els.reportGrade.value = textOf(row["등급"]);
+  els.reportGrade.value = normalizeGradeNumber(row["등급"]);
   els.reportFloor.value = textOf(row["층"]);
   refreshReportAreaOptions();
   els.reportArea.value = textOf(row["구역"]);
@@ -3486,7 +3508,7 @@ function fillDeleteNumberFromRow(row) {
 function reportCurrentEssenceValues() {
   return {
     "몬스터명": textOf(els.reportMonster.value),
-    "등급": textOf(els.reportGrade.value),
+    "등급": gradeLabelFromInput(els.reportGrade.value),
     "층": textOf(els.reportFloor.value),
     "구역": textOf(els.reportArea.value),
     "스탯": textOf(els.reportStats.value),
@@ -3755,7 +3777,7 @@ function collectEssenceRows() {
 }
 
 function applyFilters(rows) {
-  const query = textOf(els.search.value).toLowerCase();
+  const query = compactSearchText(els.search.value);
 
   if (els.floor.value !== "전체 층") {
     rows = rows.filter(({ row }) => sameLocationName(row["층"], els.floor.value));
@@ -3783,7 +3805,7 @@ function applyFilters(rows) {
   }
 
   if (query) {
-    rows = rows.filter(({ row }) => Object.values(row).join(" ").toLowerCase().includes(query));
+    rows = rows.filter(({ row }) => compactSearchText(row["몬스터"]).includes(query));
   }
 
   return rows;
@@ -4514,7 +4536,7 @@ async function submitReport(event) {
     authorNickname,
     monster: textOf(els.reportMonster.value),
     originalMonster: ["edit", "delete"].includes(els.reportMode.value) ? textOf(els.reportOriginalMonster.value) : "",
-    grade: textOf(els.reportGrade.value),
+    grade: gradeLabelFromInput(els.reportGrade.value),
     floor: textOf(els.reportFloor.value),
     area: textOf(els.reportArea.value),
     stats: textOf(els.reportStats.value),

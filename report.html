@@ -83,7 +83,7 @@
         </label>
         <label class="field essence-report-field report-short-field">
           <span>등급</span>
-          <input id="reportGrade" required placeholder="예: 6등급">
+          <input id="reportGrade" required type="number" min="1" max="99" inputmode="numeric" placeholder="예: 6">
         </label>
         <label class="field essence-report-field report-short-field">
           <span>층</span>
@@ -240,6 +240,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-login-fix"></script>
-  <script src="./app.js?v=20260607-report-ux-cards"></script>
+  <script src="./app.js?v=20260607-admin-search-grade"></script>
 </body>
 </html>
