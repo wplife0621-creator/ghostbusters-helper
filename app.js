@@ -1972,8 +1972,14 @@ function parseBuildMarkerNote(note) {
   }
 }
 
-function collectPublicBuildRows(rows) {
+function visiblePublicBuilds(rows, deletedIds) {
+  return rows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build) && !isBuildDelete(build) && !isBuildRestore(build)
+    && !isBuildReview(build) && !isBuildReport(build) && !deletedIds.has(build.id));
+}
+
+function collectPublicBuildRows(rows, options = {}) {
   const normalizedRows = rows.map(normalizeRemoteBuild);
+  const previousBuilds = options.keepLocal === false ? [] : savedBuilds;
   buildLikes = new Map();
   buildLikeRecordIds = new Set();
   buildReviews = new Map();
@@ -1998,8 +2004,10 @@ function collectPublicBuildRows(rows) {
     buildReviews.set(buildId, list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)));
   });
   const deletedIds = deletedBuildIdSet(normalizedRows);
-  savedBuilds = normalizedRows.filter((build) => !isVisitorBuild(build) && !isBuildLike(build) && !isBuildDelete(build) && !isBuildRestore(build)
-    && !isBuildReview(build) && !isBuildReport(build) && !deletedIds.has(build.id));
+  const merged = new Map();
+  visiblePublicBuilds(previousBuilds, deletedIds).forEach((build) => merged.set(build.id, build));
+  visiblePublicBuilds(normalizedRows, deletedIds).forEach((build) => merged.set(build.id, build));
+  savedBuilds = [...merged.values()].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
 
 function prependBuild(build) {
