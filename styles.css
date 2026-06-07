@@ -2139,8 +2139,8 @@ select[multiple] option:checked {
 }
 
 .guide-inline-media {
-  margin: 18px auto;
-  width: min(100%, 860px);
+  margin: 22px auto;
+  width: min(100%, 1080px);
 }
 
 .guide-inline-media img,
@@ -2148,10 +2148,18 @@ select[multiple] option:checked {
 .guide-inline-media iframe {
   display: block;
   width: 100%;
-  max-height: min(72vh, 720px);
   border-radius: 9px;
   background: #101827;
   object-fit: contain;
+}
+
+.guide-inline-media img {
+  max-height: min(86vh, 980px);
+}
+
+.guide-inline-media video,
+.guide-inline-media iframe {
+  max-height: min(72vh, 720px);
 }
 
 .guide-viewer .guide-gallery {
@@ -2403,8 +2411,8 @@ select[multiple] option:checked {
 .guide-composer-media video,
 .guide-composer-media iframe {
   display: block;
-  width: min(100%, 720px);
-  max-height: 380px;
+  width: min(100%, 920px);
+  max-height: 560px;
   border-radius: 8px;
   background: #101827;
   object-fit: contain;
@@ -6365,7 +6373,8 @@ body::after {
   }
 
   .guide-inline-media {
-    margin: 14px 0;
+    margin: 16px -2px;
+    width: calc(100% + 4px);
   }
 
   .guide-inline-media img,
