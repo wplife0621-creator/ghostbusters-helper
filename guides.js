@@ -97,7 +97,7 @@ function configureMediaInputMode() {
   }
   if (fields.media) fields.media.disabled = true;
   fields.media?.closest(".guide-insert-media")?.classList.add("is-disabled");
-  if (fields.mediaHint) fields.mediaHint.textContent = "영상은 유튜브에 올린 뒤 링크를 넣어주세요. 유튜브 링크는 본문 원하는 위치에 크게 임베드됩니다.";
+  if (fields.mediaHint) fields.mediaHint.textContent = "이미지는 이미지 주소를 넣고, 영상은 유튜브 링크나 동영상 파일 주소를 넣어주세요. 유튜브 링크는 본문 원하는 위치에 크게 임베드됩니다.";
 }
 
 function hasPublicStore() {
@@ -758,7 +758,7 @@ function insertMediaUrl() {
   } catch (error) {
     const message = error.message === "bad-url"
       ? "https://로 시작하는 주소를 입력해주세요."
-      : "이미지, 동영상 파일 주소 또는 유튜브 링크만 넣을 수 있습니다.";
+      : "이미지는 이미지 주소, 영상은 유튜브 링크 또는 동영상 파일 주소만 넣을 수 있습니다.";
     setStatus(message, "is-offline");
   }
 }
