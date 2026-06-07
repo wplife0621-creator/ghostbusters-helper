@@ -1245,7 +1245,7 @@ select[multiple] option:checked {
 
 .maze-log-table {
   width: 100%;
-  min-width: 1120px;
+  min-width: 860px;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;
@@ -1260,6 +1260,17 @@ select[multiple] option:checked {
   line-height: 1.45;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.maze-log-floor-cell {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.maze-log-floor-cell.is-empty {
+  color: #9aa6b8;
+  text-align: center;
 }
 
 .maze-log-table thead th {
@@ -1430,6 +1441,87 @@ select[multiple] option:checked {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
+}
+
+.maze-log-settings {
+  margin-top: 14px;
+  border: 1px solid #d8e4f4;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(31, 111, 235, 0.08), transparent 40%),
+    #fbfdff;
+  padding: 14px;
+}
+
+.maze-log-settings[hidden] {
+  display: none;
+}
+
+.maze-log-settings-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.maze-log-settings-head strong {
+  display: block;
+  color: #16243a;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.maze-log-settings-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.maze-log-settings-form {
+  display: grid;
+  grid-template-columns: 130px 180px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+.maze-log-settings-wide {
+  min-width: 0;
+}
+
+.maze-log-settings-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.maze-log-settings-actions button {
+  min-height: 38px;
+  border: 1px solid #cdd9ea;
+  border-radius: 999px;
+  background: #fff;
+  color: #20304a;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 0 15px;
+}
+
+.maze-log-floor-card.is-custom summary {
+  background: linear-gradient(90deg, #fff7e6 0%, #eef5ff 100%);
+}
+
+.maze-log-floor-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  border: 1px dashed #d8c49c;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #74552f;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 10px;
 }
 
 .stat-panel {
@@ -10280,6 +10372,15 @@ body.admin-review-page #adminSiteStats {
 
   .maze-log-actions .primary-action {
     grid-column: 1 / -1;
+  }
+
+  .maze-log-settings-form {
+    grid-template-columns: 1fr;
+  }
+
+  .maze-log-settings-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .maze-log-table-wrap {

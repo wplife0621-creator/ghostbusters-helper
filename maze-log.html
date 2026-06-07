@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>미궁 일지 · 겜바바 버스터즈</title>
-  <meta name="description" content="10일 단위로 미궁 균열, 봉헌 사용, 특수 몬스터 젠 여부를 기록하는 겜바바 버스터즈 미궁 일지입니다.">
+  <meta name="description" content="10일 단위로 미궁 균열, 봉헌 사용, 특수 몬스터 젠 여부를 기록하고 7층 이후는 개인 설정으로 확장할 수 있는 겜바바 버스터즈 미궁 일지입니다.">
   <link rel="canonical" href="https://busters.kr/maze-log.html">
   <meta property="og:title" content="미궁 일지 · 겜바바 버스터즈">
   <meta property="og:site_name" content="겜바바 버스터즈">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://busters.kr/maze-log.html">
-  <meta property="og:description" content="10일 단위로 미궁 균열과 특수 몬스터 젠 기록을 브라우저에 저장해 관리하세요.">
+  <meta property="og:description" content="10일 단위로 미궁 균열과 특수 몬스터 젠 기록을 브라우저에 저장하고, 7층 이후는 개인 설정으로 확장하세요.">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="미궁 일지 · 겜바바 버스터즈">
-  <meta name="twitter:description" content="10일 단위 미궁 균열, 봉헌, 밀라로돈, 베르타스 젠 기록 도구입니다.">
-  <link rel="stylesheet" href="./styles.css?v=20260607-maze-log">
+  <meta name="twitter:description" content="10일 단위 미궁 균열, 봉헌, 밀라로돈, 베르타스 젠 기록과 7층 이후 개인 설정 도구입니다.">
+  <link rel="stylesheet" href="./styles.css?v=20260607-maze-log-custom">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
@@ -46,7 +46,7 @@
       <div>
         <p class="home-kicker">MAZE JOURNAL</p>
         <h2>10일 단위로 쌓는 미궁 기록</h2>
-        <p>미궁 1회 진입을 10일 단위로 보고, 각 회차별 균열 출현과 1층 봉헌 사용, 5층 특수 몬스터 젠 여부를 기록합니다. 기록은 기본적으로 이 기기의 브라우저에만 저장되어 서버 부담이 없습니다.</p>
+        <p>미궁 1회 진입을 10일 단위로 보고, 각 회차별 균열 출현과 1층 봉헌 사용, 5층 특수 몬스터 젠 여부를 기록합니다. 현재 공개된 1~6층은 기본 제공하고, 7층 이후는 개인 설정으로 필요한 항목만 추가할 수 있습니다.</p>
       </div>
       <div class="maze-log-summary" aria-label="미궁 일지 요약">
         <span>총 회차 <strong id="mazeLogTotalRounds">0</strong></span>
@@ -58,41 +58,62 @@
     <section class="panel maze-log-tools" aria-label="미궁 일지 도구">
       <div class="maze-log-actions">
         <button type="button" class="primary-action" id="mazeLogAdd">+ 10일 추가</button>
+        <button type="button" id="mazeLogSettingsToggle">7층 이후 개인 설정</button>
         <button type="button" id="mazeLogExport">백업하기</button>
         <button type="button" id="mazeLogImport">불러오기</button>
         <input id="mazeLogImportFile" type="file" accept="application/json,.json" hidden>
       </div>
       <p id="mazeLogStatus" class="maze-log-status">기록은 자동으로 이 브라우저에 저장됩니다.</p>
+      <div class="maze-log-settings" id="mazeLogSettings" hidden>
+        <div class="maze-log-settings-head">
+          <div>
+            <strong>7층 이후 개인 설정</strong>
+            <p>게임 업데이트로 7~10층 정보가 생기면 여기에서 직접 열 이름, 균열, 특수 젠 항목을 추가하세요.</p>
+          </div>
+        </div>
+        <form id="mazeLogSettingsForm" class="maze-log-settings-form">
+          <label class="field">
+            <span>설정할 층</span>
+            <select id="mazeLogCustomFloor">
+              <option value="7">7층</option>
+              <option value="8">8층</option>
+              <option value="9">9층</option>
+              <option value="10">10층</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>표시 이름</span>
+            <input id="mazeLogCustomLabel" type="text" placeholder="예: 7층">
+          </label>
+          <label class="field maze-log-settings-wide">
+            <span>균열 목록</span>
+            <input id="mazeLogCustomRifts" type="text" placeholder="쉼표로 구분, 예: 새 균열, 숨겨진 성소">
+          </label>
+          <label class="field maze-log-settings-wide">
+            <span>특수 젠 항목</span>
+            <input id="mazeLogCustomSpecials" type="text" placeholder="쉼표로 구분, 예: 특수 보스, 희귀 몬스터">
+          </label>
+          <div class="maze-log-settings-actions">
+            <button type="button" id="mazeLogCustomRemove">이 층 숨기기</button>
+            <button type="submit" class="primary-action">설정 저장</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="panel maze-log-panel" aria-label="미궁 일지 표">
       <div class="section-title compact-title">
         <div>
           <h2>회차별 기록</h2>
-          <p>행을 누르면 1층부터 10층까지 상세 기록을 수정할 수 있습니다.</p>
+          <p>기본은 1~6층만 표시합니다. 7층 이후는 개인 설정에서 추가한 층만 표에 나타납니다.</p>
         </div>
       </div>
       <div class="maze-log-table-wrap">
         <table class="maze-log-table">
-          <thead>
-            <tr>
-              <th>회차</th>
-              <th>1층</th>
-              <th>2층</th>
-              <th>3층</th>
-              <th>4층</th>
-              <th>5층</th>
-              <th>6층</th>
-              <th>7층</th>
-              <th>8층</th>
-              <th>9층</th>
-              <th>10층</th>
-              <th>관리</th>
-            </tr>
-          </thead>
+          <thead id="mazeLogHead"></thead>
           <tbody id="mazeLogRows">
             <tr>
-              <td colspan="12" class="maze-log-empty">아직 기록이 없습니다. + 10일 추가를 눌러 시작하세요.</td>
+              <td class="maze-log-empty">아직 기록이 없습니다. + 10일 추가를 눌러 시작하세요.</td>
             </tr>
           </tbody>
         </table>
@@ -127,6 +148,6 @@
     </div>
   </div>
 
-  <script src="./maze-log.js?v=20260607-maze-log"></script>
+  <script src="./maze-log.js?v=20260607-maze-log-custom"></script>
 </body>
 </html>
