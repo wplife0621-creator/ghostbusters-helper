@@ -512,7 +512,7 @@ function visibleReportName(report) {
 }
 
 function reportModeLabel(report) {
-  if (report?.mode === "delete") return "삭제";
+  if (isDeleteReport(report)) return "삭제";
   if (report?.mode === "edit") return "수정";
   return "신규";
 }
@@ -609,7 +609,15 @@ function numbersReportToRow(report) {
 
 function isNumbersDeleteReport(report) {
   const skills = splitSkills(report?.active || "");
-  return report?.mode === "delete" || skills.includes(numbersDeleteMarker) || skills.includes(reportDeleteMarker);
+  return isDeleteReport(report);
+}
+
+function isDeleteReport(report) {
+  const skills = splitSkills(report?.active || "");
+  return report?.mode === "delete"
+    || skills.includes(numbersDeleteMarker)
+    || skills.includes(reportDeleteMarker)
+    || /^\[(삭제\s*요청|관리자\s*삭제)\]/.test(textOf(report?.stats));
 }
 
 function mergeNumbersRows(baseRows, reports) {
@@ -4401,7 +4409,7 @@ async function loadPublicReports() {
 async function savePublicReport(report) {
   const payload = {
     id: report.id,
-    mode: report.mode === "delete" ? "edit" : report.mode,
+    mode: report.mode,
     monster: report.monster,
     original_monster: report.originalMonster || "",
     grade: report.grade,
@@ -4436,7 +4444,7 @@ async function savePublicReport(report) {
 async function saveApprovedNumberDeleteReport(report) {
   const payload = {
     id: report.id,
-    mode: "edit",
+    mode: report.mode,
     monster: report.monster,
     original_monster: report.originalMonster || "",
     grade: report.grade,
@@ -4611,7 +4619,7 @@ async function handlePendingAction(event) {
   saveStoredRows(storageKeys.pending, pendingReports);
 
   if (button.dataset.action === "approve") {
-    const approvedReport = { ...report, status: "approved", reviewedAt: new Date().toISOString() };
+    const approvedReport = { ...report, mode: isDeleteReport(report) ? "delete" : report.mode, status: "approved", reviewedAt: new Date().toISOString() };
     approvedReportItems = sortReportsByDate([approvedReport, ...approvedReportItems.filter((item) => item.id !== id)]);
     syncApprovedRows();
     if (els.search) {
@@ -4646,7 +4654,7 @@ function renderPendingReports() {
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
         <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
         <div class="pending-actions">
-          <button type="button" data-action="approve">${report.mode === "delete" ? "삭제 승인" : "승인해서 추가"}</button>
+          <button type="button" data-action="approve">${isDeleteReport(report) ? "삭제 승인" : "승인해서 추가"}</button>
           <button type="button" data-action="reject">반려</button>
         </div>
       </article>
@@ -4654,14 +4662,14 @@ function renderPendingReports() {
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "delete" ? `삭제 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
+          <span>${isDeleteReport(report) ? `삭제 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
         <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active)}</p>
         <div class="pending-actions">
-          <button type="button" data-action="approve">${report.mode === "delete" ? "삭제 승인" : "승인해서 추가"}</button>
+          <button type="button" data-action="approve">${isDeleteReport(report) ? "삭제 승인" : "승인해서 추가"}</button>
           <button type="button" data-action="reject">반려</button>
         </div>
       </article>
@@ -4683,7 +4691,7 @@ function renderMyReports() {
   }
   const rows = [
     ...pendingReports.map((report) => ({ ...report, _statusLabel: "검수 대기" })),
-    ...approvedReportItems.map((report) => ({ ...report, _statusLabel: report.mode === "delete" ? "삭제 승인" : "승인 완료" })),
+    ...approvedReportItems.map((report) => ({ ...report, _statusLabel: isDeleteReport(report) ? "삭제 승인" : "승인 완료" })),
   ]
     .filter((report) => textOf(report.authorNickname) === nickname)
     .sort((a, b) => new Date(b.createdAt || b.reviewedAt || 0) - new Date(a.createdAt || a.reviewedAt || 0));
@@ -4741,7 +4749,7 @@ function renderApprovedReports() {
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
-          <span>${report.mode === "delete" ? "삭제 승인" : report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+          <span>${isDeleteReport(report) ? "삭제 승인" : report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
@@ -4754,7 +4762,7 @@ function renderApprovedReports() {
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "delete" ? `삭제 승인 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
+          <span>${isDeleteReport(report) ? `삭제 승인 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
