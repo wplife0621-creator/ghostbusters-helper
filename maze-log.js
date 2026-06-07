@@ -150,6 +150,13 @@ function normalizeDay(value) {
   return Number.isFinite(day) ? day : 10;
 }
 
+function clampNumberInput(value, min, max) {
+  if (value === "" || value == null) return "";
+  const number = Math.floor(Number(value));
+  if (!Number.isFinite(number)) return "";
+  return String(Math.min(Math.max(number, min), max));
+}
+
 function createEmptyFloor(config) {
   const specials = {};
   (config.specialSpawns || []).forEach((name) => {
@@ -647,7 +654,7 @@ function renderFloorEditor(entry, config) {
         </label>
         <label class="field">
           <span>균열 일</span>
-          <input type="number" min="1" max="10" step="1" data-appeared-day value="${escapeHtml(floor.appearedDay || "")}" placeholder="1~10">
+          <input type="number" min="1" max="999" step="1" data-appeared-day value="${escapeHtml(floor.appearedDay || "")}" placeholder="1~999">
         </label>
         <label class="field">
           <span>균열 시</span>
@@ -683,8 +690,8 @@ function readEditorEntry() {
       floor: config.floor,
       riftAppeared: Boolean(card.querySelector("[data-rift-appeared]")?.checked),
       riftName: card.querySelector("[data-rift-name]")?.value || "",
-      appearedDay: card.querySelector("[data-appeared-day]")?.value || "",
-      appearedHour: card.querySelector("[data-appeared-hour]")?.value || "",
+      appearedDay: clampNumberInput(card.querySelector("[data-appeared-day]")?.value, 1, 999),
+      appearedHour: clampNumberInput(card.querySelector("[data-appeared-hour]")?.value, 0, 23),
       offeringUsed: Boolean(card.querySelector("[data-offering]")?.checked),
       specialSpawns,
       memo: card.querySelector("[data-memo]")?.value.trim() || "",
