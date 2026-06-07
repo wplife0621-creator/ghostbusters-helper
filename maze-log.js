@@ -388,8 +388,16 @@ function saveStartDay() {
   mazeLogStartDay = normalizeDay(mazeLogEls.startDay?.value || 10);
   localStorage.setItem(MAZE_LOG_START_DAY_KEY, String(mazeLogStartDay));
   if (mazeLogEls.startDay) mazeLogEls.startDay.value = String(mazeLogStartDay);
+  const removed = pruneEmptyEntriesBeforeStartDay();
   syncActiveSheet();
-  setStatus(`${mazeLogStartDay}일부터 기록을 시작하도록 저장했습니다.`, "ok");
+  renderSheetTabs();
+  renderMazeLog();
+  setStatus(
+    removed
+      ? `${mazeLogStartDay}일부터 시작하도록 저장하고, 비어 있던 이전 회차 ${removed}개를 정리했습니다.`
+      : `${mazeLogStartDay}일부터 기록을 시작하도록 저장했습니다.`,
+    "ok"
+  );
 }
 
 function loadMazeLog() {
@@ -444,6 +452,26 @@ function floorSummary(entry, config) {
   });
   if (floor.memo) parts.push(floor.memo);
   return parts.length ? parts.join(" · ") : "-";
+}
+
+function isEmptyFloorRecord(floor) {
+  return !floor?.riftAppeared
+    && !floor?.riftName
+    && !floor?.appearedDay
+    && !floor?.appearedHour
+    && !floor?.offeringUsed
+    && !floor?.memo
+    && !Object.values(floor?.specialSpawns || {}).some(Boolean);
+}
+
+function isEmptyEntry(entry) {
+  return (entry?.floors || []).every(isEmptyFloorRecord);
+}
+
+function pruneEmptyEntriesBeforeStartDay() {
+  const before = mazeLogEntries.length;
+  mazeLogEntries = mazeLogEntries.filter((entry) => Number(entry.day || 0) >= mazeLogStartDay || !isEmptyEntry(entry));
+  return before - mazeLogEntries.length;
 }
 
 function countSpecialSpawns() {
