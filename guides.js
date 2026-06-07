@@ -466,6 +466,29 @@ function sortPosts(rows) {
   return rows.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 }
 
+function mergeRowsById(...groups) {
+  const merged = new Map();
+  groups.forEach((group) => {
+    (Array.isArray(group) ? group : []).forEach((row) => {
+      if (!row) return;
+      const id = String(row.id || "").trim();
+      if (!id) return;
+      merged.set(id, { ...(merged.get(id) || {}), ...row });
+    });
+  });
+  return [...merged.values()];
+}
+
+function applyGuideRows(rows) {
+  comments = rows.filter(isStoredComment).map(normalizeComment);
+  posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row) && !isStoredReport(row)).map(normalizePost));
+  loadLikeCounts(rows);
+  loadCommentCounts();
+  renderPosts();
+  markLikedPostsForVisitor();
+  openLinkedPostIfAvailable();
+}
+
 function loadLikeCounts(rows) {
   guideLikes = new Map();
   guideLikeRecordIds = new Set();
@@ -482,23 +505,17 @@ function loadLikeCounts(rows) {
 
 async function loadPosts() {
   renderPosts();
+  let staticRows = [];
   try {
-    const rows = await fetchStaticRows("guides-index");
-    comments = rows.filter(isStoredComment).map(normalizeComment);
-    posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row) && !isStoredReport(row)).map(normalizePost));
-    loadLikeCounts(rows);
-    loadCommentCounts();
-    renderPosts();
-    markLikedPostsForVisitor();
-    openLinkedPostIfAvailable();
-    setStatus("가벼운 공개 게시판 목록을 불러왔습니다. 작성과 댓글은 정상 저장됩니다.", "is-online");
-    return;
+    staticRows = await fetchStaticRows("guides-index");
+    applyGuideRows(staticRows);
+    setStatus("공개 게시판 백업 목록을 불러왔습니다. 최신 글을 함께 확인 중입니다.", "is-online");
   } catch {
-    // Fall back to the live store when the static snapshot has not been generated yet.
+    staticRows = [];
   }
   if (!hasPublicStore()) {
     openLinkedPostIfAvailable();
-    setStatus("공개 게시판 연결 전입니다. 이 기기에 임시 저장됩니다.", "is-offline");
+    setStatus(staticRows.length ? "공개 게시판 백업 목록을 표시합니다." : "공개 게시판 연결 전입니다. 이 기기에 임시 저장됩니다.", staticRows.length ? "is-online" : "is-offline");
     return;
   }
   try {
@@ -506,18 +523,12 @@ async function loadPosts() {
       headers: authHeaders(),
     });
     if (!response.ok) throw new Error("load");
-    const rows = await response.json();
-    comments = rows.filter(isStoredComment).map(normalizeComment);
-    posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row) && !isStoredReport(row)).map(normalizePost));
-    loadLikeCounts(rows);
-    loadCommentCounts();
-    renderPosts();
-    markLikedPostsForVisitor();
-    openLinkedPostIfAvailable();
-    setStatus("공개 게시판에 연결되었습니다.", "is-online");
+    const liveRows = await response.json();
+    applyGuideRows(mergeRowsById(staticRows, liveRows));
+    setStatus("공개 게시판 백업과 최신 저장 글을 함께 불러왔습니다.", "is-online");
   } catch {
     openLinkedPostIfAvailable();
-    setStatus("게시판 설정이 아직 적용되지 않아 이 기기의 임시 목록을 표시합니다.", "is-offline");
+    setStatus(staticRows.length ? "최신 저장소 확인은 실패했지만 백업 게시글은 정상 표시 중입니다." : "게시판 설정이 아직 적용되지 않아 이 기기의 임시 목록을 표시합니다.", staticRows.length ? "is-online" : "is-offline");
   }
 }
 
