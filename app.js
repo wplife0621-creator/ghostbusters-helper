@@ -70,6 +70,7 @@ const guideLikePrefix = "__guide_like__:";
 const guideReportPrefix = "__guide_report__:";
 const numbersReportPrefix = "__numbers__:";
 const numbersDeleteMarker = "__numbers_deleted__";
+const reportDeleteMarker = "__report_deleted__";
 const sailingMarker = "__sailing__";
 const recommendationMarkerPrefix = "__recommended_character__:";
 const authorNicknameMarkerPrefix = "__author_nickname__:";
@@ -404,6 +405,8 @@ function sailingValue(value) {
 function activeSkillsWithoutSailing(value) {
   return splitSkills(value)
     .filter((skill) => skill !== sailingMarker
+      && skill !== numbersDeleteMarker
+      && skill !== reportDeleteMarker
       && !skill.startsWith(recommendationMarkerPrefix)
       && !skill.startsWith(authorNicknameMarkerPrefix))
     .join("\n") || "-";
@@ -433,7 +436,12 @@ function isRecommendedFor(row, character) {
 
 function reportActiveForStorage(report) {
   const skills = splitSkills(report.active)
-    .filter((skill) => skill !== sailingMarker && !skill.startsWith(recommendationMarkerPrefix));
+    .filter((skill) => skill !== sailingMarker
+      && skill !== numbersDeleteMarker
+      && skill !== reportDeleteMarker
+      && !skill.startsWith(recommendationMarkerPrefix)
+      && !skill.startsWith(authorNicknameMarkerPrefix));
+  if (report.mode === "delete") skills.push(reportDeleteMarker);
   if (report.sailing) skills.push(sailingMarker);
   if (report.recommendedCharacters) skills.push(`${recommendationMarkerPrefix}${report.recommendedCharacters}`);
   if (report.authorNickname) skills.push(`${authorNicknameMarkerPrefix}${report.authorNickname}`);
@@ -600,7 +608,8 @@ function numbersReportToRow(report) {
 }
 
 function isNumbersDeleteReport(report) {
-  return report?.mode === "delete" || splitSkills(report?.active || "").includes(numbersDeleteMarker);
+  const skills = splitSkills(report?.active || "");
+  return report?.mode === "delete" || skills.includes(numbersDeleteMarker) || skills.includes(reportDeleteMarker);
 }
 
 function mergeNumbersRows(baseRows, reports) {
@@ -611,7 +620,6 @@ function mergeNumbersRows(baseRows, reports) {
     if (isNumbersDeleteReport(report)) {
       for (let index = merged.length - 1; index >= 0; index -= 1) {
         const item = merged[index];
-        if (item._baseNumber) continue;
         if (textOf(item["이름"]) === reportName || (reportNumber && normalizeNumberCode(item["번호"]) === reportNumber)) {
           merged.splice(index, 1);
         }
@@ -4300,9 +4308,10 @@ function setReportSyncStatus(message, mode = "") {
 
 function normalizeRemoteReport(row) {
   const rawActive = row.active || "";
+  const activeSkills = splitSkills(rawActive);
   return {
     id: row.id,
-    mode: splitSkills(rawActive).includes(numbersDeleteMarker) ? "delete" : row.mode || "new",
+    mode: activeSkills.includes(numbersDeleteMarker) || activeSkills.includes(reportDeleteMarker) ? "delete" : row.mode || "new",
     monster: row.monster || "",
     originalMonster: row.original_monster || row.originalMonster || "",
     grade: row.grade || "",
@@ -4312,7 +4321,7 @@ function normalizeRemoteReport(row) {
     passive: row.passive || "",
     active: activeSkillsWithoutSailing(rawActive),
     authorNickname: row.author_nickname || row.authorNickname || authorNicknameFromActive(rawActive),
-    sailing: splitSkills(rawActive).includes(sailingMarker),
+    sailing: activeSkills.includes(sailingMarker),
     recommendedCharacters: recommendedCharacterFromActive(rawActive),
     status: row.status || "pending",
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
