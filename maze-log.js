@@ -598,8 +598,7 @@ function addRound() {
   mazeLogEntries.sort((a, b) => a.day - b.day);
   saveMazeLog();
   renderMazeLog();
-  openEditor(entry.id);
-  setStatus(`${entry.day}일 기록을 추가했습니다.`, "ok");
+  setStatus(`${entry.day}일 기록을 추가했습니다. 아래 수정 모드를 켠 뒤 필요한 칸만 입력하세요.`, "ok");
 }
 
 function openEditor(entryId, floorNumber = null) {
