@@ -1592,10 +1592,28 @@ function activeSkillsForEssence(name) {
   return row ? splitSkills(activeSkillsWithoutSailing(row["액티브"])) : [];
 }
 
-const activeColorPattern = /^(빨강|주황|노랑|초록|청록|파랑|보라|검정|갈색|무색)\s*-\s*/;
+const activeColorPattern = /^\(?\s*(빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|보라|보라색|검정|검은색|갈색|무색|백색|흰색|황금|금색)\s*\)?\s*(?:-|:|：|\)|\s+)\s*/;
+const activeColorSegmentPattern = /[,，]\s*(?=\(?\s*(?:빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|보라|보라색|검정|검은색|갈색|무색|백색|흰색|황금|금색)\s*\)?\s*(?:-|:|：|\)|\s+))/;
+const activeColorAliases = {
+  빨간색: "빨강",
+  주황색: "주황",
+  노란색: "노랑",
+  초록색: "초록",
+  청록색: "청록",
+  파란색: "파랑",
+  보라색: "보라",
+  검은색: "검정",
+  흰색: "백색",
+  금색: "황금",
+};
 
 function activeSkillColor(skill) {
-  return textOf(skill).match(activeColorPattern)?.[1] || "";
+  const color = textOf(skill).match(activeColorPattern)?.[1] || "";
+  return activeColorAliases[color] || color;
+}
+
+function activeSkillDisplayName(skill) {
+  return textOf(skill).replace(activeColorPattern, "").trim();
 }
 
 function colorChoiceSkills(skills) {
@@ -1635,12 +1653,12 @@ function buildActiveSettingsMarkup(skills, states = [], selectedColor = "") {
       <select class="build-active-color">
         ${skills.map((skill) => {
           const skillColor = activeSkillColor(skill);
-          return `<option value="${escapeHtml(skillColor)}"${skillColor === color ? " selected" : ""}>${escapeHtml(skillColor)} - ${escapeHtml(skillShortName(skill).replace(activeColorPattern, ""))}</option>`;
+          return `<option value="${escapeHtml(skillColor)}"${skillColor === color ? " selected" : ""}>${escapeHtml(skillColor)} - ${escapeHtml(activeSkillDisplayName(skillShortName(skill)))}</option>`;
         }).join("")}
       </select>
     </label>
     <label class="build-active-skill build-selected-color-skill">
-      <span><i class="essence-color-pill color-${escapeHtml(color)}">${escapeHtml(color)}</i>${escapeHtml(skillShortName(selectedSkill).replace(activeColorPattern, ""))}</span>
+      <span><i class="essence-color-pill color-${escapeHtml(color)}">${escapeHtml(color)}</i>${escapeHtml(activeSkillDisplayName(skillShortName(selectedSkill)))}</span>
       <select class="build-active-skill-state">${activeStateOptions(state)}</select>
     </label>
   `;
@@ -2366,7 +2384,7 @@ function buildConfiguredSkillList(row, states = [], selectedColor = "") {
       ${visibleSkills.map((skill, index) => `
         <span>
           ${selectedColor ? `<i class="essence-color-pill color-${escapeHtml(selectedColor)}">${escapeHtml(selectedColor)}</i>` : ""}
-          ${escapeHtml(selectedColor ? skill.replace(activeColorPattern, "") : skill)}
+          ${escapeHtml(selectedColor ? activeSkillDisplayName(skill) : skill)}
           ${visibleStates[index] ? `<i class="build-active-state is-${escapeHtml(visibleStates[index])}">${visibleStates[index] === "off" ? "OFF" : "ON"}</i>` : ""}
         </span>
       `).join("")}
@@ -2445,7 +2463,7 @@ function buildMemberBoard(members, className = "") {
               return `
                 <div class="${name ? "build-loadout-item" : "build-loadout-item is-empty"}">
                   <span><b>${index + 1}</b>${escapeHtml(name || "비어 있음")}${selectedColor ? `<i class="essence-color-pill color-${escapeHtml(selectedColor)}">${escapeHtml(selectedColor)}</i>` : ""}</span>
-                  ${name && visibleSkills.length && visibleStates.some(Boolean) ? `<div class="build-loadout-skills">${visibleSkills.map((skill, skillIndex) => `<small>${escapeHtml(selectedColor ? skillShortName(skill).replace(activeColorPattern, "") : skillShortName(skill))}<i class="build-active-state is-${escapeHtml(visibleStates[skillIndex] || "on")}">${visibleStates[skillIndex] === "off" ? "OFF" : "ON"}</i></small>`).join("")}</div>` : ""}
+                  ${name && visibleSkills.length && visibleStates.some(Boolean) ? `<div class="build-loadout-skills">${visibleSkills.map((skill, skillIndex) => `<small>${escapeHtml(selectedColor ? activeSkillDisplayName(skillShortName(skill)) : skillShortName(skill))}<i class="build-active-state is-${escapeHtml(visibleStates[skillIndex] || "on")}">${visibleStates[skillIndex] === "off" ? "OFF" : "ON"}</i></small>`).join("")}</div>` : ""}
                 </div>
               `;
             }).join("")}
@@ -4057,11 +4075,15 @@ function skillNameMarkup(value) {
   const name = textOf(value);
   const color = activeSkillColor(name);
   if (!color) return `<b>${escapeHtml(name)}</b>`;
-  return `<b class="skill-color-text text-color-${escapeHtml(color)}">${escapeHtml(name.replace(activeColorPattern, ""))}</b>`;
+  return `<b class="skill-color-text text-color-${escapeHtml(color)}">${escapeHtml(activeSkillDisplayName(name))}</b>`;
 }
 
 function splitSkills(value) {
-  return textOf(value).split(/\r?\n+/).map((skill) => skill.trim()).filter((skill) => skill && skill !== "-");
+  return textOf(value)
+    .split(/\r?\n+/)
+    .flatMap((line) => line.split(activeColorSegmentPattern))
+    .map((skill) => skill.trim())
+    .filter((skill) => skill && skill !== "-");
 }
 
 function renderNumbers() {
