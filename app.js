@@ -614,16 +614,23 @@ function numbersReportToRow(report) {
 }
 
 function isNumbersDeleteReport(report) {
-  const skills = splitSkills(report?.active || "");
   return isDeleteReport(report);
 }
 
 function isDeleteReport(report) {
-  const skills = splitSkills(report?.active || "");
-  return report?.mode === "delete"
+  const rawActive = [report?.active, report?.rawActive, report?._rawActive].map(textOf).join("\n");
+  const skills = splitSkills(rawActive);
+  const rawMode = textOf(report?.mode || report?.report_mode || report?._mode).toLowerCase();
+  const stats = textOf(report?.stats || report?.["주요 스탯"] || report?.effect || report?.["효과"]);
+  return report?._deleteRequested === true
+    || rawMode === "delete"
+    || rawMode === "삭제"
+    || rawMode === "remove"
+    || rawMode === "deleted"
     || skills.includes(numbersDeleteMarker)
     || skills.includes(reportDeleteMarker)
-    || /^\[(삭제\s*요청|관리자\s*삭제)\]/.test(textOf(report?.stats));
+    || /^\[(삭제\s*요청|관리자\s*삭제)\]/.test(stats)
+    || /삭제\s*(요청|해주세요|바랍니다|처리)/.test(stats);
 }
 
 function mergeNumbersRows(baseRows, reports) {
@@ -4389,9 +4396,15 @@ function setReportSyncStatus(message, mode = "") {
 function normalizeRemoteReport(row) {
   const rawActive = row.active || "";
   const activeSkills = splitSkills(rawActive);
+  const deleteRequested = row._deleteRequested === true
+    || textOf(row.mode || row.report_mode).toLowerCase() === "delete"
+    || activeSkills.includes(numbersDeleteMarker)
+    || activeSkills.includes(reportDeleteMarker)
+    || /^\[(삭제\s*요청|관리자\s*삭제)\]/.test(textOf(row.stats))
+    || /삭제\s*(요청|해주세요|바랍니다|처리)/.test(textOf(row.stats));
   return {
     id: row.id,
-    mode: activeSkills.includes(numbersDeleteMarker) || activeSkills.includes(reportDeleteMarker) ? "delete" : row.mode || "new",
+    mode: deleteRequested ? "delete" : row.mode || row.report_mode || "new",
     monster: row.monster || "",
     originalMonster: row.original_monster || row.originalMonster || "",
     grade: row.grade || "",
@@ -4400,6 +4413,9 @@ function normalizeRemoteReport(row) {
     stats: row.stats || "",
     passive: row.passive || "",
     active: activeSkillsWithoutSailing(rawActive),
+    rawActive,
+    _rawActive: rawActive,
+    _deleteRequested: deleteRequested,
     authorNickname: row.author_nickname || row.authorNickname || authorNicknameFromActive(rawActive),
     sailing: activeSkills.includes(sailingMarker),
     recommendedCharacters: recommendedCharacterFromActive(rawActive),
@@ -4615,7 +4631,9 @@ async function submitReport(event) {
     grade: textOf(els.reportNumberLevel.value),
     floor: normalizeNumberCode(els.reportNumberCode.value) || "미확인",
     area: textOf(els.reportNumberSlot.value) || "-",
-    stats: textOf(els.reportNumberEffect.value),
+    stats: els.reportMode.value === "delete" && !/삭제\s*요청/.test(textOf(els.reportNumberEffect.value))
+      ? `[삭제 요청] ${textOf(els.reportNumberName.value)} 정보를 삭제해주세요.`
+      : textOf(els.reportNumberEffect.value),
     passive: cleanNumberSources(selectedOptionValues(els.reportNumberSource).join(", ")) || "-",
     active: els.reportMode.value === "delete" ? numbersDeleteMarker : "-",
     createdAt: new Date().toISOString(),
@@ -4628,7 +4646,9 @@ async function submitReport(event) {
     grade: gradeLabelFromInput(els.reportGrade.value),
     floor: textOf(els.reportFloor.value),
     area: textOf(els.reportArea.value),
-    stats: textOf(els.reportStats.value),
+    stats: els.reportMode.value === "delete" && !/삭제\s*요청/.test(textOf(els.reportStats.value))
+      ? `[삭제 요청] ${textOf(els.reportOriginalMonster.value || els.reportMonster.value)} 정보를 삭제해주세요.`
+      : textOf(els.reportStats.value),
     passive: textOf(els.reportPassive.value),
     sailing: Boolean(els.reportSailing.checked),
     recommendedCharacters: [...els.reportRecommendations]
@@ -4716,7 +4736,10 @@ function renderPendingReports() {
     return;
   }
   els.pendingReports.innerHTML = pendingReports.length
-    ? pendingReports.map((report) => isNumbersReport(report) ? `
+    ? pendingReports.map((report) => {
+      const deleteRequested = isDeleteReport(report);
+      const approveLabel = deleteRequested ? "삭제 승인" : report.mode === "edit" ? "수정 승인" : "승인해서 추가";
+      return isNumbersReport(report) ? `
       <article class="pending-card" data-report-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
@@ -4726,7 +4749,7 @@ function renderPendingReports() {
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
         <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
         <div class="pending-actions">
-          <button type="button" data-action="approve">${isDeleteReport(report) ? "삭제 승인" : "승인해서 추가"}</button>
+          <button type="button" data-action="approve">${escapeHtml(approveLabel)}</button>
           <button type="button" data-action="reject">반려</button>
         </div>
       </article>
@@ -4741,11 +4764,12 @@ function renderPendingReports() {
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
         <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active)}</p>
         <div class="pending-actions">
-          <button type="button" data-action="approve">${isDeleteReport(report) ? "삭제 승인" : "승인해서 추가"}</button>
+          <button type="button" data-action="approve">${escapeHtml(approveLabel)}</button>
           <button type="button" data-action="reject">반려</button>
         </div>
       </article>
-    `).join("")
+    `;
+    }).join("")
     : `<div class="empty compact-empty">검수 대기 제보가 없습니다.</div>`;
 }
 
