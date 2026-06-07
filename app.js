@@ -633,6 +633,21 @@ function isDeleteReport(report) {
     || /삭제\s*(요청|해주세요|바랍니다|처리)/.test(stats);
 }
 
+function reportTargetsSame(left, right) {
+  if (isNumbersReport(left) !== isNumbersReport(right)) return false;
+  if (isNumbersReport(left)) {
+    const leftCode = normalizeNumberCode(left?.floor);
+    const rightCode = normalizeNumberCode(right?.floor);
+    if (leftCode && rightCode) return leftCode === rightCode;
+    const leftName = textOf(visibleReportName(left)).toLowerCase();
+    const rightName = textOf(visibleReportName(right)).toLowerCase();
+    return Boolean(leftName && rightName && leftName === rightName);
+  }
+  const leftNames = [left?.originalMonster, left?.monster].map(monsterKey).filter(Boolean);
+  const rightNames = [right?.originalMonster, right?.monster].map(monsterKey).filter(Boolean);
+  return leftNames.some((name) => rightNames.includes(name));
+}
+
 function mergeNumbersRows(baseRows, reports) {
   const merged = dedupeNumberRows(baseRows, { base: true });
   [...reports].filter((report) => report.status === "approved" && isNumbersReport(report)).reverse().forEach((report) => {
@@ -4712,7 +4727,15 @@ async function handlePendingAction(event) {
 
   if (button.dataset.action === "approve") {
     const approvedReport = { ...report, mode: isDeleteReport(report) ? "delete" : report.mode, status: "approved", reviewedAt: new Date().toISOString() };
-    approvedReportItems = sortReportsByDate([approvedReport, ...approvedReportItems.filter((item) => item.id !== id)]);
+    let nextApprovedItems = approvedReportItems.filter((item) => item.id !== id);
+    if (isDeleteReport(approvedReport)) {
+      const relatedReports = nextApprovedItems.filter((item) => reportTargetsSame(approvedReport, item));
+      nextApprovedItems = nextApprovedItems.filter((item) => !reportTargetsSame(approvedReport, item));
+      if (hasPublicReportStore() && relatedReports.length) {
+        await Promise.allSettled(relatedReports.map((item) => updatePublicReportStatus(item.id, "deleted")));
+      }
+    }
+    approvedReportItems = sortReportsByDate([approvedReport, ...nextApprovedItems]);
     syncApprovedRows();
     if (els.search) {
       refreshControls();
