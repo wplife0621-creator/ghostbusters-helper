@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="미궁 일지 · 겜바바 버스터즈">
   <meta name="twitter:description" content="10일 단위 미궁 균열, 봉헌, 밀라로돈, 베르타스 젠 기록과 추가 항목 설정 도구입니다.">
-  <link rel="stylesheet" href="./styles.css?v=20260607-large-guide-images">
+  <link rel="stylesheet" href="./styles.css?v=20260608-maze-log-sheets">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
@@ -56,7 +56,14 @@
     </section>
 
     <section class="panel maze-log-tools" aria-label="미궁 일지 도구">
+      <div class="maze-log-sheet-bar" aria-label="미궁 일지 시트">
+        <div id="mazeLogSheets" class="maze-log-sheets"></div>
+        <button type="button" id="mazeLogSheetAdd" class="maze-log-sheet-add">+ 시트</button>
+      </div>
       <div class="maze-log-actions">
+        <button type="button" id="mazeLogEditMode">수정 모드</button>
+        <button type="button" id="mazeLogSettingsOpen">층 설정 추가</button>
+        <button type="button" id="mazeLogSheetReset" class="danger-action">현재 시트 초기화</button>
         <button type="button" id="mazeLogExport">백업하기</button>
         <button type="button" id="mazeLogImport">불러오기</button>
         <input id="mazeLogImportFile" type="file" accept="application/json,.json" hidden>
@@ -81,6 +88,12 @@
           <label class="field">
             <span>설정할 층</span>
             <select id="mazeLogCustomFloor">
+              <option value="1">1층</option>
+              <option value="2">2층</option>
+              <option value="3">3층</option>
+              <option value="4">4층</option>
+              <option value="5">5층</option>
+              <option value="6">6층</option>
               <option value="7">7층</option>
               <option value="8">8층</option>
               <option value="9">9층</option>
@@ -154,6 +167,6 @@
     </div>
   </div>
 
-  <script src="./maze-log.js?v=20260607-maze-log-cell-edit"></script>
+  <script src="./maze-log.js?v=20260608-maze-log-sheets"></script>
 </body>
 </html>

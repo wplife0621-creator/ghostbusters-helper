@@ -1181,6 +1181,61 @@ select[multiple] option:checked {
   gap: 12px;
 }
 
+.maze-log-sheet-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #d8e4f4;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff 0%, #fffaf0 100%);
+}
+
+.maze-log-sheets {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.maze-log-sheet-tab,
+.maze-log-sheet-add {
+  flex: 0 0 auto;
+  min-height: 42px;
+  border: 1px solid #cdd9ea;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #20304a;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 8px 14px;
+}
+
+.maze-log-sheet-tab {
+  display: grid;
+  gap: 2px;
+  min-width: 92px;
+  text-align: left;
+}
+
+.maze-log-sheet-tab small {
+  color: #66738a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.maze-log-sheet-tab.is-active {
+  border-color: #1f6feb;
+  background: linear-gradient(135deg, #1f6feb, #164fb0);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(31, 111, 235, 0.18);
+}
+
+.maze-log-sheet-tab.is-active small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
 .maze-log-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1304,9 +1359,13 @@ select[multiple] option:checked {
 }
 
 .maze-log-floor-cell {
-  cursor: pointer;
+  cursor: default;
   font-weight: 800;
   min-height: 62px;
+}
+
+.maze-log-floor-cell.is-editable {
+  cursor: pointer;
 }
 
 .maze-log-floor-cell.is-empty {
@@ -1335,6 +1394,18 @@ select[multiple] option:checked {
   padding: 8px;
 }
 
+.maze-log-cell-input {
+  min-height: 30px;
+  border: 1px solid #cdd9ea;
+  border-radius: 999px;
+  background: #fff;
+  color: #1b3d6d;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 0 12px;
+}
+
 .maze-log-floor-cell:not(.is-empty) .maze-log-cell-value {
   border-color: #b9ccef;
   background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
@@ -1344,12 +1415,24 @@ select[multiple] option:checked {
 .maze-log-floor-cell.is-empty .maze-log-cell-value {
   border-style: dashed;
   background: #fbfdff;
+  color: transparent;
 }
 
-.maze-log-floor-cell:hover .maze-log-cell-value,
-.maze-log-floor-cell:focus .maze-log-cell-value {
+.maze-log-editing .maze-log-floor-cell.is-empty .maze-log-cell-value {
+  color: #1b3d6d;
+}
+
+.maze-log-floor-cell.is-editable:hover .maze-log-cell-value,
+.maze-log-floor-cell.is-editable:focus .maze-log-cell-value {
   border-color: #1f6feb;
   box-shadow: 0 8px 18px rgba(31, 111, 235, 0.12);
+}
+
+.maze-log-row-idle {
+  display: block;
+  color: #9aa8ba;
+  font-weight: 900;
+  text-align: center;
 }
 
 .maze-log-table thead th {
@@ -1578,7 +1661,7 @@ select[multiple] option:checked {
 
 .maze-log-floor-grid {
   display: grid;
-  grid-template-columns: minmax(120px, 0.75fr) repeat(2, minmax(140px, 1fr));
+  grid-template-columns: minmax(120px, 0.75fr) repeat(3, minmax(120px, 1fr));
   gap: 10px;
   padding: 14px;
 }
@@ -10549,6 +10632,20 @@ body.admin-review-page #adminSiteStats {
   .maze-log-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .maze-log-sheet-bar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .maze-log-sheet-add {
+    width: 100%;
+  }
+
+  .maze-log-sheet-tab {
+    min-width: 86px;
   }
 
   .maze-log-actions .primary-action {

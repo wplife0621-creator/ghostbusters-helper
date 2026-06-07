@@ -1,6 +1,8 @@
 const MAZE_LOG_STORAGE_KEY = "dukhubusters.mazeLog.v1";
 const MAZE_LOG_CUSTOM_FLOORS_KEY = "dukhubusters.mazeLog.customFloors.v1";
 const MAZE_LOG_START_DAY_KEY = "dukhubusters.mazeLog.startDay.v1";
+const MAZE_LOG_SHEETS_KEY = "dukhubusters.mazeLog.sheets.v2";
+const MAZE_LOG_ACTIVE_SHEET_KEY = "dukhubusters.mazeLog.activeSheet.v2";
 
 const DEFAULT_MAZE_FLOORS = [
   {
@@ -53,9 +55,14 @@ const DEFAULT_MAZE_FLOORS = [
   },
 ];
 
-const CUSTOM_FLOOR_NUMBERS = [7, 8, 9, 10];
+const CUSTOM_FLOOR_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const mazeLogEls = {
+  sheets: document.querySelector("#mazeLogSheets"),
+  sheetAdd: document.querySelector("#mazeLogSheetAdd"),
+  sheetReset: document.querySelector("#mazeLogSheetReset"),
+  editMode: document.querySelector("#mazeLogEditMode"),
+  settingsOpen: document.querySelector("#mazeLogSettingsOpen"),
   head: document.querySelector("#mazeLogHead"),
   rows: document.querySelector("#mazeLogRows"),
   export: document.querySelector("#mazeLogExport"),
@@ -84,24 +91,34 @@ const mazeLogEls = {
   floorFields: document.querySelector("#mazeLogFloorFields"),
 };
 
-let customFloorSettings = loadCustomFloorSettings();
-let mazeLogStartDay = loadStartDay();
-let mazeLogEntries = loadMazeLog();
+let customFloorSettings = {};
+let mazeLogStartDay = 10;
+let mazeLogEntries = [];
+let mazeLogEditMode = false;
+let mazeLogSheets = loadMazeLogSheets();
+let activeMazeSheetId = localStorage.getItem(MAZE_LOG_ACTIVE_SHEET_KEY) || mazeLogSheets[0]?.id;
+applyActiveSheet(false);
 
 function activeMazeFloors() {
-  const customFloors = CUSTOM_FLOOR_NUMBERS
-    .map((floorNumber) => customFloorSettings[String(floorNumber)])
+  return CUSTOM_FLOOR_NUMBERS
+    .map((floorNumber) => {
+      const base = DEFAULT_MAZE_FLOORS.find((config) => config.floor === floorNumber);
+      const setting = customFloorSettings[String(floorNumber)];
+      if (!base && !setting) return null;
+      const rifts = uniqueList([...(base?.rifts || []), ...(setting?.rifts || [])]);
+      const specialSpawns = uniqueList([...(base?.specialSpawns || []), ...(setting?.specialSpawns || [])]);
+      return {
+        floor: floorNumber,
+        label: setting?.label || base?.label || `${floorNumber}층`,
+        rifts,
+        hasOffering: Boolean(base?.hasOffering),
+        specialSpawns,
+        defaultOpen: Boolean(base?.defaultOpen),
+        custom: Boolean(setting),
+      };
+    })
     .filter(Boolean)
-    .map((setting) => ({
-      floor: setting.floor,
-      label: setting.label || `${setting.floor}층`,
-      rifts: setting.rifts || [],
-      hasOffering: false,
-      specialSpawns: setting.specialSpawns || [],
-      defaultOpen: false,
-      custom: true,
-    }));
-  return [...DEFAULT_MAZE_FLOORS, ...customFloors].sort((a, b) => a.floor - b.floor);
+    .sort((a, b) => a.floor - b.floor);
 }
 
 function floorConfigByNumber(floorNumber) {
@@ -124,6 +141,10 @@ function splitList(value) {
     .filter(Boolean);
 }
 
+function uniqueList(items) {
+  return [...new Set((items || []).map((item) => String(item || "").trim()).filter(Boolean))];
+}
+
 function normalizeDay(value) {
   const day = Math.max(10, Math.floor(Number(value || 10) / 10) * 10);
   return Number.isFinite(day) ? day : 10;
@@ -139,6 +160,7 @@ function createEmptyFloor(config) {
     riftAppeared: false,
     riftName: "",
     appearedDay: "",
+    appearedHour: "",
     offeringUsed: false,
     specialSpawns: specials,
     memo: "",
@@ -165,6 +187,7 @@ function normalizeFloor(saved, config) {
     ...saved,
     floor: config.floor,
     riftAppeared: Boolean(saved?.riftAppeared),
+    appearedHour: saved?.appearedHour || "",
     offeringUsed: Boolean(saved?.offeringUsed),
     specialSpawns,
   };
@@ -190,20 +213,157 @@ function normalizeEntry(entry, index) {
   };
 }
 
+function createMazeSheet(index = 1) {
+  return {
+    id: `sheet-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name: `도전 ${index}`,
+    startDay: 10,
+    customFloors: {},
+    entries: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function normalizeMazeSheet(sheet, index) {
+  return {
+    id: sheet?.id || `sheet-${Date.now()}-${index}`,
+    name: textValue(sheet?.name) || `도전 ${index + 1}`,
+    startDay: normalizeDay(sheet?.startDay || 10),
+    customFloors: normalizeCustomFloorSettings(sheet?.customFloors || {}),
+    entries: Array.isArray(sheet?.entries) ? sheet.entries : [],
+    createdAt: sheet?.createdAt || new Date().toISOString(),
+    updatedAt: sheet?.updatedAt || sheet?.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeCustomFloorSettings(value) {
+  if (!value || typeof value !== "object") return {};
+  return Object.fromEntries(Object.entries(value)
+    .filter(([floor]) => CUSTOM_FLOOR_NUMBERS.includes(Number(floor)))
+    .map(([floor, item]) => [floor, {
+      floor: Number(floor),
+      label: textValue(item?.label) || `${floor}층`,
+      rifts: Array.isArray(item?.rifts) ? uniqueList(item.rifts) : [],
+      specialSpawns: Array.isArray(item?.specialSpawns) ? uniqueList(item.specialSpawns) : [],
+    }]));
+}
+
+function textValue(value) {
+  return String(value || "").trim();
+}
+
+function legacyMazeSheet() {
+  return {
+    ...createMazeSheet(1),
+    name: "도전 1",
+    startDay: loadStartDay(),
+    customFloors: loadCustomFloorSettings(),
+    entries: loadMazeLog(),
+  };
+}
+
+function loadMazeLogSheets() {
+  try {
+    const raw = localStorage.getItem(MAZE_LOG_SHEETS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const sheets = Array.isArray(parsed?.sheets) ? parsed.sheets : Array.isArray(parsed) ? parsed : [];
+      const normalized = sheets.map(normalizeMazeSheet).filter(Boolean);
+      if (normalized.length) return normalized;
+    }
+  } catch (error) {
+    console.warn("Failed to load maze sheets", error);
+  }
+  return [legacyMazeSheet()];
+}
+
+function activeMazeSheet() {
+  let sheet = mazeLogSheets.find((item) => item.id === activeMazeSheetId);
+  if (!sheet) {
+    sheet = mazeLogSheets[0] || createMazeSheet(1);
+    if (!mazeLogSheets.length) mazeLogSheets = [sheet];
+    activeMazeSheetId = sheet.id;
+  }
+  return sheet;
+}
+
+function syncActiveSheet() {
+  const sheet = activeMazeSheet();
+  sheet.startDay = mazeLogStartDay;
+  sheet.customFloors = customFloorSettings;
+  sheet.entries = mazeLogEntries;
+  sheet.updatedAt = new Date().toISOString();
+  saveMazeSheets();
+}
+
+function applyActiveSheet(shouldRender = true) {
+  const sheet = activeMazeSheet();
+  localStorage.setItem(MAZE_LOG_ACTIVE_SHEET_KEY, sheet.id);
+  mazeLogStartDay = normalizeDay(sheet.startDay || 10);
+  customFloorSettings = normalizeCustomFloorSettings(sheet.customFloors || {});
+  mazeLogEntries = (Array.isArray(sheet.entries) ? sheet.entries : []).map(normalizeEntry).sort((a, b) => a.day - b.day);
+  if (shouldRender) {
+    if (mazeLogEls.startDay) mazeLogEls.startDay.value = String(mazeLogStartDay);
+    renderSettingsFields();
+    renderSheetTabs();
+    renderMazeLog();
+  }
+}
+
+function saveMazeSheets() {
+  localStorage.setItem(MAZE_LOG_SHEETS_KEY, JSON.stringify({
+    version: 2,
+    activeSheetId: activeMazeSheetId,
+    sheets: mazeLogSheets,
+  }));
+}
+
+function renderSheetTabs() {
+  if (!mazeLogEls.sheets) return;
+  mazeLogEls.sheets.innerHTML = mazeLogSheets.map((sheet) => `
+    <button type="button" class="maze-log-sheet-tab${sheet.id === activeMazeSheetId ? " is-active" : ""}" data-sheet-id="${escapeHtml(sheet.id)}">
+      <span>${escapeHtml(sheet.name)}</span>
+      <small>${Array.isArray(sheet.entries) ? sheet.entries.length : 0}회차</small>
+    </button>
+  `).join("");
+}
+
+function selectSheet(sheetId) {
+  syncActiveSheet();
+  activeMazeSheetId = sheetId;
+  applyActiveSheet(true);
+  setStatus(`${activeMazeSheet().name} 시트를 열었습니다.`, "ok");
+}
+
+function addSheet() {
+  syncActiveSheet();
+  const sheet = createMazeSheet(mazeLogSheets.length + 1);
+  mazeLogSheets.push(sheet);
+  activeMazeSheetId = sheet.id;
+  applyActiveSheet(true);
+  setStatus(`${sheet.name} 시트를 추가했습니다.`, "ok");
+}
+
+function resetCurrentSheet() {
+  const sheet = activeMazeSheet();
+  if (!confirm(`${sheet.name} 시트의 기록을 전부 초기화할까요? 다른 시트는 유지됩니다.`)) return;
+  sheet.entries = [];
+  sheet.startDay = 10;
+  sheet.customFloors = {};
+  activeMazeSheetId = sheet.id;
+  saveMazeSheets();
+  applyActiveSheet(true);
+  setStatus(`${sheet.name} 시트를 초기화했습니다.`, "ok");
+}
+
 function loadCustomFloorSettings() {
   try {
     const raw = localStorage.getItem(MAZE_LOG_CUSTOM_FLOORS_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return {};
-    return Object.fromEntries(Object.entries(parsed)
-      .filter(([floor]) => CUSTOM_FLOOR_NUMBERS.includes(Number(floor)))
-      .map(([floor, value]) => [floor, {
-        floor: Number(floor),
-        label: value?.label || `${floor}층`,
-        rifts: Array.isArray(value?.rifts) ? value.rifts.filter(Boolean) : [],
-        specialSpawns: Array.isArray(value?.specialSpawns) ? value.specialSpawns.filter(Boolean) : [],
-      }]));
+    return normalizeCustomFloorSettings(parsed);
   } catch (error) {
     console.warn("Failed to load maze custom floors", error);
     return {};
@@ -212,6 +372,7 @@ function loadCustomFloorSettings() {
 
 function saveCustomFloorSettings() {
   localStorage.setItem(MAZE_LOG_CUSTOM_FLOORS_KEY, JSON.stringify(customFloorSettings));
+  syncActiveSheet();
 }
 
 function loadStartDay() {
@@ -227,6 +388,7 @@ function saveStartDay() {
   mazeLogStartDay = normalizeDay(mazeLogEls.startDay?.value || 10);
   localStorage.setItem(MAZE_LOG_START_DAY_KEY, String(mazeLogStartDay));
   if (mazeLogEls.startDay) mazeLogEls.startDay.value = String(mazeLogStartDay);
+  syncActiveSheet();
   setStatus(`${mazeLogStartDay}일부터 기록을 시작하도록 저장했습니다.`, "ok");
 }
 
@@ -246,6 +408,7 @@ function loadMazeLog() {
 
 function saveMazeLog() {
   localStorage.setItem(MAZE_LOG_STORAGE_KEY, JSON.stringify(mazeLogEntries));
+  syncActiveSheet();
 }
 
 function refreshEntriesForActiveFloors() {
@@ -272,7 +435,9 @@ function floorSummary(entry, config) {
   } else if (floor.riftAppeared) {
     parts.push("균열");
   }
-  if (floor.appearedDay) parts.push(`${floor.appearedDay}일`);
+  if (floor.appearedDay) {
+    parts.push(floor.appearedHour ? `${floor.appearedDay}일 ${floor.appearedHour}시` : `${floor.appearedDay}일`);
+  }
   if (config.hasOffering && floor.offeringUsed) parts.push("봉헌");
   Object.entries(floor.specialSpawns || {}).forEach(([name, spawned]) => {
     if (spawned) parts.push(name);
@@ -325,6 +490,11 @@ function renderTableHead() {
 function renderMazeLog() {
   if (!mazeLogEls.rows) return;
   const floors = activeMazeFloors();
+  document.body.classList.toggle("maze-log-editing", mazeLogEditMode);
+  if (mazeLogEls.editMode) {
+    mazeLogEls.editMode.textContent = mazeLogEditMode ? "수정 완료" : "수정 모드";
+    mazeLogEls.editMode.classList.toggle("primary-action", mazeLogEditMode);
+  }
   renderTableHead();
   const addRow = `
     <tr class="maze-log-add-row">
@@ -349,11 +519,14 @@ function renderMazeLog() {
     const cells = floors.map((config) => {
       const summary = floorSummary(entry, config);
       const emptyClass = summary === "-" ? " is-empty" : "";
-      const value = summary === "-" ? "입력" : summary;
+      const value = summary === "-" ? "" : summary;
+      const inputButton = summary === "-" && mazeLogEditMode
+        ? `<button type="button" class="maze-log-cell-input">입력</button>`
+        : "";
       return `
-        <td class="maze-log-floor-cell${emptyClass}" data-label="${escapeHtml(config.label)}" data-entry-id="${entry.id}" data-floor="${config.floor}" tabindex="0" title="${escapeHtml(config.label)} 기록 입력">
+        <td class="maze-log-floor-cell${emptyClass}${mazeLogEditMode ? " is-editable" : ""}" data-label="${escapeHtml(config.label)}" data-entry-id="${entry.id}" data-floor="${config.floor}" ${mazeLogEditMode ? 'tabindex="0"' : ""} title="${escapeHtml(config.label)} 기록">
           <span class="maze-log-cell-label">${escapeHtml(config.label)}</span>
-          <span class="maze-log-cell-value">${escapeHtml(value)}</span>
+          <span class="maze-log-cell-value">${escapeHtml(value)}${inputButton}</span>
         </td>
       `;
     }).join("");
@@ -362,7 +535,7 @@ function renderMazeLog() {
         <th scope="row" data-label="회차">${entry.day}일</th>
         ${cells}
         <td data-label="관리">
-          <button type="button" class="maze-log-edit" data-entry-id="${entry.id}">전체 수정</button>
+          ${mazeLogEditMode ? `<button type="button" class="maze-log-edit" data-entry-id="${entry.id}">전체 수정</button>` : `<span class="maze-log-row-idle">-</span>`}
         </td>
       </tr>
     `;
@@ -445,8 +618,12 @@ function renderFloorEditor(entry, config) {
           </select>
         </label>
         <label class="field">
-          <span>며칠에 나옴</span>
+          <span>균열 일</span>
           <input type="number" min="1" max="10" step="1" data-appeared-day value="${escapeHtml(floor.appearedDay || "")}" placeholder="1~10">
+        </label>
+        <label class="field">
+          <span>균열 시</span>
+          <input type="number" min="0" max="23" step="1" data-appeared-hour value="${escapeHtml(floor.appearedHour || "")}" placeholder="0~23">
         </label>
         ${offeringControl}
         ${specialControls}
@@ -479,6 +656,7 @@ function readEditorEntry() {
       riftAppeared: Boolean(card.querySelector("[data-rift-appeared]")?.checked),
       riftName: card.querySelector("[data-rift-name]")?.value || "",
       appearedDay: card.querySelector("[data-appeared-day]")?.value || "",
+      appearedHour: card.querySelector("[data-appeared-hour]")?.value || "",
       offeringUsed: Boolean(card.querySelector("[data-offering]")?.checked),
       specialSpawns,
       memo: card.querySelector("[data-memo]")?.value.trim() || "",
@@ -515,11 +693,12 @@ function deleteCurrentEntry() {
 }
 
 function exportMazeLog() {
+  syncActiveSheet();
   const payload = {
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
-    customFloors: customFloorSettings,
-    entries: mazeLogEntries,
+    activeSheetId: activeMazeSheetId,
+    sheets: mazeLogSheets,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -539,15 +718,29 @@ function importMazeLogFile(file) {
   reader.onload = () => {
     try {
       const parsed = JSON.parse(String(reader.result || ""));
-      const entries = Array.isArray(parsed) ? parsed : parsed.entries;
-      if (!Array.isArray(entries)) throw new Error("entries missing");
-      if (parsed?.customFloors && typeof parsed.customFloors === "object") {
-        customFloorSettings = parsed.customFloors;
-        saveCustomFloorSettings();
+      if (Array.isArray(parsed?.sheets)) {
+        mazeLogSheets = parsed.sheets.map(normalizeMazeSheet);
+        activeMazeSheetId = parsed.activeSheetId && mazeLogSheets.some((sheet) => sheet.id === parsed.activeSheetId)
+          ? parsed.activeSheetId
+          : mazeLogSheets[0]?.id;
+        saveMazeSheets();
+        applyActiveSheet(false);
+      } else {
+        const entries = Array.isArray(parsed) ? parsed : parsed.entries;
+        if (!Array.isArray(entries)) throw new Error("entries missing");
+        const sheet = {
+          ...createMazeSheet(1),
+          name: "불러온 기록",
+          customFloors: parsed?.customFloors && typeof parsed.customFloors === "object" ? parsed.customFloors : {},
+          entries,
+        };
+        mazeLogSheets = [normalizeMazeSheet(sheet, 0)];
+        activeMazeSheetId = mazeLogSheets[0].id;
+        saveMazeSheets();
+        applyActiveSheet(false);
       }
-      mazeLogEntries = entries.map(normalizeEntry).sort((a, b) => a.day - b.day);
-      saveMazeLog();
       renderSettingsFields();
+      renderSheetTabs();
       renderMazeLog();
       setStatus("백업 파일을 불러왔습니다.", "ok");
     } catch (error) {
@@ -561,7 +754,7 @@ function importMazeLogFile(file) {
 }
 
 function renderSettingsFields() {
-  const floor = mazeLogEls.customFloor?.value || "7";
+  const floor = mazeLogEls.customFloor?.value || "1";
   const setting = customFloorSettings[floor] || {
     floor: Number(floor),
     label: `${floor}층`,
@@ -575,7 +768,7 @@ function renderSettingsFields() {
 
 function saveCustomFloor(event) {
   event.preventDefault();
-  const floor = Number(mazeLogEls.customFloor?.value || 7);
+  const floor = Number(mazeLogEls.customFloor?.value || 1);
   const label = mazeLogEls.customLabel?.value.trim() || `${floor}층`;
   const rifts = splitList(mazeLogEls.customRifts?.value);
   const specialSpawns = splitList(mazeLogEls.customSpecials?.value);
@@ -587,7 +780,7 @@ function saveCustomFloor(event) {
 }
 
 function removeCustomFloor() {
-  const floor = Number(mazeLogEls.customFloor?.value || 7);
+  const floor = Number(mazeLogEls.customFloor?.value || 1);
   const setting = customFloorSettings[String(floor)];
   delete customFloorSettings[String(floor)];
   saveCustomFloorSettings();
@@ -599,12 +792,25 @@ function removeCustomFloor() {
 
 function initMazeLog() {
   if (mazeLogEls.startDay) mazeLogEls.startDay.value = String(mazeLogStartDay);
+  renderSheetTabs();
   renderSettingsFields();
   renderMazeLog();
+  mazeLogEls.sheets?.addEventListener("click", (event) => {
+    const tab = event.target.closest("[data-sheet-id]");
+    if (tab) selectSheet(tab.dataset.sheetId);
+  });
+  mazeLogEls.sheetAdd?.addEventListener("click", addSheet);
+  mazeLogEls.sheetReset?.addEventListener("click", resetCurrentSheet);
+  mazeLogEls.editMode?.addEventListener("click", () => {
+    mazeLogEditMode = !mazeLogEditMode;
+    renderMazeLog();
+    setStatus(mazeLogEditMode ? "수정 모드입니다. 빈칸의 입력 버튼이나 기록 칸을 눌러 수정하세요." : "수정 완료 모드입니다. 빈칸은 비워두고 기록만 보여줍니다.", "ok");
+  });
   mazeLogEls.export?.addEventListener("click", exportMazeLog);
   mazeLogEls.import?.addEventListener("click", () => mazeLogEls.importFile?.click());
   mazeLogEls.importFile?.addEventListener("change", (event) => importMazeLogFile(event.target.files?.[0]));
   mazeLogEls.startSave?.addEventListener("click", saveStartDay);
+  mazeLogEls.settingsOpen?.addEventListener("click", openSettingsPanel);
   mazeLogEls.head?.addEventListener("click", (event) => {
     if (event.target.closest(".maze-log-column-add")) openSettingsPanel();
   });
@@ -629,7 +835,7 @@ function initMazeLog() {
       return;
     }
     const cell = event.target.closest(".maze-log-floor-cell");
-    if (cell) openEditor(cell.dataset.entryId, Number(cell.dataset.floor));
+    if (cell && mazeLogEditMode) openEditor(cell.dataset.entryId, Number(cell.dataset.floor));
   });
   mazeLogEls.rows?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -639,7 +845,7 @@ function initMazeLog() {
       return;
     }
     const cell = event.target.closest(".maze-log-floor-cell");
-    if (!cell) return;
+    if (!cell || !mazeLogEditMode) return;
     event.preventDefault();
     openEditor(cell.dataset.entryId, Number(cell.dataset.floor));
   });
