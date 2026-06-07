@@ -246,6 +246,16 @@
 
   async function hydrateProfileNickname() {
     if (!state.client || !state.user || !authConfig.profileTable) return;
+    if (authConfig.backendMode === "firebase") {
+      try {
+        const doc = await firebaseProfileDoc().get();
+        const nickname = cleanNickname(doc.data()?.nickname || "");
+        if (nickname) applyNicknameToUser(nickname);
+      } catch {
+        // Firebase profile storage is optional; Firebase Auth displayName/local nickname can still be used.
+      }
+      return;
+    }
     try {
       const response = await fetch(profileUrl(`?select=nickname&user_id=eq.${encodeURIComponent(currentUserId())}&limit=1`), {
         headers: authHeaders(),
@@ -254,15 +264,7 @@
       const rows = await response.json();
       const nickname = cleanNickname(rows?.[0]?.nickname || "");
       if (!nickname) return;
-      localStorage.setItem(nicknameKey, nickname);
-      state.user = {
-        ...state.user,
-        user_metadata: {
-          ...(state.user.user_metadata || {}),
-          nickname,
-          display_name: nickname,
-        },
-      };
+      applyNicknameToUser(nickname);
     } catch {
       // Nickname storage is optional until the Supabase table is created.
     }
@@ -273,6 +275,26 @@
     const validation = validateNickname(nickname);
     if (!validation.ok) return validation;
     if (!state.client || !state.user) return { ok: false, message: "로그인 후 사용할 수 있습니다.", nickname };
+
+    if (authConfig.backendMode === "firebase") {
+      try {
+        const normalized = normalizeNickname(nickname);
+        const snapshot = await window.DUKHUBUSTERS_FIREBASE?.table?.(authConfig.profileTable)
+          ?.where("nickname_normalized", "==", normalized)
+          ?.limit(1)
+          ?.get();
+        const owner = snapshot?.docs?.[0]?.data?.() || {};
+        const ownerId = owner.user_id || snapshot?.docs?.[0]?.id || "";
+        const ownerEmail = String(owner.email || "").trim().toLowerCase();
+        const currentEmail = String(state.user.email || "").trim().toLowerCase();
+        if (ownerId && ownerId !== currentUserId() && ownerEmail !== currentEmail) {
+          return { ok: false, message: "이미 사용 중인 닉네임입니다.", nickname };
+        }
+        return { ok: true, message: "사용 가능한 닉네임입니다.", nickname };
+      } catch {
+        return { ok: true, message: "닉네임 저장소 확인이 지연되어 우선 사용할 수 있게 처리합니다.", nickname };
+      }
+    }
 
     try {
       const normalized = normalizeNickname(nickname);
@@ -306,18 +328,33 @@
     const available = await checkNicknameAvailability(nickname);
     if (!available.ok) return available;
 
+    if (authConfig.backendMode === "firebase") {
+      try {
+        await saveNicknameProfile(available.nickname);
+      } catch {
+        // Profile sync can be retried later; local/Firebase Auth nickname must not block posting.
+      }
+      try {
+        localStorage.setItem(nicknameKey, available.nickname);
+        await state.user.updateProfile?.({ displayName: available.nickname });
+        applyNicknameToUser(available.nickname);
+        renderAuthPanel(state.user);
+        applyUserToAuthorFields(state.user, true);
+        announceAuthChange();
+        localStorage.setItem(promptStorageKey(), "1");
+        return { ok: true, message: "닉네임이 저장되었습니다.", nickname: available.nickname };
+      } catch {
+        return { ok: false, message: "닉네임 저장에 실패했습니다. 잠시 후 다시 시도해주세요.", nickname: available.nickname };
+      }
+    }
+
     try {
       await saveNicknameProfile(available.nickname);
       localStorage.setItem(nicknameKey, available.nickname);
-      if (authConfig.backendMode === "firebase") {
-        await state.user.updateProfile?.({ displayName: available.nickname });
-        state.user.user_metadata = { ...(state.user.user_metadata || {}), nickname: available.nickname, display_name: available.nickname };
-      } else {
-        const { data, error } = await state.client.auth.updateUser({
-          data: { nickname: available.nickname, display_name: available.nickname },
-        });
-        if (!error && data?.user) state.user = data.user;
-      }
+      const { data, error } = await state.client.auth.updateUser({
+        data: { nickname: available.nickname, display_name: available.nickname },
+      });
+      if (!error && data?.user) state.user = data.user;
       renderAuthPanel(state.user);
       applyUserToAuthorFields(state.user, true);
       announceAuthChange();
@@ -329,6 +366,17 @@
   }
 
   async function saveNicknameProfile(nickname) {
+    if (authConfig.backendMode === "firebase") {
+      const payload = {
+        user_id: currentUserId(),
+        email: state.user.email || "",
+        nickname,
+        nickname_normalized: normalizeNickname(nickname),
+        updated_at: new Date().toISOString(),
+      };
+      await firebaseProfileDoc().set(payload, { merge: true });
+      return payload;
+    }
     const payload = {
       user_id: currentUserId(),
       email: state.user.email || "",
@@ -353,6 +401,25 @@
     if (!response.ok) throw new Error("profile save failed");
     const rows = await response.json();
     return rows[0];
+  }
+
+  function firebaseProfileDoc() {
+    return window.DUKHUBUSTERS_FIREBASE.table(authConfig.profileTable).doc(currentUserId());
+  }
+
+  function applyNicknameToUser(nickname) {
+    const clean = cleanNickname(nickname);
+    if (!clean) return;
+    localStorage.setItem(nicknameKey, clean);
+    state.user = {
+      ...state.user,
+      displayName: clean,
+      user_metadata: {
+        ...(state.user.user_metadata || {}),
+        nickname: clean,
+        display_name: clean,
+      },
+    };
   }
 
   function profileUrl(query = "") {
@@ -534,7 +601,7 @@
 
   function nicknameOf(user) {
     const meta = user?.user_metadata || {};
-    return cleanNickname(meta.nickname || meta.display_name || localStorage.getItem(nicknameKey) || "");
+    return cleanNickname(meta.nickname || meta.display_name || localStorage.getItem(nicknameKey) || user?.displayName || "");
   }
 
   function fallbackName(user) {
