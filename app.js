@@ -196,6 +196,7 @@ const els = {
   reportForm: document.querySelector("#reportForm"),
   reportDataset: document.querySelector("#reportDataset"),
   reportMode: document.querySelector("#reportMode"),
+  reportModeCards: document.querySelector("#reportModeCards"),
   reportNickname: document.querySelector("#reportNickname"),
   reportMonster: document.querySelector("#reportMonster"),
   editNameHint: document.querySelector("#editNameHint"),
@@ -212,6 +213,7 @@ const els = {
   reportActive2: document.querySelector("#reportActive2"),
   reportActive3: document.querySelector("#reportActive3"),
   reportActive4: document.querySelector("#reportActive4"),
+  reportActiveAdd: document.querySelector("#reportActiveAdd"),
   reportNumberName: document.querySelector("#reportNumberName"),
   reportNumberCode: document.querySelector("#reportNumberCode"),
   reportNumberLevel: document.querySelector("#reportNumberLevel"),
@@ -226,6 +228,9 @@ const els = {
   numberOptions: document.querySelector("#numberOptions"),
   editMonsterMatches: document.querySelector("#editMonsterMatches"),
   editNumberMatches: document.querySelector("#editNumberMatches"),
+  reportPreview: document.querySelector("#reportPreview"),
+  myReportCount: document.querySelector("#myReportCount"),
+  myReports: document.querySelector("#myReports"),
   reportSyncStatus: document.querySelector("#reportSyncStatus"),
   pendingCount: document.querySelector("#pendingCount"),
   pendingReports: document.querySelector("#pendingReports"),
@@ -805,6 +810,7 @@ function addReportNumberSource() {
   multiOptionList(els.reportNumberSource, selected);
   setSelectedOptionValues(els.reportNumberSource, selected);
   renderReportNumberSourceTags();
+  renderReportPreview();
 }
 
 function removeReportNumberSource(value) {
@@ -813,6 +819,7 @@ function removeReportNumberSource(value) {
   multiOptionList(els.reportNumberSource, unique([...selected, ...options]));
   setSelectedOptionValues(els.reportNumberSource, selected);
   renderReportNumberSourceTags();
+  renderReportPreview();
 }
 
 function renderReportNumberSourceTags() {
@@ -1294,9 +1301,11 @@ function initReport() {
   updateReportDataset();
   els.reportDataset.addEventListener("change", updateReportDataset);
   els.reportMode.addEventListener("change", updateReportMode);
+  els.reportModeCards?.addEventListener("click", handleReportModeCardClick);
   els.reportFloor.addEventListener("change", refreshReportAreaOptions);
   els.reportNumberSourceFloor.addEventListener("change", refreshReportNumberSourceOptions);
   els.reportNumberSourceAdd?.addEventListener("click", addReportNumberSource);
+  els.reportActiveAdd?.addEventListener("click", addReportActiveField);
   els.reportNumberSourceCandidate?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
@@ -1311,6 +1320,9 @@ function initReport() {
   els.editMonsterMatches.addEventListener("click", handleEditMonsterClick);
   els.editNumberMatches.addEventListener("click", handleEditNumberClick);
   els.reportForm.addEventListener("submit", submitReport);
+  els.reportForm.addEventListener("input", handleReportFormChange);
+  els.reportForm.addEventListener("change", handleReportFormChange);
+  window.addEventListener("dukhubusters:auth", renderMyReports);
   els.pendingReports.addEventListener("click", handlePendingAction);
   els.approvedReports?.addEventListener("click", handleApprovedAction);
   els.copyApproved.addEventListener("click", copyApprovedRows);
@@ -1323,6 +1335,7 @@ function initReport() {
   updateAdminUi();
   renderPendingReports();
   renderApprovedReports();
+  renderMyReports();
   loadPublicReports();
 }
 
@@ -3143,6 +3156,7 @@ function updateReportDataset() {
 function updateReportMode() {
   const editMode = els.reportMode.value === "edit" || els.reportMode.value === "delete";
   const numbersMode = isNumbersReportMode();
+  syncReportModeCards();
   els.reportOriginalMonsterField.hidden = !editMode || numbersMode;
   els.editNameHint.hidden = !editMode || numbersMode;
   els.reportMonster.placeholder = editMode ? "새 몬스터명 입력 가능" : "예: 얼음 와이번";
@@ -3162,6 +3176,8 @@ function updateReportMode() {
     els.editNumberMatches.hidden = true;
   }
   if (!editMode || numbersMode) els.reportOriginalMonster.value = "";
+  renderReportPreview();
+  renderReportActiveFields();
 }
 
 function applyReportQueryParams() {
@@ -3196,6 +3212,27 @@ function handleReportNumberInput() {
   if (!["edit", "delete"].includes(els.reportMode.value) || !isNumbersReportMode()) return;
   renderEditNumberMatches();
   fillNumberFromExactName();
+}
+
+function handleReportModeCardClick(event) {
+  const button = event.target.closest("button[data-report-mode-card]");
+  if (!button) return;
+  els.reportMode.value = button.dataset.reportModeCard;
+  updateReportMode();
+}
+
+function syncReportModeCards() {
+  if (!els.reportModeCards) return;
+  els.reportModeCards.querySelectorAll("button[data-report-mode-card]").forEach((button) => {
+    const active = button.dataset.reportModeCard === els.reportMode.value;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+}
+
+function handleReportFormChange() {
+  renderReportPreview();
+  renderReportActiveFields();
 }
 
 function handleEditMonsterClick(event) {
@@ -3249,6 +3286,8 @@ function fillReportFromRow(row) {
   reportActiveFields().forEach((field, index) => {
     if (field) field.value = activeSkills[index] || "";
   });
+  renderReportActiveFields(activeSkills.length || 1);
+  renderReportPreview();
   renderEditMonsterMatches();
 }
 
@@ -3262,6 +3301,35 @@ function fillDeleteReportFromRow(row) {
 
 function reportActiveFields() {
   return [els.reportActive, els.reportActive2, els.reportActive3, els.reportActive4].filter(Boolean);
+}
+
+function reportActiveFieldLabels() {
+  return [...document.querySelectorAll(".report-active-field")];
+}
+
+function visibleReportActiveCount() {
+  let lastFilled = -1;
+  reportActiveFields().forEach((field, index) => {
+    if (textOf(field.value)) lastFilled = index;
+  });
+  return Math.max(1, lastFilled + 1);
+}
+
+function renderReportActiveFields(forceCount = 0) {
+  const labels = reportActiveFieldLabels();
+  if (!labels.length) return;
+  const visibleCount = Math.min(labels.length, Math.max(forceCount, visibleReportActiveCount()));
+  labels.forEach((label, index) => {
+    label.hidden = index >= visibleCount;
+  });
+  if (els.reportActiveAdd) {
+    els.reportActiveAdd.hidden = visibleCount >= labels.length;
+  }
+}
+
+function addReportActiveField() {
+  const visibleCount = reportActiveFieldLabels().filter((label) => !label.hidden).length;
+  renderReportActiveFields(visibleCount + 1);
 }
 
 function quickEditActiveFields() {
@@ -3401,6 +3469,7 @@ function fillNumberFromRow(row) {
   refreshReportNumberSourceOptions();
   setSelectedOptionValues(els.reportNumberSource, sourceAreas);
   renderReportNumberSourceTags();
+  renderReportPreview();
   renderEditNumberMatches();
 }
 
@@ -3410,7 +3479,106 @@ function fillDeleteNumberFromRow(row) {
   updateReportMode();
   fillNumberFromRow(row);
   els.reportNumberEffect.value = `[삭제 요청] ${textOf(row["이름"])} 정보를 삭제해주세요.`;
+  renderReportPreview();
   setReportSyncStatus(`${textOf(row["이름"])} 삭제 요청 정보가 자동으로 채워졌습니다. 로그인 후 등록하면 검수 대기에 올라갑니다.`);
+}
+
+function reportCurrentEssenceValues() {
+  return {
+    "몬스터명": textOf(els.reportMonster.value),
+    "등급": textOf(els.reportGrade.value),
+    "층": textOf(els.reportFloor.value),
+    "구역": textOf(els.reportArea.value),
+    "스탯": textOf(els.reportStats.value),
+    "패시브": textOf(els.reportPassive.value),
+    "액티브": reportActiveFields().map((field) => textOf(field.value)).filter(Boolean).join(" / ") || "-",
+    "항해": els.reportSailing.checked ? "Y" : "",
+    "추천 캐릭터": [...els.reportRecommendations].filter((field) => field.checked).map((field) => field.value).join(", "),
+  };
+}
+
+function reportOriginalEssenceValues(row) {
+  if (!row) return null;
+  return {
+    "몬스터명": textOf(row["몬스터"]),
+    "등급": textOf(row["등급"]),
+    "층": textOf(row["층"]),
+    "구역": textOf(row["구역"]),
+    "스탯": textOf(row["주요 스탯"]),
+    "패시브": textOf(row["패시브"]),
+    "액티브": splitSkills(activeSkillsWithoutSailing(row["액티브"])).join(" / ") || "-",
+    "항해": isSailingRow(row) ? "Y" : "",
+    "추천 캐릭터": recommendedCharactersFrom(row["추천 캐릭터"]).join(", "),
+  };
+}
+
+function reportCurrentNumberValues() {
+  return {
+    "이름": textOf(els.reportNumberName.value),
+    "번호": normalizeNumberCode(els.reportNumberCode.value) || "미확인",
+    "아이템 레벨": textOf(els.reportNumberLevel.value),
+    "착용부위": textOf(els.reportNumberSlot.value),
+    "획득처": cleanNumberSources(selectedOptionValues(els.reportNumberSource).join(", ")) || "-",
+    "효과": textOf(els.reportNumberEffect.value),
+  };
+}
+
+function reportOriginalNumberValues(row) {
+  if (!row) return null;
+  return {
+    "이름": textOf(row["이름"]),
+    "번호": normalizeNumberCode(row["번호"]) || "미확인",
+    "아이템 레벨": textOf(row["아이템 레벨(Lv)"]),
+    "착용부위": textOf(row["착용부위"]),
+    "획득처": cleanNumberSources(row["획득처"]) || "-",
+    "효과": textOf(row["효과"]),
+  };
+}
+
+function reportChangedItems(original, current) {
+  if (!original) return [];
+  return Object.keys(current)
+    .filter((key) => textOf(original[key]) !== textOf(current[key]))
+    .map((key) => ({ key, before: textOf(original[key]) || "-", after: textOf(current[key]) || "-" }));
+}
+
+function renderReportPreview() {
+  if (!els.reportPreview) return;
+  const editMode = ["edit", "delete"].includes(els.reportMode.value);
+  const numbersMode = isNumbersReportMode();
+  const originalRow = numbersMode
+    ? findNumberRow(els.reportNumberName.value)
+    : findMonsterRow(els.reportOriginalMonster.value || els.reportMonster.value);
+  const original = numbersMode ? reportOriginalNumberValues(originalRow) : reportOriginalEssenceValues(originalRow);
+  const current = numbersMode ? reportCurrentNumberValues() : reportCurrentEssenceValues();
+  const hasCurrentName = numbersMode ? textOf(current["이름"]) : textOf(current["몬스터명"]);
+  if (!editMode && !hasCurrentName) {
+    els.reportPreview.hidden = true;
+    els.reportPreview.innerHTML = "";
+    return;
+  }
+  const changed = reportChangedItems(original, current);
+  const summary = els.reportMode.value === "delete"
+    ? `<li><b>삭제 요청</b><span>${escapeHtml(numbersMode ? current["이름"] : current["몬스터명"])}</span></li>`
+    : changed.length
+      ? changed.map((item) => `<li><b>${escapeHtml(item.key)}</b><span>${escapeHtml(item.before)} → ${escapeHtml(item.after)}</span></li>`).join("")
+      : `<li><b>변경 없음</b><span>기존 정보와 같은 값입니다.</span></li>`;
+  els.reportPreview.hidden = false;
+  els.reportPreview.innerHTML = `
+    <div class="report-preview-head">
+      <strong>${editMode ? "기존 정보 미리보기" : "신규 제보 미리보기"}</strong>
+      <span>${escapeHtml(reportModeLabel({ mode: els.reportMode.value }))}</span>
+    </div>
+    ${original ? `
+      <div class="report-preview-original">
+        ${Object.entries(original).map(([key, value]) => `<span><b>${escapeHtml(key)}</b>${escapeHtml(value || "-")}</span>`).join("")}
+      </div>
+    ` : editMode ? `<p class="report-preview-empty">기존 정보를 검색하거나 목록에서 선택하면 미리보기가 나타납니다.</p>` : ""}
+    <div class="report-change-summary">
+      <strong>변경 요약</strong>
+      <ul>${summary}</ul>
+    </div>
+  `;
 }
 
 function renderEditMonsterMatches() {
@@ -4188,11 +4356,13 @@ async function loadPublicReports() {
     saveStoredRows(storageKeys.pending, pendingReports);
     updateApprovedFromReports(reports);
     renderPendingReports();
+    renderMyReports();
     renderAdminCenter();
     setReportSyncStatus("제보 저장소에 연결되었습니다. 새 제보는 검수 대기에 공개 저장됩니다.", "is-online");
   } catch {
     setReportSyncStatus("제보 저장소 연결에 실패해 이 브라우저의 임시 목록을 사용합니다.", "is-offline");
     renderPendingReports();
+    renderMyReports();
     renderAdminCenter();
   }
 }
@@ -4371,6 +4541,7 @@ async function submitReport(event) {
     els.reportForm.reset();
     if (els.reportDataset) updateReportDataset();
     renderPendingReports();
+    renderMyReports();
     setReportSyncStatus(
       hasPublicReportStore()
         ? "제보가 공개 저장소의 검수 대기에 등록되었습니다."
@@ -4381,6 +4552,7 @@ async function submitReport(event) {
     pendingReports = sortReportsByDate([report, ...pendingReports.filter((item) => item.id !== report.id)]);
     saveStoredRows(storageKeys.pending, pendingReports);
     renderPendingReports();
+    renderMyReports();
     setReportSyncStatus("제보 저장소 저장에 실패해 이 브라우저의 검수 대기에 임시 저장했습니다.", "is-offline");
   } finally {
     if (submitButton) submitButton.disabled = false;
@@ -4423,6 +4595,7 @@ async function handlePendingAction(event) {
     renderApprovedReports();
     renderAdminCenter();
   }
+  renderMyReports();
 }
 
 function renderPendingReports() {
@@ -4465,6 +4638,38 @@ function renderPendingReports() {
     : `<div class="empty compact-empty">검수 대기 제보가 없습니다.</div>`;
 }
 
+function reportCardTitle(report) {
+  return isNumbersReport(report) ? visibleReportName(report) : textOf(report.monster);
+}
+
+function renderMyReports() {
+  if (!els.myReports || !els.myReportCount) return;
+  const nickname = currentAuthNickname();
+  if (!nickname) {
+    els.myReportCount.textContent = "내 제보 0건";
+    els.myReports.innerHTML = `<div class="empty compact-empty">로그인 후 내가 등록한 제보를 확인할 수 있습니다.</div>`;
+    return;
+  }
+  const rows = [
+    ...pendingReports.map((report) => ({ ...report, _statusLabel: "검수 대기" })),
+    ...approvedReportItems.map((report) => ({ ...report, _statusLabel: report.mode === "delete" ? "삭제 승인" : "승인 완료" })),
+  ]
+    .filter((report) => textOf(report.authorNickname) === nickname)
+    .sort((a, b) => new Date(b.createdAt || b.reviewedAt || 0) - new Date(a.createdAt || a.reviewedAt || 0));
+  els.myReportCount.textContent = `내 제보 ${rows.length}건`;
+  els.myReports.innerHTML = rows.length
+    ? rows.slice(0, 12).map((report) => `
+      <article class="my-report-card">
+        <div>
+          <strong>${escapeHtml(reportCardTitle(report))}</strong>
+          <span>${isNumbersReport(report) ? "넘버스" : "정수"} · ${escapeHtml(reportModeLabel(report))} · ${escapeHtml(report._statusLabel)}</span>
+        </div>
+        <small>${escapeHtml(dateLabel(report.createdAt || report.reviewedAt))}</small>
+      </article>
+    `).join("")
+    : `<div class="empty compact-empty">아직 등록한 제보가 없습니다.</div>`;
+}
+
 async function handleApprovedAction(event) {
   if (!adminUnlocked) return;
   const button = event.target.closest("button[data-approved-action]");
@@ -4485,6 +4690,7 @@ async function handleApprovedAction(event) {
     }
     renderApprovedReports();
     renderAdminCenter();
+    renderMyReports();
     setReportSyncStatus("등록된 정수를 삭제 처리했습니다.", "is-online");
   } catch {
     button.disabled = false;
@@ -4504,7 +4710,7 @@ function renderApprovedReports() {
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
-          <span>${report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+          <span>${report.mode === "delete" ? "삭제 승인" : report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
@@ -4517,7 +4723,7 @@ function renderApprovedReports() {
       <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
         <div>
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
+          <span>${report.mode === "delete" ? `삭제 승인 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
         <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
