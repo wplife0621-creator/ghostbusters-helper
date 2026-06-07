@@ -156,10 +156,16 @@ const crackAreasByFloor = {
   "4층 균열": ["천공신탁소"],
   "5층 균열": ["결빙의 성소"],
 };
-const areaFloorLookup = new Map(Object.entries(crackAreasByFloor)
-  .flatMap(([floor, areas]) => areas.map((area) => [normalizeLocationName(area), floor])));
-const areaLabelLookup = new Map(Object.values(crackAreasByFloor)
-  .flatMap((areas) => areas.map((area) => [normalizeLocationName(area), area])));
+const areaFloorPairs = [];
+Object.entries(crackAreasByFloor).forEach(([floor, areas]) => {
+  areas.forEach((area) => areaFloorPairs.push([normalizeLocationName(area), floor]));
+});
+const areaFloorLookup = new Map(areaFloorPairs);
+const areaLabelPairs = [];
+Object.values(crackAreasByFloor).forEach((areas) => {
+  areas.forEach((area) => areaLabelPairs.push([normalizeLocationName(area), area]));
+});
+const areaLabelLookup = new Map(areaLabelPairs);
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -694,9 +700,13 @@ function effectMatchLines(row, effect) {
 function effectSortScore(row, effect) {
   const lines = effectMatchLines(row, effect);
   if (!lines.length) return { matched: false, value: 0, penalized: false };
-  const values = (effect.scorePatterns || []).flatMap((pattern) =>
-    lines.map((line) => line.match(pattern)?.[1]).filter(Boolean).map((value) => Math.abs(Number(value)))
-  );
+  const values = [];
+  (effect.scorePatterns || []).forEach((pattern) => {
+    lines.forEach((line) => {
+      const value = line.match(pattern)?.[1];
+      if (value) values.push(Math.abs(Number(value)));
+    });
+  });
   return {
     matched: true,
     value: values.length ? Math.max(...values) : 0,
@@ -758,7 +768,11 @@ function floorOptionValues(rows = []) {
 }
 
 function allConfiguredAreas() {
-  return Object.values(crackAreasByFloor).flat();
+  const areas = [];
+  Object.values(crackAreasByFloor).forEach((items) => {
+    items.forEach((area) => areas.push(area));
+  });
+  return areas;
 }
 
 function areaOptionsForFloor(floor, rows = []) {
@@ -820,7 +834,11 @@ function numbersAreaOptionsForFloor(floor) {
     ? numbersRows.filter((row) => numberSourceMatchesFloor(row, floor))
     : numbersRows;
   const configured = floor && floor !== "전체 층" ? [] : allConfiguredAreas();
-  return unique([...configured, ...rows.flatMap((row) => sourceAreaLabels(row["획득처"]))]);
+  const rowAreas = [];
+  rows.forEach((row) => {
+    sourceAreaLabels(row["획득처"]).forEach((area) => rowAreas.push(area));
+  });
+  return unique([...configured, ...rowAreas]);
 }
 
 function refreshNumbersAreaOptions() {
@@ -891,12 +909,14 @@ function excludedStatName(name) {
 
 function statNames() {
   const fromStatSheet = (data["스탯"] || []).map((row) => cleanStatName(row["이름"]));
-  const fromEssence = essenceRows.flatMap((row) =>
+  const fromEssence = [];
+  essenceRows.forEach((row) => {
     textOf(row["주요 스탯"])
       .split(",")
       .map((part) => cleanStatName(part.trim().match(/^(.+?)\s+\d+/)?.[1]))
       .filter(Boolean)
-  );
+      .forEach((name) => fromEssence.push(name));
+  });
   return unique([...fromStatSheet, ...fromEssence]).filter((name) => !excludedStatName(name));
 }
 
@@ -3685,8 +3705,16 @@ function refreshControls() {
   optionList(els.floor, floorOptionValues(essenceRows), "전체 층");
   refreshEssenceAreaOptions();
   optionList(els.grade, ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급", "수호자"], "전체 등급");
-  optionList(els.character, unique(essenceRows.flatMap((row) => recommendedCharactersFrom(row["추천 캐릭터"]))), "전체 캐릭터");
+  optionList(els.character, unique(allRecommendedCharacters(essenceRows)), "전체 캐릭터");
   optionList(els.statSort, statNames(), statNoneLabel);
+}
+
+function allRecommendedCharacters(rows) {
+  const characters = [];
+  rows.forEach((row) => {
+    recommendedCharactersFrom(row["추천 캐릭터"]).forEach((character) => characters.push(character));
+  });
+  return characters;
 }
 
 function selectedStatName() {
@@ -4079,11 +4107,14 @@ function skillNameMarkup(value, options = {}) {
 }
 
 function splitSkills(value) {
-  return textOf(value)
-    .split(/\r?\n+/)
-    .flatMap((line) => line.split(activeColorSegmentPattern))
-    .map((skill) => skill.trim())
-    .filter((skill) => skill && skill !== "-");
+  const skills = [];
+  textOf(value).split(/\r?\n+/).forEach((line) => {
+    line.split(activeColorSegmentPattern).forEach((skill) => {
+      const trimmed = skill.trim();
+      if (trimmed && trimmed !== "-") skills.push(trimmed);
+    });
+  });
+  return skills;
 }
 
 function renderNumbers() {
