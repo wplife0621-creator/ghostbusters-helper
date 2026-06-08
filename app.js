@@ -4237,7 +4237,7 @@ function skillNameMarkup(value, options = {}) {
   const name = textOf(value);
   const color = activeSkillColor(name);
   if (!color || !options.colorMarkers) return `<b>${escapeHtml(name)}</b>`;
-  return `<b class="skill-color-text"><i class="skill-color-drop color-${escapeHtml(color)}" aria-label="${escapeHtml(color)}"></i>${escapeHtml(activeSkillDisplayName(name))}</b>`;
+  return `<b class="skill-color-text"><i class="skill-color-drop color-${escapeHtml(color)}" aria-hidden="true"></i><em class="skill-color-name">${escapeHtml(color)}</em>${escapeHtml(activeSkillDisplayName(name))}</b>`;
 }
 
 function splitSkills(value) {

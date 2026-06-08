@@ -3324,6 +3324,20 @@ select[multiple] option:checked {
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35), 0 0 0 1px rgba(31, 41, 55, 0.12);
 }
 
+.skill-color-name {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #164fb0;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+  padding: 2px 7px;
+}
+
 .build-active-toggle[hidden] {
   display: none;
 }
