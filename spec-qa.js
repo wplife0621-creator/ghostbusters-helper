@@ -10,6 +10,9 @@ const specBackend = {
 const staticDataVersion = String(config.staticDataVersion || "20260607-static-index");
 const answerPrefix = "__spec_answer__:";
 const answerLikePrefix = "__spec_answer_like__:";
+const adminEmails = Array.isArray(config.adminEmails)
+  ? config.adminEmails.map((email) => textOf(email).toLowerCase()).filter(Boolean)
+  : [];
 const pageSize = 10;
 let questions = [];
 let answers = [];
@@ -100,6 +103,11 @@ function currentUserKey() {
   return textOf(user?.uid || user?.email || "");
 }
 
+function isAdminUser() {
+  const email = textOf(currentUser()?.email).toLowerCase();
+  return Boolean(email && adminEmails.includes(email));
+}
+
 function requireLoggedIn(actionLabel = "이용") {
   const user = currentUser();
   if (!user) {
@@ -128,6 +136,7 @@ function normalizeQuestion(row) {
     id: textOf(row.id) || idValue(),
     monster,
     author: textOf(row.author) || "익명",
+    userKey: textOf(row.user_key || row.userKey),
     createdAt: textOf(row.created_at || row.createdAt) || new Date().toISOString(),
     updatedAt: textOf(row.updated_at || row.updatedAt || row.created_at || row.createdAt) || new Date().toISOString(),
     answerCount: 0,
@@ -142,6 +151,7 @@ function normalizeAnswer(row) {
     result: textOf(row.result || row.category || "조건부 가능"),
     content: textOf(row.content || row.memo),
     author: textOf(row.author) || "익명",
+    userKey: textOf(row.user_key || row.userKey),
     createdAt: textOf(row.created_at || row.createdAt) || new Date().toISOString(),
     likeCount: 0,
     liked: false,
@@ -246,9 +256,18 @@ function resultClass(result) {
   return "conditional";
 }
 
+function canDeleteSpecItem(item) {
+  if (!currentUser()) return false;
+  if (isAdminUser()) return true;
+  const key = currentUserKey();
+  if (item.userKey && key && item.userKey === key) return true;
+  return Boolean(item.author && item.author === currentNickname());
+}
+
 function questionMarkup(question) {
   const rows = answerRows(question.id);
   const open = activeQuestionId === question.id;
+  const canDeleteQuestion = canDeleteSpecItem(question);
   return `
     <article class="spec-card ${open ? "is-open" : ""}" data-spec-id="${escapeHtml(question.id)}">
       <button class="spec-question-row" type="button" data-spec-action="toggle">
@@ -260,6 +279,7 @@ function questionMarkup(question) {
       </button>
       ${open ? `
         <div class="spec-question-body">
+          ${canDeleteQuestion ? `<div class="spec-question-actions"><button class="spec-delete-button" type="button" data-spec-action="delete-question">질문 삭제</button></div>` : ""}
           <div class="spec-answers">
             ${rows.length ? rows.map((answer) => `
               <div class="spec-answer is-${escapeHtml(resultClass(answer.result))}" data-answer-id="${escapeHtml(answer.id)}">
@@ -268,9 +288,12 @@ function questionMarkup(question) {
                   <p>${escapeHtml(answer.content)}</p>
                   <small>${escapeHtml(answer.author)} · ${escapeHtml(new Date(answer.createdAt).toLocaleDateString("ko-KR"))}</small>
                 </div>
-                <button class="spec-answer-like ${answer.liked ? "is-liked" : ""}" type="button" data-spec-action="like-answer" ${answer.liked ? "disabled" : ""}>
-                  좋아요 ${answer.likeCount}
-                </button>
+                <div class="spec-answer-actions">
+                  <button class="spec-answer-like ${answer.liked ? "is-liked" : ""}" type="button" data-spec-action="like-answer" ${answer.liked ? "disabled" : ""}>
+                    좋아요 ${answer.likeCount}
+                  </button>
+                  ${canDeleteSpecItem(answer) ? `<button class="spec-delete-button" type="button" data-spec-action="delete-answer">삭제</button>` : ""}
+                </div>
               </div>
             `).join("") : `<div class="spec-answer-empty">아직 답변이 없습니다. 첫 답변을 남겨주세요.</div>`}
           </div>
@@ -335,6 +358,7 @@ async function saveQuestion(event) {
     author: currentNickname(),
     spec: { monster },
     content: `${monster} 잡을 수 있나요?`,
+    user_key: currentUserKey(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -375,6 +399,7 @@ async function saveAnswer(event) {
     question_id: questionId,
     result,
     author: currentNickname(),
+    user_key: currentUserKey(),
     content,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -433,6 +458,59 @@ async function saveAnswerLike(answerId) {
   }
 }
 
+async function deleteSpecRows(ids) {
+  if (!hasPublicStore()) throw new Error("store unavailable");
+  for (const id of ids.filter(Boolean)) {
+    const response = await fetch(specStoreUrl(`?id=eq.${encodeURIComponent(id)}`), {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!response.ok && response.status !== 204) throw new Error("delete failed");
+  }
+}
+
+async function deleteQuestion(questionId) {
+  const question = questions.find((item) => item.id === questionId);
+  if (!question || !canDeleteSpecItem(question)) {
+    setStatus("삭제 권한이 없습니다.", "is-offline");
+    return;
+  }
+  if (!confirm(`${question.monster} 질문과 답변을 삭제할까요?`)) return;
+  const targetAnswers = answers.filter((answer) => answer.questionId === questionId);
+  const targetAnswerIds = new Set(targetAnswers.map((answer) => answer.id));
+  const targetLikes = answerLikes.filter((like) => like.questionId === questionId || targetAnswerIds.has(like.answerId));
+  try {
+    await deleteSpecRows([questionId, ...targetAnswers.map((answer) => answer.id), ...targetLikes.map((like) => like.id)]);
+    questions = questions.filter((item) => item.id !== questionId);
+    answers = answers.filter((answer) => answer.questionId !== questionId);
+    answerLikes = answerLikes.filter((like) => like.questionId !== questionId && !targetAnswerIds.has(like.answerId));
+    if (activeQuestionId === questionId) activeQuestionId = "";
+    setStatus("질문을 삭제했습니다.", "is-online");
+    renderQuestions();
+  } catch {
+    setStatus("질문 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
+  }
+}
+
+async function deleteAnswer(answerId) {
+  const answer = answers.find((item) => item.id === answerId);
+  if (!answer || !canDeleteSpecItem(answer)) {
+    setStatus("삭제 권한이 없습니다.", "is-offline");
+    return;
+  }
+  if (!confirm("이 답변을 삭제할까요?")) return;
+  const targetLikes = answerLikes.filter((like) => like.answerId === answerId);
+  try {
+    await deleteSpecRows([answerId, ...targetLikes.map((like) => like.id)]);
+    answers = answers.filter((item) => item.id !== answerId);
+    answerLikes = answerLikes.filter((like) => like.answerId !== answerId);
+    setStatus("답변을 삭제했습니다.", "is-online");
+    renderQuestions();
+  } catch {
+    setStatus("답변 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
+  }
+}
+
 fields.openQuestion.addEventListener("click", openQuestionModal);
 fields.closeQuestion.addEventListener("click", closeQuestionModal);
 fields.modal.addEventListener("click", (event) => {
@@ -440,6 +518,16 @@ fields.modal.addEventListener("click", (event) => {
 });
 fields.form.addEventListener("submit", saveQuestion);
 fields.list.addEventListener("click", (event) => {
+  const deleteQuestionButton = event.target.closest("button[data-spec-action='delete-question']");
+  if (deleteQuestionButton) {
+    deleteQuestion(deleteQuestionButton.closest("[data-spec-id]")?.dataset.specId || "");
+    return;
+  }
+  const deleteAnswerButton = event.target.closest("button[data-spec-action='delete-answer']");
+  if (deleteAnswerButton) {
+    deleteAnswer(deleteAnswerButton.closest("[data-answer-id]")?.dataset.answerId || "");
+    return;
+  }
   const likeButton = event.target.closest("button[data-spec-action='like-answer']");
   if (likeButton) {
     saveAnswerLike(likeButton.closest("[data-answer-id]")?.dataset.answerId || "");

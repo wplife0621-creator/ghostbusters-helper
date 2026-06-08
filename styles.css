@@ -11426,6 +11426,11 @@ body.admin-review-page #adminSiteStats {
   padding: 16px 18px 18px;
 }
 
+.spec-question-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .spec-answers {
   margin-top: 0;
   gap: 10px;
@@ -11485,6 +11490,31 @@ body.admin-review-page #adminSiteStats {
   opacity: 0.8;
 }
 
+.spec-answer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.spec-delete-button {
+  min-height: 34px;
+  border: 1px solid rgba(190, 67, 52, 0.18);
+  border-radius: 999px;
+  background: #fff1ee;
+  color: #a43b2d;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 0 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.spec-delete-button:hover {
+  border-color: rgba(190, 67, 52, 0.34);
+  background: #ffe3dd;
+}
+
 .spec-answer-form {
   grid-template-columns: 130px minmax(0, 1fr) auto;
   margin-top: 0;
@@ -11536,6 +11566,11 @@ body.admin-review-page #adminSiteStats {
 
   .spec-answer-like {
     justify-self: start;
+  }
+
+  .spec-answer-actions,
+  .spec-question-actions {
+    justify-content: flex-start;
   }
 }
 
