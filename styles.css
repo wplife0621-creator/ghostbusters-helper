@@ -1498,6 +1498,39 @@ select[multiple] option:checked {
   box-shadow: 0 10px 18px rgba(24, 38, 61, 0.08);
 }
 
+.maze-log-bottom-rift {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed #cdd9ea;
+  border-radius: 16px;
+  background: #fbfdff;
+  color: #52647c;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.maze-log-bottom-rift strong {
+  color: #18324f;
+  font-weight: 900;
+}
+
+.maze-log-bottom-rift span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #164fb0;
+  font-weight: 900;
+}
+
 .maze-log-table {
   width: 100%;
   min-width: 920px;
@@ -10888,6 +10921,11 @@ body.admin-review-page #adminSiteStats {
 
   .maze-log-bottom-actions p {
     text-align: center;
+  }
+
+  .maze-log-bottom-rift {
+    justify-content: flex-start;
+    padding: 9px;
   }
 
   .maze-log-table,
