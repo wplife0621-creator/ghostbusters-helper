@@ -2027,8 +2027,7 @@ async function loadPublicBuilds(options = {}) {
       saveStoredRows(storageKeys.builds, savedBuilds);
       renderBuilds();
       markLikedBuildsForVisitor();
-      setBuildSyncStatus("가벼운 공개 빌드 목록을 불러왔습니다. 등록과 좋아요는 정상 저장됩니다.", "is-online");
-      return;
+      setBuildSyncStatus("가벼운 공개 빌드 목록을 먼저 보여주고, 최신 빌드를 확인하는 중입니다.", "is-online");
     } catch {
       // Fall through to the live store for pages deployed before the static index exists.
     }
