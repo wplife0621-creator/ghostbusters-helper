@@ -5350,13 +5350,18 @@ async function loadAdminCenter() {
     return;
   }
   els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
-  const [guideResult, buildResult, buildLogResult, userResult, visitorResult, dailyResult] = await Promise.allSettled([
+  const today = todayKey();
+  const todayVisitorQuery = `select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.daily)}&note=eq.${today}`;
+  const totalVisitorQuery = `select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.daily)}`;
+  const [guideResult, buildResult, buildLogResult, userResult, visitorResult, dailyResult, todayCountResult, totalCountResult] = await Promise.allSettled([
     fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
     fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(3000)),
     fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc&limit=1200"),
     fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc"),
     fetchAdminRows(visitorBackend, visitorBackend.visitorTable, "?select=visitor_id"),
     fetchAdminRows(visitorBackend, visitorBackend.dailyTable, "?select=visitor_id,visit_date&order=visit_date.desc"),
+    countBuildRows(todayVisitorQuery),
+    countBuildRows(totalVisitorQuery),
   ]);
   const buildRows = mergeAdminBuildRows(
     buildResult.status === "fulfilled" ? buildResult.value : [],
@@ -5366,14 +5371,15 @@ async function loadAdminCenter() {
   const dailyRows = dailyResult.status === "fulfilled" ? dailyResult.value : [];
   const tableDaily = adminDailyVisitorCounts(dailyRows);
   const dailyCounts = buildVisitorStats.dailyCounts.length ? buildVisitorStats.dailyCounts : tableDaily;
-  const today = todayKey();
+  const exactToday = todayCountResult.status === "fulfilled" ? todayCountResult.value : null;
+  const exactTotal = totalCountResult.status === "fulfilled" ? totalCountResult.value : null;
   adminCenterData = {
     guides: guideResult.status === "fulfilled" ? guideResult.value.map(normalizeAdminGuide) : [],
     builds: buildRows,
     users: userResult.status === "fulfilled" ? userResult.value : [],
     visitors: {
-      total: buildVisitorStats.total || (visitorResult.status === "fulfilled" ? visitorResult.value.length : null),
-      today: buildVisitorStats.today ?? tableDaily.find((row) => row.date === today)?.count ?? null,
+      total: exactTotal ?? (buildVisitorStats.total || (visitorResult.status === "fulfilled" ? visitorResult.value.length : null)),
+      today: exactToday ?? buildVisitorStats.today ?? tableDaily.find((row) => row.date === today)?.count ?? null,
       dailyCounts,
       stayStats: adminSessionStayStats(buildRows),
     },
