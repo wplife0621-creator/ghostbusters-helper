@@ -252,8 +252,10 @@ function questionMarkup(question) {
   return `
     <article class="spec-card ${open ? "is-open" : ""}" data-spec-id="${escapeHtml(question.id)}">
       <button class="spec-question-row" type="button" data-spec-action="toggle">
-        <span>${escapeHtml(question.monster)} 잡을 수 있나요?</span>
-        <small>${escapeHtml(question.author)} · 답변 ${rows.length}</small>
+        <span>
+          <b>${escapeHtml(question.monster)} 잡을 수 있나요?</b>
+          <small>${escapeHtml(question.author)} · 답변 ${rows.length}개</small>
+        </span>
         <i aria-hidden="true">⌕</i>
       </button>
       ${open ? `
