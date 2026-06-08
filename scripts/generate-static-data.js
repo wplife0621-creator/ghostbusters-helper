@@ -8,7 +8,6 @@ const collections = {
   reports: "dukhubusters_monster_reports",
   builds: "dukhubusters_builds",
   guides: "dukhubusters_guide_posts",
-  specQuestions: "dukhubusters_spec_questions",
 };
 const backupDir = path.join(process.cwd(), "migration-backups");
 const arrayMarker = "__dukhubustersArray";
@@ -119,14 +118,12 @@ function writeJson(name, rows) {
   let reports;
   let builds;
   let guides;
-  let specQuestions;
   let source = "firestore";
   try {
-    [reports, builds, guides, specQuestions] = await Promise.all([
+    [reports, builds, guides] = await Promise.all([
       listCollection(collections.reports),
       listCollection(collections.builds),
       listCollection(collections.guides),
-      listCollection(collections.specQuestions),
     ]);
   } catch (error) {
     source = "migration-backup";
@@ -134,19 +131,16 @@ function writeJson(name, rows) {
     reports = Array.isArray(tables.monster_reports) ? tables.monster_reports : [];
     builds = Array.isArray(tables.builds) ? tables.builds : [];
     guides = Array.isArray(tables.guide_posts) ? tables.guide_posts : [];
-    specQuestions = Array.isArray(tables.spec_questions) ? tables.spec_questions : [];
     console.warn(`Firestore에서 직접 읽지 못해 백업으로 정적 데이터를 생성합니다: ${error.message}`);
   }
   writeJson("reports-index", sortByUpdated(reports.filter((row) => row.status === "approved")).map(replaceLegacySiteName));
   writeJson("builds-index", sortByUpdated(cleanBuildRows(builds)).map(replaceLegacySiteName));
   writeJson("guides-index", sortByUpdated(guides).map(replaceLegacySiteName));
-  writeJson("spec-questions-index", sortByUpdated(specQuestions).map(replaceLegacySiteName));
   console.log(JSON.stringify({
     source,
     reports: reports.filter((row) => row.status === "approved").length,
     builds: cleanBuildRows(builds).length,
     guides: guides.length,
-    specQuestions: specQuestions.length,
   }, null, 2));
 })().catch((error) => {
   console.error(error.stack || error.message || error);

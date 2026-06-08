@@ -10,7 +10,6 @@
     config.visitorTable || "site_visitors",
     config.dailyVisitorTable || "daily_visitors",
     config.profileTable || "user_profiles",
-    config.specQuestionTable || "spec_questions",
   ]);
 
   const state = {

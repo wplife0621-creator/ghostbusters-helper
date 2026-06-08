@@ -16,7 +16,6 @@ window.DUKHUBUSTERS_CONFIG = {
   visitorTable: "site_visitors",
   dailyVisitorTable: "daily_visitors",
   guideTable: "guide_posts",
-  specQuestionTable: "spec_questions",
   guideBucket: "guide-media",
   guideShareUrl: "https://bjlykfxfminmjfgilowj.supabase.co/functions/v1/guide-share",
   canonicalSiteUrl: "https://busters.kr",
