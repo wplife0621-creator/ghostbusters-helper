@@ -9,20 +9,21 @@ const specBackend = {
 };
 const staticDataVersion = String(config.staticDataVersion || "20260607-static-index");
 const answerPrefix = "__spec_answer__:";
+const answerLikePrefix = "__spec_answer_like__:";
 const pageSize = 10;
 let questions = [];
 let answers = [];
+let answerLikes = [];
 let activePage = 1;
+let activeQuestionId = "";
 
 const fields = {
   form: document.querySelector("#specQuestionForm"),
+  modal: document.querySelector("#specQuestionModal"),
+  openQuestion: document.querySelector("#openSpecQuestion"),
+  closeQuestion: document.querySelector("#closeSpecQuestion"),
   monster: document.querySelector("#specMonster"),
   monsterOptions: document.querySelector("#specMonsterOptions"),
-  character: document.querySelector("#specCharacter"),
-  level: document.querySelector("#specLevel"),
-  control: document.querySelector("#specControl"),
-  essences: document.querySelector("#specEssences"),
-  memo: document.querySelector("#specMemo"),
   status: document.querySelector("#specStatus"),
   search: document.querySelector("#specSearch"),
   monsterFilter: document.querySelector("#specMonsterFilter"),
@@ -86,12 +87,21 @@ async function fetchStaticRows(name) {
   return Array.isArray(payload.rows) ? payload.rows : [];
 }
 
+function currentUser() {
+  return window.DUKHUBUSTERS_AUTH?.getUser?.() || null;
+}
+
 function currentNickname() {
   return textOf(window.DUKHUBUSTERS_AUTH?.getDisplayName?.()) || "익명";
 }
 
-function requireLoggedIn(actionLabel = "등록") {
-  const user = window.DUKHUBUSTERS_AUTH?.getUser?.();
+function currentUserKey() {
+  const user = currentUser();
+  return textOf(user?.uid || user?.email || "");
+}
+
+function requireLoggedIn(actionLabel = "이용") {
+  const user = currentUser();
   if (!user) {
     setStatus(`${actionLabel}하려면 Google 로그인이 필요합니다.`, "is-offline");
     window.DUKHUBUSTERS_AUTH?.signIn?.();
@@ -106,20 +116,17 @@ function requireLoggedIn(actionLabel = "등록") {
 }
 
 function setStatus(message, mode = "") {
+  if (!fields.status) return;
   fields.status.textContent = message;
   fields.status.className = `build-sync-status ${mode}`.trim();
 }
 
 function normalizeQuestion(row) {
   const payload = typeof row.spec === "object" && row.spec ? row.spec : row;
+  const monster = textOf(payload.monster || row.monster || row.title);
   return {
     id: textOf(row.id) || idValue(),
-    monster: textOf(payload.monster || row.monster || row.title),
-    character: textOf(payload.character || row.character || "비요른"),
-    level: textOf(payload.level || row.level),
-    control: textOf(payload.control || row.control || "보통"),
-    essences: textOf(payload.essences || row.essences),
-    memo: textOf(payload.memo || row.memo || row.content),
+    monster,
     author: textOf(row.author) || "익명",
     createdAt: textOf(row.created_at || row.createdAt) || new Date().toISOString(),
     updatedAt: textOf(row.updated_at || row.updatedAt || row.created_at || row.createdAt) || new Date().toISOString(),
@@ -136,19 +143,51 @@ function normalizeAnswer(row) {
     content: textOf(row.content || row.memo),
     author: textOf(row.author) || "익명",
     createdAt: textOf(row.created_at || row.createdAt) || new Date().toISOString(),
+    likeCount: 0,
+    liked: false,
+  };
+}
+
+function normalizeAnswerLike(row) {
+  const answerId = textOf(row.answer_id) || textOf(row.answerId) || textOf(row.title).slice(answerLikePrefix.length);
+  return {
+    id: textOf(row.id) || idValue(),
+    answerId,
+    questionId: textOf(row.question_id || row.questionId),
+    userKey: textOf(row.user_key || row.userKey || row.author),
   };
 }
 
 function splitRows(rows) {
+  answerLikes = rows.filter((row) => textOf(row.title).startsWith(answerLikePrefix)).map(normalizeAnswerLike);
   answers = rows.filter((row) => textOf(row.title).startsWith(answerPrefix)).map(normalizeAnswer);
   questions = rows
-    .filter((row) => !textOf(row.title).startsWith(answerPrefix))
+    .filter((row) => !textOf(row.title).startsWith(answerPrefix) && !textOf(row.title).startsWith(answerLikePrefix))
     .map(normalizeQuestion)
+    .filter((question) => question.monster)
     .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+
   const answerCounts = new Map();
   answers.forEach((answer) => answerCounts.set(answer.questionId, (answerCounts.get(answer.questionId) || 0) + 1));
   questions.forEach((question) => {
     question.answerCount = answerCounts.get(question.id) || 0;
+  });
+  hydrateAnswerLikes();
+}
+
+function hydrateAnswerLikes() {
+  const currentKey = currentUserKey();
+  const likesByAnswer = new Map();
+  answerLikes.forEach((like) => {
+    if (!like.answerId) return;
+    const bucket = likesByAnswer.get(like.answerId) || { count: 0, liked: false };
+    bucket.count += 1;
+    if (currentKey && like.userKey === currentKey) bucket.liked = true;
+    likesByAnswer.set(like.answerId, bucket);
+  });
+  answers = answers.map((answer) => {
+    const likes = likesByAnswer.get(answer.id) || { count: 0, liked: false };
+    return { ...answer, likeCount: likes.count, liked: likes.liked };
   });
 }
 
@@ -185,15 +224,12 @@ async function loadQuestions() {
 }
 
 function filteredQuestions() {
-  const query = textOf(fields.search.value).toLowerCase();
+  const query = textOf(fields.search.value).toLowerCase().replace(/\s+/g, "");
   const monster = textOf(fields.monsterFilter.value);
   return questions.filter((question) => {
     if (monster && question.monster !== monster) return false;
     if (!query) return true;
-    return [question.monster, question.character, question.level, question.essences, question.memo, question.author]
-      .join(" ")
-      .toLowerCase()
-      .includes(query);
+    return [question.monster, question.author].join(" ").toLowerCase().replace(/\s+/g, "").includes(query);
   });
 }
 
@@ -204,55 +240,56 @@ function answerRows(questionId) {
 }
 
 function resultClass(result) {
-  if (result.includes("가능") && !result.includes("조건")) return "ok";
   if (result.includes("불가능")) return "danger";
+  if (result.includes("가능") && !result.includes("조건")) return "ok";
   if (result.includes("어려")) return "warn";
   return "conditional";
 }
 
 function questionMarkup(question) {
   const rows = answerRows(question.id);
+  const open = activeQuestionId === question.id;
   return `
-    <article class="spec-card" data-spec-id="${escapeHtml(question.id)}">
-      <div class="spec-card-head">
-        <div>
-          <span class="spec-monster">${escapeHtml(question.monster || "몬스터 미입력")}</span>
-          <h3>${escapeHtml(question.monster || "이 몬스터")} 잡을 수 있나요?</h3>
-          <p>${escapeHtml(question.author)} · ${escapeHtml(new Date(question.createdAt).toLocaleDateString("ko-KR"))}</p>
-        </div>
-        <strong>답변 ${rows.length}</strong>
-      </div>
-      <dl class="spec-detail-grid">
-        <div><dt>캐릭터</dt><dd>${escapeHtml(question.character)}</dd></div>
-        <div><dt>각인/레벨</dt><dd>${escapeHtml(question.level || "-")}</dd></div>
-        <div><dt>컨트롤</dt><dd>${escapeHtml(question.control)}</dd></div>
-        <div><dt>정수/장비</dt><dd>${escapeHtml(question.essences || "-")}</dd></div>
-      </dl>
-      ${question.memo ? `<p class="spec-memo">${escapeHtml(question.memo)}</p>` : ""}
-      <div class="spec-answers">
-        ${rows.length ? rows.map((answer) => `
-          <div class="spec-answer is-${escapeHtml(resultClass(answer.result))}">
-            <b>${escapeHtml(answer.result)}</b>
-            <p>${escapeHtml(answer.content)}</p>
-            <small>${escapeHtml(answer.author)} · ${escapeHtml(new Date(answer.createdAt).toLocaleDateString("ko-KR"))}</small>
+    <article class="spec-card ${open ? "is-open" : ""}" data-spec-id="${escapeHtml(question.id)}">
+      <button class="spec-question-row" type="button" data-spec-action="toggle">
+        <span>${escapeHtml(question.monster)} 잡을 수 있나요?</span>
+        <small>${escapeHtml(question.author)} · 답변 ${rows.length}</small>
+        <i aria-hidden="true">⌕</i>
+      </button>
+      ${open ? `
+        <div class="spec-question-body">
+          <div class="spec-answers">
+            ${rows.length ? rows.map((answer) => `
+              <div class="spec-answer is-${escapeHtml(resultClass(answer.result))}" data-answer-id="${escapeHtml(answer.id)}">
+                <div>
+                  <b>${escapeHtml(answer.result)}</b>
+                  <p>${escapeHtml(answer.content)}</p>
+                  <small>${escapeHtml(answer.author)} · ${escapeHtml(new Date(answer.createdAt).toLocaleDateString("ko-KR"))}</small>
+                </div>
+                <button class="spec-answer-like ${answer.liked ? "is-liked" : ""}" type="button" data-spec-action="like-answer" ${answer.liked ? "disabled" : ""}>
+                  좋아요 ${answer.likeCount}
+                </button>
+              </div>
+            `).join("") : `<div class="spec-answer-empty">아직 답변이 없습니다. 첫 답변을 남겨주세요.</div>`}
           </div>
-        `).join("") : `<div class="spec-answer-empty">아직 답변이 없습니다. 첫 답변을 남겨주세요.</div>`}
-      </div>
-      <form class="spec-answer-form">
-        <select data-spec-answer-result>
-          <option>가능</option>
-          <option selected>조건부 가능</option>
-          <option>어려움</option>
-          <option>불가능</option>
-        </select>
-        <input data-spec-answer-content maxlength="500" placeholder="예: 항마 정수 있으면 가능, 없으면 5각 추천">
-        <button type="submit">답변</button>
-      </form>
+          <form class="spec-answer-form">
+            <select data-spec-answer-result aria-label="답변 결과">
+              <option>가능</option>
+              <option selected>조건부 가능</option>
+              <option>어려움</option>
+              <option>불가능</option>
+            </select>
+            <input data-spec-answer-content maxlength="500" placeholder="예: 항마 정수 있으면 가능, 없으면 어려움">
+            <button type="submit">답변</button>
+          </form>
+        </div>
+      ` : ""}
     </article>
   `;
 }
 
 function renderQuestions() {
+  hydrateAnswerLikes();
   const visible = filteredQuestions();
   const totalPages = Math.max(1, Math.ceil(visible.length / pageSize));
   activePage = Math.min(Math.max(1, activePage), totalPages);
@@ -270,29 +307,35 @@ function renderQuestions() {
   ` : "";
 }
 
+function openQuestionModal() {
+  if (!requireLoggedIn("스펙 질문")) return;
+  fields.modal.hidden = false;
+  document.body.classList.add("modal-open");
+  setTimeout(() => fields.monster.focus(), 20);
+}
+
+function closeQuestionModal() {
+  fields.modal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
 async function saveQuestion(event) {
   event.preventDefault();
   if (!requireLoggedIn("질문 등록")) return;
+  const monster = textOf(fields.monster.value);
+  if (!monster) {
+    setStatus("몬스터 이름을 입력해주세요.", "is-offline");
+    return;
+  }
   const question = {
     id: `spec-${idValue()}`,
-    title: textOf(fields.monster.value),
+    title: monster,
     author: currentNickname(),
-    spec: {
-      monster: textOf(fields.monster.value),
-      character: textOf(fields.character.value),
-      level: textOf(fields.level.value),
-      control: textOf(fields.control.value),
-      essences: textOf(fields.essences.value),
-      memo: textOf(fields.memo.value),
-    },
-    content: textOf(fields.memo.value),
+    spec: { monster },
+    content: `${monster} 잡을 수 있나요?`,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
-  if (!question.spec.monster || !question.spec.level) {
-    setStatus("몬스터와 각인/레벨은 꼭 입력해주세요.", "is-offline");
-    return;
-  }
   try {
     const response = await fetch(specStoreUrl(), {
       method: "POST",
@@ -303,7 +346,9 @@ async function saveQuestion(event) {
     const rows = await response.json();
     questions = [normalizeQuestion(rows[0] || question), ...questions];
     fields.form.reset();
-    setStatus("질문이 등록되었습니다. 공개 목록은 자동 갱신 때 반영됩니다.", "is-online");
+    closeQuestionModal();
+    setStatus("질문이 등록되었습니다.", "is-online");
+    activePage = 1;
     renderQuestions();
   } catch {
     setStatus("질문 저장에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
@@ -351,7 +396,59 @@ async function saveAnswer(event) {
   }
 }
 
+async function saveAnswerLike(answerId) {
+  if (!answerId || !requireLoggedIn("답변 좋아요")) return;
+  const userKey = currentUserKey();
+  if (!userKey) return;
+  const likeId = `spec-like-${answerId}-${userKey}`.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 180);
+  if (answerLikes.some((like) => like.id === likeId || (like.answerId === answerId && like.userKey === userKey))) {
+    setStatus("이미 좋아요를 누른 답변입니다.", "is-online");
+    return;
+  }
+  const answer = answers.find((item) => item.id === answerId);
+  const like = {
+    id: likeId,
+    title: `${answerLikePrefix}${answerId}`,
+    answer_id: answerId,
+    question_id: answer?.questionId || activeQuestionId,
+    author: currentNickname(),
+    user_key: userKey,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  try {
+    const response = await fetch(specStoreUrl(), {
+      method: "POST",
+      headers: authHeaders({ Prefer: "resolution=ignore-duplicates,return=minimal" }),
+      body: JSON.stringify(like),
+    });
+    if (!response.ok && response.status !== 409) throw new Error("like");
+    answerLikes = [...answerLikes, normalizeAnswerLike(like)];
+    setStatus("답변에 좋아요를 눌렀습니다.", "is-online");
+    renderQuestions();
+  } catch {
+    setStatus("좋아요 저장에 실패했습니다. 잠시 후 다시 시도해주세요.", "is-offline");
+  }
+}
+
+fields.openQuestion.addEventListener("click", openQuestionModal);
+fields.closeQuestion.addEventListener("click", closeQuestionModal);
+fields.modal.addEventListener("click", (event) => {
+  if (event.target === fields.modal) closeQuestionModal();
+});
 fields.form.addEventListener("submit", saveQuestion);
+fields.list.addEventListener("click", (event) => {
+  const likeButton = event.target.closest("button[data-spec-action='like-answer']");
+  if (likeButton) {
+    saveAnswerLike(likeButton.closest("[data-answer-id]")?.dataset.answerId || "");
+    return;
+  }
+  const toggleButton = event.target.closest("button[data-spec-action='toggle']");
+  if (!toggleButton) return;
+  const id = toggleButton.closest("[data-spec-id]")?.dataset.specId || "";
+  activeQuestionId = activeQuestionId === id ? "" : id;
+  renderQuestions();
+});
 fields.list.addEventListener("submit", saveAnswer);
 fields.search.addEventListener("input", () => {
   activePage = 1;
@@ -367,6 +464,7 @@ fields.pagination.addEventListener("click", (event) => {
   activePage = Number(button.dataset.page) || 1;
   renderQuestions();
 });
+window.addEventListener("dukhubusters:auth", renderQuestions);
 
 seedMonsterOptions();
 fields.search.value = new URLSearchParams(location.search).get("search") || "";

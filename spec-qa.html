@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>스펙 질문 · 겜바바 버스터즈</title>
   <meta name="description" content="겜바바 팬게임 몬스터별 필요 스펙을 질문하고 답변하는 전용 Q&A 게시판입니다.">
-  <link rel="stylesheet" href="./styles.css?v=20260608-spec-qa-launch">
+  <link rel="stylesheet" href="./styles.css?v=20260608-spec-simple-qa">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
 </head>
 <body>
@@ -34,62 +34,19 @@
   <main class="layout spec-layout">
     <section class="panel page-intro spec-hero">
       <p class="home-kicker">SPEC Q&A</p>
-      <h2>“이 몬스터 잡을 수 있나요?” 전용 질문방</h2>
-      <p>몬스터와 내 스펙을 고르면 다른 유저가 가능, 조건부, 어려움, 불가능으로 답변할 수 있습니다. 반복 질문을 모아 나중에는 몬스터별 참고 스펙으로 정리할 수 있게 설계했습니다.</p>
-    </section>
-
-    <section class="panel spec-form-panel">
-      <div class="section-title compact-title">
-        <h2>스펙 질문 등록</h2>
-        <p>로그인 후 질문을 등록할 수 있습니다. 새 질문은 Firebase에 저장되고, 공개 목록은 정적 JSON 갱신 때 반영됩니다.</p>
-      </div>
-      <form id="specQuestionForm" class="spec-form">
-        <label class="field">
-          <span>몬스터</span>
-          <input id="specMonster" list="specMonsterOptions" required placeholder="예: 데스웜">
-          <datalist id="specMonsterOptions"></datalist>
-        </label>
-        <label class="field">
-          <span>캐릭터</span>
-          <select id="specCharacter">
-            <option>비요른</option>
-            <option>에르웬</option>
-            <option>미샤</option>
-            <option>아이나르</option>
-            <option>레이븐</option>
-            <option>아우옌</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>각인/레벨</span>
-          <input id="specLevel" required placeholder="예: 4각인, 6레벨">
-        </label>
-        <label class="field">
-          <span>컨트롤</span>
-          <select id="specControl">
-            <option>보통</option>
-            <option>쉬움</option>
-            <option>어려움</option>
-          </select>
-        </label>
-        <label class="field wide">
-          <span>정수/장비</span>
-          <input id="specEssences" placeholder="예: 카니바로 / 오크대전사 / 흑요석">
-        </label>
-        <label class="field wide">
-          <span>동료/메모</span>
-          <textarea id="specMemo" rows="3" maxlength="700" placeholder="동료, 항마 여부, 어려웠던 패턴 등을 적어주세요."></textarea>
-        </label>
-        <button class="submit-report" type="submit">질문 등록</button>
-      </form>
-      <p id="specStatus" class="build-sync-status"></p>
+      <h2>한 줄로 묻고, 답변으로 쌓는 스펙 질문</h2>
+      <p>몬스터만 고르면 질문은 끝입니다. 질문을 누르면 답변과 좋아요를 확인할 수 있습니다.</p>
     </section>
 
     <section class="panel spec-board">
+      <div class="spec-board-head">
+        <button id="openSpecQuestion" class="submit-report spec-ask-button" type="button">스펙 물어보기</button>
+        <p id="specStatus" class="build-sync-status"></p>
+      </div>
       <div class="guide-toolbar spec-toolbar">
         <label class="guide-search">
           <span>검색</span>
-          <input id="specSearch" type="search" placeholder="몬스터, 캐릭터, 정수 검색">
+          <input id="specSearch" type="search" placeholder="몬스터 검색">
         </label>
         <select id="specMonsterFilter" aria-label="몬스터 필터">
           <option value="">전체 몬스터</option>
@@ -100,6 +57,27 @@
       <nav id="specPagination" class="guide-pagination" aria-label="스펙 질문 페이지"></nav>
     </section>
   </main>
+
+  <div id="specQuestionModal" class="build-form-modal spec-question-modal" hidden>
+    <section class="build-form-dialog spec-question-dialog" role="dialog" aria-modal="true" aria-labelledby="specQuestionTitle">
+      <div class="build-form-head">
+        <div>
+          <p class="home-kicker">SPEC ASK</p>
+          <h2 id="specQuestionTitle">스펙 물어보기</h2>
+          <span>몬스터만 입력하면 질문이 등록됩니다.</span>
+        </div>
+        <button id="closeSpecQuestion" class="build-form-close" type="button" aria-label="닫기">×</button>
+      </div>
+      <form id="specQuestionForm" class="spec-simple-form">
+        <label class="field">
+          <span>몬스터</span>
+          <input id="specMonster" list="specMonsterOptions" required placeholder="예: 데스웜">
+          <datalist id="specMonsterOptions"></datalist>
+        </label>
+        <button class="submit-report" type="submit">질문 등록</button>
+      </form>
+    </section>
+  </div>
 
   <script src="./ghost-data.js?v=20260520"></script>
   <script>
@@ -115,6 +93,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260607-spec-qa"></script>
   <script src="./auth.js?v=20260607-firebase-nickname-fix"></script>
-  <script src="./spec-qa.js?v=20260608-spec-qa-launch"></script>
+  <script src="./spec-qa.js?v=20260608-spec-simple-qa"></script>
 </body>
 </html>

@@ -1136,6 +1136,7 @@ function homeGuideNotices(rows) {
 function homeSpecNotices(rows) {
   return rows
     .filter((row) => !textOf(row.title).startsWith("__spec_answer__:")
+      && !textOf(row.title).startsWith("__spec_answer_like__:")
       && noticeWithinWeek(row.updated_at || row.created_at || row.updatedAt || row.createdAt))
     .map((row) => {
       const payload = typeof row.spec === "object" && row.spec ? row.spec : row;
