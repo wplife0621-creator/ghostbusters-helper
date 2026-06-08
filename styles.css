@@ -9414,6 +9414,7 @@ body {
 }
 
 .admin-center-layout > .admin-center-hero,
+.admin-center-layout > .admin-command-center,
 .admin-center-layout > .admin-dashboard,
 .admin-center-layout > .admin-ops-grid,
 .admin-center-layout > #admin-backup {
@@ -9445,6 +9446,142 @@ body {
 .admin-stats-grid {
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
+}
+
+.admin-command-center {
+  overflow: hidden;
+  border: 1px solid rgba(35, 71, 101, 0.14);
+  background:
+    radial-gradient(circle at 5% 0%, rgba(255, 209, 102, 0.24), transparent 28%),
+    linear-gradient(135deg, #ffffff, #f3f8ff 58%, #fff8e7);
+}
+
+.admin-command-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.admin-command-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-brief-card,
+.admin-task-card {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  border: 1px solid rgba(50, 93, 128, 0.14);
+  border-radius: 18px;
+  color: #142334;
+  text-decoration: none;
+  box-shadow: 0 12px 26px rgba(31, 44, 62, 0.08);
+}
+
+.admin-brief-card {
+  min-height: 126px;
+  padding: 16px;
+}
+
+.admin-brief-card span,
+.admin-task-card span {
+  color: #4f6174;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.admin-brief-card strong {
+  margin-top: 9px;
+  color: #102033;
+  font-size: clamp(24px, 3.2vw, 36px);
+  line-height: 1.05;
+  letter-spacing: -0.06em;
+}
+
+.admin-brief-card small,
+.admin-task-card small {
+  margin-top: 8px;
+  color: #607186;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.admin-brief-info {
+  background: linear-gradient(145deg, #ffffff, #edf6ff);
+}
+
+.admin-brief-warn {
+  border-color: rgba(217, 139, 52, 0.34);
+  background: linear-gradient(145deg, #fffaf0, #ffffff);
+}
+
+.admin-brief-card:hover,
+.admin-task-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: 0 16px 34px rgba(31, 44, 62, 0.12);
+}
+
+.admin-task-board {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(114, 84, 45, 0.12);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 14px;
+}
+
+.admin-task-board > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-task-board > div:first-child strong {
+  color: #132235;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.admin-task-board > div:first-child span {
+  color: #607186;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.admin-task-list {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-task-card {
+  min-height: 82px;
+  padding: 12px 13px;
+}
+
+.admin-task-card strong {
+  margin-top: 4px;
+  color: #142334;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.admin-task-ok {
+  border-color: rgba(34, 145, 94, 0.22);
+  background: linear-gradient(135deg, #f0fbf5, #ffffff);
+}
+
+.admin-task-warn {
+  border-color: rgba(217, 139, 52, 0.34);
+  background: linear-gradient(135deg, #fff3df, #ffffff);
+}
+
+.admin-task-danger {
+  border-color: rgba(206, 83, 66, 0.38);
+  background: linear-gradient(135deg, #fff1ee, #ffffff);
 }
 
 .admin-stat-card {
@@ -9522,6 +9659,14 @@ body {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .admin-command-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-command-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .admin-ops-grid {
     grid-template-columns: 1fr;
   }
@@ -9569,6 +9714,19 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .admin-command-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-brief-card {
+    min-height: 98px;
+    padding: 14px;
+  }
+
+  .admin-brief-card strong {
+    font-size: 26px;
+  }
+
   .admin-management-card {
     grid-template-columns: 1fr;
   }
@@ -9612,15 +9770,19 @@ body {
 
 .admin-center-layout > .admin-site-stats-section {
   grid-column: 1 / -1;
+  order: 2;
+}
+
+.admin-center-layout > .admin-command-center {
   order: 1;
 }
 
 .admin-center-layout > .admin-dashboard {
-  order: 2;
+  order: 3;
 }
 
 .admin-center-layout > .admin-quality-section {
-  order: 3;
+  order: 4;
 }
 
 .admin-center-layout > #admin-pending,
@@ -9629,7 +9791,7 @@ body {
 .admin-center-layout > #admin-builds,
 .admin-center-layout > #admin-users,
 .admin-center-layout > #admin-backup {
-  order: 4;
+  order: 5;
 }
 
 .admin-center-layout,

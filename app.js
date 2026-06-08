@@ -5061,13 +5061,15 @@ function formatSeconds(totalSeconds) {
 
 function renderAdminCenter() {
   if (!els.adminStatsGrid) return;
+  const opsBrief = document.querySelector("#adminOpsBrief");
   const locked = !adminUnlocked || !isAdminUser();
-  document.querySelectorAll(".admin-dashboard, .admin-ops-grid, .admin-backup-grid").forEach((element) => {
+  document.querySelectorAll(".admin-dashboard, .admin-command-center, .admin-ops-grid, .admin-backup-grid").forEach((element) => {
     element.classList.toggle("is-locked", locked);
   });
   if (locked) {
     const message = `<div class="empty compact-empty">wplife0621@gmail.com Google 계정으로 로그인하면 관리자 센터가 열립니다.</div>`;
     els.adminStatsGrid.innerHTML = message;
+    if (opsBrief) opsBrief.innerHTML = message;
     if (els.adminGuideList) els.adminGuideList.innerHTML = message;
     if (els.adminBuildList) els.adminBuildList.innerHTML = message;
     if (els.adminDeletedBuildList) els.adminDeletedBuildList.innerHTML = message;
@@ -5084,6 +5086,7 @@ function renderAdminCenter() {
   const deletedBuilds = deletedAdminBuilds();
   const health = adminBuildHealth();
   const warningCount = qualityWarningCount(posts, builds);
+  renderAdminOpsBrief(posts, comments, builds, deletedBuilds, health, warningCount);
   const stats = [
     { label: "검수 대기", value: `${pendingReports.length}건`, hint: "정수/넘버스 제보", href: "#admin-pending", tone: pendingReports.length ? "warn" : "ok" },
     { label: "등록 정보", value: `${approvedReportItems.length}건`, hint: "승인된 도감 정보", href: "#admin-approved", tone: "normal" },
@@ -5111,6 +5114,129 @@ function renderAdminCenter() {
   renderAdminSiteStats();
   renderAdminQuality(posts, builds);
   renderAdminDataHealth();
+}
+
+function isAdminToday(value) {
+  return textOf(value).slice(0, 10) === todayKey();
+}
+
+function adminPendingDeleteReports() {
+  return pendingReports.filter((report) => isDeleteReport(report));
+}
+
+function adminOpsTaskItems(deletedBuilds, warningCount) {
+  const items = [];
+  const deletePending = adminPendingDeleteReports();
+  if (pendingReports.length) {
+    items.push({
+      label: "제보 검수",
+      value: `${pendingReports.length}건`,
+      detail: deletePending.length ? `삭제 요청 ${deletePending.length}건 포함` : "신규/수정 요청 확인",
+      href: "#admin-pending",
+      tone: "warn",
+    });
+  }
+  if (deletedBuilds.length) {
+    items.push({
+      label: "삭제된 빌드",
+      value: `${deletedBuilds.length}건`,
+      detail: "필요하면 복구 가능",
+      href: "#admin-deleted-builds",
+      tone: "warn",
+    });
+  }
+  if (warningCount) {
+    items.push({
+      label: "품질 점검",
+      value: `${warningCount}건`,
+      detail: "중복/누락/짧은 글 확인",
+      href: "#admin-quality",
+      tone: "warn",
+    });
+  }
+  if (adminCenterData.errors?.guides || adminCenterData.errors?.builds || adminCenterData.errors?.users || adminCenterData.errors?.visitors) {
+    items.push({
+      label: "저장소 연결",
+      value: "확인 필요",
+      detail: "일부 데이터를 불러오지 못했습니다",
+      href: "#admin-data-health",
+      tone: "danger",
+    });
+  }
+  return items.length ? items : [{
+    label: "긴급 처리",
+    value: "없음",
+    detail: "지금은 큰 이상 신호가 없습니다",
+    href: "#admin-stats",
+    tone: "ok",
+  }];
+}
+
+function renderAdminOpsBrief(posts, comments, builds, deletedBuilds, health, warningCount) {
+  const target = document.querySelector("#adminOpsBrief");
+  if (!target) return;
+  const todayPosts = posts.filter((post) => isAdminToday(post.createdAt || post.updatedAt)).length;
+  const todayComments = comments.filter((comment) => isAdminToday(comment.createdAt)).length;
+  const todayBuilds = builds.filter((build) => isAdminToday(build.createdAt || build.created_at)).length;
+  const todayStayRows = adminFilterStayDays(adminCenterData.visitors.stayStats?.daily || []).filter((row) => row.date === todayKey());
+  const todayStaySeconds = todayStayRows.reduce((sum, row) => sum + row.seconds, 0);
+  const taskItems = adminOpsTaskItems(deletedBuilds, warningCount);
+  const briefItems = [
+    {
+      label: "오늘 방문",
+      value: `${adminCenterData.visitors.today ?? "-"}명`,
+      detail: `누적 ${adminCenterData.visitors.total ?? "-"}명`,
+      href: "#admin-stats",
+      tone: "info",
+    },
+    {
+      label: "오늘 콘텐츠",
+      value: `${todayPosts + todayComments + todayBuilds}건`,
+      detail: `글 ${todayPosts} · 댓글 ${todayComments} · 빌드 ${todayBuilds}`,
+      href: "#admin-guides",
+      tone: "info",
+    },
+    {
+      label: "로그인 체류",
+      value: todayStaySeconds ? adminFormatMinutes(todayStaySeconds) : "-",
+      detail: "오늘 로그인 사용자 합계",
+      href: "#admin-stats",
+      tone: "info",
+    },
+    {
+      label: "데이터 행",
+      value: `${health.totalRows}행`,
+      detail: `통계 로그 ${health.visitorRows}건`,
+      href: "#admin-data-health",
+      tone: health.visitorRows > 500 ? "warn" : "info",
+    },
+  ];
+  target.innerHTML = `
+    <div class="admin-command-summary">
+      ${briefItems.map((item) => `
+        <a class="admin-brief-card admin-brief-${escapeHtml(item.tone)}" href="${escapeHtml(item.href)}">
+          <span>${escapeHtml(item.label)}</span>
+          <strong>${escapeHtml(item.value)}</strong>
+          <small>${escapeHtml(item.detail)}</small>
+        </a>
+      `).join("")}
+    </div>
+    <div class="admin-task-board">
+      <div>
+        <strong>오늘 할 일</strong>
+        <span>처리가 필요한 항목만 추려서 보여줍니다.</span>
+      </div>
+      <div class="admin-task-list">
+        ${taskItems.map((item) => `
+          <a class="admin-task-card admin-task-${escapeHtml(item.tone)}" href="${escapeHtml(item.href)}">
+            <span>${escapeHtml(item.label)}</span>
+            <strong>${escapeHtml(item.value)}</strong>
+            <small>${escapeHtml(item.detail)}</small>
+          </a>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function renderAdminGuides(posts, comments) {

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>관리자 센터 · 겜바바 버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260608-essence-color-label">
+  <link rel="stylesheet" href="./styles.css?v=20260608-admin-command-center">
   <style>
     body.admin-review-page .admin-review-layout {
       width: min(1480px, calc(100% - 32px));
@@ -69,6 +69,14 @@
         <a href="./guides.html">게시판 열기</a>
         <a href="./builds.html">빌드 열기</a>
       </div>
+    </section>
+
+    <section class="panel report-panel page-panel admin-review-section admin-command-center">
+      <div class="section-title compact-title">
+        <h2>한눈 운영 브리핑</h2>
+        <p>오늘 처리할 일, 이상 신호, 핵심 활동을 먼저 보여줍니다. 각 항목을 누르면 해당 관리 구간으로 이동합니다.</p>
+      </div>
+      <div id="adminOpsBrief" class="admin-command-grid"></div>
     </section>
 
     <section id="admin-pending" class="panel report-panel page-panel admin-review-section">
@@ -165,6 +173,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-firebase-nickname-fix"></script>
-  <script src="./app.js?v=20260608-essence-color-label"></script>
+  <script src="./app.js?v=20260608-admin-command-center"></script>
 </body>
 </html>
