@@ -5393,8 +5393,7 @@ function adminBuildVisitorStats(rows) {
   });
   const dailyCounts = [...dailyMap.entries()]
     .map(([date, count]) => ({ date, count }))
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-14);
+    .sort((a, b) => a.date.localeCompare(b.date));
   return {
     total: dailyRows.length,
     today: dailyMap.get(todayKey()) || 0,
@@ -5420,8 +5419,7 @@ function adminDailyVisitorCounts(rows) {
   });
   return [...dailyMap.entries()]
     .map(([date, count]) => ({ date, count }))
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-14);
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function adminSessionStayStats(rows) {
@@ -5452,14 +5450,14 @@ function adminSessionStayStats(rows) {
     pageMap.set(path, pageBucket);
   });
   return {
-    daily: [...dailyMap.values()].sort((a, b) => a.date.localeCompare(b.date)).slice(-14),
+    daily: [...dailyMap.values()].sort((a, b) => a.date.localeCompare(b.date)),
     accounts: [...accountMap.values()]
       .sort((a, b) => b.date.localeCompare(a.date) || b.seconds - a.seconds)
-      .slice(0, 80),
+      .slice(0, 500),
     pages: [...pageMap.values()]
       .map((row) => ({ ...row, accounts: row.accounts.size, averageSeconds: row.records ? row.seconds / row.records : 0 }))
       .sort((a, b) => b.seconds - a.seconds)
-      .slice(0, 20),
+      .slice(0, 50),
   };
 }
 
@@ -5527,6 +5525,158 @@ function adminFilterStayDays(rows) {
 function adminFilterStayPages(rows) {
   if (!adminStatsRangeDays) return rows;
   return rows;
+}
+
+function adminDateRangeKeys() {
+  const sourceDates = [
+    ...(adminCenterData.visitors.dailyCounts || []).map((row) => row.date),
+    ...(adminCenterData.visitors.stayStats?.daily || []).map((row) => row.date),
+    ...(adminCenterData.visitors.stayStats?.accounts || []).map((row) => row.date),
+  ].filter(Boolean).sort();
+  if (!adminStatsRangeDays) return unique(sourceDates);
+  const keys = [];
+  const today = new Date();
+  for (let index = adminStatsRangeDays - 1; index >= 0; index -= 1) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - index);
+    keys.push(new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(date));
+  }
+  return keys;
+}
+
+function adminDailyMetrics(dailyCounts, stayRows, accountRows) {
+  const visitorMap = new Map((dailyCounts || []).map((row) => [row.date, Number(row.count || 0)]));
+  const stayMap = new Map((stayRows || []).map((row) => [row.date, row]));
+  const memberMap = new Map();
+  (accountRows || []).forEach((row) => {
+    const date = textOf(row.date);
+    if (!date) return;
+    const bucket = memberMap.get(date) || { date, memberVisitors: new Set(), memberSeconds: 0, memberRecords: 0 };
+    bucket.memberVisitors.add(textOf(row.account) || textOf(row.nickname) || "계정 미확인");
+    bucket.memberSeconds += Number(row.seconds || 0);
+    bucket.memberRecords += Number(row.records || 0);
+    memberMap.set(date, bucket);
+  });
+  return adminDateRangeKeys().map((date) => {
+    const stay = stayMap.get(date) || {};
+    const member = memberMap.get(date);
+    return {
+      date,
+      visitors: visitorMap.get(date) || 0,
+      memberVisitors: member?.memberVisitors.size || 0,
+      staySeconds: Number(stay.seconds || 0),
+      memberStaySeconds: Number(member?.memberSeconds || 0),
+      stayRecords: Number(stay.records || 0),
+      memberRecords: Number(member?.memberRecords || 0),
+    };
+  });
+}
+
+function adminCompactNumber(value) {
+  const number = Number(value || 0);
+  if (number >= 10000) return `${Math.round(number / 1000) / 10}만`;
+  if (number >= 1000) return `${Math.round(number / 100) / 10}천`;
+  return String(number);
+}
+
+function adminChartValue(row, key) {
+  return Number(row?.[key] || 0);
+}
+
+function adminLinePointList(rows, key, max) {
+  if (!rows.length) return "";
+  if (rows.length === 1) {
+    const y = 100 - Math.round((adminChartValue(rows[0], key) / max) * 88);
+    return `50,${Math.max(6, Math.min(94, y))}`;
+  }
+  return rows.map((row, index) => {
+    const x = Math.round((index / (rows.length - 1)) * 1000) / 10;
+    const y = 100 - Math.round((adminChartValue(row, key) / max) * 88);
+    return `${x},${Math.max(6, Math.min(94, y))}`;
+  }).join(" ");
+}
+
+function adminMetricChartMarkup({ title, rows, key, unit, tone = "blue", formatter }) {
+  const visibleRows = rows || [];
+  const max = Math.max(...visibleRows.map((row) => adminChartValue(row, key)), 0);
+  const total = visibleRows.reduce((sum, row) => sum + adminChartValue(row, key), 0);
+  const average = visibleRows.length ? total / visibleRows.length : 0;
+  const latest = visibleRows[visibleRows.length - 1];
+  const latestValue = adminChartValue(latest, key);
+  const format = formatter || ((value) => `${adminCompactNumber(value)}${unit}`);
+  if (!visibleRows.length || !max) {
+    return `
+      <section class="admin-metric-chart admin-metric-${escapeHtml(tone)}">
+        <header>
+          <div>
+            <h3>${escapeHtml(title)}</h3>
+            <p>아직 표시할 기록이 없습니다.</p>
+          </div>
+          <strong>-</strong>
+        </header>
+        <div class="empty compact-empty">선택한 기간에 데이터가 쌓이면 그래프가 표시됩니다.</div>
+      </section>
+    `;
+  }
+  return `
+    <section class="admin-metric-chart admin-metric-${escapeHtml(tone)}">
+      <header>
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+          <p>합계 ${escapeHtml(format(total))} · 평균 ${escapeHtml(format(average))}</p>
+        </div>
+        <strong>${escapeHtml(format(latestValue))}</strong>
+      </header>
+      <div class="admin-line-chart" aria-label="${escapeHtml(title)} 그래프">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-hidden="true">
+          <polyline points="${adminLinePointList(visibleRows, key, max)}"></polyline>
+        </svg>
+        <div class="admin-chart-columns">
+          ${visibleRows.map((row) => {
+            const height = Math.max(4, Math.round((adminChartValue(row, key) / max) * 100));
+            return `
+              <span style="height:${height}%" title="${escapeHtml(row.date)} · ${escapeHtml(format(adminChartValue(row, key)))}"></span>
+            `;
+          }).join("")}
+        </div>
+      </div>
+      <footer>
+        ${visibleRows.map((row, index) => index === 0 || index === visibleRows.length - 1 || row.date.endsWith("-01")
+          ? `<span>${escapeHtml(row.date.slice(5).replace("-", "/"))}</span>`
+          : `<span></span>`
+        ).join("")}
+      </footer>
+    </section>
+  `;
+}
+
+function adminMetricTableMarkup(rows) {
+  if (!rows?.length) return `<div class="empty compact-empty">선택한 기간의 일자별 통계가 없습니다.</div>`;
+  return `
+    <div class="admin-daily-metrics-table">
+      <div class="admin-daily-metrics-head">
+        <span>날짜</span>
+        <span>방문자</span>
+        <span>회원 방문</span>
+        <span>전체 체류</span>
+        <span>회원 체류</span>
+      </div>
+      ${rows.slice().reverse().map((row) => `
+        <div class="admin-daily-metrics-row">
+          <strong>${escapeHtml(row.date)}</strong>
+          <span>${row.visitors}명</span>
+          <span>${row.memberVisitors}명</span>
+          <span>${escapeHtml(adminFormatMinutes(row.staySeconds))}</span>
+          <span>${escapeHtml(adminFormatMinutes(row.memberStaySeconds))}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function adminContentActivityStats(posts, comments, builds) {
@@ -5752,6 +5902,7 @@ function renderAdminSiteStats() {
   const accountRows = adminFilterStayAccounts(adminCenterData.visitors.stayStats?.accounts || []);
   const pageRows = adminFilterStayPages(adminCenterData.visitors.stayStats?.pages || []);
   const dailyCounts = (adminCenterData.visitors.dailyCounts || []).filter((row) => adminWithinRange(row.date));
+  const dailyMetrics = adminDailyMetrics(dailyCounts, stayRows, accountRows);
   const activityRows = adminContentActivityStats(posts, comments, builds);
   const todayStay = stayRows.find((row) => row.date === todayKey());
   const avgStaySeconds = todayStay?.records ? todayStay.seconds / todayStay.records : 0;
@@ -5808,6 +5959,48 @@ function renderAdminSiteStats() {
         <h3>콘텐츠 활동량</h3>
         ${adminActivityChartMarkup(activityRows)}
       </section>
+    </div>
+    <div class="admin-search-console">
+      <div class="admin-search-console-head">
+        <div>
+          <h3>일자별 핵심 지표</h3>
+          <p>서치콘솔처럼 날짜 흐름을 먼저 보고, 이상한 날을 아래 표에서 바로 확인합니다.</p>
+        </div>
+        <span>선택 기간 ${adminStatsRangeDays ? `${adminStatsRangeDays}일` : "전체"}</span>
+      </div>
+      <div class="admin-metric-chart-grid">
+        ${adminMetricChartMarkup({
+          title: "일자별 방문자수",
+          rows: dailyMetrics,
+          key: "visitors",
+          unit: "명",
+          tone: "blue",
+        })}
+        ${adminMetricChartMarkup({
+          title: "일자별 회원 방문자수",
+          rows: dailyMetrics,
+          key: "memberVisitors",
+          unit: "명",
+          tone: "green",
+        })}
+        ${adminMetricChartMarkup({
+          title: "일자별 체류시간",
+          rows: dailyMetrics,
+          key: "staySeconds",
+          unit: "",
+          tone: "amber",
+          formatter: adminFormatMinutes,
+        })}
+        ${adminMetricChartMarkup({
+          title: "일자별 회원 체류시간",
+          rows: dailyMetrics,
+          key: "memberStaySeconds",
+          unit: "",
+          tone: "purple",
+          formatter: adminFormatMinutes,
+        })}
+      </div>
+      ${adminMetricTableMarkup(dailyMetrics)}
     </div>
     ${adminPopularContentMarkup(posts, builds)}
     <div class="admin-stay-list admin-account-stay">

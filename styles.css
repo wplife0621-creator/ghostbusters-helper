@@ -9678,6 +9678,10 @@ body {
   .admin-analytics-grid {
     grid-template-columns: 1fr;
   }
+
+  .admin-metric-chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -9725,6 +9729,35 @@ body {
 
   .admin-brief-card strong {
     font-size: 26px;
+  }
+
+  .admin-search-console {
+    padding: 12px;
+  }
+
+  .admin-search-console-head {
+    display: grid;
+  }
+
+  .admin-search-console-head > span {
+    width: fit-content;
+  }
+
+  .admin-metric-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-line-chart {
+    height: 116px;
+  }
+
+  .admin-daily-metrics-table {
+    overflow-x: auto;
+  }
+
+  .admin-daily-metrics-head,
+  .admin-daily-metrics-row {
+    min-width: 560px;
   }
 
   .admin-management-card {
@@ -9875,6 +9908,221 @@ body {
   color: #142334;
   font-size: 13px;
   font-weight: 950;
+}
+
+.admin-search-console {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 34%),
+    linear-gradient(135deg, #ffffff, #f7fbff);
+  padding: 16px;
+}
+
+.admin-search-console-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-search-console-head h3 {
+  margin: 0;
+  color: #102033;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.admin-search-console-head p {
+  margin: 5px 0 0;
+  color: #607186;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.admin-search-console-head > span {
+  flex: 0 0 auto;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 8px 11px;
+}
+
+.admin-metric-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-metric-chart {
+  min-width: 0;
+  border: 1px solid rgba(50, 93, 128, 0.12);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 26px rgba(31, 44, 62, 0.07);
+  padding: 13px;
+}
+
+.admin-metric-chart header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-metric-chart h3 {
+  margin: 0;
+  color: #132235;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.admin-metric-chart p {
+  margin: 5px 0 0;
+  color: #6a7a8e;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.admin-metric-chart header strong {
+  flex: 0 0 auto;
+  color: #102033;
+  font-size: 21px;
+  font-weight: 950;
+  letter-spacing: -0.05em;
+}
+
+.admin-line-chart {
+  position: relative;
+  height: 128px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 15px;
+  background:
+    linear-gradient(rgba(50, 93, 128, 0.08) 1px, transparent 1px) 0 0 / 100% 25%,
+    linear-gradient(180deg, #f8fbff, #ffffff);
+}
+
+.admin-line-chart svg {
+  position: absolute;
+  inset: 12px 10px 22px;
+  z-index: 2;
+  width: calc(100% - 20px);
+  height: calc(100% - 34px);
+}
+
+.admin-line-chart polyline {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke: #2563eb;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-chart-columns {
+  position: absolute;
+  inset: 12px 10px 22px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(8px, 1fr);
+  align-items: end;
+  gap: 4px;
+}
+
+.admin-chart-columns span {
+  display: block;
+  min-height: 4px;
+  border-radius: 999px 999px 0 0;
+  background: rgba(37, 99, 235, 0.16);
+}
+
+.admin-metric-green .admin-line-chart polyline {
+  stroke: #13945e;
+}
+
+.admin-metric-green .admin-chart-columns span {
+  background: rgba(19, 148, 94, 0.16);
+}
+
+.admin-metric-amber .admin-line-chart polyline {
+  stroke: #d7902f;
+}
+
+.admin-metric-amber .admin-chart-columns span {
+  background: rgba(215, 144, 47, 0.18);
+}
+
+.admin-metric-purple .admin-line-chart polyline {
+  stroke: #7c3aed;
+}
+
+.admin-metric-purple .admin-chart-columns span {
+  background: rgba(124, 58, 237, 0.16);
+}
+
+.admin-metric-chart footer {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(8px, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.admin-metric-chart footer span {
+  min-height: 12px;
+  color: #8a96a6;
+  font-size: 9px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.admin-daily-metrics-table {
+  display: grid;
+  gap: 6px;
+  max-height: 330px;
+  overflow: auto;
+}
+
+.admin-daily-metrics-head,
+.admin-daily-metrics-row {
+  display: grid;
+  grid-template-columns: minmax(96px, 1fr) repeat(4, minmax(86px, 0.8fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-daily-metrics-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-radius: 12px;
+  background: #eaf2fb;
+  color: #1f3347;
+  font-size: 11px;
+  font-weight: 950;
+  padding: 9px 10px;
+}
+
+.admin-daily-metrics-row {
+  border: 1px solid rgba(50, 93, 128, 0.1);
+  border-radius: 12px;
+  background: #ffffff;
+  color: #2b3d50;
+  font-size: 12px;
+  font-weight: 850;
+  padding: 9px 10px;
+}
+
+.admin-daily-metrics-row strong {
+  color: #132235;
+  font-size: 12px;
 }
 
 .admin-visitor-chart,
