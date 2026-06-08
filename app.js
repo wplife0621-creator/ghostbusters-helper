@@ -1066,6 +1066,7 @@ function homeNoticeLink(type, id, row) {
   if (type === "essence") return `./essences.html?search=${encodeURIComponent(visibleReportName(row))}#results`;
   if (type === "numbers") return `./numbers.html?search=${encodeURIComponent(visibleReportName(row))}#numbersResults`;
   if (type === "guide") return `./guides.html?post=${encodeURIComponent(id)}`;
+  if (type === "spec") return `./spec-qa.html?search=${encodeURIComponent(textOf(row?.monster || row?.title || ""))}`;
   return `./builds.html?build=${encodeURIComponent(encodeBuild(normalizeRemoteBuild(row)))}`;
 }
 
@@ -1128,6 +1129,27 @@ function homeGuideNotices(rows) {
         summary: `${category} · ${textOf(row.author) || "익명"}`,
         date: row.updated_at || row.created_at,
         href: homeNoticeLink("guide", row.id, row),
+      };
+    });
+}
+
+function homeSpecNotices(rows) {
+  return rows
+    .filter((row) => !textOf(row.title).startsWith("__spec_answer__:")
+      && noticeWithinWeek(row.updated_at || row.created_at || row.updatedAt || row.createdAt))
+    .map((row) => {
+      const payload = typeof row.spec === "object" && row.spec ? row.spec : row;
+      const monster = textOf(payload.monster || row.monster || row.title) || "몬스터 미입력";
+      const character = textOf(payload.character || row.character || "캐릭터 미입력");
+      const level = textOf(payload.level || row.level || "스펙 미기록");
+      return {
+        id: row.id,
+        type: "spec",
+        label: "스펙 질문",
+        title: `${monster} 잡을 수 있나요?`,
+        summary: `${character} · ${level} · ${textOf(row.author) || "익명"}`,
+        date: row.updated_at || row.created_at || row.updatedAt || row.createdAt,
+        href: homeNoticeLink("spec", row.id, { ...row, monster }),
       };
     });
 }
@@ -1196,21 +1218,24 @@ function renderHomePopularGuides(rows) {
 }
 
 async function loadHomeNotices() {
+  let usedStaticSnapshot = false;
   try {
-    const [reports, builds, guides] = await Promise.all([
+    const [reports, builds, guides, specs] = await Promise.all([
       fetchStaticRows("reports-index"),
       fetchStaticRows("builds-index"),
       fetchStaticRows("guides-index"),
+      fetchStaticRows("spec-questions-index"),
     ]);
     homeNotices = [
       ...reports.map(noticeFromReport).filter(Boolean),
       ...homeBuildNotices(builds),
       ...homeGuideNotices(guides),
+      ...homeSpecNotices(specs),
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
     renderHomePopularGuides(guides);
-    els.homeNoticeStatus.textContent = "가벼운 공개 목록으로 최근 소식을 표시합니다.";
+    els.homeNoticeStatus.textContent = "가벼운 공개 목록을 먼저 보여주고, 최신 소식을 확인하는 중입니다.";
     renderHomeNotices();
-    return;
+    usedStaticSnapshot = true;
   } catch {
     // Static data is the free-tier path. Fall back to Firestore when the snapshot is not available yet.
   }
@@ -1227,18 +1252,26 @@ async function loadHomeNotices() {
     fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?select=*&order=updated_at.desc`, {
       headers: { apikey: guideBackend.anonKey, Authorization: `Bearer ${guideBackend.anonKey}` },
     }),
+    fetch(`${buildBackend.url}/rest/v1/${textOf(siteConfig.specQuestionTable) || "spec_questions"}?select=*&order=updated_at.desc&limit=200`, {
+      headers: { apikey: buildBackend.anonKey, Authorization: `Bearer ${buildBackend.anonKey}` },
+    }),
   ]);
-  const [reports, builds, guides] = await Promise.all(requests.map(async (request) => {
+  const [reports, builds, guides, specs] = await Promise.all(requests.map(async (request) => {
     if (request.status !== "fulfilled" || !request.value.ok) return [];
     return request.value.json();
   }));
+  const failedCount = requests.filter((request) => request.status !== "fulfilled" || !request.value.ok).length;
+  if (usedStaticSnapshot && failedCount === requests.length) {
+    els.homeNoticeStatus.textContent = "가벼운 공개 목록으로 최근 소식을 표시합니다. 최신 소식은 잠시 후 다시 확인합니다.";
+    return;
+  }
   homeNotices = [
     ...reports.map(noticeFromReport).filter(Boolean),
     ...homeBuildNotices(builds),
     ...homeGuideNotices(guides),
+    ...homeSpecNotices(specs),
   ].sort((a, b) => new Date(b.date) - new Date(a.date));
   renderHomePopularGuides(guides);
-  const failedCount = requests.filter((request) => request.status !== "fulfilled" || !request.value.ok).length;
   els.homeNoticeStatus.textContent = failedCount
     ? "일부 최근 소식을 불러오지 못했습니다. 잠시 후 다시 확인해주세요."
     : "항목을 누르면 해당 정보 화면으로 바로 이동합니다.";

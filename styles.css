@@ -5811,6 +5811,7 @@ body::after {
 .home-notice-count.type-numbers { border-left-color: #8e4f2d; }
 .home-notice-count.type-build { border-left-color: #a6822d; }
 .home-notice-count.type-guide { border-left-color: #9f2d24; }
+.home-notice-count.type-spec { border-left-color: #2563eb; }
 
 .home-notice-item::before,
 .guide-row::before,
@@ -5863,6 +5864,11 @@ body::after {
 .home-notice-item.type-guide .home-notice-type {
   background: linear-gradient(180deg, #ffd1ad, #d7854d);
   color: #6a2415;
+}
+
+.home-notice-item.type-spec .home-notice-type {
+  background: linear-gradient(180deg, #dbeafe, #93c5fd);
+  color: #123f8c;
 }
 
 .home-hero {
