@@ -5534,8 +5534,25 @@ function adminFilterStayDays(rows) {
 }
 
 function adminFilterStayPages(rows) {
-  if (!adminStatsRangeDays) return rows;
-  return rows;
+  return adminEnsureTrackedPages(rows);
+}
+
+function adminEnsureTrackedPages(rows) {
+  const output = Array.isArray(rows) ? [...rows] : [];
+  const requiredPaths = ["/maze-log.html"];
+  requiredPaths.forEach((path) => {
+    const normalizedPath = normalizeAdminPagePath(path);
+    if (output.some((row) => normalizeAdminPagePath(row.path) === normalizedPath)) return;
+    output.push({
+      path: normalizedPath,
+      label: adminPageLabel(normalizedPath),
+      seconds: 0,
+      averageSeconds: 0,
+      accounts: 0,
+      records: 0,
+    });
+  });
+  return output.sort((a, b) => Number(b.seconds || 0) - Number(a.seconds || 0));
 }
 
 function adminDateRangeKeys() {
@@ -5859,11 +5876,14 @@ function adminPageStayTableMarkup(rows) {
   if (!rows?.length) {
     return `<div class="empty compact-empty">페이지별 체류 기록이 아직 없습니다. 로그인 사용자가 사이트에 머문 뒤부터 집계됩니다.</div>`;
   }
+  const topRow = rows.find((row) => Number(row.seconds || 0) > 0);
   return `
-    <div class="admin-page-stay-summary">
-      <strong>가장 오래 머문 페이지: ${escapeHtml(rows[0].label)}</strong>
-      <span>총 ${escapeHtml(adminFormatMinutes(rows[0].seconds))} · 평균 ${escapeHtml(adminFormatMinutes(rows[0].averageSeconds))} · 계정 ${rows[0].accounts}명</span>
-    </div>
+    ${topRow ? `
+      <div class="admin-page-stay-summary">
+        <strong>가장 오래 머문 페이지: ${escapeHtml(topRow.label)}</strong>
+        <span>총 ${escapeHtml(adminFormatMinutes(topRow.seconds))} · 평균 ${escapeHtml(adminFormatMinutes(topRow.averageSeconds))} · 계정 ${topRow.accounts}명</span>
+      </div>
+    ` : `<div class="empty compact-empty">아직 체류 시간이 누적된 페이지가 없습니다. 미궁 일지는 추적 대상에 포함되어 있습니다.</div>`}
     <div class="admin-page-stay-table">
       <div class="admin-page-stay-head">
         <span>페이지</span>
