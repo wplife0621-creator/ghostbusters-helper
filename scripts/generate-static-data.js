@@ -12,7 +12,7 @@ const collections = {
 const backupDir = path.join(process.cwd(), "migration-backups");
 const arrayMarker = "__dukhubustersArray";
 const sessionTimeMarker = "__session_time__";
-const visitorMarkers = new Set(["__visitor_total__", "__visitor_daily__"]);
+const visitorMarkers = new Set(["__visitor_total__", "__visitor_daily__", "__location_settings__"]);
 
 function fromFirestoreValue(value) {
   if (!value || typeof value !== "object") return null;

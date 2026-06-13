@@ -93,6 +93,52 @@
       <div id="approvedReports" class="pending-reports"></div>
     </section>
 
+    <section id="admin-locations" class="panel report-panel page-panel admin-review-section">
+      <div class="review-head">
+        <strong>도감 설정</strong>
+      </div>
+      <div class="admin-location-editor">
+        <form id="adminFloorForm" class="admin-location-form">
+          <input id="adminFloorId" type="hidden">
+          <label class="field">
+            <span>층 이름</span>
+            <input id="adminFloorName" placeholder="예: 7층 균열" required>
+          </label>
+          <label class="field">
+            <span>정렬</span>
+            <input id="adminFloorOrder" type="number" min="0" step="1" placeholder="예: 70">
+          </label>
+          <label class="admin-location-check">
+            <input id="adminFloorEnabled" type="checkbox" checked>
+            <span>활성</span>
+          </label>
+          <button type="submit">층 저장</button>
+        </form>
+        <form id="adminAreaForm" class="admin-location-form">
+          <input id="adminAreaId" type="hidden">
+          <label class="field">
+            <span>소속 층</span>
+            <select id="adminAreaFloor" required></select>
+          </label>
+          <label class="field">
+            <span>구역 이름</span>
+            <input id="adminAreaName" placeholder="예: 신규 성소" required>
+          </label>
+          <label class="field">
+            <span>정렬</span>
+            <input id="adminAreaOrder" type="number" min="0" step="1" placeholder="예: 10">
+          </label>
+          <label class="admin-location-check">
+            <input id="adminAreaEnabled" type="checkbox" checked>
+            <span>활성</span>
+          </label>
+          <button type="submit">구역 저장</button>
+        </form>
+      </div>
+      <p id="adminLocationStatus" class="build-sync-status"></p>
+      <div id="adminLocationList" class="admin-location-list"></div>
+    </section>
+
     <section id="admin-guides" class="panel report-panel page-panel admin-review-section">
       <div class="review-head">
         <strong id="adminGuideCount">게시글/댓글 0건</strong>
@@ -213,6 +259,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-firebase-nickname-fix"></script>
-  <script src="./app.js?v=20260614-admin-detail-edit"></script>
+  <script src="./app.js?v=20260614-location-settings"></script>
 </body>
 </html>

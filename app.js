@@ -148,24 +148,22 @@ const effectSortDefinitions = {
   },
 };
 
-const floorOptions = ["1층", "1층 균열", "2층", "2층 균열", "3층", "3층 균열", "4층", "4층 균열", "5층", "5층 균열", "6층"];
-const crackAreasByFloor = {
+const defaultFloorOptions = ["1층", "1층 균열", "2층", "2층 균열", "3층", "3층 균열", "4층", "4층 균열", "5층", "5층 균열", "6층"];
+const defaultCrackAreasByFloor = {
   "1층 균열": ["강철의 묘", "녹색 탄광", "빙하굴", "핏빛 성채"],
   "2층 균열": ["검귀의 동굴", "망자의제단", "안개의 거석 폐허", "총포사막", "홉고블린 요새"],
   "3층 균열": ["백색신전"],
   "4층 균열": ["천공신탁소"],
   "5층 균열": ["결빙의 성소"],
 };
-const areaFloorPairs = [];
-Object.entries(crackAreasByFloor).forEach(([floor, areas]) => {
-  areas.forEach((area) => areaFloorPairs.push([normalizeLocationName(area), floor]));
-});
-const areaFloorLookup = new Map(areaFloorPairs);
-const areaLabelPairs = [];
-Object.values(crackAreasByFloor).forEach((areas) => {
-  areas.forEach((area) => areaLabelPairs.push([normalizeLocationName(area), area]));
-});
-const areaLabelLookup = new Map(areaLabelPairs);
+const locationSettingsMarker = "__location_settings__";
+const locationSettingsId = "site-location-settings";
+let floorOptions = [...defaultFloorOptions];
+let crackAreasByFloor = { ...defaultCrackAreasByFloor };
+let areaFloorLookup = new Map();
+let areaLabelLookup = new Map();
+let locationSettings = defaultLocationSettings();
+refreshLocationLookups();
 
 const els = {
   search: document.querySelector("#searchInput"),
@@ -276,6 +274,19 @@ const els = {
   adminExportGuides: document.querySelector("#adminExportGuides"),
   adminExportBuilds: document.querySelector("#adminExportBuilds"),
   adminExportAll: document.querySelector("#adminExportAll"),
+  adminFloorForm: document.querySelector("#adminFloorForm"),
+  adminFloorId: document.querySelector("#adminFloorId"),
+  adminFloorName: document.querySelector("#adminFloorName"),
+  adminFloorOrder: document.querySelector("#adminFloorOrder"),
+  adminFloorEnabled: document.querySelector("#adminFloorEnabled"),
+  adminAreaForm: document.querySelector("#adminAreaForm"),
+  adminAreaId: document.querySelector("#adminAreaId"),
+  adminAreaFloor: document.querySelector("#adminAreaFloor"),
+  adminAreaName: document.querySelector("#adminAreaName"),
+  adminAreaOrder: document.querySelector("#adminAreaOrder"),
+  adminAreaEnabled: document.querySelector("#adminAreaEnabled"),
+  adminLocationStatus: document.querySelector("#adminLocationStatus"),
+  adminLocationList: document.querySelector("#adminLocationList"),
   adminDetailModal: document.querySelector("#adminDetailModal"),
   adminDetailForm: document.querySelector("#adminDetailForm"),
   adminDetailClose: document.querySelector("#adminDetailClose"),
@@ -426,6 +437,87 @@ function normalizeLocationName(value) {
 
 function sameLocationName(left, right) {
   return normalizeLocationName(left) === normalizeLocationName(right);
+}
+
+function defaultLocationSettings() {
+  const floors = defaultFloorOptions.map((name, index) => ({
+    id: `floor-${index + 1}`,
+    name,
+    order: (index + 1) * 10,
+    enabled: true,
+  }));
+  const areas = [];
+  Object.entries(defaultCrackAreasByFloor).forEach(([floor, items]) => {
+    items.forEach((name, index) => {
+      areas.push({
+        id: `area-${normalizeLocationName(floor)}-${index + 1}`,
+        name,
+        floor,
+        order: (index + 1) * 10,
+        enabled: true,
+      });
+    });
+  });
+  return { floors, areas, updatedAt: "" };
+}
+
+function normalizeLocationSettings(value) {
+  const fallback = defaultLocationSettings();
+  const rawFloors = Array.isArray(value?.floors) ? value.floors : fallback.floors;
+  const rawAreas = Array.isArray(value?.areas) ? value.areas : fallback.areas;
+  const floors = rawFloors
+    .map((floor, index) => ({
+      id: textOf(floor.id) || `floor-${index + 1}`,
+      name: textOf(floor.name),
+      order: Number(floor.order || (index + 1) * 10),
+      enabled: floor.enabled !== false,
+    }))
+    .filter((floor) => floor.name);
+  const areas = rawAreas
+    .map((area, index) => ({
+      id: textOf(area.id) || `area-${index + 1}`,
+      name: textOf(area.name),
+      floor: textOf(area.floor || area.floorName),
+      order: Number(area.order || (index + 1) * 10),
+      enabled: area.enabled !== false,
+    }))
+    .filter((area) => area.name && area.floor);
+  return {
+    floors: floors.length ? floors : fallback.floors,
+    areas,
+    updatedAt: textOf(value?.updatedAt),
+  };
+}
+
+function applyLocationSettings(settings) {
+  locationSettings = normalizeLocationSettings(settings);
+  floorOptions = locationSettings.floors
+    .filter((floor) => floor.enabled)
+    .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko"))
+    .map((floor) => floor.name);
+  const grouped = {};
+  locationSettings.areas
+    .filter((area) => area.enabled)
+    .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko"))
+    .forEach((area) => {
+      if (!grouped[area.floor]) grouped[area.floor] = [];
+      grouped[area.floor].push(area.name);
+    });
+  crackAreasByFloor = grouped;
+  refreshLocationLookups();
+}
+
+function refreshLocationLookups() {
+  const areaFloorPairs = [];
+  Object.entries(crackAreasByFloor).forEach(([floor, areas]) => {
+    areas.forEach((area) => areaFloorPairs.push([normalizeLocationName(area), floor]));
+  });
+  areaFloorLookup = new Map(areaFloorPairs);
+  const areaLabelPairs = [];
+  Object.values(crackAreasByFloor).forEach((areas) => {
+    areas.forEach((area) => areaLabelPairs.push([normalizeLocationName(area), area]));
+  });
+  areaLabelLookup = new Map(areaLabelPairs);
 }
 
 function sailingValue(value) {
@@ -1032,8 +1124,9 @@ function statValue(row, statName) {
   return 0;
 }
 
-function init() {
+async function init() {
   revealCurrentNavItem();
+  await loadLocationSettingsForPage();
   if (els.homeNoticeList) initHomeNotices();
   if (els.search) initEssences();
   if (els.numbersResults) initNumbers();
@@ -1042,6 +1135,28 @@ function init() {
   if (els.buildForm) initBuilds();
   if (els.timeResult) initMazeTime();
   if (els.visitorToday) recordVisit();
+}
+
+function pageUsesLocationSettings() {
+  return Boolean(els.search || els.numbersResults || els.reportForm || els.pendingReports || els.adminDetailModal);
+}
+
+async function loadLocationSettingsForPage() {
+  if (!pageUsesLocationSettings() || !hasPublicBuildStore()) {
+    applyLocationSettings(locationSettings);
+    return;
+  }
+  try {
+    const response = await fetch(buildStoreUrl(`?select=*&title=eq.${encodeURIComponent(locationSettingsMarker)}&limit=1`), {
+      headers: buildStoreHeaders(),
+    });
+    if (!response.ok) throw new Error(`location settings load failed: ${response.status}`);
+    const rows = await response.json();
+    const payload = rows[0]?.note ? JSON.parse(rows[0].note) : null;
+    applyLocationSettings(payload || locationSettings);
+  } catch {
+    applyLocationSettings(locationSettings);
+  }
 }
 
 function initHomeNotices() {
@@ -1113,6 +1228,7 @@ function homeBuildNotices(rows) {
   return rows
     .filter((row) => row.title !== buildLikeMarker && row.title !== buildDeleteMarker
       && row.title !== buildReviewMarker && row.title !== buildReportMarker
+      && row.title !== locationSettingsMarker
       && row.title !== visitorBuildMarkers.total && row.title !== visitorBuildMarkers.daily
       && !deletedIds.has(row.id) && noticeWithinWeek(row.created_at || row.createdAt))
     .map((row) => {
@@ -1513,11 +1629,13 @@ function initAdminReview() {
   els.adminExportGuides?.addEventListener("click", () => exportAdminData("guides"));
   els.adminExportBuilds?.addEventListener("click", () => exportAdminData("builds"));
   els.adminExportAll?.addEventListener("click", () => exportAdminData("all"));
+  initAdminLocationEditor();
   initAdminDetailModal();
   window.addEventListener("dukhubusters:auth", (event) => updateAdminAccess(event.detail?.user));
   updateAdminAccess(window.DUKHUBUSTERS_AUTH?.getUser?.());
   renderPendingReports();
   renderApprovedReports();
+  renderAdminLocations();
   loadPublicReports();
   loadAdminCenter();
 }
@@ -1908,7 +2026,7 @@ async function fetchStaticRows(name) {
 }
 
 function publicBuildRowsQuery(limit = 2000) {
-  const excludedTitles = [visitorBuildMarkers.total, visitorBuildMarkers.daily, sessionTimeMarker]
+  const excludedTitles = [visitorBuildMarkers.total, visitorBuildMarkers.daily, sessionTimeMarker, locationSettingsMarker]
     .map((title) => `title=neq.${encodeURIComponent(title)}`)
     .join("&");
   return `?select=*&${excludedTitles}&order=created_at.desc&limit=${limit}`;
@@ -1932,7 +2050,10 @@ function normalizeRemoteBuild(row) {
 }
 
 function isVisitorBuild(build) {
-  return build?.title === visitorBuildMarkers.total || build?.title === visitorBuildMarkers.daily || build?.title === sessionTimeMarker;
+  return build?.title === visitorBuildMarkers.total
+    || build?.title === visitorBuildMarkers.daily
+    || build?.title === sessionTimeMarker
+    || build?.title === locationSettingsMarker;
 }
 
 function isBuildLike(build) {
@@ -5155,6 +5276,209 @@ function renderApprovedReports() {
       </article>
     `).join("")
     : `<div class="empty compact-empty">승인되어 등록된 제보 정수가 없습니다.</div>`;
+}
+
+function initAdminLocationEditor() {
+  if (!els.adminLocationList) return;
+  els.adminFloorForm?.addEventListener("submit", submitAdminFloor);
+  els.adminAreaForm?.addEventListener("submit", submitAdminArea);
+  els.adminLocationList.addEventListener("click", handleAdminLocationAction);
+}
+
+function setAdminLocationStatus(message, mode = "") {
+  if (!els.adminLocationStatus) return;
+  els.adminLocationStatus.textContent = message;
+  els.adminLocationStatus.className = `build-sync-status ${mode}`.trim();
+}
+
+function renderAdminLocations() {
+  if (!els.adminLocationList) return;
+  renderAdminAreaFloorOptions();
+  const floors = [...locationSettings.floors].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko"));
+  const areas = [...locationSettings.areas].sort((a, b) => a.floor.localeCompare(b.floor, "ko") || a.order - b.order || a.name.localeCompare(b.name, "ko"));
+  els.adminLocationList.innerHTML = `
+    <div class="admin-location-column">
+      <strong>층 목록</strong>
+      ${floors.map((floor) => `
+        <article class="admin-location-card ${floor.enabled ? "" : "is-disabled"}" data-location-kind="floor" data-location-id="${escapeHtml(floor.id)}">
+          <div>
+            <b>${escapeHtml(floor.name)}</b>
+            <span>정렬 ${floor.order} · ${floor.enabled ? "활성" : "비활성"}</span>
+          </div>
+          <div class="pending-actions">
+            <button type="button" data-location-action="edit">수정</button>
+            <button type="button" data-location-action="delete">삭제</button>
+          </div>
+        </article>
+      `).join("") || `<div class="empty compact-empty">등록된 층이 없습니다.</div>`}
+    </div>
+    <div class="admin-location-column">
+      <strong>구역 목록</strong>
+      ${areas.map((area) => `
+        <article class="admin-location-card ${area.enabled ? "" : "is-disabled"}" data-location-kind="area" data-location-id="${escapeHtml(area.id)}">
+          <div>
+            <b>${escapeHtml(area.name)}</b>
+            <span>${escapeHtml(area.floor)} · 정렬 ${area.order} · ${area.enabled ? "활성" : "비활성"}</span>
+          </div>
+          <div class="pending-actions">
+            <button type="button" data-location-action="edit">수정</button>
+            <button type="button" data-location-action="delete">삭제</button>
+          </div>
+        </article>
+      `).join("") || `<div class="empty compact-empty">등록된 구역이 없습니다.</div>`}
+    </div>
+  `;
+}
+
+function renderAdminAreaFloorOptions() {
+  if (!els.adminAreaFloor) return;
+  els.adminAreaFloor.innerHTML = [...locationSettings.floors]
+    .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko"))
+    .map((floor) => `<option value="${escapeHtml(floor.name)}">${escapeHtml(floor.name)}${floor.enabled ? "" : " (비활성)"}</option>`)
+    .join("");
+}
+
+async function submitAdminFloor(event) {
+  event.preventDefault();
+  const name = textOf(els.adminFloorName.value);
+  if (!name) return;
+  const id = textOf(els.adminFloorId.value) || `floor-${Date.now()}`;
+  const previousFloor = locationSettings.floors.find((floor) => floor.id === id);
+  const order = Number(els.adminFloorOrder.value || ((locationSettings.floors.length + 1) * 10));
+  const next = normalizeLocationSettings({
+    ...locationSettings,
+    floors: [
+      ...locationSettings.floors.filter((floor) => floor.id !== id),
+      { id, name, order, enabled: Boolean(els.adminFloorEnabled.checked) },
+    ],
+    areas: locationSettings.areas.map((area) => previousFloor && area.floor === previousFloor.name ? { ...area, floor: name } : area),
+  });
+  await saveAdminLocationSettings(next);
+  els.adminFloorForm.reset();
+  els.adminFloorId.value = "";
+  els.adminFloorEnabled.checked = true;
+}
+
+async function submitAdminArea(event) {
+  event.preventDefault();
+  const name = textOf(els.adminAreaName.value);
+  const floor = textOf(els.adminAreaFloor.value);
+  if (!name || !floor) return;
+  const id = textOf(els.adminAreaId.value) || `area-${Date.now()}`;
+  const order = Number(els.adminAreaOrder.value || ((locationSettings.areas.filter((area) => area.floor === floor).length + 1) * 10));
+  const next = normalizeLocationSettings({
+    ...locationSettings,
+    areas: [
+      ...locationSettings.areas.filter((area) => area.id !== id),
+      { id, name, floor, order, enabled: Boolean(els.adminAreaEnabled.checked) },
+    ],
+  });
+  await saveAdminLocationSettings(next);
+  els.adminAreaForm.reset();
+  els.adminAreaId.value = "";
+  els.adminAreaEnabled.checked = true;
+  renderAdminAreaFloorOptions();
+}
+
+async function handleAdminLocationAction(event) {
+  const button = event.target.closest("button[data-location-action]");
+  if (!button) return;
+  const card = button.closest("[data-location-kind][data-location-id]");
+  const kind = card?.dataset.locationKind;
+  const id = card?.dataset.locationId;
+  if (!kind || !id) return;
+  if (kind === "floor") {
+    const floor = locationSettings.floors.find((item) => item.id === id);
+    if (!floor) return;
+    if (button.dataset.locationAction === "edit") {
+      els.adminFloorId.value = floor.id;
+      els.adminFloorName.value = floor.name;
+      els.adminFloorOrder.value = floor.order;
+      els.adminFloorEnabled.checked = floor.enabled;
+      els.adminFloorName.focus();
+      return;
+    }
+    if (!confirm(`${floor.name} 층 설정을 삭제할까요? 이 층에 연결된 구역도 함께 제거됩니다.`)) return;
+    const next = normalizeLocationSettings({
+      ...locationSettings,
+      floors: locationSettings.floors.filter((item) => item.id !== id),
+      areas: locationSettings.areas.filter((area) => area.floor !== floor.name),
+    });
+    await saveAdminLocationSettings(next);
+  } else {
+    const area = locationSettings.areas.find((item) => item.id === id);
+    if (!area) return;
+    if (button.dataset.locationAction === "edit") {
+      els.adminAreaId.value = area.id;
+      els.adminAreaFloor.value = area.floor;
+      els.adminAreaName.value = area.name;
+      els.adminAreaOrder.value = area.order;
+      els.adminAreaEnabled.checked = area.enabled;
+      els.adminAreaName.focus();
+      return;
+    }
+    if (!confirm(`${area.name} 구역 설정을 삭제할까요?`)) return;
+    const next = normalizeLocationSettings({
+      ...locationSettings,
+      areas: locationSettings.areas.filter((item) => item.id !== id),
+    });
+    await saveAdminLocationSettings(next);
+  }
+}
+
+async function saveAdminLocationSettings(nextSettings) {
+  applyLocationSettings(nextSettings);
+  renderAdminLocations();
+  if (els.search) {
+    refreshControls();
+    render();
+  }
+  if (els.numbersResults) {
+    refreshNumbersControls();
+    renderNumbers();
+  }
+  if (els.reportFloor) {
+    placeholderOptionList(els.reportFloor, floorOptionValues(essenceRows), "층 선택");
+    optionList(els.reportNumberSourceFloor, floorOptions, "전체 층");
+    refreshReportAreaOptions();
+    refreshReportNumberSourceOptions();
+  }
+  fillAdminDetailOptions();
+  setAdminLocationStatus("도감 설정을 저장하는 중입니다.", "is-online");
+  const payload = { ...locationSettings, updatedAt: new Date().toISOString() };
+  applyLocationSettings(payload);
+  try {
+    if (hasPublicBuildStore()) await saveLocationSettingsRemote(payload);
+    setAdminLocationStatus("도감 설정이 저장되었습니다.", "is-online");
+  } catch {
+    setAdminLocationStatus("원격 저장에 실패했습니다. 현재 화면에는 임시 반영되었습니다.", "is-offline");
+  }
+}
+
+async function saveLocationSettingsRemote(settings) {
+  const row = {
+    id: locationSettingsId,
+    title: locationSettingsMarker,
+    author: "system",
+    members: [],
+    note: JSON.stringify(settings),
+    created_at: new Date().toISOString(),
+  };
+  const patch = await fetch(buildStoreUrl(`?id=eq.${encodeURIComponent(locationSettingsId)}`), {
+    method: "PATCH",
+    headers: buildStoreHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify(row),
+  });
+  if (patch.ok) {
+    const rows = await patch.json();
+    if (Array.isArray(rows) && rows.length) return;
+  }
+  const response = await fetch(buildStoreUrl(), {
+    method: "POST",
+    headers: buildStoreHeaders({ Prefer: "resolution=merge-duplicates,return=minimal" }),
+    body: JSON.stringify(row),
+  });
+  if (!response.ok && response.status !== 409) throw new Error(`location settings save failed: ${response.status}`);
 }
 
 async function copyApprovedRows() {
