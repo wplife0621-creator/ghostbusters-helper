@@ -1196,7 +1196,6 @@ function renderHomePopularGuides(rows) {
 }
 
 async function loadHomeNotices() {
-  let usedStaticSnapshot = false;
   try {
     const [reports, builds, guides] = await Promise.all([
       fetchStaticRows("reports-index"),
@@ -1209,45 +1208,14 @@ async function loadHomeNotices() {
       ...homeGuideNotices(guides),
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
     renderHomePopularGuides(guides);
-    els.homeNoticeStatus.textContent = "가벼운 공개 목록을 먼저 보여주고, 최신 소식을 확인하는 중입니다.";
+    els.homeNoticeStatus.textContent = "정적 공개 목록 기준으로 빠르게 표시합니다. 최신 반영은 정적 데이터 갱신 후 적용됩니다.";
     renderHomeNotices();
-    usedStaticSnapshot = true;
   } catch {
-    // Static data is the free-tier path. Fall back to Firestore when the snapshot is not available yet.
-  }
-  if (!reportBackend.url || !reportBackend.anonKey || !buildBackend.url || !buildBackend.anonKey
-    || !guideBackend.url || !guideBackend.anonKey) {
-    els.homeNoticeStatus.textContent = "공개 저장소가 연결되면 최근 공지사항이 표시됩니다.";
+    homeNotices = [];
+    els.homeNoticeStatus.textContent = "정적 공개 목록을 불러오지 못했습니다. 잠시 후 다시 확인해주세요.";
     renderHomePopularGuides([]);
     renderHomeNotices();
-    return;
   }
-  const requests = await Promise.allSettled([
-    fetch(reportStoreUrl("?select=*&status=eq.approved&order=reviewed_at.desc"), { headers: reportStoreHeaders() }),
-    fetch(buildStoreUrl(publicBuildRowsQuery()), { headers: buildStoreHeaders() }),
-    fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?select=*&order=updated_at.desc`, {
-      headers: { apikey: guideBackend.anonKey, Authorization: `Bearer ${guideBackend.anonKey}` },
-    }),
-  ]);
-  const [reports, builds, guides] = await Promise.all(requests.map(async (request) => {
-    if (request.status !== "fulfilled" || !request.value.ok) return [];
-    return request.value.json();
-  }));
-  const failedCount = requests.filter((request) => request.status !== "fulfilled" || !request.value.ok).length;
-  if (usedStaticSnapshot && failedCount === requests.length) {
-    els.homeNoticeStatus.textContent = "가벼운 공개 목록으로 최근 소식을 표시합니다. 최신 소식은 잠시 후 다시 확인합니다.";
-    return;
-  }
-  homeNotices = [
-    ...reports.map(noticeFromReport).filter(Boolean),
-    ...homeBuildNotices(builds),
-    ...homeGuideNotices(guides),
-  ].sort((a, b) => new Date(b.date) - new Date(a.date));
-  renderHomePopularGuides(guides);
-  els.homeNoticeStatus.textContent = failedCount
-    ? "일부 최근 소식을 불러오지 못했습니다. 잠시 후 다시 확인해주세요."
-    : "항목을 누르면 해당 정보 화면으로 바로 이동합니다.";
-  renderHomeNotices();
 }
 
 function renderHomeNotices() {
