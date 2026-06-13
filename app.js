@@ -257,6 +257,7 @@ const els = {
   adminUnlock: document.querySelector("#adminUnlock"),
   adminLock: document.querySelector("#adminLock"),
   adminStatus: document.querySelector("#adminStatus"),
+  adminTabs: document.querySelector("#adminTabs"),
   adminStatsGrid: document.querySelector("#adminStatsGrid"),
   adminGuideCount: document.querySelector("#adminGuideCount"),
   adminGuideList: document.querySelector("#adminGuideList"),
@@ -387,6 +388,7 @@ let homeNotices = [];
 let activeHomeNoticeFilter = "all";
 let activeHomeNoticePage = 1;
 const homeNoticePageSize = 10;
+let activeAdminTab = "dashboard";
 let activeNumbersPage = 1;
 const numbersPageSize = 10;
 const statNoneLabel = "스탯 선택 안 함";
@@ -1616,6 +1618,7 @@ function initReport() {
 
 function initAdminReview() {
   adminUnlocked = false;
+  initAdminTabs();
   els.pendingReports.addEventListener("click", handlePendingAction);
   els.approvedReports?.addEventListener("click", handleApprovedAction);
   els.copyApproved?.addEventListener("click", copyApprovedRows);
@@ -1638,6 +1641,64 @@ function initAdminReview() {
   renderAdminLocations();
   loadPublicReports();
   loadAdminCenter();
+}
+
+function initAdminTabs() {
+  if (!els.adminTabs) return;
+  const fromHash = adminTabForHash(window.location.hash);
+  if (fromHash) activeAdminTab = fromHash;
+  els.adminTabs.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-admin-tab]");
+    if (!button) return;
+    setAdminTab(button.dataset.adminTab);
+  });
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[href^='#admin-']");
+    if (!link) return;
+    const tab = adminTabForHash(link.getAttribute("href"));
+    if (tab) setAdminTab(tab, { updateHash: false });
+  });
+  window.addEventListener("hashchange", () => {
+    const tab = adminTabForHash(window.location.hash);
+    if (tab) setAdminTab(tab, { updateHash: false });
+  });
+  setAdminTab(activeAdminTab, { updateHash: false });
+}
+
+function adminTabForHash(hash) {
+  const id = textOf(hash).replace(/^#/, "");
+  if (id.startsWith("admin-tab-")) return id.slice("admin-tab-".length) || "";
+  const map = {
+    "admin-pending": "tasks",
+    "admin-approved": "codex",
+    "admin-locations": "codex",
+    "admin-guides": "community",
+    "admin-builds": "community",
+    "admin-deleted-builds": "community",
+    "admin-users": "users",
+    "admin-stats": "stats",
+    "admin-data-health": "system",
+    "admin-quality": "system",
+    "admin-backup": "system",
+  };
+  return map[id] || "";
+}
+
+function setAdminTab(tab, options = {}) {
+  if (!els.adminTabs) return;
+  activeAdminTab = tab || "dashboard";
+  els.adminTabs.querySelectorAll("[data-admin-tab]").forEach((button) => {
+    const active = button.dataset.adminTab === activeAdminTab;
+    button.classList.toggle("is-active", active);
+    if (active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
+  document.querySelectorAll("[data-admin-panel]").forEach((section) => {
+    section.hidden = section.dataset.adminPanel !== activeAdminTab;
+  });
+  if (options.updateHash !== false) {
+    history.replaceState(null, "", `#admin-tab-${activeAdminTab}`);
+  }
 }
 
 function initBuilds() {

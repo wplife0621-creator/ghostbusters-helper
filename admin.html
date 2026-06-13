@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>관리자 센터 · 겜바바 버스터즈</title>
-  <link rel="stylesheet" href="./styles.css?v=20260614-admin-detail-edit">
+  <link rel="stylesheet" href="./styles.css?v=20260614-admin-tabs">
   <style>
     body.admin-review-page .admin-review-layout {
       width: min(1480px, calc(100% - 32px));
@@ -57,7 +57,17 @@
       <p id="reportSyncStatus" class="build-sync-status"></p>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section admin-dashboard">
+    <nav id="adminTabs" class="admin-tabs panel report-panel page-panel admin-review-section" aria-label="관리자 메뉴">
+      <button type="button" class="is-active" data-admin-tab="dashboard">대시보드</button>
+      <button type="button" data-admin-tab="tasks">처리할 일</button>
+      <button type="button" data-admin-tab="codex">등록/도감</button>
+      <button type="button" data-admin-tab="community">커뮤니티</button>
+      <button type="button" data-admin-tab="users">사용자</button>
+      <button type="button" data-admin-tab="stats">통계</button>
+      <button type="button" data-admin-tab="system">점검/백업</button>
+    </nav>
+
+    <section class="panel report-panel page-panel admin-review-section admin-dashboard" data-admin-panel="dashboard">
       <div class="section-title compact-title">
         <h2>운영 현황</h2>
         <p>지금 손봐야 할 항목을 빠르게 확인합니다.</p>
@@ -70,7 +80,7 @@
       </div>
     </section>
 
-    <section class="panel report-panel page-panel admin-review-section admin-command-center">
+    <section class="panel report-panel page-panel admin-review-section admin-command-center" data-admin-panel="dashboard">
       <div class="section-title compact-title">
         <h2>한눈 운영 브리핑</h2>
         <p>오늘 처리할 일, 이상 신호, 핵심 활동을 먼저 보여줍니다. 각 항목을 누르면 해당 관리 구간으로 이동합니다.</p>
@@ -78,7 +88,7 @@
       <div id="adminOpsBrief" class="admin-command-grid"></div>
     </section>
 
-    <section id="admin-pending" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-pending" class="panel report-panel page-panel admin-review-section" data-admin-panel="tasks">
       <div class="review-head">
         <strong id="pendingCount">검수 대기 0건</strong>
         <button id="copyApproved" type="button" hidden>승인 데이터 복사</button>
@@ -86,14 +96,14 @@
       <div id="pendingReports" class="pending-reports"></div>
     </section>
 
-    <section id="admin-approved" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-approved" class="panel report-panel page-panel admin-review-section" data-admin-panel="codex">
       <div class="review-head">
         <strong id="approvedCount">등록된 정보 0건</strong>
       </div>
       <div id="approvedReports" class="pending-reports"></div>
     </section>
 
-    <section id="admin-locations" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-locations" class="panel report-panel page-panel admin-review-section" data-admin-panel="codex">
       <div class="review-head">
         <strong>도감 설정</strong>
       </div>
@@ -139,7 +149,7 @@
       <div id="adminLocationList" class="admin-location-list"></div>
     </section>
 
-    <section id="admin-guides" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-guides" class="panel report-panel page-panel admin-review-section" data-admin-panel="community">
       <div class="review-head">
         <strong id="adminGuideCount">게시글/댓글 0건</strong>
         <button id="adminRefreshCenter" type="button">새로고침</button>
@@ -147,49 +157,49 @@
       <div id="adminGuideList" class="admin-management-list"></div>
     </section>
 
-    <section id="admin-builds" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-builds" class="panel report-panel page-panel admin-review-section" data-admin-panel="community">
       <div class="review-head">
         <strong id="adminBuildCount">공개 빌드 0건</strong>
       </div>
       <div id="adminBuildList" class="admin-management-list"></div>
     </section>
 
-    <section id="admin-deleted-builds" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-deleted-builds" class="panel report-panel page-panel admin-review-section" data-admin-panel="community">
       <div class="review-head">
         <strong id="adminDeletedBuildCount">삭제된 빌드 0건</strong>
       </div>
       <div id="adminDeletedBuildList" class="admin-management-list"></div>
     </section>
 
-    <section id="admin-data-health" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-data-health" class="panel report-panel page-panel admin-review-section" data-admin-panel="system">
       <div class="review-head">
         <strong>데이터 건강 상태</strong>
       </div>
       <div id="adminDataHealthList" class="admin-management-list"></div>
     </section>
 
-    <section id="admin-users" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-users" class="panel report-panel page-panel admin-review-section" data-admin-panel="users">
       <div class="review-head">
         <strong id="adminUserCount">사용자 닉네임 0명</strong>
       </div>
       <div id="adminUserList" class="admin-management-list"></div>
     </section>
 
-    <section id="admin-stats" class="panel report-panel page-panel admin-review-section admin-site-stats-section">
+    <section id="admin-stats" class="panel report-panel page-panel admin-review-section admin-site-stats-section" data-admin-panel="stats">
       <div class="review-head">
         <strong>사이트 통계</strong>
       </div>
       <div id="adminSiteStats" class="admin-management-list"></div>
     </section>
 
-    <section id="admin-quality" class="panel report-panel page-panel admin-review-section admin-quality-section">
+    <section id="admin-quality" class="panel report-panel page-panel admin-review-section admin-quality-section" data-admin-panel="system">
       <div class="review-head">
         <strong>품질 점검</strong>
       </div>
       <div id="adminQualityList" class="admin-management-list"></div>
     </section>
 
-    <section id="admin-backup" class="panel report-panel page-panel admin-review-section">
+    <section id="admin-backup" class="panel report-panel page-panel admin-review-section" data-admin-panel="system">
       <div class="review-head">
         <strong>데이터 백업</strong>
       </div>
@@ -259,6 +269,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260606-legacy-data-fallback"></script>
   <script src="./auth.js?v=20260607-firebase-nickname-fix"></script>
-  <script src="./app.js?v=20260614-location-settings"></script>
+  <script src="./app.js?v=20260614-admin-tabs"></script>
 </body>
 </html>
