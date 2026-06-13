@@ -8541,22 +8541,6 @@ body {
   flex-wrap: wrap;
 }
 
-.home-visitor-panel {
-  min-width: 220px;
-  margin: 0;
-  border-color: rgba(8, 183, 131, 0.16);
-  background: #f8fffc;
-  box-shadow: none;
-}
-
-.home-visitor-panel .visitor-counts {
-  justify-content: flex-end;
-}
-
-.home-visitor-panel p {
-  text-align: right;
-}
-
 @media (max-width: 980px) {
   .topbar-inner {
     grid-template-columns: 1fr;
@@ -8584,13 +8568,6 @@ body {
     font-size: 12px;
   }
 
-  .home-visitor-panel,
-  .home-visitor-panel .visitor-counts,
-  .home-visitor-panel p {
-    width: 100%;
-    text-align: left;
-    justify-content: flex-start;
-  }
 }
 
 /* Final header lock: title, navigation, and login stay on one line on desktop. */
