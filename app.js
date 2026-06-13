@@ -276,6 +276,24 @@ const els = {
   adminExportGuides: document.querySelector("#adminExportGuides"),
   adminExportBuilds: document.querySelector("#adminExportBuilds"),
   adminExportAll: document.querySelector("#adminExportAll"),
+  adminDetailModal: document.querySelector("#adminDetailModal"),
+  adminDetailForm: document.querySelector("#adminDetailForm"),
+  adminDetailClose: document.querySelector("#adminDetailClose"),
+  adminDetailCancel: document.querySelector("#adminDetailCancel"),
+  adminDetailId: document.querySelector("#adminDetailId"),
+  adminDetailTitle: document.querySelector("#adminDetailTitle"),
+  adminDetailKind: document.querySelector("#adminDetailKind"),
+  adminDetailNameLabel: document.querySelector("#adminDetailNameLabel"),
+  adminDetailName: document.querySelector("#adminDetailName"),
+  adminDetailFloorLabel: document.querySelector("#adminDetailFloorLabel"),
+  adminDetailFloor: document.querySelector("#adminDetailFloor"),
+  adminDetailFloorOptions: document.querySelector("#adminDetailFloorOptions"),
+  adminDetailGradeLabel: document.querySelector("#adminDetailGradeLabel"),
+  adminDetailGrade: document.querySelector("#adminDetailGrade"),
+  adminDetailGradeOptions: document.querySelector("#adminDetailGradeOptions"),
+  adminDetailAreaLabel: document.querySelector("#adminDetailAreaLabel"),
+  adminDetailArea: document.querySelector("#adminDetailArea"),
+  adminDetailStatus: document.querySelector("#adminDetailStatus"),
   buildForm: document.querySelector("#buildForm"),
   buildTitle: document.querySelector("#buildTitle"),
   buildAuthor: document.querySelector("#buildAuthor"),
@@ -1495,6 +1513,7 @@ function initAdminReview() {
   els.adminExportGuides?.addEventListener("click", () => exportAdminData("guides"));
   els.adminExportBuilds?.addEventListener("click", () => exportAdminData("builds"));
   els.adminExportAll?.addEventListener("click", () => exportAdminData("all"));
+  initAdminDetailModal();
   window.addEventListener("dukhubusters:auth", (event) => updateAdminAccess(event.detail?.user));
   updateAdminAccess(window.DUKHUBUSTERS_AUTH?.getUser?.());
   renderPendingReports();
@@ -4680,6 +4699,27 @@ async function updatePublicReportStatus(id, status) {
   return rows[0] ? normalizeRemoteReport(rows[0]) : null;
 }
 
+async function updatePublicReportDetail(report) {
+  const payload = {
+    grade: report.grade,
+    floor: report.floor,
+    area: report.area,
+    stats: report.stats,
+    passive: report.passive,
+    active: reportActiveForStorage(report),
+    status: "approved",
+    reviewed_at: new Date().toISOString(),
+  };
+  const response = await fetch(reportStoreUrl(`?id=eq.${encodeURIComponent(report.id)}`), {
+    method: "PATCH",
+    headers: reportStoreHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error(`report detail update failed: ${response.status}`);
+  const rows = await response.json();
+  return rows[0] ? normalizeRemoteReport(rows[0]) : report;
+}
+
 function reportToRow(report) {
   return {
     "_reportId": report.id,
@@ -4924,6 +4964,10 @@ async function handleApprovedAction(event) {
   const id = button.closest("[data-approved-id]")?.dataset.approvedId;
   const report = approvedReportItems.find((item) => item.id === id);
   if (!report) return;
+  if (button.dataset.approvedAction === "edit-detail") {
+    openAdminDetailModal(report);
+    return;
+  }
   button.disabled = true;
 
   try {
@@ -4945,6 +4989,133 @@ async function handleApprovedAction(event) {
   }
 }
 
+function initAdminDetailModal() {
+  if (!els.adminDetailModal || !els.adminDetailForm) return;
+  els.adminDetailClose?.addEventListener("click", closeAdminDetailModal);
+  els.adminDetailCancel?.addEventListener("click", closeAdminDetailModal);
+  els.adminDetailModal.addEventListener("click", (event) => {
+    if (event.target === els.adminDetailModal) closeAdminDetailModal();
+  });
+  els.adminDetailForm.addEventListener("submit", submitAdminDetailEdit);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.adminDetailModal.hidden) closeAdminDetailModal();
+  });
+  fillAdminDetailOptions();
+}
+
+function fillAdminDetailOptions() {
+  if (els.adminDetailFloorOptions) {
+    els.adminDetailFloorOptions.innerHTML = floorOptions
+      .map((floor) => `<option value="${escapeHtml(floor)}"></option>`)
+      .join("");
+  }
+  if (els.adminDetailGradeOptions) {
+    const grades = ["1등급", "2등급", "3등급", "4등급", "5등급", "6등급", "7등급", "8등급", "9등급", "수호자", "150", "200", "400", "500"];
+    els.adminDetailGradeOptions.innerHTML = grades
+      .map((grade) => `<option value="${escapeHtml(grade)}"></option>`)
+      .join("");
+  }
+}
+
+function openAdminDetailModal(report) {
+  if (!els.adminDetailModal) return;
+  const numbers = isNumbersReport(report);
+  fillAdminDetailOptions();
+  els.adminDetailId.value = report.id;
+  els.adminDetailTitle.textContent = numbers ? "넘버스 세부정보 수정" : "정수 세부정보 수정";
+  els.adminDetailKind.textContent = numbers
+    ? "번호, 착용부위, 아이템 레벨, 획득처를 바로 수정합니다."
+    : "층, 구역, 등급을 바로 수정합니다. 등급에는 수호자도 입력할 수 있습니다.";
+  els.adminDetailNameLabel.textContent = numbers ? "넘버스명" : "몬스터명";
+  els.adminDetailName.value = numbers ? visibleReportName(report) : textOf(report.monster);
+  els.adminDetailFloorLabel.textContent = numbers ? "번호" : "층";
+  els.adminDetailFloor.placeholder = numbers ? "예: 5050 또는 미확인" : "예: 3층 균열";
+  els.adminDetailFloor.value = textOf(report.floor);
+  els.adminDetailGradeLabel.textContent = numbers ? "아이템 레벨" : "등급";
+  els.adminDetailGrade.placeholder = numbers ? "예: 400" : "예: 6등급 또는 수호자";
+  els.adminDetailGrade.value = textOf(report.grade);
+  els.adminDetailAreaLabel.textContent = numbers ? "착용부위 / 획득처" : "구역";
+  els.adminDetailArea.placeholder = numbers ? "착용부위와 획득처를 줄바꿈으로 구분해 입력하세요." : "예: 백색신전, 결빙의 성소";
+  els.adminDetailArea.value = numbers
+    ? `${textOf(report.area === "-" ? "" : report.area)}\n${textOf(report.passive === "-" ? "" : report.passive)}`.trim()
+    : textOf(report.area);
+  els.adminDetailStatus.textContent = "";
+  els.adminDetailModal.hidden = false;
+  setTimeout(() => els.adminDetailFloor?.focus(), 20);
+}
+
+function closeAdminDetailModal() {
+  if (els.adminDetailModal) els.adminDetailModal.hidden = true;
+}
+
+function adminDetailPayload(report) {
+  const numbers = isNumbersReport(report);
+  const floor = textOf(els.adminDetailFloor.value) || (numbers ? "미확인" : "");
+  const grade = numbers
+    ? textOf(els.adminDetailGrade.value)
+    : adminNormalizeGrade(els.adminDetailGrade.value);
+  const areaText = textOf(els.adminDetailArea.value);
+  if (numbers) {
+    const [slot = "", ...sourceLines] = areaText.split(/\r?\n/);
+    return {
+      ...report,
+      floor: normalizeNumberCode(floor) || "미확인",
+      grade,
+      area: textOf(slot) || "-",
+      passive: textOf(sourceLines.join(", ")) || "-",
+      reviewedAt: new Date().toISOString(),
+    };
+  }
+  return {
+    ...report,
+    floor,
+    grade,
+    area: areaText,
+    reviewedAt: new Date().toISOString(),
+  };
+}
+
+function adminNormalizeGrade(value) {
+  const raw = textOf(value);
+  if (raw.includes("수호자")) return "수호자";
+  return gradeLabelFromInput(raw) || raw;
+}
+
+async function submitAdminDetailEdit(event) {
+  event.preventDefault();
+  if (!adminUnlocked) return;
+  const id = textOf(els.adminDetailId.value);
+  const report = approvedReportItems.find((item) => item.id === id);
+  if (!report) return;
+  const button = els.adminDetailForm.querySelector("[type='submit']");
+  const next = adminDetailPayload(report);
+  if (!next.floor || !next.grade || !next.area) {
+    els.adminDetailStatus.textContent = "필수 세부정보를 입력해주세요.";
+    return;
+  }
+  button.disabled = true;
+  els.adminDetailStatus.textContent = "저장 중입니다.";
+  try {
+    const saved = hasPublicReportStore() ? await updatePublicReportDetail(next) : next;
+    approvedReportItems = sortReportsByDate(approvedReportItems.map((item) => item.id === id ? { ...next, ...saved } : item));
+    syncApprovedRows();
+    renderApprovedReports();
+    renderAdminCenter();
+    if (els.search) {
+      refreshControls();
+      renderStatChips();
+      render();
+    }
+    els.adminDetailStatus.textContent = "저장되었습니다.";
+    setReportSyncStatus("관리자 세부정보 수정이 반영되었습니다.", "is-online");
+    setTimeout(closeAdminDetailModal, 350);
+  } catch {
+    els.adminDetailStatus.textContent = "저장소 반영에 실패했습니다. 잠시 후 다시 시도해주세요.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderApprovedReports() {
   if (!els.approvedReports || !els.approvedCount) return;
   els.approvedCount.textContent = `등록된 정보 ${approvedReportItems.length}건`;
@@ -4963,6 +5134,7 @@ function renderApprovedReports() {
         <p><b>효과</b> ${escapeHtml(report.stats)}</p>
         <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
         <div class="pending-actions">
+          ${els.adminDetailModal && !isDeleteReport(report) ? `<button type="button" data-approved-action="edit-detail">세부정보 수정</button>` : ""}
           <button type="button" data-approved-action="delete">등록 정보 삭제</button>
         </div>
       </article>
@@ -4977,6 +5149,7 @@ function renderApprovedReports() {
         <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
         <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active)}</p>
         <div class="pending-actions">
+          ${els.adminDetailModal && !isDeleteReport(report) ? `<button type="button" data-approved-action="edit-detail">세부정보 수정</button>` : ""}
           <button type="button" data-approved-action="delete">등록 정수 삭제</button>
         </div>
       </article>

@@ -3795,6 +3795,25 @@ select[multiple] option:checked {
   color: #0f4c5c;
 }
 
+.admin-detail-dialog {
+  max-width: 560px;
+}
+
+.admin-detail-form {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-detail-form textarea {
+  resize: vertical;
+}
+
 .admin-management-list {
   display: grid;
   gap: 9px;
@@ -10877,6 +10896,7 @@ body.admin-review-page #adminSiteStats {
   .admin-account-stay-row,
   .admin-daily-metrics-head,
   .admin-daily-metrics-row,
+  .admin-detail-grid,
   .admin-page-stay-head,
   .admin-page-stay-row {
     grid-template-columns: 1fr;
