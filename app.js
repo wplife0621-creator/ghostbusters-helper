@@ -5442,22 +5442,52 @@ function adminSessionStayStats(rows) {
     const date = textOf(parsed.date) || textOf(row.created_at || row.createdAt).slice(0, 10);
     const seconds = Math.max(0, Number(parsed.seconds || 0));
     if (!date || !seconds) return;
-    const bucket = dailyMap.get(date) || { date, seconds: 0, records: 0 };
-    bucket.seconds += Math.min(seconds, 600);
+    const cappedSeconds = Math.min(seconds, 600);
+    const isGuest = Boolean(parsed.isGuest) || textOf(parsed.accountType) === "guest";
+    const bucket = dailyMap.get(date) || { date, seconds: 0, records: 0, memberSeconds: 0, guestSeconds: 0, memberRecords: 0, guestRecords: 0 };
+    bucket.seconds += cappedSeconds;
     bucket.records += 1;
+    if (isGuest) {
+      bucket.guestSeconds += cappedSeconds;
+      bucket.guestRecords += 1;
+    } else {
+      bucket.memberSeconds += cappedSeconds;
+      bucket.memberRecords += 1;
+    }
     dailyMap.set(date, bucket);
     const account = textOf(parsed.email) || textOf(parsed.nickname) || textOf(row.author) || "계정 미확인";
     const nickname = textOf(parsed.nickname) || textOf(row.author) || account;
-    const key = `${account}__${date}`;
-    const accountBucket = accountMap.get(key) || { account, nickname, date, seconds: 0, records: 0 };
-    accountBucket.seconds += Math.min(seconds, 600);
-    accountBucket.records += 1;
-    accountMap.set(key, accountBucket);
+    if (!isGuest) {
+      const key = `${account}__${date}`;
+      const accountBucket = accountMap.get(key) || { account, nickname, date, seconds: 0, records: 0 };
+      accountBucket.seconds += cappedSeconds;
+      accountBucket.records += 1;
+      accountMap.set(key, accountBucket);
+    }
     const path = normalizeAdminPagePath(parsed.path);
-    const pageBucket = pageMap.get(path) || { path, label: adminPageLabel(path), seconds: 0, records: 0, accounts: new Set() };
-    pageBucket.seconds += Math.min(seconds, 600);
+    const pageBucket = pageMap.get(path) || {
+      path,
+      label: adminPageLabel(path),
+      seconds: 0,
+      memberSeconds: 0,
+      guestSeconds: 0,
+      records: 0,
+      memberRecords: 0,
+      guestRecords: 0,
+      accounts: new Set(),
+      guests: new Set(),
+    };
+    pageBucket.seconds += cappedSeconds;
     pageBucket.records += 1;
-    pageBucket.accounts.add(account);
+    if (isGuest) {
+      pageBucket.guestSeconds += cappedSeconds;
+      pageBucket.guestRecords += 1;
+      pageBucket.guests.add(textOf(parsed.userId) || account);
+    } else {
+      pageBucket.memberSeconds += cappedSeconds;
+      pageBucket.memberRecords += 1;
+      pageBucket.accounts.add(account);
+    }
     pageMap.set(path, pageBucket);
   });
   return {
@@ -5466,7 +5496,14 @@ function adminSessionStayStats(rows) {
       .sort((a, b) => b.date.localeCompare(a.date) || b.seconds - a.seconds)
       .slice(0, 500),
     pages: [...pageMap.values()]
-      .map((row) => ({ ...row, accounts: row.accounts.size, averageSeconds: row.records ? row.seconds / row.records : 0 }))
+      .map((row) => ({
+        ...row,
+        accounts: row.accounts.size,
+        guests: row.guests.size,
+        averageSeconds: row.records ? row.seconds / row.records : 0,
+        memberAverageSeconds: row.memberRecords ? row.memberSeconds / row.memberRecords : 0,
+        guestAverageSeconds: row.guestRecords ? row.guestSeconds / row.guestRecords : 0,
+      }))
       .sort((a, b) => b.seconds - a.seconds)
       .slice(0, 50),
   };
@@ -5548,8 +5585,15 @@ function adminEnsureTrackedPages(rows) {
       label: adminPageLabel(normalizedPath),
       seconds: 0,
       averageSeconds: 0,
+      memberSeconds: 0,
+      guestSeconds: 0,
+      memberAverageSeconds: 0,
+      guestAverageSeconds: 0,
       accounts: 0,
+      guests: 0,
       records: 0,
+      memberRecords: 0,
+      guestRecords: 0,
     });
   });
   return output.sort((a, b) => Number(b.seconds || 0) - Number(a.seconds || 0));
@@ -5598,9 +5642,11 @@ function adminDailyMetrics(dailyCounts, stayRows, accountRows) {
       visitors: visitorMap.get(date) || 0,
       memberVisitors: member?.memberVisitors.size || 0,
       staySeconds: Number(stay.seconds || 0),
-      memberStaySeconds: Number(member?.memberSeconds || 0),
+      memberStaySeconds: Number(stay.memberSeconds ?? member?.memberSeconds ?? 0),
+      guestStaySeconds: Number(stay.guestSeconds || 0),
       stayRecords: Number(stay.records || 0),
-      memberRecords: Number(member?.memberRecords || 0),
+      memberRecords: Number(stay.memberRecords ?? member?.memberRecords ?? 0),
+      guestRecords: Number(stay.guestRecords || 0),
     };
   });
 }
@@ -5690,9 +5736,10 @@ function adminMetricTableMarkup(rows) {
       <div class="admin-daily-metrics-head">
         <span>날짜</span>
         <span>방문자</span>
-        <span>회원 방문</span>
+        <span>로그인 방문</span>
         <span>전체 체류</span>
-        <span>회원 체류</span>
+        <span>로그인 체류</span>
+        <span>비로그인 체류</span>
       </div>
       ${rows.slice().reverse().map((row) => `
         <div class="admin-daily-metrics-row">
@@ -5701,6 +5748,7 @@ function adminMetricTableMarkup(rows) {
           <span>${row.memberVisitors}명</span>
           <span>${escapeHtml(adminFormatMinutes(row.staySeconds))}</span>
           <span>${escapeHtml(adminFormatMinutes(row.memberStaySeconds))}</span>
+          <span>${escapeHtml(adminFormatMinutes(row.guestStaySeconds))}</span>
         </div>
       `).join("")}
     </div>
@@ -5881,15 +5929,17 @@ function adminPageStayTableMarkup(rows) {
     ${topRow ? `
       <div class="admin-page-stay-summary">
         <strong>가장 오래 머문 페이지: ${escapeHtml(topRow.label)}</strong>
-        <span>총 ${escapeHtml(adminFormatMinutes(topRow.seconds))} · 평균 ${escapeHtml(adminFormatMinutes(topRow.averageSeconds))} · 계정 ${topRow.accounts}명</span>
+        <span>총 ${escapeHtml(adminFormatMinutes(topRow.seconds))} · 로그인 ${escapeHtml(adminFormatMinutes(topRow.memberSeconds || 0))} · 비로그인 ${escapeHtml(adminFormatMinutes(topRow.guestSeconds || 0))}</span>
       </div>
     ` : `<div class="empty compact-empty">아직 체류 시간이 누적된 페이지가 없습니다. 미궁 일지는 추적 대상에 포함되어 있습니다.</div>`}
     <div class="admin-page-stay-table">
       <div class="admin-page-stay-head">
         <span>페이지</span>
         <span>총 체류</span>
-        <span>평균</span>
-        <span>계정</span>
+        <span>로그인</span>
+        <span>비로그인</span>
+        <span>로그인 계정</span>
+        <span>비로그인</span>
         <span>기록</span>
       </div>
       ${rows.map((row) => `
@@ -5899,8 +5949,10 @@ function adminPageStayTableMarkup(rows) {
             <small>${escapeHtml(row.path)}</small>
           </span>
           <strong>${escapeHtml(adminFormatMinutes(row.seconds))}</strong>
-          <span>${escapeHtml(adminFormatMinutes(row.averageSeconds))}</span>
+          <span>${escapeHtml(adminFormatMinutes(row.memberSeconds || 0))}</span>
+          <span>${escapeHtml(adminFormatMinutes(row.guestSeconds || 0))}</span>
           <span>${row.accounts}명</span>
+          <span>${row.guests || 0}명</span>
           <span>${row.records}회</span>
         </div>
       `).join("")}
@@ -5938,6 +5990,8 @@ function renderAdminSiteStats() {
   const todayStay = stayRows.find((row) => row.date === todayKey());
   const avgStaySeconds = todayStay?.records ? todayStay.seconds / todayStay.records : 0;
   const totalStaySeconds = stayRows.reduce((sum, row) => sum + row.seconds, 0);
+  const memberStaySeconds = stayRows.reduce((sum, row) => sum + Number(row.memberSeconds || 0), 0);
+  const guestStaySeconds = stayRows.reduce((sum, row) => sum + Number(row.guestSeconds || 0), 0);
   const activeAccountsToday = new Set(accountRows.filter((row) => row.date === todayKey()).map((row) => row.account)).size;
   const topPage = pageRows[0];
   els.adminSiteStats.innerHTML = `
@@ -5956,8 +6010,16 @@ function renderAdminSiteStats() {
         <strong>${avgStaySeconds ? escapeHtml(adminFormatMinutes(avgStaySeconds)) : "-"}</strong>
       </div>
       <div class="admin-site-metric">
-        <span>최근 로그인 체류 합계</span>
+        <span>최근 전체 체류 합계</span>
         <strong>${totalStaySeconds ? escapeHtml(adminFormatMinutes(totalStaySeconds)) : "-"}</strong>
+      </div>
+      <div class="admin-site-metric">
+        <span>로그인 체류</span>
+        <strong>${memberStaySeconds ? escapeHtml(adminFormatMinutes(memberStaySeconds)) : "-"}</strong>
+      </div>
+      <div class="admin-site-metric">
+        <span>비로그인 체류</span>
+        <strong>${guestStaySeconds ? escapeHtml(adminFormatMinutes(guestStaySeconds)) : "-"}</strong>
       </div>
       <div class="admin-site-metric">
         <span>오늘 활동 계정</span>
@@ -5983,7 +6045,7 @@ function renderAdminSiteStats() {
         ${adminVisitorChartMarkup(dailyCounts)}
       </section>
       <section>
-        <h3>일자별 로그인 체류 시간</h3>
+        <h3>일자별 전체 체류 시간</h3>
         ${adminStayChartMarkup(stayRows)}
       </section>
       <section>
@@ -6008,7 +6070,7 @@ function renderAdminSiteStats() {
           tone: "blue",
         })}
         ${adminMetricChartMarkup({
-          title: "일자별 회원 방문자수",
+          title: "일자별 로그인 방문자수",
           rows: dailyMetrics,
           key: "memberVisitors",
           unit: "명",
@@ -6023,11 +6085,19 @@ function renderAdminSiteStats() {
           formatter: adminFormatMinutes,
         })}
         ${adminMetricChartMarkup({
-          title: "일자별 회원 체류시간",
+          title: "일자별 로그인 체류시간",
           rows: dailyMetrics,
           key: "memberStaySeconds",
           unit: "",
           tone: "purple",
+          formatter: adminFormatMinutes,
+        })}
+        ${adminMetricChartMarkup({
+          title: "일자별 비로그인 체류시간",
+          rows: dailyMetrics,
+          key: "guestStaySeconds",
+          unit: "",
+          tone: "blue",
           formatter: adminFormatMinutes,
         })}
       </div>

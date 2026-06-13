@@ -13,6 +13,7 @@
   };
   const nicknameKey = "dukhubusters.authNickname";
   const nicknamePromptKey = "dukhubusters.nicknamePrompted";
+  const anonymousVisitorKey = "dukhubusters.visitorId";
   const sessionTimeMarker = "__session_time__";
   const bannedNicknamePatterns = [
     /섹스|성관계|성기|음란|야동|자위|정액|질싸|오랄|강간/i,
@@ -536,7 +537,7 @@
 
   function startStayTracking() {
     stopStayTracking();
-    if (!state.user || !authConfig.buildTable) return;
+    if (!authConfig.buildTable) return;
     if (authConfig.backendMode !== "firebase" && (!authConfig.url || !authConfig.key)) return;
     state.stayStartedAt = Date.now();
     state.stayTimer = window.setInterval(flushStayTime, 60000);
@@ -549,12 +550,13 @@
   }
 
   async function flushStayTime() {
-    if (!state.user || !state.stayStartedAt) return;
+    if (!state.stayStartedAt) return;
     const now = Date.now();
     const seconds = Math.max(0, Math.round((now - state.stayStartedAt) / 1000));
     if (seconds < 20) return;
     state.stayStartedAt = now;
     state.staySequence += 1;
+    const identity = stayIdentity();
     try {
       await fetch(`${authConfig.url}/rest/v1/${authConfig.buildTable}`, {
         method: "POST",
@@ -566,17 +568,19 @@
           Prefer: "resolution=ignore-duplicates,return=minimal",
         },
         body: JSON.stringify({
-          id: `session-${todayKey()}-${currentUserId()}-${Date.now()}-${state.staySequence}`,
+          id: `session-${todayKey()}-${identity.id}-${Date.now()}-${state.staySequence}`,
           title: sessionTimeMarker,
-          author: displayName(state.user).slice(0, 40) || "login",
+          author: identity.nickname.slice(0, 40) || identity.type,
           members: [],
           note: JSON.stringify({
             date: todayKey(),
             seconds: Math.min(seconds, 600),
             path: window.location.pathname,
-            email: state.user.email || "",
-            userId: currentUserId(),
-            nickname: displayName(state.user),
+            email: identity.email,
+            userId: identity.id,
+            nickname: identity.nickname,
+            accountType: identity.type,
+            isGuest: identity.isGuest,
           }),
           created_at: new Date().toISOString(),
         }),
@@ -584,6 +588,34 @@
     } catch {
       // Stay-time analytics are optional and should never interrupt login.
     }
+  }
+
+  function stayIdentity() {
+    if (state.user) {
+      return {
+        id: currentUserId(),
+        email: state.user.email || "",
+        nickname: displayName(state.user),
+        type: "member",
+        isGuest: false,
+      };
+    }
+    return {
+      id: anonymousVisitorId(),
+      email: "",
+      nickname: "비로그인",
+      type: "guest",
+      isGuest: true,
+    };
+  }
+
+  function anonymousVisitorId() {
+    let id = localStorage.getItem(anonymousVisitorKey);
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem(anonymousVisitorKey, id);
+    }
+    return `guest-${id}`;
   }
 
   function todayKey() {
@@ -648,6 +680,6 @@
   });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") flushStayTime();
-    else if (state.user) state.stayStartedAt = Date.now();
+    else if (state.stayTimer) state.stayStartedAt = Date.now();
   });
 })();

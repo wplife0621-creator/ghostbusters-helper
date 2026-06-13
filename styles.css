@@ -10093,7 +10093,7 @@ body {
 .admin-daily-metrics-head,
 .admin-daily-metrics-row {
   display: grid;
-  grid-template-columns: minmax(96px, 1fr) repeat(4, minmax(86px, 0.8fr));
+  grid-template-columns: minmax(92px, 1fr) repeat(5, minmax(78px, 0.76fr));
   gap: 8px;
   align-items: center;
 }
@@ -10371,7 +10371,7 @@ body {
 .admin-page-stay-head,
 .admin-page-stay-row {
   display: grid;
-  grid-template-columns: minmax(160px, 1.5fr) minmax(84px, 0.7fr) minmax(70px, 0.55fr) minmax(56px, 0.45fr) minmax(56px, 0.45fr);
+  grid-template-columns: minmax(150px, 1.45fr) repeat(3, minmax(74px, 0.7fr)) repeat(3, minmax(54px, 0.48fr));
   gap: 8px;
   align-items: center;
 }
@@ -10898,6 +10898,8 @@ body.admin-review-page #adminSiteStats {
 
   .admin-account-stay-head,
   .admin-account-stay-row,
+  .admin-daily-metrics-head,
+  .admin-daily-metrics-row,
   .admin-page-stay-head,
   .admin-page-stay-row {
     grid-template-columns: 1fr;
