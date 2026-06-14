@@ -1234,6 +1234,20 @@ function noticeWithinWeek(value) {
   return date && date.getTime() >= Date.now() - (7 * 24 * 60 * 60 * 1000);
 }
 
+function staticGeneratedLabel(payloads) {
+  const dates = payloads
+    .map((payload) => recentNoticeDate(payload?.generatedAt))
+    .filter(Boolean)
+    .sort((a, b) => b - a);
+  if (!dates.length) return "";
+  return dates[0].toLocaleString("ko-KR", {
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function homeNoticeLink(type, id, row) {
   if (type === "essence") return `./essences.html?search=${encodeURIComponent(visibleReportName(row))}#results`;
   if (type === "numbers") return `./numbers.html?search=${encodeURIComponent(visibleReportName(row))}#numbersResults`;
@@ -1245,7 +1259,6 @@ function noticeFromReport(row) {
   const report = normalizeRemoteReport(row);
   const numbers = isNumbersReport(report);
   const date = report.reviewedAt || report.createdAt;
-  if (!noticeWithinWeek(date)) return null;
   return {
     id: report.id,
     type: numbers ? "numbers" : "essence",
@@ -1269,7 +1282,7 @@ function homeBuildNotices(rows) {
       && row.title !== buildReviewMarker && row.title !== buildReportMarker
       && row.title !== locationSettingsMarker
       && row.title !== visitorBuildMarkers.total && row.title !== visitorBuildMarkers.daily
-      && !deletedIds.has(row.id) && noticeWithinWeek(row.created_at || row.createdAt))
+      && !deletedIds.has(row.id))
     .map((row) => {
       const build = normalizeRemoteBuild(row);
       return {
@@ -1288,8 +1301,7 @@ function homeGuideNotices(rows) {
   return rows
     .filter((row) => !textOf(row.title).startsWith(guideCommentPrefix)
       && !textOf(row.title).startsWith(guideLikePrefix)
-      && !textOf(row.title).startsWith(guideReportPrefix)
-      && noticeWithinWeek(row.updated_at || row.created_at))
+      && !textOf(row.title).startsWith(guideReportPrefix))
     .map((row) => {
       const title = textOf(row.title).replace(/^\[(질문|보스|파밍|빌드|정보)\]\s*/, "");
       const category = textOf(row.title).match(/^\[(질문|보스|파밍|빌드|정보)\]/)?.[1] || "일반";
@@ -1370,18 +1382,24 @@ function renderHomePopularGuides(rows) {
 
 async function loadHomeNotices() {
   try {
-    const [reports, builds, guides] = await Promise.all([
-      fetchStaticRows("reports-index"),
-      fetchStaticRows("builds-index"),
-      fetchStaticRows("guides-index"),
+    const [reportPayload, buildPayload, guidePayload] = await Promise.all([
+      fetchStaticPayload("reports-index"),
+      fetchStaticPayload("builds-index"),
+      fetchStaticPayload("guides-index"),
     ]);
+    const reports = staticPayloadRows(reportPayload);
+    const builds = staticPayloadRows(buildPayload);
+    const guides = staticPayloadRows(guidePayload);
     homeNotices = [
       ...reports.map(noticeFromReport).filter(Boolean),
       ...homeBuildNotices(builds),
       ...homeGuideNotices(guides),
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
     renderHomePopularGuides(guides);
-    els.homeNoticeStatus.textContent = "매일 새벽 갱신되는 정적 공개 목록 기준으로 빠르게 표시합니다.";
+    const generated = staticGeneratedLabel([reportPayload, buildPayload, guidePayload]);
+    els.homeNoticeStatus.textContent = generated
+      ? `매일 새벽 갱신되는 정적 공개 목록 기준입니다. 마지막 갱신: ${generated}`
+      : "매일 새벽 갱신되는 정적 공개 목록 기준으로 빠르게 표시합니다.";
     renderHomeNotices();
   } catch {
     homeNotices = [];
@@ -1411,7 +1429,7 @@ function renderHomeNotices() {
         <i aria-hidden="true">보기</i>
       </a>
     `).join("")
-    : `<div class="home-notice-empty">최근 7일 내 공개된 ${activeHomeNoticeFilter === "all" ? "새 소식이" : "항목이"} 없습니다.</div>`;
+    : `<div class="home-notice-empty">아직 표시할 ${activeHomeNoticeFilter === "all" ? "업데이트 요약이" : "항목이"} 없습니다. 제보와 게시글은 검수 또는 정적 데이터 갱신 후 반영됩니다.</div>`;
   els.homeNoticePagination.innerHTML = visible.length > homeNoticePageSize
     ? noticePaginationMarkup(pageCount, activeHomeNoticePage)
     : "";
@@ -2138,11 +2156,19 @@ function staticDataUrl(name) {
 }
 
 async function fetchStaticRows(name) {
+  return staticPayloadRows(await fetchStaticPayload(name));
+}
+
+async function fetchStaticPayload(name) {
   const response = await fetch(staticDataUrl(name), { cache: "force-cache" });
   if (!response.ok) throw new Error(`static data unavailable: ${name}`);
   const payload = await response.json();
+  return payload;
+}
+
+function staticPayloadRows(payload) {
   if (Array.isArray(payload)) return payload;
-  return Array.isArray(payload.rows) ? payload.rows : [];
+  return Array.isArray(payload?.rows) ? payload.rows : [];
 }
 
 function publicBuildRowsQuery(limit = 2000) {

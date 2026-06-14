@@ -50,12 +50,41 @@
       </div>
     </section>
 
-    <section class="panel home-recent" aria-label="최근 공지사항">
+    <section class="panel home-recent" aria-label="사이트 이용 안내 및 업데이트 요약">
       <div class="home-recent-head">
         <div>
-          <p class="home-kicker">NOTICE</p>
-          <h2>최근 공지사항</h2>
-          <span>최근 7일 동안 공개된 정보와 새 글을 확인하세요.</span>
+          <p class="home-kicker">SITE GUIDE</p>
+          <h2>사이트 이용 안내</h2>
+          <span>겜바바 팬게임 플레이에 필요한 도감, 빌드, 게시판, 제보 기능을 한곳에서 이용할 수 있습니다.</span>
+        </div>
+      </div>
+      <div class="home-guide-cards" aria-label="주요 이용 방법">
+        <article>
+          <strong>도감 이용법</strong>
+          <p>정수와 넘버스를 층, 구역, 효과, 추천 캐릭터 기준으로 검색하고 비교할 수 있습니다.</p>
+          <a href="./codex.html">도감 보기</a>
+        </article>
+        <article>
+          <strong>빌드 공유</strong>
+          <p>캐릭터별 정수 조합을 저장하고, 공개 빌드를 참고해 나만의 세팅을 구성할 수 있습니다.</p>
+          <a href="./builds.html">빌드 보기</a>
+        </article>
+        <article>
+          <strong>게시판 이용</strong>
+          <p>공략, 보스, 파밍, 빌드 정보를 이미지와 영상 링크로 공유하고 댓글로 의견을 남길 수 있습니다.</p>
+          <a href="./guides.html">게시판 보기</a>
+        </article>
+        <article>
+          <strong>정보 제보</strong>
+          <p>로그인 후 잘못된 정수와 넘버스 정보를 제보하면 관리자 검수 후 공개 도감에 반영됩니다.</p>
+          <a href="./report.html">제보하기</a>
+        </article>
+      </div>
+      <div class="home-update-head">
+        <div>
+          <p class="home-kicker">UPDATE SUMMARY</p>
+          <h3>업데이트 요약</h3>
+          <span>정적 공개 데이터 기준으로 최근 반영된 정보와 글을 모아 보여줍니다.</span>
         </div>
         <nav id="homeNoticeFilters" class="home-notice-filters" aria-label="공지사항 종류 선택">
           <button type="button" class="is-active" data-notice-filter="all">전체</button>
@@ -66,7 +95,7 @@
         </nav>
       </div>
       <div id="homeNoticeList" class="home-notice-list">
-        <div class="home-notice-loading">최근 소식을 불러오는 중입니다.</div>
+        <div class="home-notice-loading">업데이트 요약을 불러오는 중입니다.</div>
       </div>
       <nav id="homeNoticePagination" class="home-notice-pagination" aria-label="공지사항 페이지"></nav>
       <p id="homeNoticeStatus" class="home-notice-status"></p>
@@ -197,6 +226,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260614-site-stability"></script>
   <script src="./auth.js?v=20260614-site-stability"></script>
-  <script src="./app.js?v=20260614-static-refresh-guard"></script>
+  <script src="./app.js?v=20260614-adsense-home-guide"></script>
 </body>
 </html>
