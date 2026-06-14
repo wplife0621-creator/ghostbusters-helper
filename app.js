@@ -252,6 +252,11 @@ const els = {
   pendingReports: document.querySelector("#pendingReports"),
   approvedCount: document.querySelector("#approvedCount"),
   approvedReports: document.querySelector("#approvedReports"),
+  adminCodexSummary: document.querySelector("#adminCodexSummary"),
+  adminApprovedSearch: document.querySelector("#adminApprovedSearch"),
+  adminApprovedKind: document.querySelector("#adminApprovedKind"),
+  adminApprovedLimit: document.querySelector("#adminApprovedLimit"),
+  adminApprovedHint: document.querySelector("#adminApprovedHint"),
   copyApproved: document.querySelector("#copyApproved"),
   adminCodeInput: document.querySelector("#adminCodeInput"),
   adminUnlock: document.querySelector("#adminUnlock"),
@@ -287,6 +292,7 @@ const els = {
   adminAreaOrder: document.querySelector("#adminAreaOrder"),
   adminAreaEnabled: document.querySelector("#adminAreaEnabled"),
   adminLocationStatus: document.querySelector("#adminLocationStatus"),
+  adminLocationSummary: document.querySelector("#adminLocationSummary"),
   adminLocationList: document.querySelector("#adminLocationList"),
   adminDetailModal: document.querySelector("#adminDetailModal"),
   adminDetailForm: document.querySelector("#adminDetailForm"),
@@ -389,6 +395,9 @@ let activeHomeNoticeFilter = "all";
 let activeHomeNoticePage = 1;
 const homeNoticePageSize = 10;
 let activeAdminTab = "dashboard";
+let adminApprovedSearch = "";
+let adminApprovedKind = "all";
+let adminApprovedLimit = "10";
 let activeNumbersPage = 1;
 const numbersPageSize = 10;
 const statNoneLabel = "스탯 선택 안 함";
@@ -1632,6 +1641,7 @@ function initAdminReview() {
   els.adminExportGuides?.addEventListener("click", () => exportAdminData("guides"));
   els.adminExportBuilds?.addEventListener("click", () => exportAdminData("builds"));
   els.adminExportAll?.addEventListener("click", () => exportAdminData("all"));
+  initAdminCodexControls();
   initAdminLocationEditor();
   initAdminDetailModal();
   window.addEventListener("dukhubusters:auth", (event) => updateAdminAccess(event.detail?.user));
@@ -1641,6 +1651,27 @@ function initAdminReview() {
   renderAdminLocations();
   loadPublicReports();
   loadAdminCenter();
+}
+
+function initAdminCodexControls() {
+  if (els.adminApprovedSearch) {
+    els.adminApprovedSearch.addEventListener("input", () => {
+      adminApprovedSearch = textOf(els.adminApprovedSearch.value).toLowerCase();
+      renderApprovedReports();
+    });
+  }
+  if (els.adminApprovedKind) {
+    els.adminApprovedKind.addEventListener("change", () => {
+      adminApprovedKind = els.adminApprovedKind.value || "all";
+      renderApprovedReports();
+    });
+  }
+  if (els.adminApprovedLimit) {
+    els.adminApprovedLimit.addEventListener("change", () => {
+      adminApprovedLimit = els.adminApprovedLimit.value || "10";
+      renderApprovedReports();
+    });
+  }
 }
 
 function initAdminTabs() {
@@ -5298,45 +5329,116 @@ async function submitAdminDetailEdit(event) {
   }
 }
 
+function matchesAdminApprovedFilters(report) {
+  if (adminApprovedKind === "essence" && isNumbersReport(report)) return false;
+  if (adminApprovedKind === "numbers" && !isNumbersReport(report)) return false;
+  const keyword = compactSearchText(adminApprovedSearch);
+  if (!keyword) return true;
+  const haystack = compactSearchText([
+    visibleReportName(report),
+    report.monster,
+    report.originalMonster,
+    report.floor,
+    report.area,
+    report.grade,
+    report.stats,
+    report.passive,
+    report.active,
+    report.recommendedCharacters,
+    report.authorNickname,
+  ].filter(Boolean).join(" "));
+  return haystack.includes(keyword);
+}
+
+function limitedAdminApprovedRows(rows) {
+  if (adminApprovedLimit === "all") return rows;
+  const limit = Number(adminApprovedLimit || 10);
+  return rows.slice(0, Number.isFinite(limit) && limit > 0 ? limit : 10);
+}
+
+function renderAdminCodexSummary(filteredRows) {
+  if (!els.adminCodexSummary) return;
+  const total = approvedReportItems.length;
+  const essenceCount = approvedReportItems.filter((report) => !isNumbersReport(report)).length;
+  const numbersCount = approvedReportItems.filter(isNumbersReport).length;
+  const deleteCount = approvedReportItems.filter(isDeleteReport).length;
+  const filteredCount = filteredRows.length;
+  els.adminCodexSummary.innerHTML = [
+    ["전체 등록", `${total}건`, "승인된 도감 정보"],
+    ["정수", `${essenceCount}건`, "몬스터 정수"],
+    ["넘버스", `${numbersCount}건`, "장비/장식구"],
+    ["검색 결과", `${filteredCount}건`, deleteCount ? `삭제 승인 ${deleteCount}건 포함` : "현재 필터 기준"],
+  ].map(([label, value, hint]) => `
+    <div class="admin-codex-metric">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+      <small>${escapeHtml(hint)}</small>
+    </div>
+  `).join("");
+}
+
+function approvedReportStatusText(report) {
+  if (isDeleteReport(report)) return "삭제 승인";
+  if (report.mode === "edit") return "수정 승인";
+  return "신규 승인";
+}
+
 function renderApprovedReports() {
   if (!els.approvedReports || !els.approvedCount) return;
   els.approvedCount.textContent = `등록된 정보 ${approvedReportItems.length}건`;
   if (!adminUnlocked) {
+    if (els.adminCodexSummary) els.adminCodexSummary.innerHTML = "";
+    if (els.adminApprovedHint) els.adminApprovedHint.textContent = "";
     els.approvedReports.innerHTML = `<div class="empty compact-empty">관리자 모드를 열면 등록된 정수 삭제 목록이 표시됩니다.</div>`;
     return;
   }
-  els.approvedReports.innerHTML = approvedReportItems.length
-    ? approvedReportItems.map((report) => isNumbersReport(report) ? `
-      <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
-        <div>
+  const filteredRows = approvedReportItems.filter(matchesAdminApprovedFilters);
+  const visibleRows = limitedAdminApprovedRows(filteredRows);
+  renderAdminCodexSummary(filteredRows);
+  if (els.adminApprovedHint) {
+    els.adminApprovedHint.textContent = `${filteredRows.length}건 중 ${visibleRows.length}건 표시 중입니다. 검색은 몬스터명, 넘버스명, 층, 구역, 효과를 함께 찾습니다.`;
+  }
+  els.approvedReports.innerHTML = visibleRows.length
+    ? `
+      <div class="admin-approved-result-head">
+        <strong>도감 등록 목록</strong>
+        <span>${escapeHtml(adminApprovedLimit === "all" ? "전체 표시" : `최근 ${visibleRows.length}건 표시`)}</span>
+      </div>
+      ${visibleRows.map((report) => isNumbersReport(report) ? `
+      <article class="pending-card admin-approved-card is-number" data-approved-id="${escapeHtml(report.id)}">
+        <div class="admin-approved-card-head">
           <strong><span class="data-kind-pill">넘버스</span> ${escapeHtml(visibleReportName(report))}</strong>
-          <span>${isDeleteReport(report) ? "삭제 승인" : report.mode === "edit" ? "수정 승인" : "신규 승인"} · #${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
+          <span class="admin-approved-status">${escapeHtml(approvedReportStatusText(report))} · NO.${escapeHtml(report.floor)} · Lv ${escapeHtml(report.grade)}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
-        <p><b>효과</b> ${escapeHtml(report.stats)}</p>
-        <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
+        <div class="admin-approved-meta">
+          <p><b>효과</b> ${escapeHtml(report.stats || "미기록")}</p>
+          <p><b>착용부위</b> ${escapeHtml(report.area === "-" ? "미기록" : report.area)} · <b>획득처</b> ${escapeHtml(report.passive === "-" ? "미기록" : report.passive)}</p>
+        </div>
         <div class="pending-actions">
           ${els.adminDetailModal && !isDeleteReport(report) ? `<button type="button" data-approved-action="edit-detail">세부정보 수정</button>` : ""}
           <button type="button" data-approved-action="delete">등록 정보 삭제</button>
         </div>
       </article>
     ` : `
-      <article class="pending-card" data-approved-id="${escapeHtml(report.id)}">
-        <div>
+      <article class="pending-card admin-approved-card is-essence" data-approved-id="${escapeHtml(report.id)}">
+        <div class="admin-approved-card-head">
           <strong><span class="data-kind-pill">정수</span> ${escapeHtml(report.monster)}</strong>
-          <span>${isDeleteReport(report) ? `삭제 승인 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
+          <span class="admin-approved-status">${isDeleteReport(report) ? `삭제 승인 (${escapeHtml(report.originalMonster || report.monster)})` : report.mode === "edit" ? `수정 승인 (${escapeHtml(report.originalMonster || report.monster)} → ${escapeHtml(report.monster)})` : "신규 승인"} · ${escapeHtml(report.floor)} · ${escapeHtml(report.area)} · ${escapeHtml(report.grade)} ${report.sailing ? `<b class="sailing-pill">항해</b>` : ""} ${report.recommendedCharacters ? `<b class="character-pill">${escapeHtml(report.recommendedCharacters)} 추천</b>` : ""}</span>
           ${report.authorNickname ? `<small class="report-author">올린사람 ${escapeHtml(report.authorNickname)}</small>` : ""}
         </div>
-        <p><b>스탯</b> ${escapeHtml(report.stats)}</p>
-        <p><b>패시브</b> ${escapeHtml(report.passive)}</p>
-        <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active)}</p>
+        <div class="admin-approved-meta">
+          <p><b>스탯</b> ${escapeHtml(report.stats || "미기록")}</p>
+          <p><b>패시브</b> ${escapeHtml(report.passive || "미기록")}</p>
+          <p class="multi-skill"><b>액티브</b> ${escapeHtml(report.active || "미기록")}</p>
+        </div>
         <div class="pending-actions">
           ${els.adminDetailModal && !isDeleteReport(report) ? `<button type="button" data-approved-action="edit-detail">세부정보 수정</button>` : ""}
           <button type="button" data-approved-action="delete">등록 정수 삭제</button>
         </div>
       </article>
-    `).join("")
-    : `<div class="empty compact-empty">승인되어 등록된 제보 정수가 없습니다.</div>`;
+    `).join("")}`
+    : `<div class="empty compact-empty">현재 검색 조건에 맞는 등록 정보가 없습니다.</div>`;
 }
 
 function initAdminLocationEditor() {
@@ -5357,9 +5459,26 @@ function renderAdminLocations() {
   renderAdminAreaFloorOptions();
   const floors = [...locationSettings.floors].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ko"));
   const areas = [...locationSettings.areas].sort((a, b) => a.floor.localeCompare(b.floor, "ko") || a.order - b.order || a.name.localeCompare(b.name, "ko"));
+  const activeFloors = floors.filter((floor) => floor.enabled).length;
+  const activeAreas = areas.filter((area) => area.enabled).length;
+  const disabledCount = floors.length + areas.length - activeFloors - activeAreas;
+  if (els.adminLocationSummary) {
+    els.adminLocationSummary.innerHTML = [
+      ["층", `${floors.length}개`, `활성 ${activeFloors}개`],
+      ["구역", `${areas.length}개`, `활성 ${activeAreas}개`],
+      ["비활성", `${disabledCount}개`, "선택지에서 숨김"],
+      ["관리 기준", "도감 공통", "정수/넘버스 함께 적용"],
+    ].map(([label, value, hint]) => `
+      <div class="admin-codex-metric">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+        <small>${escapeHtml(hint)}</small>
+      </div>
+    `).join("");
+  }
   els.adminLocationList.innerHTML = `
     <div class="admin-location-column">
-      <strong>층 목록</strong>
+      <strong>층 목록 <small>${floors.length}개</small></strong>
       ${floors.map((floor) => `
         <article class="admin-location-card ${floor.enabled ? "" : "is-disabled"}" data-location-kind="floor" data-location-id="${escapeHtml(floor.id)}">
           <div>
@@ -5374,7 +5493,7 @@ function renderAdminLocations() {
       `).join("") || `<div class="empty compact-empty">등록된 층이 없습니다.</div>`}
     </div>
     <div class="admin-location-column">
-      <strong>구역 목록</strong>
+      <strong>구역 목록 <small>${areas.length}개</small></strong>
       ${areas.map((area) => `
         <article class="admin-location-card ${area.enabled ? "" : "is-disabled"}" data-location-kind="area" data-location-id="${escapeHtml(area.id)}">
           <div>

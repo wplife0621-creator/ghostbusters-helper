@@ -3855,6 +3855,137 @@ select[multiple] option:checked {
   margin-top: 12px;
 }
 
+.admin-section-hint {
+  margin: 8px 0 0;
+  color: #526574;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.admin-codex-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-codex-metric {
+  min-height: 84px;
+  border: 1px solid rgba(24, 80, 107, 0.14);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(239, 248, 247, 0.9));
+  box-shadow: 0 12px 24px rgba(25, 45, 72, 0.06);
+  padding: 13px;
+}
+
+.admin-codex-metric span,
+.admin-codex-metric strong,
+.admin-codex-metric small {
+  display: block;
+}
+
+.admin-codex-metric span {
+  color: #526574;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-codex-metric strong {
+  margin-top: 6px;
+  color: #123146;
+  font-size: 24px;
+  letter-spacing: -0.04em;
+}
+
+.admin-codex-metric small {
+  margin-top: 5px;
+  color: #72808a;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.admin-codex-tools {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(130px, 0.35fr) minmax(130px, 0.35fr);
+  gap: 10px;
+  align-items: end;
+  margin-top: 12px;
+  border: 1px solid rgba(24, 80, 107, 0.12);
+  border-radius: 18px;
+  background: rgba(248, 251, 253, 0.86);
+  padding: 12px;
+}
+
+.admin-approved-result-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(24, 80, 107, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 10px 12px;
+  box-shadow: 0 10px 20px rgba(25, 45, 72, 0.06);
+}
+
+.admin-approved-result-head strong {
+  color: #123146;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.admin-approved-result-head span {
+  color: #5d7080;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-approved-card {
+  grid-template-columns: minmax(180px, 0.42fr) minmax(220px, 1fr) auto;
+  align-items: center;
+}
+
+.admin-approved-card.is-number {
+  border-color: rgba(217, 139, 52, 0.24);
+  background: linear-gradient(135deg, #fffaf0, #ffffff);
+}
+
+.admin-approved-card.is-essence {
+  border-color: rgba(29, 120, 145, 0.2);
+  background: linear-gradient(135deg, #f5fbfb, #ffffff);
+}
+
+.admin-approved-card-head strong {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.admin-approved-status {
+  display: block;
+  margin-top: 5px;
+  color: #526574;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.admin-approved-meta {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-approved-meta p {
+  margin: 0;
+}
+
 .admin-location-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(80px, 0.45fr) auto auto;
@@ -3897,10 +4028,32 @@ select[multiple] option:checked {
 .admin-location-column {
   display: grid;
   gap: 8px;
+  align-content: start;
+  border: 1px solid rgba(24, 80, 107, 0.1);
+  border-radius: 18px;
+  background: rgba(248, 251, 253, 0.76);
+  padding: 12px;
+  max-height: 460px;
+  overflow: auto;
 }
 
 .admin-location-column > strong {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 12px;
+  background: rgba(248, 251, 253, 0.96);
   color: #17364b;
+  padding: 4px 2px 8px;
+}
+
+.admin-location-column > strong small {
+  color: #6f7f8a;
+  font-size: 11px;
 }
 
 .admin-location-card {
@@ -9776,6 +9929,15 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .admin-codex-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-codex-tools,
+  .admin-approved-card {
+    grid-template-columns: 1fr;
+  }
+
   .admin-command-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -9879,6 +10041,29 @@ body {
 
   .admin-management-card .pending-actions {
     justify-content: flex-start;
+  }
+
+  .admin-codex-summary,
+  .admin-location-editor,
+  .admin-location-list {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-codex-tools {
+    padding: 10px;
+  }
+
+  .admin-approved-result-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-approved-card {
+    align-items: start;
+  }
+
+  .admin-location-column {
+    max-height: none;
   }
 }
 
