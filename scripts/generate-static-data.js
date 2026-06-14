@@ -10,7 +10,6 @@ const collections = {
   builds: "dukhubusters_builds",
   guides: "dukhubusters_guide_posts",
 };
-const backupDir = path.join(process.cwd(), "migration-backups");
 const arrayMarker = "__dukhubustersArray";
 const sessionTimeMarker = "__session_time__";
 const visitorMarkers = new Set(["__visitor_total__", "__visitor_daily__", "__location_settings__"]);
@@ -77,21 +76,6 @@ async function listCollection(collection) {
   return rows;
 }
 
-function newestBackupFile(pattern) {
-  if (!fs.existsSync(backupDir)) return "";
-  return fs.readdirSync(backupDir)
-    .filter((name) => pattern.test(name))
-    .map((name) => path.join(backupDir, name))
-    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0] || "";
-}
-
-function loadBackupTables() {
-  const mainFile = newestBackupFile(/^supabase-export-.*\.json$/);
-  if (!mainFile) throw new Error("Firestore를 읽지 못했고 migration-backups 백업도 찾지 못했습니다.");
-  const main = JSON.parse(fs.readFileSync(mainFile, "utf8"));
-  return main.tables || {};
-}
-
 function cleanBuildRows(rows) {
   return rows.filter((row) => {
     const title = String(row.title || "");
@@ -127,7 +111,6 @@ function refreshStaticDataVersion() {
   let reports;
   let builds;
   let guides;
-  let source = "firestore";
   try {
     [reports, builds, guides] = await Promise.all([
       listCollection(collections.reports),
@@ -135,19 +118,15 @@ function refreshStaticDataVersion() {
       listCollection(collections.guides),
     ]);
   } catch (error) {
-    source = "migration-backup";
-    const tables = loadBackupTables();
-    reports = Array.isArray(tables.monster_reports) ? tables.monster_reports : [];
-    builds = Array.isArray(tables.builds) ? tables.builds : [];
-    guides = Array.isArray(tables.guide_posts) ? tables.guide_posts : [];
-    console.warn(`Firestore에서 직접 읽지 못해 백업으로 정적 데이터를 생성합니다: ${error.message}`);
+    console.warn(`Firestore에서 직접 읽지 못해 정적 데이터 갱신을 건너뜁니다: ${error.message}`);
+    process.exit(0);
   }
   writeJson("reports-index", sortByUpdated(reports.filter((row) => row.status === "approved")).map(replaceLegacySiteName));
   writeJson("builds-index", sortByUpdated(cleanBuildRows(builds)).map(replaceLegacySiteName));
   writeJson("guides-index", sortByUpdated(guides).map(replaceLegacySiteName));
   refreshStaticDataVersion();
   console.log(JSON.stringify({
-    source,
+    source: "firestore",
     reports: reports.filter((row) => row.status === "approved").length,
     builds: cleanBuildRows(builds).length,
     guides: guides.length,

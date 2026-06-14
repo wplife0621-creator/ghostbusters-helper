@@ -1381,7 +1381,7 @@ async function loadHomeNotices() {
       ...homeGuideNotices(guides),
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
     renderHomePopularGuides(guides);
-    els.homeNoticeStatus.textContent = "6시간마다 갱신되는 정적 공개 목록 기준으로 빠르게 표시합니다.";
+    els.homeNoticeStatus.textContent = "매일 새벽 갱신되는 정적 공개 목록 기준으로 빠르게 표시합니다.";
     renderHomeNotices();
   } catch {
     homeNotices = [];

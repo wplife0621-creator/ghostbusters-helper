@@ -2,9 +2,8 @@ name: Refresh static public data
 
 on:
   schedule:
-    # Every 6 hours: 03:10, 09:10, 15:10, 21:10 KST.
-    # GitHub Actions cron uses UTC.
-    - cron: "10 0,6,12,18 * * *"
+    # Daily at 03:10 KST. GitHub Actions cron uses UTC.
+    - cron: "10 18 * * *"
   workflow_dispatch:
 
 permissions:
