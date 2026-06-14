@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="겜바바 버스터즈">
   <meta name="twitter:description" content="겜바바(게임 속 바바리안으로 살아남기) 팬게임의 정수와 넘버스 정보, 캐릭터 빌드, 게시판 공략, 미궁 시간 계산기를 한곳에서 확인하세요.">
-  <link rel="stylesheet" href="./styles.css?v=20260614-site-stability">
+  <link rel="stylesheet" href="./styles.css?v=20260614-remove-update-summary">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
 </head>
@@ -50,7 +50,7 @@
       </div>
     </section>
 
-    <section class="panel home-recent" aria-label="사이트 이용 안내 및 업데이트 요약">
+    <section class="panel home-recent" aria-label="사이트 이용 안내">
       <div class="home-recent-head">
         <div>
           <p class="home-kicker">SITE GUIDE</p>
@@ -80,25 +80,24 @@
           <a href="./report.html">제보하기</a>
         </article>
       </div>
-      <div class="home-update-head">
-        <div>
-          <p class="home-kicker">UPDATE SUMMARY</p>
-          <h3>업데이트 요약</h3>
-          <span>정적 공개 데이터 기준으로 최근 반영된 정보와 글을 모아 보여줍니다.</span>
-        </div>
-        <nav id="homeNoticeFilters" class="home-notice-filters" aria-label="공지사항 종류 선택">
-          <button type="button" class="is-active" data-notice-filter="all">전체</button>
-          <button type="button" data-notice-filter="essence">정수</button>
-          <button type="button" data-notice-filter="numbers">넘버스</button>
-          <button type="button" data-notice-filter="build">빌드</button>
-          <button type="button" data-notice-filter="guide">게시판</button>
-        </nav>
+      <div class="home-guide-detail">
+        <article>
+          <p class="home-kicker">RECOMMENDED FLOW</p>
+          <h3>처음 방문했다면 이렇게 이용하세요</h3>
+          <ol>
+            <li><strong>도감에서 정보 확인</strong><span>정수와 넘버스를 먼저 검색해 필요한 효과와 획득처를 확인합니다.</span></li>
+            <li><strong>빌드에서 조합 비교</strong><span>공개 빌드를 참고해 캐릭터별 정수 세팅을 빠르게 비교합니다.</span></li>
+            <li><strong>게시판에서 공략 확인</strong><span>보스, 파밍, 빌드 글을 보고 부족한 정보를 보완합니다.</span></li>
+            <li><strong>제보로 정보 보완</strong><span>잘못된 정보는 로그인 후 제보하면 관리자 검수 뒤 반영됩니다.</span></li>
+          </ol>
+        </article>
+        <article>
+          <p class="home-kicker">DATA POLICY</p>
+          <h3>정보 반영과 검수 기준</h3>
+          <p>겜바바 버스터즈의 정수, 넘버스, 빌드, 게시판 정보는 팬 커뮤니티의 제보와 공개 데이터를 바탕으로 정리됩니다. 제보된 정보는 관리자 확인 후 반영되며, 게임 업데이트로 내용이 달라질 수 있습니다.</p>
+          <p>사이트는 비공식 팬 정보 사이트이며, 공식 게임 운영 주체가 아닙니다. 문의와 수정 요청은 정보 제보/수정 페이지를 통해 남겨주세요.</p>
+        </article>
       </div>
-      <div id="homeNoticeList" class="home-notice-list">
-        <div class="home-notice-loading">업데이트 요약을 불러오는 중입니다.</div>
-      </div>
-      <nav id="homeNoticePagination" class="home-notice-pagination" aria-label="공지사항 페이지"></nav>
-      <p id="homeNoticeStatus" class="home-notice-status"></p>
     </section>
 
     <section class="panel home-popular" aria-label="인기 게시글">
@@ -226,6 +225,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="./firebase-bridge.js?v=20260614-site-stability"></script>
   <script src="./auth.js?v=20260614-site-stability"></script>
-  <script src="./app.js?v=20260614-adsense-home-guide"></script>
+  <script src="./app.js?v=20260614-remove-update-summary"></script>
 </body>
 </html>

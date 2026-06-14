@@ -294,6 +294,69 @@ body {
   color: #0a4854;
 }
 
+.home-guide-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 12px;
+}
+
+.home-guide-detail article {
+  border: 1px solid rgba(24, 80, 107, 0.12);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 218, 137, 0.18), transparent 38%),
+    linear-gradient(145deg, #fffdf8, #f7fbfb);
+  padding: 17px;
+}
+
+.home-guide-detail h3 {
+  margin: 0 0 10px;
+  color: #17263d;
+  font-size: 18px;
+}
+
+.home-guide-detail p {
+  margin: 0 0 9px;
+  color: #526574;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.65;
+}
+
+.home-guide-detail p:last-child {
+  margin-bottom: 0;
+}
+
+.home-guide-detail ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-guide-detail li {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(24, 80, 107, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 10px 12px;
+}
+
+.home-guide-detail li strong {
+  color: #123146;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.home-guide-detail li span {
+  color: #607381;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
 .home-update-head {
   display: flex;
   align-items: end;
@@ -6542,6 +6605,15 @@ body::after {
 
   .home-guide-cards article {
     min-height: 0;
+    padding: 13px;
+  }
+
+  .home-guide-detail {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .home-guide-detail article {
     padding: 13px;
   }
 
