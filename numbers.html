@@ -99,66 +99,12 @@
       dailyVisitorTable: "daily_visitors",
     };
   </script>
-  <script src="./config.js?v=20260614-site-stability"></script>
+  <script src="./config.js?v=20260614-codex-render-fix"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="./firebase-bridge.js?v=20260614-site-stability"></script>
-  <script src="./auth.js?v=20260614-site-stability"></script>
-  <script src="./app.js?v=20260614-site-stability"></script>
-  <script>
-    (function () {
-      function text(value) {
-        return String(value == null ? "" : value).trim();
-      }
-
-      function escapeHtml(value) {
-        return text(value)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-      }
-
-      function displayNumber(value) {
-        var number = text(value);
-        return number && number !== "미확인" ? "NO." + number : "NO.미확인";
-      }
-
-      function renderNumbersFallback() {
-        var data = (window.GHOST_DATA && window.GHOST_DATA["넘버스"]) || [];
-        var results = document.getElementById("numbersResults");
-        var count = document.getElementById("numbersCount");
-        var search = document.getElementById("numbersSearch");
-        if (!results || !data.length) return;
-        var rendered = text(results.textContent);
-        if (rendered && rendered !== "조건에 맞는 넘버스 정보가 없습니다.") return;
-
-        function draw() {
-          var query = text(search && search.value).toLowerCase();
-          var rows = data.filter(function (row) {
-            if (!query) return true;
-            return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"], row["착용부위"], row["획득처"]].some(function (value) {
-              return text(value).toLowerCase().indexOf(query) >= 0;
-            });
-          });
-          if (count) count.textContent = "총 " + rows.length + "건";
-          results.innerHTML = rows.length ? '<div class="numbers-card-list">' + rows.map(function (row) {
-            return '<article class="number-card"><div class="number-card-head"><div class="number-title-line"><span class="number-code">' + escapeHtml(displayNumber(row["번호"])) + '</span><strong>' + escapeHtml(row["이름"] || "이름 미확인") + '</strong></div><span class="grade-pill">Lv ' + escapeHtml(row["아이템 레벨(Lv)"] || "미확인") + '</span></div><div class="number-card-meta"><span><b>착용부위</b>' + escapeHtml(row["착용부위"] || "-") + '</span></div><div class="number-card-meta number-source-block"><b>획득처</b><p>' + escapeHtml(row["획득처"] || "-") + '</p></div><div class="number-card-meta number-effect-block"><b>효과</b><p>' + escapeHtml(row["효과"] || "-") + '</p></div></article>';
-          }).join("") + '</div>' : '<div class="empty">조건에 맞는 넘버스 정보가 없습니다.</div>';
-        }
-
-        draw();
-        if (search && !search.dataset.fallbackBound) {
-          search.dataset.fallbackBound = "1";
-          search.addEventListener("input", draw);
-        }
-      }
-
-      window.addEventListener("load", function () {
-        setTimeout(renderNumbersFallback, 1200);
-      });
-    }());
-  </script>
+  <script src="./firebase-bridge.js?v=20260614-codex-render-fix"></script>
+  <script src="./auth.js?v=20260614-codex-render-fix"></script>
+  <script src="./app.js?v=20260614-codex-render-fix"></script>
 </body>
 </html>

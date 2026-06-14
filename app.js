@@ -6770,4 +6770,21 @@ function renderAdminSiteStats() {
   `;
 }
 
-init();
+function handleAppInitError(error) {
+  console.error("Dukhubusters app init failed", error);
+  const message = `
+    <div class="empty compact-empty">
+      정보를 불러오는 중 문제가 발생했습니다. 새로고침 후에도 반복되면 관리자에게 알려주세요.
+    </div>
+  `;
+  if (els.results) {
+    els.resultCount.textContent = "확인 필요";
+    els.results.innerHTML = message;
+  }
+  if (els.numbersResults) {
+    els.numbersCount.textContent = "확인 필요";
+    els.numbersResults.innerHTML = message;
+  }
+}
+
+init().catch(handleAppInitError);
