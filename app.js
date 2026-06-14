@@ -212,6 +212,7 @@ const els = {
   reportOriginalMonsterField: document.querySelector("#reportOriginalMonsterField"),
   reportOriginalMonster: document.querySelector("#reportOriginalMonster"),
   reportGrade: document.querySelector("#reportGrade"),
+  reportGuardian: document.querySelector("#reportGuardian"),
   reportFloor: document.querySelector("#reportFloor"),
   reportAreaCandidate: document.querySelector("#reportAreaCandidate"),
   reportAreaAdd: document.querySelector("#reportAreaAdd"),
@@ -344,6 +345,7 @@ const els = {
   quickEditOriginalMonster: document.querySelector("#quickEditOriginalMonster"),
   quickEditMonster: document.querySelector("#quickEditMonster"),
   quickEditGrade: document.querySelector("#quickEditGrade"),
+  quickEditGuardian: document.querySelector("#quickEditGuardian"),
   quickEditFloor: document.querySelector("#quickEditFloor"),
   quickEditAreaCandidate: document.querySelector("#quickEditAreaCandidate"),
   quickEditAreaAdd: document.querySelector("#quickEditAreaAdd"),
@@ -664,9 +666,15 @@ function normalizeGradeNumber(value) {
   return match ? match[0] : "";
 }
 
-function gradeLabelFromInput(value) {
+function isGuardianGrade(value) {
+  return /수호자/.test(textOf(value));
+}
+
+function gradeLabelFromInput(value, guardian = false) {
   const grade = normalizeGradeNumber(value);
-  return grade ? `${grade}등급` : "";
+  const guardianGrade = guardian || isGuardianGrade(value);
+  if (!grade) return guardianGrade ? "수호자" : "";
+  return guardianGrade ? `${grade}등급(수호자)` : `${grade}등급`;
 }
 
 function hasConfirmedNumber(value) {
@@ -3510,7 +3518,7 @@ function updateReportDataset() {
   [els.reportArea, els.reportAreaCandidate, els.reportAreaAdd].forEach((field) => {
     if (field) field.disabled = numbersMode;
   });
-  [...reportActiveFields(), els.reportSailing, ...els.reportRecommendations].forEach((field) => {
+  [els.reportGuardian, ...reportActiveFields(), els.reportSailing, ...els.reportRecommendations].forEach((field) => {
     field.disabled = numbersMode;
   });
   [els.reportNumberName, els.reportNumberLevel, els.reportNumberEffect].forEach((field) => {
@@ -3648,6 +3656,7 @@ function fillReportFromRow(row) {
   els.reportOriginalMonster.value = textOf(row["몬스터"]);
   els.reportMonster.value = textOf(row["몬스터"]);
   els.reportGrade.value = normalizeGradeNumber(row["등급"]);
+  if (els.reportGuardian) els.reportGuardian.checked = isGuardianGrade(row["등급"]);
   els.reportFloor.value = textOf(row["층"]);
   refreshReportAreaOptions();
   const areas = essenceAreaLabels(row["구역"]);
@@ -3728,7 +3737,8 @@ function openQuickEditModal(row) {
   if (!row || !els.quickEditModal) return;
   els.quickEditOriginalMonster.value = textOf(row["몬스터"]);
   els.quickEditMonster.value = textOf(row["몬스터"]);
-  els.quickEditGrade.value = textOf(row["등급"]);
+  els.quickEditGrade.value = normalizeGradeNumber(row["등급"]);
+  if (els.quickEditGuardian) els.quickEditGuardian.checked = isGuardianGrade(row["등급"]);
   els.quickEditFloor.value = textOf(row["층"]);
   refreshQuickEditAreaOptions();
   const areas = essenceAreaLabels(row["구역"]);
@@ -3794,7 +3804,7 @@ async function submitQuickEditReport(event) {
     authorNickname: textOf(els.quickEditNickname.value),
     monster: textOf(els.quickEditMonster.value),
     originalMonster: textOf(els.quickEditOriginalMonster.value),
-    grade: textOf(els.quickEditGrade.value),
+    grade: gradeLabelFromInput(els.quickEditGrade.value, els.quickEditGuardian?.checked),
     floor: textOf(els.quickEditFloor.value),
     area: selectedOptionValues(els.quickEditArea).join(", "),
     stats: textOf(els.quickEditStats.value),
@@ -3876,7 +3886,7 @@ function fillDeleteNumberFromRow(row) {
 function reportCurrentEssenceValues() {
   return {
     "몬스터명": textOf(els.reportMonster.value),
-    "등급": gradeLabelFromInput(els.reportGrade.value),
+    "등급": gradeLabelFromInput(els.reportGrade.value, els.reportGuardian?.checked),
     "층": textOf(els.reportFloor.value),
     "구역": selectedOptionValues(els.reportArea).join(", "),
     "스탯": textOf(els.reportStats.value),
@@ -4976,7 +4986,7 @@ async function submitReport(event) {
     authorNickname,
     monster: textOf(els.reportMonster.value),
     originalMonster: ["edit", "delete"].includes(els.reportMode.value) ? textOf(els.reportOriginalMonster.value) : "",
-    grade: gradeLabelFromInput(els.reportGrade.value),
+    grade: gradeLabelFromInput(els.reportGrade.value, els.reportGuardian?.checked),
     floor: textOf(els.reportFloor.value),
     area: selectedOptionValues(els.reportArea).join(", "),
     stats: els.reportMode.value === "delete" && !/삭제\s*요청/.test(textOf(els.reportStats.value))
