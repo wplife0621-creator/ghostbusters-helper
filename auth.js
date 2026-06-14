@@ -412,15 +412,23 @@
     const clean = cleanNickname(nickname);
     if (!clean) return;
     localStorage.setItem(nicknameKey, clean);
-    state.user = {
-      ...state.user,
-      displayName: clean,
-      user_metadata: {
-        ...(state.user.user_metadata || {}),
+    if (!state.user) return;
+    if (state.user.user_metadata) {
+      state.user.user_metadata = {
+        ...state.user.user_metadata,
         nickname: clean,
         display_name: clean,
-      },
-    };
+      };
+    }
+    if (state.user.user_metadata || !Object.prototype.hasOwnProperty.call(state.user, "displayName")) return;
+    try {
+      Object.defineProperty(state.user, "displayName", {
+        configurable: true,
+        value: clean,
+      });
+    } catch {
+      // Firebase User objects should keep their prototype; localStorage still carries the nickname.
+    }
   }
 
   function profileUrl(query = "") {
