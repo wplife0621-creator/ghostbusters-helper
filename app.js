@@ -1970,6 +1970,15 @@ function buildStoreUrl(query = "") {
   return `${buildBackend.url}/rest/v1/${buildBackend.table}${query}`;
 }
 
+function fetchWithTimeout(resource, options = {}, timeoutMs = 10000) {
+  return Promise.race([
+    fetch(resource, options),
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("request timeout")), timeoutMs);
+    }),
+  ]);
+}
+
 function staticDataUrl(name) {
   return `./data/${name}.json?v=${encodeURIComponent(staticDataVersion)}`;
 }
@@ -5503,8 +5512,14 @@ async function saveAdminLocationSettings(nextSettings) {
   try {
     if (hasPublicBuildStore()) await saveLocationSettingsRemote(payload);
     setAdminLocationStatus("도감 설정이 저장되었습니다.", "is-online");
-  } catch {
-    setAdminLocationStatus("원격 저장에 실패했습니다. 현재 화면에는 임시 반영되었습니다.", "is-offline");
+  } catch (error) {
+    const timeout = /timeout/i.test(error?.message || "");
+    setAdminLocationStatus(
+      timeout
+        ? "저장 응답이 지연되고 있습니다. 현재 화면에는 임시 반영되었고, 잠시 뒤 새로고침 후 확인해주세요."
+        : "원격 저장에 실패했습니다. 현재 화면에는 임시 반영되었습니다.",
+      "is-offline"
+    );
   }
 }
 
@@ -5517,20 +5532,20 @@ async function saveLocationSettingsRemote(settings) {
     note: JSON.stringify(settings),
     created_at: new Date().toISOString(),
   };
-  const patch = await fetch(buildStoreUrl(`?id=eq.${encodeURIComponent(locationSettingsId)}`), {
+  const patch = await fetchWithTimeout(buildStoreUrl(`?id=eq.${encodeURIComponent(locationSettingsId)}`), {
     method: "PATCH",
     headers: buildStoreHeaders({ Prefer: "return=representation" }),
     body: JSON.stringify(row),
-  });
+  }, 10000);
   if (patch.ok) {
     const rows = await patch.json();
     if (Array.isArray(rows) && rows.length) return;
   }
-  const response = await fetch(buildStoreUrl(), {
+  const response = await fetchWithTimeout(buildStoreUrl(), {
     method: "POST",
     headers: buildStoreHeaders({ Prefer: "resolution=merge-duplicates,return=minimal" }),
     body: JSON.stringify(row),
-  });
+  }, 10000);
   if (!response.ok && response.status !== 409) throw new Error(`location settings save failed: ${response.status}`);
 }
 
