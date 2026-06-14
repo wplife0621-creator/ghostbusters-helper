@@ -1178,6 +1178,16 @@ async function loadLocationSettingsForPage() {
     return;
   }
   try {
+    let directPayload = null;
+    try {
+      directPayload = await loadLocationSettingsFromFirebase();
+    } catch {
+      directPayload = null;
+    }
+    if (directPayload) {
+      applyLocationSettings(directPayload);
+      return;
+    }
     const response = await fetch(buildStoreUrl(`?select=*&id=eq.${encodeURIComponent(locationSettingsId)}&limit=1`), {
       headers: buildStoreHeaders(),
     });
@@ -1188,6 +1198,24 @@ async function loadLocationSettingsForPage() {
   } catch {
     applyLocationSettings(locationSettings);
   }
+}
+
+async function locationSettingsFirebaseCollection() {
+  const bridge = window.DUKHUBUSTERS_FIREBASE;
+  if (!bridge?.ready || !bridge?.table) return null;
+  const ready = await promiseWithTimeout(bridge.ready(), 8000);
+  if (!ready) return null;
+  return bridge.table(buildBackend.table);
+}
+
+async function loadLocationSettingsFromFirebase() {
+  if (String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return null;
+  const collection = await locationSettingsFirebaseCollection();
+  if (!collection) return null;
+  const doc = await promiseWithTimeout(collection.doc(locationSettingsId).get(), 8000);
+  if (!doc.exists) return null;
+  const row = doc.data() || {};
+  return row.note ? JSON.parse(row.note) : null;
 }
 
 function recentNoticeDate(value) {
@@ -1970,13 +1998,17 @@ function buildStoreUrl(query = "") {
   return `${buildBackend.url}/rest/v1/${buildBackend.table}${query}`;
 }
 
-function fetchWithTimeout(resource, options = {}, timeoutMs = 10000) {
+function promiseWithTimeout(promise, timeoutMs = 10000) {
   return Promise.race([
-    fetch(resource, options),
+    promise,
     new Promise((_, reject) => {
       setTimeout(() => reject(new Error("request timeout")), timeoutMs);
     }),
   ]);
+}
+
+function fetchWithTimeout(resource, options = {}, timeoutMs = 10000) {
+  return promiseWithTimeout(fetch(resource, options), timeoutMs);
 }
 
 function staticDataUrl(name) {
@@ -5532,6 +5564,10 @@ async function saveLocationSettingsRemote(settings) {
     note: JSON.stringify(settings),
     created_at: new Date().toISOString(),
   };
+  if (String(siteConfig.backendMode || "").toLowerCase() === "firebase") {
+    await saveLocationSettingsToFirebase(row);
+    return;
+  }
   const patch = await fetchWithTimeout(buildStoreUrl(`?id=eq.${encodeURIComponent(locationSettingsId)}`), {
     method: "PATCH",
     headers: buildStoreHeaders({ Prefer: "return=representation" }),
@@ -5547,6 +5583,12 @@ async function saveLocationSettingsRemote(settings) {
     body: JSON.stringify(row),
   }, 10000);
   if (!response.ok && response.status !== 409) throw new Error(`location settings save failed: ${response.status}`);
+}
+
+async function saveLocationSettingsToFirebase(row) {
+  const collection = await locationSettingsFirebaseCollection();
+  if (!collection) throw new Error("firebase location settings unavailable");
+  await promiseWithTimeout(collection.doc(locationSettingsId).set(row, { merge: true }), 10000);
 }
 
 async function copyApprovedRows() {
