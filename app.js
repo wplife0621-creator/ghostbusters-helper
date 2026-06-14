@@ -1137,7 +1137,9 @@ function statValue(row, statName) {
 
 async function init() {
   revealCurrentNavItem();
-  await loadLocationSettingsForPage();
+  const fastCodexPage = isPublicCodexPage();
+  if (fastCodexPage) applyLocationSettings(locationSettings);
+  else await loadLocationSettingsForPage();
   resetPublicCodexLocalCache();
   if (els.homeNoticeList) initHomeNotices();
   if (els.search) initEssences();
@@ -1147,15 +1149,31 @@ async function init() {
   if (els.buildForm) initBuilds();
   if (els.timeResult) initMazeTime();
   if (els.visitorToday) recordVisit();
+  if (fastCodexPage) loadLocationSettingsForPage().then(refreshPublicCodexAfterLocationSettings).catch(() => {});
 }
 
 function resetPublicCodexLocalCache() {
-  const isPublicCodexPage = Boolean((els.search || els.numbersResults) && !els.pendingReports);
-  if (!isPublicCodexPage || String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return;
+  if (!isPublicCodexPage() || String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return;
   approvedReports = [];
   approvedReportItems = [];
   essenceRows = mergeApprovedRows(data["정수"] || [], []);
   numbersRows = mergeNumbersRows(data["넘버스"] || [], []);
+}
+
+function isPublicCodexPage() {
+  return Boolean((els.search || els.numbersResults) && !els.reportForm && !els.pendingReports && !els.adminDetailModal);
+}
+
+function refreshPublicCodexAfterLocationSettings() {
+  if (els.search) {
+    refreshControls();
+    renderStatChips();
+    render();
+  }
+  if (els.numbersResults) {
+    refreshNumbersControls();
+    renderNumbers();
+  }
 }
 
 function pageUsesLocationSettings() {
@@ -1168,7 +1186,7 @@ async function loadLocationSettingsForPage() {
     return;
   }
   try {
-    const response = await fetch(buildStoreUrl(`?select=*&title=eq.${encodeURIComponent(locationSettingsMarker)}&limit=1`), {
+    const response = await fetch(buildStoreUrl(`?select=*&id=eq.${encodeURIComponent(locationSettingsId)}&limit=1`), {
       headers: buildStoreHeaders(),
     });
     if (!response.ok) throw new Error(`location settings load failed: ${response.status}`);

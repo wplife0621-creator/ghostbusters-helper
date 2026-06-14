@@ -106,7 +106,14 @@
   }
 
   async function readRows(table, params) {
-    let rows = (await collectionRef(table).get()).docs.map((doc) => fromDoc(doc));
+    const directId = equalityParam(params, "id");
+    let rows = [];
+    if (directId) {
+      const doc = await collectionRef(table).doc(directId).get();
+      rows = doc.exists ? [fromDoc(doc)] : [];
+    } else {
+      rows = (await collectionRef(table).get()).docs.map((doc) => fromDoc(doc));
+    }
     rows = applyFilters(rows, params);
     const order = params.get("order");
     if (order) {
@@ -115,6 +122,11 @@
     }
     const limit = Number(params.get("limit") || 0);
     return limit > 0 ? rows.slice(0, limit) : rows;
+  }
+
+  function equalityParam(params, key) {
+    const value = String(params.get(key) || "");
+    return value.startsWith("eq.") ? decodeURIComponent(value.slice(3)) : "";
   }
 
   async function writeRows(table, init, merge) {
