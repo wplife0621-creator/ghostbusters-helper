@@ -6772,19 +6772,64 @@ function renderAdminSiteStats() {
 
 function handleAppInitError(error) {
   console.error("Dukhubusters app init failed", error);
-  const message = `
-    <div class="empty compact-empty">
-      정보를 불러오는 중 문제가 발생했습니다. 새로고침 후에도 반복되면 관리자에게 알려주세요.
-    </div>
-  `;
+  const message = `<div class="empty compact-empty">정보를 불러오는 중 문제가 발생했습니다. 새로고침 후에도 반복되면 관리자에게 알려주세요.</div>`;
   if (els.results) {
-    els.resultCount.textContent = "확인 필요";
-    els.results.innerHTML = message;
+    if (!renderEmergencyEssenceList()) {
+      els.resultCount.textContent = "확인 필요";
+      els.results.innerHTML = message;
+    }
   }
   if (els.numbersResults) {
     els.numbersCount.textContent = "확인 필요";
     els.numbersResults.innerHTML = message;
   }
+}
+
+function renderEmergencyEssenceList() {
+  const rows = data["정수"] || [];
+  if (!els.results || !rows.length) return false;
+  const query = compactSearchText(els.search?.value);
+  const visibleRows = rows.filter((row) => !query || compactSearchText(row["몬스터"]).includes(query));
+  if (els.resultTitle) els.resultTitle.textContent = "정수 목록";
+  if (els.resultCount) els.resultCount.textContent = `${visibleRows.length}건`;
+  els.results.innerHTML = visibleRows.length
+    ? `
+      <section class="essence-group">
+        <div class="group-title">
+          <h3>정수 목록</h3>
+          <span>기본 데이터</span>
+        </div>
+        <div class="essence-table-wrap">
+          <table class="essence-table">
+            <thead>
+              <tr>
+                <th>몬스터</th>
+                <th>위치</th>
+                <th>등급</th>
+                <th>주요 스탯</th>
+                <th>패시브</th>
+                <th>액티브</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${visibleRows.map((row) => `
+                <tr>
+                  <td data-label="몬스터"><strong class="monster-name">${escapeHtml(row["몬스터"])}</strong></td>
+                  <td data-label="위치">${escapeHtml(row["층"] || "-")} · ${escapeHtml(row["구역"] || "-")}</td>
+                  <td data-label="등급"><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
+                  <td data-label="주요 스탯">${escapeHtml(row["주요 스탯"] || "-")}</td>
+                  <td data-label="패시브">${escapeHtml(row["패시브"] || "-")}</td>
+                  <td data-label="액티브">${escapeHtml(row["액티브"] || "-")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `
+    : `<div class="empty">조건에 맞는 정수가 없습니다.</div>`;
+  els.search?.addEventListener("input", renderEmergencyEssenceList, { once: true });
+  return true;
 }
 
 init().catch(handleAppInitError);
