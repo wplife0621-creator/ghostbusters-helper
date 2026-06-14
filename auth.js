@@ -471,7 +471,7 @@
           await state.client.signInWithRedirect(provider);
         }
       } catch (error) {
-        if (error?.code === "auth/popup-blocked" || error?.code === "auth/cancelled-popup-request") {
+        if (shouldRetryFirebaseRedirect(error)) {
           try {
             const provider = new window.firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ prompt: "select_account" });
@@ -511,10 +511,20 @@
     }
   }
 
+  function shouldRetryFirebaseRedirect(error) {
+    return [
+      "auth/popup-blocked",
+      "auth/cancelled-popup-request",
+      "auth/operation-not-supported-in-this-environment",
+      "auth/web-storage-unsupported",
+      "auth/internal-error",
+    ].includes(String(error?.code || ""));
+  }
+
   function firebaseAuthErrorMessage(error) {
     const code = String(error?.code || "");
     if (code === "auth/unauthorized-domain") {
-      return "Firebase 승인 도메인에 busters.kr을 추가해주세요.";
+      return "Firebase 승인 도메인에 busters.kr과 www.busters.kr을 추가해주세요.";
     }
     if (code === "auth/popup-closed-by-user") {
       return "로그인 창이 닫혔습니다. 다시 시도해주세요.";

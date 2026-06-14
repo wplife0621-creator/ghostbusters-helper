@@ -1138,6 +1138,7 @@ function statValue(row, statName) {
 async function init() {
   revealCurrentNavItem();
   await loadLocationSettingsForPage();
+  resetPublicCodexLocalCache();
   if (els.homeNoticeList) initHomeNotices();
   if (els.search) initEssences();
   if (els.numbersResults) initNumbers();
@@ -1146,6 +1147,15 @@ async function init() {
   if (els.buildForm) initBuilds();
   if (els.timeResult) initMazeTime();
   if (els.visitorToday) recordVisit();
+}
+
+function resetPublicCodexLocalCache() {
+  const isPublicCodexPage = Boolean((els.search || els.numbersResults) && !els.pendingReports);
+  if (!isPublicCodexPage || String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return;
+  approvedReports = [];
+  approvedReportItems = [];
+  essenceRows = mergeApprovedRows(data["정수"] || [], []);
+  numbersRows = mergeNumbersRows(data["넘버스"] || [], []);
 }
 
 function pageUsesLocationSettings() {
