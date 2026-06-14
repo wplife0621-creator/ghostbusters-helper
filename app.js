@@ -1208,8 +1208,70 @@ async function locationSettingsFirebaseCollection() {
   return bridge.table(buildBackend.table);
 }
 
+function firestoreRestConfig() {
+  if (String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return null;
+  const config = siteConfig.firebaseConfig || {};
+  if (!config.projectId || !config.apiKey) return null;
+  return config;
+}
+
+function firestoreLocationUrl() {
+  const config = firestoreRestConfig();
+  if (!config) return "";
+  const collection = `dukhubusters_${buildBackend.table}`;
+  return `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/databases/(default)/documents/${encodeURIComponent(collection)}/${encodeURIComponent(locationSettingsId)}?key=${encodeURIComponent(config.apiKey)}`;
+}
+
+async function firebaseCurrentUserToken() {
+  const bridge = window.DUKHUBUSTERS_FIREBASE;
+  await promiseWithTimeout(bridge?.ready?.() || Promise.resolve(false), 8000);
+  const user = bridge?.auth?.()?.currentUser || window.firebase?.auth?.()?.currentUser;
+  if (!user) throw new Error("관리자 로그인 정보가 확인되지 않았습니다.");
+  return promiseWithTimeout(user.getIdToken(), 8000);
+}
+
+function toFirestoreValue(value) {
+  if (Array.isArray(value)) {
+    return { arrayValue: value.length ? { values: value.map(toFirestoreValue) } : {} };
+  }
+  if (value && typeof value === "object") {
+    return {
+      mapValue: {
+        fields: Object.fromEntries(Object.entries(value).map(([key, item]) => [key, toFirestoreValue(item)])),
+      },
+    };
+  }
+  if (typeof value === "number" && Number.isFinite(value)) return Number.isInteger(value) ? { integerValue: String(value) } : { doubleValue: value };
+  if (typeof value === "boolean") return { booleanValue: value };
+  if (value == null) return { nullValue: null };
+  return { stringValue: String(value) };
+}
+
+function fromFirestoreValue(value) {
+  if (!value || typeof value !== "object") return null;
+  if ("stringValue" in value) return value.stringValue;
+  if ("integerValue" in value) return Number(value.integerValue);
+  if ("doubleValue" in value) return Number(value.doubleValue);
+  if ("booleanValue" in value) return Boolean(value.booleanValue);
+  if ("arrayValue" in value) return (value.arrayValue.values || []).map(fromFirestoreValue);
+  if ("mapValue" in value) {
+    return Object.fromEntries(Object.entries(value.mapValue.fields || {}).map(([key, item]) => [key, fromFirestoreValue(item)]));
+  }
+  return null;
+}
+
 async function loadLocationSettingsFromFirebase() {
   if (String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return null;
+  const restUrl = firestoreLocationUrl();
+  if (restUrl) {
+    const response = await fetchWithTimeout(restUrl, {}, 8000);
+    if (response.ok) {
+      const doc = await response.json();
+      const row = Object.fromEntries(Object.entries(doc.fields || {}).map(([key, value]) => [key, fromFirestoreValue(value)]));
+      return row.note ? JSON.parse(row.note) : null;
+    }
+    if (response.status !== 404 && response.status !== 403) throw new Error(`location settings read failed: ${response.status}`);
+  }
   const collection = await locationSettingsFirebaseCollection();
   if (!collection) return null;
   const doc = await promiseWithTimeout(collection.doc(locationSettingsId).get(), 8000);
@@ -5546,10 +5608,11 @@ async function saveAdminLocationSettings(nextSettings) {
     setAdminLocationStatus("도감 설정이 저장되었습니다.", "is-online");
   } catch (error) {
     const timeout = /timeout/i.test(error?.message || "");
+    const detail = textOf(error?.message);
     setAdminLocationStatus(
       timeout
         ? "저장 응답이 지연되고 있습니다. 현재 화면에는 임시 반영되었고, 잠시 뒤 새로고침 후 확인해주세요."
-        : "원격 저장에 실패했습니다. 현재 화면에는 임시 반영되었습니다.",
+        : `원격 저장에 실패했습니다. ${detail ? `사유: ${detail}` : "현재 화면에는 임시 반영되었습니다."}`,
       "is-offline"
     );
   }
@@ -5586,6 +5649,34 @@ async function saveLocationSettingsRemote(settings) {
 }
 
 async function saveLocationSettingsToFirebase(row) {
+  await saveLocationSettingsToFirebaseRest(row);
+}
+
+async function saveLocationSettingsToFirebaseRest(row) {
+  const restUrl = firestoreLocationUrl();
+  if (!restUrl) throw new Error("Firebase 설정이 비어 있습니다.");
+  const token = await firebaseCurrentUserToken();
+  const response = await fetchWithTimeout(restUrl, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fields: Object.fromEntries(Object.entries(row).map(([key, value]) => [key, toFirestoreValue(value)])),
+    }),
+  }, 10000);
+  if (!response.ok) {
+    let message = `Firebase 저장 실패 ${response.status}`;
+    try {
+      const payload = await response.json();
+      if (payload?.error?.message) message = payload.error.message;
+    } catch {}
+    throw new Error(message);
+  }
+}
+
+async function saveLocationSettingsToFirebaseSdk(row) {
   const collection = await locationSettingsFirebaseCollection();
   if (!collection) throw new Error("firebase location settings unavailable");
   await promiseWithTimeout(collection.doc(locationSettingsId).set(row, { merge: true }), 10000);
