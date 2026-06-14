@@ -4,6 +4,7 @@ const path = require("path");
 const projectId = "dukhubusters";
 const apiKey = "AIzaSyB1Nvaz_Vmz201izN0vwx3mK9hDbLwDB4A";
 const outputDir = path.join(process.cwd(), "data");
+const configPath = path.join(process.cwd(), "config.js");
 const collections = {
   reports: "dukhubusters_monster_reports",
   builds: "dukhubusters_builds",
@@ -113,6 +114,14 @@ function writeJson(name, rows) {
   fs.writeFileSync(path.join(outputDir, `${name}.json`), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
+function refreshStaticDataVersion() {
+  if (!fs.existsSync(configPath)) return;
+  const version = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 12);
+  const text = fs.readFileSync(configPath, "utf8");
+  const next = text.replace(/staticDataVersion:\s*"[^"]*"/, `staticDataVersion: "${version}"`);
+  if (next !== text) fs.writeFileSync(configPath, next, "utf8");
+}
+
 (async () => {
   fs.mkdirSync(outputDir, { recursive: true });
   let reports;
@@ -136,6 +145,7 @@ function writeJson(name, rows) {
   writeJson("reports-index", sortByUpdated(reports.filter((row) => row.status === "approved")).map(replaceLegacySiteName));
   writeJson("builds-index", sortByUpdated(cleanBuildRows(builds)).map(replaceLegacySiteName));
   writeJson("guides-index", sortByUpdated(guides).map(replaceLegacySiteName));
+  refreshStaticDataVersion();
   console.log(JSON.stringify({
     source,
     reports: reports.filter((row) => row.status === "approved").length,
