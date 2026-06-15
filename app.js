@@ -4775,9 +4775,9 @@ function updateApprovedFromReports(reports) {
 async function loadPublicApprovedReports() {
   if (!hasPublicReportStore()) return;
   try {
-    const response = await fetch(reportStoreUrl("?select=*&status=eq.approved&order=reviewed_at.desc"), {
+    const response = await fetchWithTimeout(reportStoreUrl("?select=*&status=eq.approved&order=reviewed_at.desc"), {
       headers: reportStoreHeaders(),
-    });
+    }, 10000);
     if (!response.ok) throw new Error(`approved load failed: ${response.status}`);
     updateApprovedFromReports((await response.json()).map(normalizeRemoteReport));
   } catch {
@@ -4792,9 +4792,9 @@ async function loadPublicReports() {
   }
   setReportSyncStatus("제보 저장소를 불러오는 중입니다.", "is-online");
   try {
-    const response = await fetch(reportStoreUrl("?select=*&status=in.(pending,approved)&order=created_at.desc"), {
+    const response = await fetchWithTimeout(reportStoreUrl("?select=*&status=in.(pending,approved)&order=created_at.desc"), {
       headers: reportStoreHeaders(),
-    });
+    }, 10000);
     if (!response.ok) throw new Error(`report load failed: ${response.status}`);
     const reports = (await response.json()).map(normalizeRemoteReport);
     pendingReports = sortReportsByDate(reports.filter((report) => report.status === "pending"));
@@ -4828,19 +4828,19 @@ async function savePublicReport(report) {
     status: "pending",
     created_at: report.createdAt,
   };
-  let response = await fetch(reportStoreUrl(), {
+  let response = await fetchWithTimeout(reportStoreUrl(), {
     method: "POST",
     headers: reportStoreHeaders({ Prefer: "return=representation" }),
     body: JSON.stringify(payload),
-  });
+  }, 10000);
   if (!response.ok && report.authorNickname) {
     const fallbackPayload = { ...payload };
     delete fallbackPayload.author_nickname;
-    response = await fetch(reportStoreUrl(), {
+    response = await fetchWithTimeout(reportStoreUrl(), {
       method: "POST",
       headers: reportStoreHeaders({ Prefer: "return=representation" }),
       body: JSON.stringify(fallbackPayload),
-    });
+    }, 10000);
   }
   if (!response.ok) throw new Error(`report save failed: ${response.status}`);
   const rows = await response.json();
@@ -4864,19 +4864,19 @@ async function saveApprovedNumberDeleteReport(report) {
     created_at: report.createdAt,
     reviewed_at: report.reviewedAt || new Date().toISOString(),
   };
-  let response = await fetch(reportStoreUrl(), {
+  let response = await fetchWithTimeout(reportStoreUrl(), {
     method: "POST",
     headers: reportStoreHeaders({ Prefer: "return=representation" }),
     body: JSON.stringify(payload),
-  });
+  }, 10000);
   if (!response.ok && report.authorNickname) {
     const fallbackPayload = { ...payload };
     delete fallbackPayload.author_nickname;
-    response = await fetch(reportStoreUrl(), {
+    response = await fetchWithTimeout(reportStoreUrl(), {
       method: "POST",
       headers: reportStoreHeaders({ Prefer: "return=representation" }),
       body: JSON.stringify(fallbackPayload),
-    });
+    }, 10000);
   }
   if (!response.ok) throw new Error(`approved number delete save failed: ${response.status}`);
   const rows = await response.json();
@@ -4885,14 +4885,14 @@ async function saveApprovedNumberDeleteReport(report) {
 }
 
 async function updatePublicReportStatus(id, status) {
-  const response = await fetch(reportStoreUrl(`?id=eq.${encodeURIComponent(id)}`), {
+  const response = await fetchWithTimeout(reportStoreUrl(`?id=eq.${encodeURIComponent(id)}`), {
     method: "PATCH",
     headers: reportStoreHeaders({ Prefer: "return=representation" }),
     body: JSON.stringify({
       status,
       reviewed_at: new Date().toISOString(),
     }),
-  });
+  }, 10000);
   if (!response.ok) throw new Error(`report update failed: ${response.status}`);
   const rows = await response.json();
   return rows[0] ? normalizeRemoteReport(rows[0]) : null;
@@ -4909,11 +4909,11 @@ async function updatePublicReportDetail(report) {
     status: "approved",
     reviewed_at: new Date().toISOString(),
   };
-  const response = await fetch(reportStoreUrl(`?id=eq.${encodeURIComponent(report.id)}`), {
+  const response = await fetchWithTimeout(reportStoreUrl(`?id=eq.${encodeURIComponent(report.id)}`), {
     method: "PATCH",
     headers: reportStoreHeaders({ Prefer: "return=representation" }),
     body: JSON.stringify(payload),
-  });
+  }, 10000);
   if (!response.ok) throw new Error(`report detail update failed: ${response.status}`);
   const rows = await response.json();
   return rows[0] ? normalizeRemoteReport(rows[0]) : report;
@@ -5041,10 +5041,15 @@ async function handlePendingAction(event) {
   const report = pendingReports.find((item) => item.id === id);
   if (!report) return;
   button.disabled = true;
+  const action = button.dataset.action;
+  const approving = action === "approve";
+  const originalText = button.textContent;
+  button.textContent = approving ? "승인 중..." : "반려 중...";
+  setReportSyncStatus(approving ? "검수 승인 처리 중입니다." : "검수 반려 처리 중입니다.", "is-online");
 
   try {
     if (hasPublicReportStore()) {
-      await updatePublicReportStatus(id, button.dataset.action === "approve" ? "approved" : "rejected");
+      await updatePublicReportStatus(id, approving ? "approved" : "rejected");
     }
   } catch {
     setReportSyncStatus("공개 저장소 검수 상태 업데이트에 실패했습니다. 임시 목록만 변경합니다.", "is-offline");
@@ -5053,7 +5058,7 @@ async function handlePendingAction(event) {
   pendingReports = pendingReports.filter((item) => item.id !== id);
   saveStoredRows(storageKeys.pending, pendingReports);
 
-  if (button.dataset.action === "approve") {
+  if (approving) {
     const approvedReport = { ...report, mode: isDeleteReport(report) ? "delete" : report.mode, status: "approved", reviewedAt: new Date().toISOString() };
     let nextApprovedItems = approvedReportItems.filter((item) => item.id !== id);
     if (isDeleteReport(approvedReport)) {
@@ -5078,6 +5083,8 @@ async function handlePendingAction(event) {
     renderAdminCenter();
   }
   renderMyReports();
+  setReportSyncStatus(approving ? "검수 승인을 반영했습니다." : "검수 반려를 반영했습니다.", hasPublicReportStore() ? "is-online" : "is-offline");
+  button.textContent = originalText;
 }
 
 function renderPendingReports() {
