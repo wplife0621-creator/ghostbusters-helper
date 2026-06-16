@@ -1258,11 +1258,15 @@ function firestoreRestConfig() {
   return config;
 }
 
-function firestoreLocationUrl() {
+function firestoreDocumentUrl(table, id) {
   const config = firestoreRestConfig();
   if (!config) return "";
-  const collection = `dukhubusters_${buildBackend.table}`;
-  return `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/databases/(default)/documents/${encodeURIComponent(collection)}/${encodeURIComponent(locationSettingsId)}?key=${encodeURIComponent(config.apiKey)}`;
+  const collection = `dukhubusters_${table}`;
+  return `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/databases/(default)/documents/${encodeURIComponent(collection)}/${encodeURIComponent(id)}?key=${encodeURIComponent(config.apiKey)}`;
+}
+
+function firestoreLocationUrl() {
+  return firestoreDocumentUrl(buildBackend.table, locationSettingsId);
 }
 
 async function firebaseCurrentUserToken() {
@@ -3867,10 +3871,11 @@ async function submitQuickEditReport(event) {
     saveStoredRows(storageKeys.pending, pendingReports);
     els.quickEditStatus.textContent = "수정 제보가 검수 대기에 등록되었습니다.";
     setTimeout(closeQuickEditModal, 700);
-  } catch {
+  } catch (error) {
     pendingReports = sortReportsByDate([report, ...pendingReports.filter((item) => item.id !== report.id)]);
     saveStoredRows(storageKeys.pending, pendingReports);
-    els.quickEditStatus.textContent = "저장소 연결이 불안정해 임시 검수 대기에 저장했습니다.";
+    const detail = textOf(error?.message);
+    els.quickEditStatus.textContent = `공개 저장소 저장에 실패해 임시 검수 대기에 저장했습니다.${detail ? ` 사유: ${detail}` : ""}`;
   } finally {
     if (button) button.disabled = false;
   }
@@ -4779,6 +4784,52 @@ function normalizeRemoteReport(row) {
   };
 }
 
+function reportPayloadFromReport(report, status = "pending") {
+  return {
+    id: report.id,
+    mode: report.mode,
+    monster: report.monster,
+    original_monster: report.originalMonster || "",
+    grade: report.grade,
+    floor: report.floor,
+    area: report.area,
+    stats: report.stats,
+    passive: report.passive,
+    active: reportActiveForStorage(report),
+    author_nickname: report.authorNickname || "",
+    status,
+    created_at: report.createdAt,
+    reviewed_at: report.reviewedAt || "",
+  };
+}
+
+async function saveReportToFirebaseRest(payload) {
+  const id = textOf(payload.id) || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+  const restUrl = firestoreDocumentUrl(reportBackend.table, id);
+  if (!restUrl) throw new Error("Firebase 설정이 비어 있습니다.");
+  const token = await firebaseCurrentUserToken();
+  const row = { ...payload, id };
+  const response = await fetchWithTimeout(restUrl, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fields: Object.fromEntries(Object.entries(row).map(([key, value]) => [key, toFirestoreValue(value)])),
+    }),
+  }, 10000);
+  if (!response.ok) {
+    let message = `제보 저장 실패 ${response.status}`;
+    try {
+      const body = await response.json();
+      if (body?.error?.message) message = body.error.message;
+    } catch {}
+    throw new Error(message);
+  }
+  return normalizeRemoteReport(row);
+}
+
 function sortReportsByDate(rows) {
   return rows.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
@@ -4849,21 +4900,10 @@ async function loadPublicReports() {
 }
 
 async function savePublicReport(report) {
-  const payload = {
-    id: report.id,
-    mode: report.mode,
-    monster: report.monster,
-    original_monster: report.originalMonster || "",
-    grade: report.grade,
-    floor: report.floor,
-    area: report.area,
-    stats: report.stats,
-    passive: report.passive,
-    active: reportActiveForStorage(report),
-    author_nickname: report.authorNickname || "",
-    status: "pending",
-    created_at: report.createdAt,
-  };
+  const payload = reportPayloadFromReport(report, "pending");
+  if (String(siteConfig.backendMode || "").toLowerCase() === "firebase") {
+    return saveReportToFirebaseRest(payload);
+  }
   let response = await fetchWithTimeout(reportStoreUrl(), {
     method: "POST",
     headers: reportStoreHeaders({ Prefer: "return=representation" }),
@@ -4921,6 +4961,17 @@ async function saveApprovedNumberDeleteReport(report) {
 }
 
 async function updatePublicReportStatus(id, status) {
+  if (String(siteConfig.backendMode || "").toLowerCase() === "firebase") {
+    const current = [...pendingReports, ...approvedReportItems].find((report) => report.id === id) || { id };
+    const next = {
+      ...current,
+      id,
+      status,
+      reviewedAt: new Date().toISOString(),
+      createdAt: current.createdAt || new Date().toISOString(),
+    };
+    return saveReportToFirebaseRest(reportPayloadFromReport(next, status));
+  }
   const response = await fetchWithTimeout(reportStoreUrl(`?id=eq.${encodeURIComponent(id)}`), {
     method: "PATCH",
     headers: reportStoreHeaders({ Prefer: "return=representation" }),
@@ -4935,6 +4986,15 @@ async function updatePublicReportStatus(id, status) {
 }
 
 async function updatePublicReportDetail(report) {
+  if (String(siteConfig.backendMode || "").toLowerCase() === "firebase") {
+    const next = {
+      ...report,
+      status: "approved",
+      reviewedAt: new Date().toISOString(),
+      createdAt: report.createdAt || new Date().toISOString(),
+    };
+    return saveReportToFirebaseRest(reportPayloadFromReport(next, "approved"));
+  }
   const payload = {
     grade: report.grade,
     floor: report.floor,
@@ -5058,12 +5118,13 @@ async function submitReport(event) {
         : "공개 저장소 연결 전이라 이 브라우저의 검수 대기에 임시 저장했습니다.",
       hasPublicReportStore() ? "is-online" : "is-offline"
     );
-  } catch {
+  } catch (error) {
     pendingReports = sortReportsByDate([report, ...pendingReports.filter((item) => item.id !== report.id)]);
     saveStoredRows(storageKeys.pending, pendingReports);
     renderPendingReports();
     renderMyReports();
-    setReportSyncStatus("제보 저장소 저장에 실패해 이 브라우저의 검수 대기에 임시 저장했습니다.", "is-offline");
+    const detail = textOf(error?.message);
+    setReportSyncStatus(`제보 저장소 저장에 실패해 이 브라우저의 검수 대기에 임시 저장했습니다.${detail ? ` 사유: ${detail}` : ""}`, "is-offline");
   } finally {
     if (submitButton) submitButton.disabled = false;
   }
