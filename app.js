@@ -16,6 +16,7 @@ const storageKeys = {
   pending: "dukhubusters.pendingReports",
   approved: "dukhubusters.approvedReports",
   approvedReportItems: "dukhubusters.approvedReportItems",
+  approvedVersion: "dukhubusters.approvedReportsVersion",
   pinnedEssences: "dukhubusters.pinnedEssences",
   adminUnlocked: "dukhubusters.adminUnlocked",
   builds: "dukhubusters.sharedBuilds",
@@ -393,6 +394,8 @@ let adminApprovedSearch = "";
 let adminApprovedKind = "all";
 let adminApprovedLimit = "10";
 let activeNumbersPage = 1;
+let approvedReloadPromise = null;
+let lastApprovedReloadAt = 0;
 const numbersPageSize = 10;
 const statNoneLabel = "스탯 선택 안 함";
 
@@ -1144,6 +1147,7 @@ async function init() {
   if (els.homePopularGuides) loadHomePopularGuides();
   if (els.search) initEssences();
   if (els.numbersResults) initNumbers();
+  initPublicApprovedRefresh();
   if (els.reportForm) initReport();
   else if (els.pendingReports) initAdminReview();
   if (els.buildForm) initBuilds();
@@ -1162,6 +1166,37 @@ function resetPublicCodexLocalCache() {
 
 function isPublicCodexPage() {
   return Boolean((els.search || els.numbersResults) && !els.reportForm && !els.pendingReports && !els.adminDetailModal);
+}
+
+function notifyApprovedDataChanged() {
+  try {
+    localStorage.setItem(storageKeys.approvedVersion, String(Date.now()));
+  } catch {}
+}
+
+function refreshPublicApprovedData(options = {}) {
+  if (!isPublicCodexPage() || !hasPublicReportStore()) return Promise.resolve();
+  const now = Date.now();
+  if (!options.force && now - lastApprovedReloadAt < 3000) return Promise.resolve();
+  if (approvedReloadPromise) return approvedReloadPromise;
+  lastApprovedReloadAt = now;
+  approvedReloadPromise = loadPublicApprovedReports()
+    .catch(() => {})
+    .finally(() => {
+      approvedReloadPromise = null;
+    });
+  return approvedReloadPromise;
+}
+
+function initPublicApprovedRefresh() {
+  if (!isPublicCodexPage()) return;
+  window.addEventListener("storage", (event) => {
+    if (event.key === storageKeys.approvedVersion) refreshPublicApprovedData({ force: true });
+  });
+  window.addEventListener("focus", () => refreshPublicApprovedData());
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refreshPublicApprovedData();
+  });
 }
 
 function refreshPublicCodexAfterLocationSettings() {
@@ -1457,6 +1492,7 @@ async function adminDeleteNumber(row) {
     : report;
   approvedReportItems = sortReportsByDate([saved, ...approvedReportItems.filter((item) => item.id !== saved.id)]);
   updateApprovedFromReports([...approvedReportItems]);
+  notifyApprovedDataChanged();
 }
 
 function initEssences() {
@@ -5044,14 +5080,17 @@ async function handlePendingAction(event) {
   const action = button.dataset.action;
   const approving = action === "approve";
   const originalText = button.textContent;
+  let publicStatusUpdated = !hasPublicReportStore();
   button.textContent = approving ? "승인 중..." : "반려 중...";
   setReportSyncStatus(approving ? "검수 승인 처리 중입니다." : "검수 반려 처리 중입니다.", "is-online");
 
   try {
     if (hasPublicReportStore()) {
       await updatePublicReportStatus(id, approving ? "approved" : "rejected");
+      publicStatusUpdated = true;
     }
   } catch {
+    publicStatusUpdated = false;
     setReportSyncStatus("공개 저장소 검수 상태 업데이트에 실패했습니다. 임시 목록만 변경합니다.", "is-offline");
   }
 
@@ -5070,6 +5109,7 @@ async function handlePendingAction(event) {
     }
     approvedReportItems = sortReportsByDate([approvedReport, ...nextApprovedItems]);
     syncApprovedRows();
+    if (publicStatusUpdated) notifyApprovedDataChanged();
     if (els.search) {
       refreshControls();
       renderStatChips();
@@ -5083,7 +5123,12 @@ async function handlePendingAction(event) {
     renderAdminCenter();
   }
   renderMyReports();
-  setReportSyncStatus(approving ? "검수 승인을 반영했습니다." : "검수 반려를 반영했습니다.", hasPublicReportStore() ? "is-online" : "is-offline");
+  setReportSyncStatus(
+    publicStatusUpdated
+      ? (approving ? "검수 승인을 공개 사이트에 반영했습니다." : "검수 반려를 공개 저장소에 반영했습니다.")
+      : (approving ? "검수 승인을 이 화면에 임시 반영했습니다. 공개 저장소 연결을 확인해주세요." : "검수 반려를 이 화면에 임시 반영했습니다. 공개 저장소 연결을 확인해주세요."),
+    publicStatusUpdated ? "is-online" : "is-offline"
+  );
   button.textContent = originalText;
 }
 
@@ -5180,6 +5225,7 @@ async function handleApprovedAction(event) {
     if (hasPublicReportStore()) await updatePublicReportStatus(id, "deleted");
     approvedReportItems = approvedReportItems.filter((item) => item.id !== id);
     syncApprovedRows();
+    notifyApprovedDataChanged();
     if (els.search) {
       refreshControls();
       renderStatChips();
@@ -5305,6 +5351,7 @@ async function submitAdminDetailEdit(event) {
     const saved = hasPublicReportStore() ? await updatePublicReportDetail(next) : next;
     approvedReportItems = sortReportsByDate(approvedReportItems.map((item) => item.id === id ? { ...next, ...saved } : item));
     syncApprovedRows();
+    notifyApprovedDataChanged();
     renderApprovedReports();
     renderAdminCenter();
     if (els.search) {
