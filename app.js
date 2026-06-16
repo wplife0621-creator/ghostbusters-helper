@@ -27,6 +27,8 @@ const storageKeys = {
 const adminCode = "0621";
 const siteConfig = window.DUKHUBUSTERS_CONFIG || {};
 const staticDataVersion = textOf(siteConfig.staticDataVersion) || "20260607-static-index";
+const visitorCountersEnabled = String(siteConfig.enableVisitorCounters || "").toLowerCase() === "true";
+const adminAutoLoadEnabled = String(siteConfig.enableAdminAutoLoad || "").toLowerCase() === "true";
 const buildBackend = {
   url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
   anonKey: textOf(siteConfig.supabaseAnonKey),
@@ -1653,7 +1655,7 @@ function initAdminReview() {
   renderApprovedReports();
   renderAdminLocations();
   loadPublicReports();
-  loadAdminCenter();
+  if (adminAutoLoadEnabled) loadAdminCenter();
 }
 
 function initAdminCodexControls() {
@@ -2924,7 +2926,7 @@ function updateAdminAccess(user) {
   renderPendingReports();
   renderApprovedReports();
   renderAdminCenter();
-  if (allowed) loadAdminCenter();
+  if (allowed && adminAutoLoadEnabled) loadAdminCenter();
 }
 
 function updateAdminUi() {
@@ -3157,28 +3159,28 @@ async function loadAdminCenter() {
     return;
   }
   els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
-  const [guideResult, buildResult, userResult, visitorResult, dailyResult] = await Promise.allSettled([
+  const [guideResult, buildResult, userResult] = await Promise.allSettled([
     fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(3000)),
-    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(visitorBackend, visitorBackend.visitorTable, "?select=visitor_id"),
-    fetchAdminRows(visitorBackend, visitorBackend.dailyTable, "?select=visitor_id,visit_date&order=visit_date.desc"),
+    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(500)),
+    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc&limit=300"),
   ]);
+  const buildRows = buildResult.status === "fulfilled" ? buildResult.value : [];
+  const buildVisitorStats = adminBuildVisitorStats(buildRows);
   adminCenterData = {
     guides: guideResult.status === "fulfilled" ? guideResult.value.map(normalizeAdminGuide) : [],
-    builds: buildResult.status === "fulfilled" ? buildResult.value : [],
+    builds: buildRows,
     users: userResult.status === "fulfilled" ? userResult.value : [],
     visitors: {
-      total: visitorResult.status === "fulfilled" ? visitorResult.value.length : null,
-      today: dailyResult.status === "fulfilled"
-        ? dailyResult.value.filter((row) => textOf(row.visit_date) === new Date().toISOString().slice(0, 10)).length
-        : null,
+      total: buildVisitorStats.total || null,
+      today: buildVisitorStats.today ?? null,
+      dailyCounts: buildVisitorStats.dailyCounts,
+      stayStats: adminSessionStayStats(buildRows),
     },
     errors: {
       guides: guideResult.status !== "fulfilled",
       builds: buildResult.status !== "fulfilled",
       users: userResult.status !== "fulfilled",
-      visitors: visitorResult.status !== "fulfilled" || dailyResult.status !== "fulfilled",
+      visitors: buildResult.status !== "fulfilled",
     },
     loadedAt: new Date().toISOString(),
   };
@@ -4645,6 +4647,10 @@ async function countRows(table, query = "") {
 
 async function recordVisit() {
   if (!els.visitorToday || !els.visitorTotal) return;
+  if (!visitorCountersEnabled) {
+    setVisitorStatus("");
+    return;
+  }
   if (!hasVisitorStore()) {
     setVisitorStatus("방문자 저장소 연결 전입니다.");
     return;
@@ -4697,6 +4703,10 @@ async function countBuildRows(query = "") {
 
 async function recordVisit() {
   if (!els.visitorToday || !els.visitorTotal) return;
+  if (!visitorCountersEnabled) {
+    setVisitorStatus("");
+    return;
+  }
   if (!hasVisitorStore()) {
     setVisitorStatus("방문자 저장소 연결 전입니다.");
     return;
@@ -6141,36 +6151,25 @@ async function loadAdminCenter() {
     return;
   }
   els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
-  const today = todayKey();
-  const todayVisitorQuery = `select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.daily)}&note=eq.${today}`;
-  const totalVisitorQuery = `select=id&title=eq.${encodeURIComponent(visitorBuildMarkers.daily)}`;
-  const [guideResult, buildResult, buildLogResult, userResult, visitorResult, dailyResult, todayCountResult, totalCountResult] = await Promise.allSettled([
+  const [guideResult, buildResult, buildLogResult, userResult] = await Promise.allSettled([
     fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(3000)),
-    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc&limit=1200"),
-    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(visitorBackend, visitorBackend.visitorTable, "?select=visitor_id"),
-    fetchAdminRows(visitorBackend, visitorBackend.dailyTable, "?select=visitor_id,visit_date&order=visit_date.desc"),
-    countBuildRows(todayVisitorQuery),
-    countBuildRows(totalVisitorQuery),
+    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(500)),
+    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc&limit=300"),
+    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc&limit=300"),
   ]);
   const buildRows = mergeAdminBuildRows(
     buildResult.status === "fulfilled" ? buildResult.value : [],
     buildLogResult.status === "fulfilled" ? buildLogResult.value : [],
   );
   const buildVisitorStats = adminBuildVisitorStats(buildRows);
-  const dailyRows = dailyResult.status === "fulfilled" ? dailyResult.value : [];
-  const tableDaily = adminDailyVisitorCounts(dailyRows);
-  const dailyCounts = buildVisitorStats.dailyCounts.length ? buildVisitorStats.dailyCounts : tableDaily;
-  const exactToday = todayCountResult.status === "fulfilled" ? todayCountResult.value : null;
-  const exactTotal = totalCountResult.status === "fulfilled" ? totalCountResult.value : null;
+  const dailyCounts = buildVisitorStats.dailyCounts;
   adminCenterData = {
     guides: guideResult.status === "fulfilled" ? guideResult.value.map(normalizeAdminGuide) : [],
     builds: buildRows,
     users: userResult.status === "fulfilled" ? userResult.value : [],
     visitors: {
-      total: exactTotal ?? (buildVisitorStats.total || (visitorResult.status === "fulfilled" ? visitorResult.value.length : null)),
-      today: exactToday ?? buildVisitorStats.today ?? tableDaily.find((row) => row.date === today)?.count ?? null,
+      total: buildVisitorStats.total || null,
+      today: buildVisitorStats.today ?? null,
       dailyCounts,
       stayStats: adminSessionStayStats(buildRows),
     },
@@ -6178,7 +6177,7 @@ async function loadAdminCenter() {
       guides: guideResult.status !== "fulfilled",
       builds: buildResult.status !== "fulfilled",
       users: userResult.status !== "fulfilled",
-      visitors: buildLogResult.status !== "fulfilled" && (visitorResult.status !== "fulfilled" || dailyResult.status !== "fulfilled"),
+      visitors: buildLogResult.status !== "fulfilled",
     },
     loadedAt: new Date().toISOString(),
   };

@@ -15,6 +15,9 @@
   const nicknamePromptKey = "dukhubusters.nicknamePrompted";
   const anonymousVisitorKey = "dukhubusters.visitorId";
   const sessionTimeMarker = "__session_time__";
+  const stayTrackingEnabled = String(config.enableStayTracking || "").toLowerCase() === "true";
+  const stayFlushIntervalMs = 10 * 60 * 1000;
+  const stayMinimumSeconds = 5 * 60;
   const bannedNicknamePatterns = [
     /섹스|성관계|성기|음란|야동|자위|정액|질싸|오랄|강간/i,
     /보지|자지|좆|꼬추|유두|젖꼭지/i,
@@ -555,10 +558,11 @@
 
   function startStayTracking() {
     stopStayTracking();
+    if (!stayTrackingEnabled || !state.user) return;
     if (!authConfig.buildTable) return;
-    if (authConfig.backendMode !== "firebase" && (!authConfig.url || !authConfig.key)) return;
+    if (!authConfig.url || !authConfig.key) return;
     state.stayStartedAt = Date.now();
-    state.stayTimer = window.setInterval(flushStayTime, 60000);
+    state.stayTimer = window.setInterval(flushStayTime, stayFlushIntervalMs);
   }
 
   function stopStayTracking() {
@@ -568,10 +572,11 @@
   }
 
   async function flushStayTime() {
+    if (!stayTrackingEnabled || !state.user) return;
     if (!state.stayStartedAt) return;
     const now = Date.now();
     const seconds = Math.max(0, Math.round((now - state.stayStartedAt) / 1000));
-    if (seconds < 20) return;
+    if (seconds < stayMinimumSeconds) return;
     state.stayStartedAt = now;
     state.staySequence += 1;
     const identity = stayIdentity();
@@ -586,7 +591,7 @@
           Prefer: "resolution=ignore-duplicates,return=minimal",
         },
         body: JSON.stringify({
-          id: `session-${todayKey()}-${identity.id}-${Date.now()}-${state.staySequence}`,
+          id: `session-${todayKey()}-${identity.id}-${Math.floor(now / stayFlushIntervalMs)}-${state.staySequence}`,
           title: sessionTimeMarker,
           author: identity.nickname.slice(0, 40) || identity.type,
           members: [],
