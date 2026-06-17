@@ -98,6 +98,21 @@ function writeJson(name, rows) {
   fs.writeFileSync(path.join(outputDir, `${name}.json`), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
+function writeLocationSettings(rows) {
+  const row = rows.find((item) => item.id === "site-location-settings" || item.title === "__location_settings__");
+  let settings = null;
+  try {
+    settings = row?.note ? JSON.parse(row.note) : null;
+  } catch {
+    settings = null;
+  }
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    settings,
+  };
+  fs.writeFileSync(path.join(outputDir, "location-settings.json"), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
 function refreshStaticDataVersion() {
   if (!fs.existsSync(configPath)) return;
   const version = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 12);
@@ -124,6 +139,7 @@ function refreshStaticDataVersion() {
   writeJson("reports-index", sortByUpdated(reports.filter((row) => row.status === "approved")).map(replaceLegacySiteName));
   writeJson("builds-index", sortByUpdated(cleanBuildRows(builds)).map(replaceLegacySiteName));
   writeJson("guides-index", sortByUpdated(guides).map(replaceLegacySiteName));
+  writeLocationSettings(builds);
   refreshStaticDataVersion();
   console.log(JSON.stringify({
     source: "firestore",

@@ -370,6 +370,7 @@ let approvedReportItems = loadStoredRows(storageKeys.approvedReportItems);
 let pendingReports = loadStoredRows(storageKeys.pending);
 let pendingReportsUnsubscribe = null;
 let pendingReportsLiveStarting = false;
+let adminLocationLiveLoaded = false;
 let savedBuilds = loadStoredRows(storageKeys.builds);
 let buildLikes = new Map();
 let buildLikeRecordIds = new Set();
@@ -1144,9 +1145,7 @@ function statValue(row, statName) {
 
 async function init() {
   revealCurrentNavItem();
-  const fastCodexPage = isPublicCodexPage();
-  if (fastCodexPage) applyLocationSettings(locationSettings);
-  else await loadLocationSettingsForPage();
+  await loadStaticLocationSettingsForPage();
   resetPublicCodexLocalCache();
   if (els.homePopularGuides) loadHomePopularGuides();
   if (els.search) initEssences();
@@ -1157,7 +1156,6 @@ async function init() {
   if (els.buildForm) initBuilds();
   if (els.timeResult) initMazeTime();
   if (els.visitorToday) recordVisit();
-  if (fastCodexPage) loadLocationSettingsForPage().then(refreshPublicCodexAfterLocationSettings).catch(() => {});
 }
 
 function resetPublicCodexLocalCache() {
@@ -1242,6 +1240,19 @@ async function loadLocationSettingsForPage() {
     const rows = await response.json();
     const payload = rows[0]?.note ? JSON.parse(rows[0].note) : null;
     applyLocationSettings(payload || locationSettings);
+  } catch {
+    applyLocationSettings(locationSettings);
+  }
+}
+
+async function loadStaticLocationSettingsForPage() {
+  if (!pageUsesLocationSettings()) {
+    applyLocationSettings(locationSettings);
+    return;
+  }
+  try {
+    const payload = await fetchStaticPayload("location-settings");
+    applyLocationSettings(payload?.settings || locationSettings);
   } catch {
     applyLocationSettings(locationSettings);
   }
@@ -2914,6 +2925,13 @@ function updateAdminAccess(user) {
   renderApprovedReports();
   renderAdminCenter();
   syncPendingReportsLiveState();
+  if (allowed && els.pendingReports && !adminLocationLiveLoaded) {
+    adminLocationLiveLoaded = true;
+    loadLocationSettingsForPage().then(() => {
+      renderAdminLocations();
+      refreshPublicCodexAfterLocationSettings();
+    }).catch(() => {});
+  }
   if (allowed && adminAutoLoadEnabled) loadAdminCenter();
 }
 
