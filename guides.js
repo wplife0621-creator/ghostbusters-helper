@@ -23,6 +23,8 @@ const guideBackend = {
 const staticDataVersion = String(config.staticDataVersion || "20260607-static-index");
 const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
+const guideDeletedStorageKey = "dukhubusters.deletedGuidePosts";
+const guideDeletedCommentStorageKey = "dukhubusters.deletedGuideComments";
 const commentTitlePrefix = "__guide_comment__:";
 const likeTitlePrefix = "__guide_like__:";
 const reportTitlePrefix = "__guide_report__:";
@@ -68,6 +70,8 @@ const fields = {
 };
 let posts = sortPosts(readLocalPosts().map(normalizePost));
 let comments = readLocalComments();
+let deletedPostIds = readLocalIdSet(guideDeletedStorageKey);
+let deletedCommentIds = readLocalIdSet(guideDeletedCommentStorageKey);
 let guideLikes = new Map();
 let guideLikeRecordIds = new Set();
 let likedPostIds = new Set();
@@ -145,6 +149,19 @@ function readLocalComments() {
 
 function saveLocalComments() {
   localStorage.setItem(guideCommentStorageKey, JSON.stringify(comments));
+}
+
+function readLocalIdSet(key) {
+  try {
+    const rows = JSON.parse(localStorage.getItem(key) || "[]");
+    return new Set(Array.isArray(rows) ? rows.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveLocalIdSet(key, values) {
+  localStorage.setItem(key, JSON.stringify([...values]));
 }
 
 function setStatus(message, mode = "") {
@@ -482,8 +499,12 @@ function mergeRowsById(...groups) {
 }
 
 function applyGuideRows(rows) {
-  comments = rows.filter(isStoredComment).map(normalizeComment);
-  posts = sortPosts(rows.filter((row) => !isStoredComment(row) && !isStoredLike(row) && !isStoredReport(row)).map(normalizePost));
+  const remoteComments = rows.filter(isStoredComment).map(normalizeComment);
+  const remotePosts = rows.filter((row) => !isStoredComment(row) && !isStoredLike(row) && !isStoredReport(row)).map(normalizePost);
+  comments = mergeRowsById(remoteComments, readLocalComments()).map(normalizeComment)
+    .filter((comment) => !deletedCommentIds.has(comment.id));
+  posts = sortPosts(mergeRowsById(remotePosts, readLocalPosts().map(normalizePost)).map(normalizePost)
+    .filter((post) => !deletedPostIds.has(post.id)));
   loadLikeCounts(rows);
   loadCommentCounts();
   renderPosts();
@@ -511,27 +532,24 @@ async function loadPosts() {
   try {
     staticRows = await fetchStaticRows("guides-index");
     applyGuideRows(staticRows);
-    setStatus("공개 게시판 백업 목록을 불러왔습니다. 최신 글을 함께 확인 중입니다.", "is-online");
+    setStatus("가벼운 공개 게시판 목록을 표시합니다.", "is-online");
   } catch {
     staticRows = [];
   }
-  if (!hasPublicStore()) {
-    openLinkedPostIfAvailable();
-    setStatus(staticRows.length ? "공개 게시판 백업 목록을 표시합니다." : "공개 게시판 연결 전입니다. 이 기기에 임시 저장됩니다.", staticRows.length ? "is-online" : "is-offline");
-    return;
+  if (linkedPostId && !posts.some((post) => post.id === linkedPostId) && hasPublicStore()) {
+    try {
+      const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?select=*&id=eq.${encodeURIComponent(linkedPostId)}&limit=1`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) throw new Error("linked-load");
+      const linkedRows = await response.json();
+      if (linkedRows.length) applyGuideRows(mergeRowsById(staticRows, linkedRows));
+    } catch {
+      // The static board remains usable even when the newest shared post is unavailable.
+    }
   }
-  try {
-    const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?select=*&order=updated_at.desc`, {
-      headers: authHeaders(),
-    });
-    if (!response.ok) throw new Error("load");
-    const liveRows = await response.json();
-    applyGuideRows(mergeRowsById(staticRows, liveRows));
-    setStatus("공개 게시판 백업과 최신 저장 글을 함께 불러왔습니다.", "is-online");
-  } catch {
-    openLinkedPostIfAvailable();
-    setStatus(staticRows.length ? "최신 저장소 확인은 실패했지만 백업 게시글은 정상 표시 중입니다." : "게시판 설정이 아직 적용되지 않아 이 기기의 임시 목록을 표시합니다.", staticRows.length ? "is-online" : "is-offline");
-  }
+  openLinkedPostIfAvailable();
+  setStatus(staticRows.length ? "가벼운 공개 게시판 목록을 표시합니다." : "게시판 백업을 불러오지 못해 이 기기의 임시 목록을 표시합니다.", staticRows.length ? "is-online" : "is-offline");
 }
 
 async function guideLikeIp() {
@@ -851,6 +869,9 @@ async function submitPost(event) {
       basePost.media.push(...await uploadMedia(pendingMedia, id));
       const saved = await saveRemotePost(basePost, editing);
       posts = sortPosts([saved, ...posts.filter((post) => post.id !== id)]);
+      deletedPostIds.delete(id);
+      saveLocalPosts();
+      saveLocalIdSet(guideDeletedStorageKey, deletedPostIds);
       setStatus(editing ? "게시글이 수정되었습니다." : "게시글이 등록되었습니다.", "is-online");
     } else {
       basePost.media.push(...await filesToTemporaryMedia(pendingMedia));
@@ -1157,6 +1178,9 @@ async function submitComment(event) {
       comments.push(comment);
       saveLocalComments();
     }
+    deletedCommentIds.delete(comment.id);
+    saveLocalComments();
+    saveLocalIdSet(guideDeletedCommentStorageKey, deletedCommentIds);
     event.target.reset();
     activeReplyId = "";
     renderComments(postId);
@@ -1178,8 +1202,10 @@ async function deleteComment(commentId) {
       if (!response.ok) throw new Error("comment-delete");
     }
     comments = comments.filter((item) => item.id !== commentId);
+    deletedCommentIds.add(commentId);
     if (activeReplyId === commentId) activeReplyId = "";
     saveLocalComments();
+    saveLocalIdSet(guideDeletedCommentStorageKey, deletedCommentIds);
     renderComments(comment.postId);
     renderPosts();
   } catch {
@@ -1297,11 +1323,13 @@ async function deletePost(post) {
       if (!response.ok) throw new Error("delete");
     }
     posts = posts.filter((item) => item.id !== post.id);
+    deletedPostIds.add(post.id);
     if (selectedPostId === post.id) {
       selectedPostId = "";
       updatePostUrl("", true);
     }
     saveLocalPosts();
+    saveLocalIdSet(guideDeletedStorageKey, deletedPostIds);
     if (fields.editId.value === post.id) resetForm();
     renderPosts();
     setStatus("게시글이 삭제되었습니다.", hasPublicStore() ? "is-online" : "is-offline");

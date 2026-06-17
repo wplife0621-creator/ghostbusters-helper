@@ -11,6 +11,8 @@
     config.dailyVisitorTable || "daily_visitors",
     config.profileTable || "user_profiles",
   ]);
+  const defaultReadLimit = Math.max(1, Math.min(Number(config.firebaseDefaultReadLimit) || 200, 500));
+  const maximumReadLimit = Math.max(defaultReadLimit, Math.min(Number(config.firebaseMaximumReadLimit) || 500, 1000));
 
   const state = {
     app: null,
@@ -64,7 +66,7 @@
           status: 503,
           headers: { "Content-Type": "application/json" },
         });
-        return await handleRest(parsed, init, nativeFetch, input);
+        return await handleRest(parsed, init);
       } catch (error) {
         return new Response(JSON.stringify({ message: error?.message || "Firebase bridge error" }), {
           status: 500,
@@ -82,13 +84,10 @@
     return { table, params: url.searchParams };
   }
 
-  async function handleRest(parsed, init, nativeFetch, originalInput) {
+  async function handleRest(parsed, init) {
     const method = String(init?.method || "GET").toUpperCase();
     if (method === "GET") {
       const rows = await readRows(parsed.table, parsed.params);
-      if (!rows.length && shouldFallbackToLegacy(parsed.table, parsed.params)) {
-        return nativeFetch(originalInput, init);
-      }
       return jsonResponse(rows, 200, { "Content-Range": `0-${Math.max(rows.length - 1, 0)}/${rows.length}` });
     }
     if (method === "POST") return jsonResponse(await writeRows(parsed.table, init, false), 201);
@@ -100,11 +99,6 @@
     return jsonResponse({ message: "Unsupported method" }, 405);
   }
 
-  function shouldFallbackToLegacy(table, params) {
-    if (params.get("no_legacy_fallback") === "1") return false;
-    return tableMap.has(table);
-  }
-
   async function readRows(table, params) {
     const directId = equalityParam(params, "id");
     let rows = [];
@@ -112,7 +106,18 @@
       const doc = await collectionRef(table).doc(directId).get();
       rows = doc.exists ? [fromDoc(doc)] : [];
     } else {
-      rows = (await collectionRef(table).get()).docs.map((doc) => fromDoc(doc));
+      let query = collectionRef(table);
+      const serverFilters = serverFilterEntries(params);
+      serverFilters.forEach(({ field, operator, value }) => {
+        query = query.where(field, operator, value);
+      });
+      const order = params.get("order");
+      if (order && !serverFilters.length) {
+        const [field, direction = "asc"] = order.split(".");
+        query = query.orderBy(field, direction === "desc" ? "desc" : "asc");
+      }
+      query = query.limit(readLimit(params));
+      rows = (await query.get()).docs.map((doc) => fromDoc(doc));
     }
     rows = applyFilters(rows, params);
     const order = params.get("order");
@@ -122,6 +127,39 @@
     }
     const limit = Number(params.get("limit") || 0);
     return limit > 0 ? rows.slice(0, limit) : rows;
+  }
+
+  function readLimit(params) {
+    const requested = Number(params.get("limit") || 0);
+    if (!Number.isFinite(requested) || requested <= 0) return defaultReadLimit;
+    return Math.max(1, Math.min(Math.floor(requested), maximumReadLimit));
+  }
+
+  function serverFilterEntries(params) {
+    const filters = [];
+    const grouped = new Map();
+    for (const [field, rawValue] of params.entries()) {
+      if (["id", "select", "order", "limit", "on_conflict", "no_legacy_fallback"].includes(field)) continue;
+      const values = grouped.get(field) || [];
+      values.push(String(rawValue));
+      grouped.set(field, values);
+    }
+    grouped.forEach((values, field) => {
+      const equality = values.find((value) => value.startsWith("eq."));
+      if (equality) {
+        filters.push({ field, operator: "==", value: decodeURIComponent(equality.slice(3)) });
+        return;
+      }
+      const inclusion = values.find((value) => value.startsWith("in.(") && value.endsWith(")"));
+      if (inclusion) {
+        const candidates = inclusion.slice(4, -1).split(",")
+          .map((item) => decodeURIComponent(item.trim()))
+          .filter(Boolean)
+          .slice(0, 10);
+        if (candidates.length) filters.push({ field, operator: "in", value: candidates });
+      }
+    });
+    return filters;
   }
 
   function equalityParam(params, key) {

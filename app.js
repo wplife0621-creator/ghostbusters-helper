@@ -368,6 +368,8 @@ const els = {
 let approvedReports = loadStoredRows(storageKeys.approved);
 let approvedReportItems = loadStoredRows(storageKeys.approvedReportItems);
 let pendingReports = loadStoredRows(storageKeys.pending);
+let pendingReportsUnsubscribe = null;
+let pendingReportsLiveStarting = false;
 let savedBuilds = loadStoredRows(storageKeys.builds);
 let buildLikes = new Map();
 let buildLikeRecordIds = new Set();
@@ -1654,7 +1656,8 @@ function initAdminReview() {
   renderPendingReports();
   renderApprovedReports();
   renderAdminLocations();
-  loadPublicReports();
+  loadStaticApprovedReports();
+  document.addEventListener("visibilitychange", syncPendingReportsLiveState);
   if (adminAutoLoadEnabled) loadAdminCenter();
 }
 
@@ -2247,35 +2250,19 @@ function prependBuild(build) {
   saveStoredRows(storageKeys.builds, savedBuilds);
 }
 
-async function loadPublicBuilds(options = {}) {
+async function loadPublicBuilds() {
   if (!hasPublicBuildStore()) {
     setBuildSyncStatus("공개 저장소 연결 전입니다. 지금 등록한 빌드는 이 브라우저에만 임시 저장됩니다.", "is-offline");
     return;
   }
-  if (!options.preferLive) {
-    try {
-      collectPublicBuildRows(await fetchStaticRows("builds-index"));
-      saveStoredRows(storageKeys.builds, savedBuilds);
-      renderBuilds();
-      markLikedBuildsForVisitor();
-      setBuildSyncStatus("가벼운 공개 빌드 목록을 먼저 보여주고, 최신 빌드를 확인하는 중입니다.", "is-online");
-    } catch {
-      // Fall through to the live store for pages deployed before the static index exists.
-    }
-  }
-  setBuildSyncStatus("공개 빌드 목록을 불러오는 중입니다.", "is-online");
   try {
-    const response = await fetch(buildStoreUrl(publicBuildRowsQuery()), {
-      headers: buildStoreHeaders(),
-    });
-    if (!response.ok) throw new Error(`load failed: ${response.status}`);
-    collectPublicBuildRows(await response.json());
+    collectPublicBuildRows(await fetchStaticRows("builds-index"));
     saveStoredRows(storageKeys.builds, savedBuilds);
     renderBuilds();
     markLikedBuildsForVisitor();
-    setBuildSyncStatus("공개 저장소에 연결되었습니다. 등록한 빌드는 모든 방문자에게 표시됩니다.", "is-online");
+    setBuildSyncStatus("가벼운 공개 빌드 목록을 표시합니다. 새로 등록한 빌드는 이 기기에서 바로 확인할 수 있습니다.", "is-online");
   } catch {
-    setBuildSyncStatus("공개 저장소 연결에 실패해 임시 저장 목록을 보여줍니다.", "is-offline");
+    setBuildSyncStatus("공개 빌드 백업을 불러오지 못해 이 기기의 임시 목록을 보여줍니다.", "is-offline");
     renderBuilds();
   }
 }
@@ -2331,8 +2318,10 @@ async function savePublicBuildLike(build) {
     }),
   });
   if (!response.ok && response.status !== 409) throw new Error(`like failed: ${response.status}`);
+  buildLikeRecordIds.add(likeId);
   likedBuildIds.add(build.id);
-  await loadPublicBuilds({ preferLive: true });
+  buildLikes.set(build.id, (buildLikes.get(build.id) || 0) + 1);
+  renderBuilds();
 }
 
 async function savePublicBuildReview(build, content) {
@@ -2361,12 +2350,10 @@ async function savePublicBuildReview(build, content) {
       }),
     });
     if (!response.ok) throw new Error(`review failed: ${response.status}`);
-    await loadPublicBuilds({ preferLive: true });
-  } else {
-    const list = buildReviews.get(build.id) || [];
-    buildReviews.set(build.id, [{ ...review, content: cleanContent }, ...list]);
-    renderBuilds();
   }
+  const list = buildReviews.get(build.id) || [];
+  buildReviews.set(build.id, [{ ...review, content: cleanContent }, ...list]);
+  renderBuilds();
   return true;
 }
 
@@ -2926,7 +2913,49 @@ function updateAdminAccess(user) {
   renderPendingReports();
   renderApprovedReports();
   renderAdminCenter();
+  syncPendingReportsLiveState();
   if (allowed && adminAutoLoadEnabled) loadAdminCenter();
+}
+
+function stopPendingReportsLiveSync() {
+  if (typeof pendingReportsUnsubscribe === "function") pendingReportsUnsubscribe();
+  pendingReportsUnsubscribe = null;
+  pendingReportsLiveStarting = false;
+}
+
+function syncPendingReportsLiveState() {
+  if (!els.pendingReports || !adminUnlocked || !isAdminUser() || document.visibilityState === "hidden") {
+    stopPendingReportsLiveSync();
+    return;
+  }
+  startPendingReportsLiveSync();
+}
+
+async function startPendingReportsLiveSync() {
+  if (pendingReportsUnsubscribe || pendingReportsLiveStarting) return;
+  pendingReportsLiveStarting = true;
+  try {
+    const bridge = window.DUKHUBUSTERS_FIREBASE;
+    const ready = await promiseWithTimeout(bridge?.ready?.() || Promise.resolve(false), 8000);
+    if (!ready || !bridge?.table) throw new Error("firebase unavailable");
+    const query = bridge.table(reportBackend.table).where("status", "==", "pending").limit(50);
+    pendingReportsUnsubscribe = query.onSnapshot((snapshot) => {
+      pendingReports = sortReportsByDate(snapshot.docs.map((doc) => normalizeRemoteReport({ id: doc.id, ...doc.data() })));
+      saveStoredRows(storageKeys.pending, pendingReports);
+      renderPendingReports();
+      renderMyReports();
+      renderAdminCenter();
+      setReportSyncStatus("검수 대기 목록이 실시간으로 동기화되고 있습니다.", "is-online");
+    }, () => {
+      stopPendingReportsLiveSync();
+      setReportSyncStatus("실시간 검수 연결이 일시 중단되었습니다. 저장소 한도를 확인해주세요.", "is-offline");
+    });
+  } catch {
+    stopPendingReportsLiveSync();
+    setReportSyncStatus("실시간 검수 연결을 시작하지 못했습니다. 저장소 한도를 확인해주세요.", "is-offline");
+  } finally {
+    pendingReportsLiveStarting = false;
+  }
 }
 
 function updateAdminUi() {
@@ -4870,6 +4899,10 @@ function updateApprovedFromReports(reports) {
 }
 
 async function loadPublicApprovedReports() {
+  if (isPublicCodexPage()) {
+    await loadStaticApprovedReports();
+    return;
+  }
   if (!hasPublicReportStore()) return;
   try {
     const response = await fetchWithTimeout(reportStoreUrl("?select=*&status=eq.approved&order=reviewed_at.desc"), {
@@ -4882,6 +4915,15 @@ async function loadPublicApprovedReports() {
   }
 }
 
+async function loadStaticApprovedReports() {
+  try {
+    const rows = await fetchStaticRows("reports-index");
+    updateApprovedFromReports(rows.map(normalizeRemoteReport));
+  } catch {
+    if (els.reportSyncStatus) setReportSyncStatus("정적 승인 정보를 불러오지 못했습니다.", "is-offline");
+  }
+}
+
 async function loadPublicReports() {
   if (!hasPublicReportStore()) {
     setReportSyncStatus("공개 저장소 연결 전입니다. 지금 제보한 내용은 이 브라우저의 검수 대기에 임시 저장됩니다.", "is-offline");
@@ -4889,14 +4931,18 @@ async function loadPublicReports() {
   }
   setReportSyncStatus("제보 저장소를 불러오는 중입니다.", "is-online");
   try {
-    const response = await fetchWithTimeout(reportStoreUrl("?select=*&status=in.(pending,approved)&order=created_at.desc"), {
-      headers: reportStoreHeaders(),
-    }, 10000);
+    const [response, staticRows] = await Promise.all([
+      fetchWithTimeout(reportStoreUrl("?select=*&status=eq.pending&order=created_at.desc&limit=50&no_legacy_fallback=1"), {
+        headers: reportStoreHeaders(),
+      }, 10000),
+      fetchStaticRows("reports-index").catch(() => []),
+    ]);
     if (!response.ok) throw new Error(`report load failed: ${response.status}`);
-    const reports = (await response.json()).map(normalizeRemoteReport);
-    pendingReports = sortReportsByDate(reports.filter((report) => report.status === "pending"));
+    const pendingRows = (await response.json()).map(normalizeRemoteReport);
+    const approvedRows = staticRows.map(normalizeRemoteReport).filter((report) => report.status === "approved");
+    pendingReports = sortReportsByDate(pendingRows.filter((report) => report.status === "pending"));
     saveStoredRows(storageKeys.pending, pendingReports);
-    updateApprovedFromReports(reports);
+    updateApprovedFromReports(approvedRows);
     renderPendingReports();
     renderMyReports();
     renderAdminCenter();

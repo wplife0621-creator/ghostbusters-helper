@@ -3,6 +3,8 @@ window.DUKHUBUSTERS_CONFIG = {
   supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
   backendMode: "firebase",
   staticDataVersion: "20260607-static-data",
+  firebaseDefaultReadLimit: 100,
+  firebaseMaximumReadLimit: 300,
   firebaseConfig: {
     apiKey: "AIzaSyB1Nvaz_Vmz201izN0vwx3mK9hDbLwDB4A",
     authDomain: "dukhubusters.firebaseapp.com",
