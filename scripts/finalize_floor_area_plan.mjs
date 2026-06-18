@@ -108,6 +108,7 @@ if (reviewRows.length) {
 const sandbox = { window: {} };
 vm.runInNewContext(await fs.readFile("ghost-data.js", "utf8"), sandbox);
 const data = sandbox.window.GHOST_DATA;
+data["정수"] = (data["정수"] || []).filter((row) => row["몬스터"] !== "천공의 군주" && row["구역"] !== "4층 정상");
 const planByMonster = new Map(detailRows.map((row) => [String(row[1]), { floor: String(row[4]), area: String(row[5]) }]));
 for (const row of data["정수"] || []) {
   const plan = planByMonster.get(String(row["몬스터"]));
