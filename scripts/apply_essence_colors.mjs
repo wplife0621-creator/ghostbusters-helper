@@ -62,6 +62,9 @@ let describedSkills = 0;
 let guardianCount = 0;
 
 for (const row of rows) {
+  for (const [key, value] of Object.entries(row)) {
+    if (typeof value === "string" && value.trim().toLowerCase() === "undefined") row[key] = "-";
+  }
   delete row["정수 색깔"];
   const monster = String(row["몬스터"] || "");
   const source = essenceByName.get(normalize(monster)) || essenceById.get(aliases[monster]);
@@ -92,10 +95,11 @@ for (const row of rows) {
   matched += 1;
 }
 
-data._snapshotUpdatedAt = "2026-06-18T20:10:00+09:00";
+data._snapshotUpdatedAt = "2026-06-18T20:25:00+09:00";
 fs.writeFileSync("ghost-data.js", `window.GHOST_DATA = ${JSON.stringify(data, null, 2)};\n`, "utf8");
 
 const colorFieldCount = rows.filter((row) => Object.hasOwn(row, "정수 색깔")).length;
+const undefinedValues = rows.flatMap((row) => Object.entries(row).filter(([, value]) => typeof value === "string" && value.trim().toLowerCase() === "undefined").map(([key]) => `${row["몬스터"]}: ${key}`));
 const malformedGuardians = rows.filter((row) => String(row["등급"] || "").includes("수호자") && !/^\d+등급\(수호자\)$/.test(String(row["등급"]))).map((row) => row["몬스터"]);
 const floorSeven = rows.filter((row) => /^7층/.test(String(row["층"] || ""))).map((row) => row["몬스터"]);
 const floorFourSummit = rows.filter((row) => row["층"] === "4층" && row["구역"] === "4층 정상").map((row) => row["몬스터"]);
@@ -111,6 +115,7 @@ console.log(JSON.stringify({
   guardianCount,
   malformedGuardians,
   colorFieldCount,
+  undefinedValues,
   floorSeven,
   floorFourSummit,
   floorSixAreas,
