@@ -157,7 +157,7 @@ const defaultCrackAreasByFloor = {
   "2층 균열": ["검귀의 동굴", "망자의제단", "안개의 거석 폐허", "총포사막", "홉고블린 요새"],
   "3층 균열": ["백색신전"],
   "4층 균열": ["천공신탁소"],
-  "5층 균열": ["결빙의 성소"],
+  "5층 균열": ["결빙의 성소", "중력의 묘"],
 };
 const locationSettingsMarker = "__location_settings__";
 const locationSettingsId = "site-location-settings";
