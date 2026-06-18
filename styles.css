@@ -3428,6 +3428,16 @@ select[multiple] option:checked {
   padding: 4px 7px;
 }
 
+.essence-color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.essence-color-cell {
+  min-width: 108px;
+}
+
 .color-빨강 { background: #d44747; }
 .color-주황 { background: #d9771f; }
 .color-노랑 { background: #c58d08; }
@@ -3440,6 +3450,17 @@ select[multiple] option:checked {
 .color-무색 { background: #6b7280; }
 .color-백색 { background: #94a3b8; }
 .color-황금 { background: #b7791f; }
+.color-회색 { background: #6b7280; }
+.color-황동 { background: #9a6b2f; }
+.color-남색 { background: #1e3a8a; }
+.color-은색 { background: #8492a6; }
+.color-암흑 { background: #221b35; }
+.color-무지개 {
+  background: linear-gradient(120deg, #dc2626, #f59e0b 24%, #16a34a 46%, #2563eb 68%, #7c3aed);
+}
+.color-공통 { background: #475569; }
+.color-미확인,
+.color-정수-없음 { background: #64748b; }
 
 .skill-color-text {
   display: inline-flex;

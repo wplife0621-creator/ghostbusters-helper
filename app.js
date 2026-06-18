@@ -1892,6 +1892,7 @@ function essencePickerRows() {
       row["층"],
       row["구역"],
       row["주요 스탯"],
+      row["정수 색깔"],
       row["패시브"],
       row["액티브"],
       isSailingRow(row) ? "항해" : "",
@@ -1906,6 +1907,7 @@ function renderEssencePickerTable() {
       <thead>
         <tr>
           <th>몬스터</th>
+          <th>정수 색깔</th>
           <th>주요 스탯</th>
           <th>패시브</th>
           <th>액티브</th>
@@ -1915,11 +1917,12 @@ function renderEssencePickerTable() {
         ${rows.map((row) => `
           <tr data-monster="${escapeHtml(row["몬스터"])}">
             <td data-label="몬스터"><strong>${escapeHtml(row["몬스터"])}</strong>${isSailingRow(row) ? `<span class="sailing-pill">항해</span>` : ""}</td>
+            <td data-label="정수 색깔">${essenceColorMarkup(row["정수 색깔"])}</td>
             <td data-label="주요 스탯">${escapeHtml(row["주요 스탯"] || "-")}</td>
             <td data-label="패시브">${skillText(row["패시브"])}</td>
             <td data-label="액티브">${skillText(row["액티브"], { colorMarkers: true })}</td>
           </tr>
-        `).join("") || `<tr><td colspan="4">조건에 맞는 정수가 없습니다.</td></tr>`}
+        `).join("") || `<tr><td colspan="5">조건에 맞는 정수가 없습니다.</td></tr>`}
       </tbody>
     </table>
   `;
@@ -1969,7 +1972,7 @@ function activeSkillsForEssence(name) {
   return row ? splitSkills(activeSkillsWithoutSailing(row["액티브"])) : [];
 }
 
-const activeColorPattern = /^\(?\s*(빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|보라|보라색|검정|검은색|갈색|무색|백색|흰색|황금|금색)\s*\)?\s*(?:-|:|：|\)|\s+)\s*/;
+const activeColorPattern = /^\(?\s*(빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|남색|보라|보라색|검정|검은색|갈색|회색|무색|백색|흰색|황동|황금|금색|은색|암흑|무지개|공통|미확인)\s*\)?\s*(?:-|:|：|\)|\s+)\s*/;
 const activeColorAliases = {
   빨간색: "빨강",
   주황색: "주황",
@@ -1977,6 +1980,7 @@ const activeColorAliases = {
   초록색: "초록",
   청록색: "청록",
   파란색: "파랑",
+  무색: "회색",
   보라색: "보라",
   검은색: "검정",
   흰색: "백색",
@@ -4466,6 +4470,7 @@ function essenceTable(items) {
           <th>고정</th>
           <th>몬스터</th>
           <th>등급</th>
+          <th>정수 색깔</th>
           <th>추천</th>
           <th>주요 스탯</th>
           <th>패시브</th>
@@ -4501,6 +4506,7 @@ function essenceRowTemplate(row) {
         </div>
       </td>
       <td data-label="등급"><span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span></td>
+      <td data-label="정수 색깔" class="essence-color-cell">${essenceColorMarkup(row["정수 색깔"])}</td>
       <td data-label="추천">${row["추천 캐릭터"] ? `<span class="character-pill">${escapeHtml(row["추천 캐릭터"])}</span>` : `<span class="muted">-</span>`}</td>
       <td data-label="주요 스탯">
         ${activeStats.length ? `<div class="sorted-stat">${escapeHtml(highlightText)}</div>` : ""}
@@ -4526,6 +4532,15 @@ function statBadges(value) {
       return `<span><b>${escapeHtml(cleanStatName(match[1]))}</b> ${escapeHtml(match[2])}</span>`;
     })
     .join("");
+}
+
+function essenceColorMarkup(value) {
+  const colors = textOf(value).split(/[,，/]/).map((color) => color.trim()).filter(Boolean);
+  if (!colors.length) return `<span class="muted">-</span>`;
+  return `<span class="essence-color-list">${colors.map((color) => {
+    const className = color === "확인 필요" ? "미확인" : color.replace(/\s+/g, "-");
+    return `<i class="essence-color-pill color-${escapeHtml(className)}">${escapeHtml(color)}</i>`;
+  }).join("")}</span>`;
 }
 
 function skillText(value, options = {}) {
