@@ -600,6 +600,25 @@ function monsterKey(value) {
   return textOf(value).toLowerCase();
 }
 
+function rowTimestamp(value) {
+  const timestamp = Date.parse(textOf(value));
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function sourceRowIsNewer(current, incoming) {
+  const sourceUpdatedAt = rowTimestamp(current?._sourceUpdatedAt);
+  if (!sourceUpdatedAt) return false;
+  const approvedAt = rowTimestamp(incoming?._approvedAt || incoming?.reviewedAt || incoming?.createdAt);
+  return sourceUpdatedAt >= approvedAt;
+}
+
+function codexSnapshotIsNewer(incoming) {
+  const snapshotUpdatedAt = rowTimestamp(data?._snapshotUpdatedAt);
+  if (!snapshotUpdatedAt) return false;
+  const approvedAt = rowTimestamp(incoming?._approvedAt || incoming?.reviewedAt || incoming?.createdAt);
+  return snapshotUpdatedAt >= approvedAt;
+}
+
 function compactSearchText(value) {
   return textOf(value).toLowerCase().replace(/\s+/g, "");
 }
@@ -616,12 +635,15 @@ function savePinnedEssences() {
 function mergeApprovedRows(baseRows, approvedRows) {
   const merged = [...baseRows];
   [...approvedRows].reverse().forEach((row) => {
+    if (codexSnapshotIsNewer(row)) return;
     const monster = textOf(row["몬스터"]);
     const originalMonster = textOf(row["_originalMonster"]) || monster;
     if (row["_mode"] === "delete" || row["출처"] === "삭제 승인") {
       for (let index = merged.length - 1; index >= 0; index -= 1) {
         const itemMonster = textOf(merged[index]["몬스터"]);
-        if (itemMonster === originalMonster || itemMonster === monster) merged.splice(index, 1);
+        if ((itemMonster === originalMonster || itemMonster === monster) && !sourceRowIsNewer(merged[index], row)) {
+          merged.splice(index, 1);
+        }
       }
       return;
     }
@@ -630,7 +652,7 @@ function mergeApprovedRows(baseRows, approvedRows) {
       ? originalIndex
       : merged.findIndex((item) => textOf(item["몬스터"]) === monster);
     if (index >= 0) {
-      merged[index] = { ...merged[index], ...row };
+      if (!sourceRowIsNewer(merged[index], row)) merged[index] = { ...merged[index], ...row };
     } else {
       merged.unshift(row);
     }
@@ -702,6 +724,7 @@ function mergeNumberSources(left, right) {
 }
 
 function combineNumberRows(current, incoming) {
+  if (incoming?._reportId && sourceRowIsNewer(current, incoming)) return current;
   return {
     ...current,
     ...incoming,
@@ -739,6 +762,7 @@ function dedupeNumberRows(rows, options = {}) {
 function numbersReportToRow(report) {
   return {
     "_reportId": report.id,
+    "_approvedAt": report.reviewedAt || report.createdAt || "",
     "번호": normalizeNumberCode(report.floor) || "미확인",
     "이름": visibleReportName(report),
     "효과": report.stats,
@@ -786,12 +810,14 @@ function reportTargetsSame(left, right) {
 function mergeNumbersRows(baseRows, reports) {
   const merged = dedupeNumberRows(baseRows, { base: true });
   [...reports].filter((report) => report.status === "approved" && isNumbersReport(report)).reverse().forEach((report) => {
+    if (codexSnapshotIsNewer(report)) return;
     const reportName = visibleReportName(report);
     const reportNumber = normalizeNumberCode(report.floor);
     if (isNumbersDeleteReport(report)) {
       for (let index = merged.length - 1; index >= 0; index -= 1) {
         const item = merged[index];
-        if (textOf(item["이름"]) === reportName || (reportNumber && normalizeNumberCode(item["번호"]) === reportNumber)) {
+        if ((textOf(item["이름"]) === reportName || (reportNumber && normalizeNumberCode(item["번호"]) === reportNumber))
+          && !sourceRowIsNewer(item, report)) {
           merged.splice(index, 1);
         }
       }
@@ -5092,6 +5118,7 @@ async function updatePublicReportDetail(report) {
 function reportToRow(report) {
   return {
     "_reportId": report.id,
+    "_approvedAt": report.reviewedAt || report.createdAt || "",
     "_mode": report.mode || "new",
     "_originalMonster": report.originalMonster || "",
     "층": report.floor,
