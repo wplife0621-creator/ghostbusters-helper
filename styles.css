@@ -3428,16 +3428,6 @@ select[multiple] option:checked {
   padding: 4px 7px;
 }
 
-.essence-color-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.essence-color-cell {
-  min-width: 108px;
-}
-
 .color-빨강 { background: #d44747; }
 .color-주황 { background: #d9771f; }
 .color-노랑 { background: #c58d08; }

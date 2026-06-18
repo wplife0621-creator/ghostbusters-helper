@@ -42,22 +42,9 @@ const aliases = {
   "백색 노움": "noum",
   "녹갑 탐사병": "green_armor",
 };
-const manualColors = {
-  "백색 구울": "백색",
-  "백색 스켈레톤": "백색",
-  "백색 머미": "백색",
-  "백색 노움": "백색",
-  "소울이터": "정수 없음",
-};
-const manualActiveColors = {
-  "무덤지기일레톤": ["회색", "검정"],
-};
-const prefixPattern = /^\(?\s*(빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|남색|보라|보라색|검정|검은색|갈색|회색|무색|백색|흰색|황동|황금|금색|은색|암흑|무지개|미확인)\s*\)?\s*(?:-|:|：|\)|\s+)\s*/;
-const prefixAliases = { 빨간색: "빨강", 주황색: "주황", 노란색: "노랑", 초록색: "초록", 청록색: "청록", 파란색: "파랑", 보라색: "보라", 검은색: "검정", 무색: "회색", 흰색: "백색", 금색: "황금" };
 const normalize = (value) => String(value || "").replace(/\s+/g, "").replace(/데쓰/g, "데스").replace(/바이쿤/g, "뷔쿤").toLowerCase();
 
-const essencePayload = readJson("data/essences.json");
-const essences = essencePayload.essences || [];
+const essences = readJson("data/essences.json").essences || [];
 const skills = readJson("data/skills.json").manual_skills || [];
 const essenceByName = new Map(essences.map((row) => [normalize(row.name), row]));
 const essenceById = new Map(essences.map((row) => [row.id, row]));
@@ -66,66 +53,66 @@ const skillById = new Map(skills.map((row) => [row.id, row]));
 const sandbox = { window: {} };
 vm.runInNewContext(fs.readFileSync("ghost-data.js", "utf8"), sandbox);
 const data = sandbox.window.GHOST_DATA;
-let matched = 0;
-let unresolved = 0;
+const rows = data["정수"] || [];
 const unresolvedNames = [];
+const missingDescriptionSkills = [];
+let matched = 0;
+let activeSkills = 0;
+let describedSkills = 0;
+let guardianCount = 0;
 
-for (const row of data["정수"] || []) {
+for (const row of rows) {
+  delete row["정수 색깔"];
   const monster = String(row["몬스터"] || "");
   const source = essenceByName.get(normalize(monster)) || essenceById.get(aliases[monster]);
   if (!source) {
-    const existingPrefix = String(row["액티브"] || "").match(prefixPattern)?.[1];
-    row["정수 색깔"] = manualColors[monster] || prefixAliases[existingPrefix] || existingPrefix || "확인 필요";
-    const currentActive = String(row["액티브"] || "").trim();
-    if (currentActive && !["-", "?", "x", "X"].includes(currentActive)) {
-      row["액티브"] = currentActive.split(/\r?\n/).map((line) => prefixPattern.test(line) ? line : `미확인 - ${line}`).join("\n");
-    }
-    unresolved += 1;
     unresolvedNames.push(monster);
     continue;
   }
 
-  const sourceColors = (Array.isArray(source.color) ? source.color : [source.color]).filter(Boolean);
-  const displayColors = sourceColors.map((color) => colorNames[color] || color);
-  row["정수 색깔"] = manualColors[monster] || displayColors.join(", ") || "확인 필요";
+  if (source.type === "guardian") {
+    row["등급"] = `${source.grade}등급(수호자)`;
+    guardianCount += 1;
+  }
 
   const sourceActives = source.actives || [];
-  const currentLines = String(row["액티브"] || "").split(/\r?\n/).map((line) => line.trim()).filter((line) => line && line !== "-");
-  if (currentLines.length) {
-    const usedIndexes = new Set();
-    row["액티브"] = currentLines.map((line, lineIndex) => {
-      const existingPrefix = line.match(prefixPattern)?.[1] || "";
-      const cleanLine = line.replace(prefixPattern, "").trim();
-      const cleanKey = normalize(cleanLine.split(":")[0].replace(/\([^)]*\)/g, ""));
-      let activeIndex = sourceActives.findIndex((active, index) => {
-        if (usedIndexes.has(index)) return false;
-        const skillName = normalize(skillById.get(active.skill_id)?.name);
-        return skillName && (cleanKey.includes(skillName) || skillName.includes(cleanKey));
-      });
-      if (activeIndex < 0) activeIndex = Math.min(lineIndex, Math.max(0, sourceActives.length - 1));
-      usedIndexes.add(activeIndex);
-      const colorKey = Array.isArray(source.color)
-        ? (source.color[activeIndex] || "")
-        : source.color;
-      const color = manualActiveColors[monster]?.[lineIndex]
-        || colorNames[colorKey]
-        || colorKey
-        || prefixAliases[existingPrefix]
-        || existingPrefix
-        || "공통";
-      return `${color} - ${cleanLine}`;
-    }).join("\n");
-  }
+  row["액티브"] = sourceActives.length ? sourceActives.map((active, index) => {
+    const skill = skillById.get(active.skill_id) || {};
+    const colorKey = Array.isArray(source.color) ? source.color[index] : source.color;
+    const color = colorKey ? (colorNames[colorKey] || colorKey) : "공통";
+    const name = skill.name || active.skill_id || "액티브";
+    const cooldownValue = Number(skill.cooldown);
+    const cooldown = Number.isFinite(cooldownValue) && cooldownValue > 0 ? `(${cooldownValue}s)` : "";
+    const description = String(skill.effect || skill.desc || skill.description || active.description || "").trim();
+    activeSkills += 1;
+    if (description) describedSkills += 1;
+    else missingDescriptionSkills.push(`${monster}: ${name}`);
+    return `${color} - ${name}${cooldown}${description ? `: ${description}` : ""}`;
+  }).join("\n") : "-";
   matched += 1;
 }
 
-data._snapshotUpdatedAt = "2026-06-18T17:20:00+09:00";
+data._snapshotUpdatedAt = "2026-06-18T20:10:00+09:00";
 fs.writeFileSync("ghost-data.js", `window.GHOST_DATA = ${JSON.stringify(data, null, 2)};\n`, "utf8");
-const rows = data["정수"] || [];
-const missingColor = rows.filter((row) => !String(row["정수 색깔"] || "").trim()).map((row) => row["몬스터"]);
-const unmarkedActives = rows.filter((row) => String(row["액티브"] || "").split(/\r?\n/).some((line) => {
-  const text = line.trim();
-  return text && !["-", "?", "x", "X"].includes(text) && !prefixPattern.test(text);
-})).map((row) => row["몬스터"]);
+
+const colorFieldCount = rows.filter((row) => Object.hasOwn(row, "정수 색깔")).length;
+const malformedGuardians = rows.filter((row) => String(row["등급"] || "").includes("수호자") && !/^\d+등급\(수호자\)$/.test(String(row["등급"]))).map((row) => row["몬스터"]);
 const floorSeven = rows.filter((row) => /^7층/.test(String(row["층"] || ""))).map((row) => row["몬스터"]);
-console.log(JSON.stringify({ total: rows.length, matched, unresolved, unresolvedNames, missingColor, unmarkedActives, floorSeven }));
+const floorFourSummit = rows.filter((row) => row["층"] === "4층" && row["구역"] === "4층 정상").map((row) => row["몬스터"]);
+const floorSixAreas = [...new Set(rows.filter((row) => row["층"] === "6층").map((row) => row["구역"]))];
+const floorFiveCracks = (data["균열"] || []).filter((row) => row["층"] === "5층 균열").map((row) => row["구역"]);
+console.log(JSON.stringify({
+  total: rows.length,
+  matched,
+  unresolvedNames,
+  activeSkills,
+  describedSkills,
+  missingDescriptionSkills,
+  guardianCount,
+  malformedGuardians,
+  colorFieldCount,
+  floorSeven,
+  floorFourSummit,
+  floorSixAreas,
+  floorFiveCracks,
+}));
