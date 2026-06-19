@@ -2968,8 +2968,12 @@ function stopPendingReportsLiveSync() {
   pendingReportsLiveStarting = false;
 }
 
+function isAdminReviewPage() {
+  return Boolean(els.adminStatsGrid && els.pendingReports);
+}
+
 function syncPendingReportsLiveState() {
-  if (!els.pendingReports || !adminUnlocked || !isAdminUser() || document.visibilityState === "hidden") {
+  if (!isAdminReviewPage() || !adminUnlocked || !isAdminUser() || document.visibilityState === "hidden") {
     stopPendingReportsLiveSync();
     return;
   }
@@ -3234,9 +3238,9 @@ async function loadAdminCenter() {
   }
   els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
   const [guideResult, buildResult, userResult] = await Promise.allSettled([
-    fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(500)),
-    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc&limit=300"),
+    fetchStaticRows("guides-index"),
+    fetchStaticRows("builds-index"),
+    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc&limit=100"),
   ]);
   const buildRows = buildResult.status === "fulfilled" ? buildResult.value : [];
   const buildVisitorStats = adminBuildVisitorStats(buildRows);
@@ -4970,34 +4974,17 @@ async function loadStaticApprovedReports() {
 }
 
 async function loadPublicReports() {
-  if (!hasPublicReportStore()) {
-    setReportSyncStatus("공개 저장소 연결 전입니다. 지금 제보한 내용은 이 브라우저의 검수 대기에 임시 저장됩니다.", "is-offline");
-    return;
-  }
-  setReportSyncStatus("제보 저장소를 불러오는 중입니다.", "is-online");
-  try {
-    const [response, staticRows] = await Promise.all([
-      fetchWithTimeout(reportStoreUrl("?select=*&status=eq.pending&order=created_at.desc&limit=50&no_legacy_fallback=1"), {
-        headers: reportStoreHeaders(),
-      }, 10000),
-      fetchStaticRows("reports-index").catch(() => []),
-    ]);
-    if (!response.ok) throw new Error(`report load failed: ${response.status}`);
-    const pendingRows = (await response.json()).map(normalizeRemoteReport);
-    const approvedRows = staticRows.map(normalizeRemoteReport).filter((report) => report.status === "approved");
-    pendingReports = sortReportsByDate(pendingRows.filter((report) => report.status === "pending"));
-    saveStoredRows(storageKeys.pending, pendingReports);
-    updateApprovedFromReports(approvedRows);
-    renderPendingReports();
-    renderMyReports();
-    renderAdminCenter();
-    setReportSyncStatus("제보 저장소에 연결되었습니다. 새 제보는 검수 대기에 공개 저장됩니다.", "is-online");
-  } catch {
-    setReportSyncStatus("제보 저장소 연결에 실패해 이 브라우저의 임시 목록을 사용합니다.", "is-offline");
-    renderPendingReports();
-    renderMyReports();
-    renderAdminCenter();
-  }
+  await loadStaticApprovedReports();
+  pendingReports = sortReportsByDate(loadStoredRows(storageKeys.pending).filter((report) => report.status !== "approved"));
+  renderPendingReports();
+  renderMyReports();
+  renderAdminCenter();
+  setReportSyncStatus(
+    hasPublicReportStore()
+      ? "승인 정보는 정적 데이터로 표시합니다. 새 제보만 검수 저장소에 전송됩니다."
+      : "공개 저장소 연결 전입니다. 지금 제보한 내용은 이 브라우저에 임시 저장됩니다.",
+    hasPublicReportStore() ? "is-online" : "is-offline",
+  );
 }
 
 async function savePublicReport(report) {
@@ -6243,16 +6230,12 @@ async function loadAdminCenter() {
     return;
   }
   els.adminStatsGrid.innerHTML = `<div class="empty compact-empty">관리자 데이터를 불러오는 중입니다.</div>`;
-  const [guideResult, buildResult, buildLogResult, userResult] = await Promise.allSettled([
-    fetchAdminRows(guideBackend, guideBackend.table, "?select=*&order=updated_at.desc"),
-    fetchAdminRows(buildBackend, buildBackend.table, publicBuildRowsQuery(500)),
-    fetchAdminRows(buildBackend, buildBackend.table, "?select=*&order=created_at.desc&limit=300"),
-    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc&limit=300"),
+  const [guideResult, buildResult, userResult] = await Promise.allSettled([
+    fetchStaticRows("guides-index"),
+    fetchStaticRows("builds-index"),
+    fetchAdminRows(profileBackend, profileBackend.table, "?select=*&order=updated_at.desc&limit=100"),
   ]);
-  const buildRows = mergeAdminBuildRows(
-    buildResult.status === "fulfilled" ? buildResult.value : [],
-    buildLogResult.status === "fulfilled" ? buildLogResult.value : [],
-  );
+  const buildRows = buildResult.status === "fulfilled" ? buildResult.value : [];
   const buildVisitorStats = adminBuildVisitorStats(buildRows);
   const dailyCounts = buildVisitorStats.dailyCounts;
   adminCenterData = {
@@ -6269,7 +6252,7 @@ async function loadAdminCenter() {
       guides: guideResult.status !== "fulfilled",
       builds: buildResult.status !== "fulfilled",
       users: userResult.status !== "fulfilled",
-      visitors: buildLogResult.status !== "fulfilled",
+      visitors: false,
     },
     loadedAt: new Date().toISOString(),
   };
