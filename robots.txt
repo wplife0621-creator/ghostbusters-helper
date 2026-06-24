@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /search.html
+Disallow: /library.html
+Disallow: /changelog.html
 
 Sitemap: https://busters.kr/sitemap.xml
