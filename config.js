@@ -1,7 +1,15 @@
 window.DUKHUBUSTERS_CONFIG = {
   supabaseUrl: "https://bjlykfxfminmjfgilowj.supabase.co",
   supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
-  backendMode: "firebase",
+  // Temporary quota-safe mode: keep public pages on static/local data and prevent
+  // Firebase bridge/auth from consuming Firestore reads until backups can run.
+  backendMode: "static",
+  communityRemoteReadsEnabled: false,
+  guideRemoteReadsEnabled: false,
+  publicCodexRemoteReadsEnabled: false,
+  enableVisitorCounters: false,
+  enableStayTracking: false,
+  enableAdminAutoLoad: false,
   staticDataVersion: "20260607-static-data",
   firebaseDefaultReadLimit: 100,
   firebaseMaximumReadLimit: 300,
