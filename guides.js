@@ -21,6 +21,7 @@ const guideBackend = {
   r2PublicBaseUrl: String(config.r2PublicBaseUrl || "").replace(/\/$/, ""),
 };
 const staticDataVersion = String(config.staticDataVersion || "20260607-static-index");
+const guideRemoteReadsEnabled = config.guideRemoteReadsEnabled === true;
 const guideStorageKey = "dukhubusters.guidePosts";
 const guideCommentStorageKey = "dukhubusters.guideComments";
 const guideDeletedStorageKey = "dukhubusters.deletedGuidePosts";
@@ -536,7 +537,7 @@ async function loadPosts() {
   } catch {
     staticRows = [];
   }
-  if (linkedPostId && !posts.some((post) => post.id === linkedPostId) && hasPublicStore()) {
+  if (guideRemoteReadsEnabled && linkedPostId && !posts.some((post) => post.id === linkedPostId) && hasPublicStore()) {
     try {
       const response = await fetch(`${guideBackend.url}/rest/v1/${guideBackend.table}?select=*&id=eq.${encodeURIComponent(linkedPostId)}&limit=1`, {
         headers: authHeaders(),
@@ -1053,7 +1054,7 @@ function renderViewer() {
 async function incrementViews(post) {
   post.views += 1;
   renderPosts();
-  if (!hasPublicStore()) {
+  if (!hasPublicStore() || !guideRemoteReadsEnabled) {
     saveLocalPosts();
     return;
   }

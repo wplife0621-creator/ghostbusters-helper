@@ -2,6 +2,7 @@ redirectLegacyGithubPages();
 
 const communityData = window.GHOST_DATA || {};
 const config = window.DUKHUBUSTERS_CONFIG || {};
+const communityRemoteReadsEnabled = config.communityRemoteReadsEnabled === true;
 const storeKeys = {
   favorites: "dukhubusters.communityFavorites.v1",
   compare: "dukhubusters.communityCompare.v1",
@@ -62,10 +63,14 @@ function initGlobalSearch() {
   let cachedRemoteItems = [];
   let activeTag = "all";
 
-  loadRemoteItems().then((items) => {
-    cachedRemoteItems = items;
+  if (communityRemoteReadsEnabled) {
+    loadRemoteItems().then((items) => {
+      cachedRemoteItems = items;
+      renderSearch(input.value.trim(), activeTag, results, status, cachedRemoteItems);
+    });
+  } else {
     renderSearch(input.value.trim(), activeTag, results, status, cachedRemoteItems);
-  });
+  }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -102,6 +107,10 @@ function initChangelog() {
   if (!list) return;
 
   list.innerHTML = staticUpdates.map(renderUpdateCard).join("");
+  if (!communityRemoteReadsEnabled) {
+    if (status) status.textContent = "기본 변경 이력을 표시하고 있습니다.";
+    return;
+  }
   fetchReportUpdates()
     .then((updates) => {
       if (!updates.length) return;
@@ -288,6 +297,10 @@ async function fetchReportUpdates() {
 
 async function renderAlerts(alertsBox) {
   if (!alertsBox) return;
+  if (!communityRemoteReadsEnabled) {
+    alertsBox.innerHTML = `<div class="community-empty">알림은 현재 점검 중입니다. 즐겨찾기와 비교함은 이 브라우저에 저장된 항목만 표시됩니다.</div>`;
+    return;
+  }
   const nickname = await getCurrentNickname();
   if (!nickname) {
     alertsBox.innerHTML = `<div class="community-empty">로그인 후 닉네임을 설정하면 내 글에 달린 댓글 알림을 확인할 수 있습니다.</div>`;
@@ -405,6 +418,7 @@ function removeItem(key, id) {
 }
 
 async function restSelect(table, select, query = "") {
+  if (!communityRemoteReadsEnabled) return [];
   const url = textOf(config.supabaseUrl).replace(/\/$/, "");
   const key = textOf(config.supabaseAnonKey);
   if (!url || !key || !table) return [];
