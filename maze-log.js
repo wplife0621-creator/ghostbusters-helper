@@ -1,4 +1,4 @@
-﻿const MAZE_LOG_STORAGE_KEY = "dukhubusters.mazeLog.v1";
+const MAZE_LOG_STORAGE_KEY = "dukhubusters.mazeLog.v1";
 const MAZE_LOG_CUSTOM_FLOORS_KEY = "dukhubusters.mazeLog.customFloors.v1";
 const MAZE_LOG_START_DAY_KEY = "dukhubusters.mazeLog.startDay.v1";
 const MAZE_LOG_SHEETS_KEY = "dukhubusters.mazeLog.sheets.v2";
@@ -957,4 +957,3 @@ initMazeLog().catch((error) => {
   console.warn("Failed to initialize maze log", error);
   renderMazeLog();
 });
-
