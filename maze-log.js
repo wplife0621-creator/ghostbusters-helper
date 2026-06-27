@@ -610,14 +610,14 @@ function renderMazeLog() {
   `;
   if (!mazeLogEntries.length) {
     mazeLogEls.rows.innerHTML = `
-      <tr><td colspan="${floors.length + 2}" class="maze-log-empty">아직 기록이 없습니다. 아래 + 회차 추가를 눌러 시작하세요.</td></tr>
       ${addRow}
+      <tr><td colspan="${floors.length + 2}" class="maze-log-empty">아직 기록이 없습니다. 위 + 회차 추가를 눌러 시작하세요.</td></tr>
     `;
     updateSummary();
     return;
   }
   const displayEntries = [...mazeLogEntries].sort((a, b) => Number(b.day || 0) - Number(a.day || 0));
-  mazeLogEls.rows.innerHTML = displayEntries.map((entry) => {
+  mazeLogEls.rows.innerHTML = addRow + displayEntries.map((entry) => {
     const cells = floors.map((config) => {
       const summary = floorSummary(entry, config);
       const emptyClass = summary === "-" ? " is-empty" : "";
@@ -641,7 +641,7 @@ function renderMazeLog() {
         </td>
       </tr>
     `;
-  }).join("") + addRow;
+  }).join("");
   updateSummary();
 }
 
