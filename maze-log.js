@@ -559,8 +559,8 @@ function countSpecialSpawns() {
 function updateSummary() {
   if (mazeLogEls.totalRounds) mazeLogEls.totalRounds.textContent = String(mazeLogEntries.length);
   if (mazeLogEls.latestDay) {
-    const latest = mazeLogEntries.at(-1);
-    mazeLogEls.latestDay.textContent = latest ? `${latest.day}일` : "-";
+    const latestDay = mazeLogEntries.reduce((max, entry) => Math.max(max, Number(entry.day || 0)), 0);
+    mazeLogEls.latestDay.textContent = latestDay ? `${latestDay}일` : "-";
   }
   if (mazeLogEls.specialCount) mazeLogEls.specialCount.textContent = String(countSpecialSpawns());
 }
@@ -616,7 +616,8 @@ function renderMazeLog() {
     updateSummary();
     return;
   }
-  mazeLogEls.rows.innerHTML = mazeLogEntries.map((entry) => {
+  const displayEntries = [...mazeLogEntries].sort((a, b) => Number(b.day || 0) - Number(a.day || 0));
+  mazeLogEls.rows.innerHTML = displayEntries.map((entry) => {
     const cells = floors.map((config) => {
       const summary = floorSummary(entry, config);
       const emptyClass = summary === "-" ? " is-empty" : "";
