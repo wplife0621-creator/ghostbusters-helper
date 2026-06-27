@@ -1,4 +1,4 @@
-const MAZE_LOG_STORAGE_KEY = "dukhubusters.mazeLog.v1";
+﻿const MAZE_LOG_STORAGE_KEY = "dukhubusters.mazeLog.v1";
 const MAZE_LOG_CUSTOM_FLOORS_KEY = "dukhubusters.mazeLog.customFloors.v1";
 const MAZE_LOG_START_DAY_KEY = "dukhubusters.mazeLog.startDay.v1";
 const MAZE_LOG_SHEETS_KEY = "dukhubusters.mazeLog.sheets.v2";
@@ -40,7 +40,7 @@ const DEFAULT_MAZE_FLOORS = [
   {
     floor: 5,
     label: "5층",
-    rifts: ["결빙의 성소", "중력의 묘"],
+    rifts: ["결빙의 성소", "중력의 묘", "용광의 도가니"],
     hasOffering: false,
     specialSpawns: ["밀라로돈", "베르타스"],
     defaultOpen: true,
@@ -957,3 +957,4 @@ initMazeLog().catch((error) => {
   console.warn("Failed to initialize maze log", error);
   renderMazeLog();
 });
+
