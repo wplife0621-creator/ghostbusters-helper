@@ -1607,6 +1607,20 @@ select[multiple] option:checked {
   background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
 }
 
+.maze-log-section-head .maze-log-bottom-actions {
+  flex: 0 0 auto;
+  align-items: flex-end;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.maze-log-section-head .maze-log-bottom-actions p {
+  max-width: 260px;
+  text-align: right;
+}
+
 .maze-log-bottom-actions p {
   margin: 0;
   color: #60708a;
