@@ -18,6 +18,7 @@ const storageKeys = {
   approvedReportItems: "dukhubusters.approvedReportItems",
   approvedVersion: "dukhubusters.approvedReportsVersion",
   pinnedEssences: "dukhubusters.pinnedEssences",
+  characterEssencePins: "dukhubusters.characterEssencePins.v1",
   adminUnlocked: "dukhubusters.adminUnlocked",
   builds: "dukhubusters.sharedBuilds",
   visitorId: "dukhubusters.visitorId",
@@ -26,6 +27,7 @@ const storageKeys = {
 
 const adminCode = "0621";
 const siteConfig = window.DUKHUBUSTERS_CONFIG || {};
+const essencePinCharacters = ["비요른", "에르웬", "미샤", "아이나르", "아우옌", "아브만"];
 const staticDataVersion = textOf(siteConfig.staticDataVersion) || "20260607-static-index";
 const visitorCountersEnabled = String(siteConfig.enableVisitorCounters || "").toLowerCase() === "true";
 const adminAutoLoadEnabled = String(siteConfig.enableAdminAutoLoad || "").toLowerCase() === "true";
@@ -395,6 +397,7 @@ let activeEssenceInput = null;
 let activeStatNames = [];
 let activeEffectSortKey = "";
 let pinnedEssenceNames = loadStoredRows(storageKeys.pinnedEssences);
+let characterEssencePins = loadCharacterEssencePins();
 let activeAdminTab = "dashboard";
 let adminApprovedSearch = "";
 let adminApprovedKind = "all";
@@ -597,6 +600,31 @@ function saveStoredRows(key, rows) {
   localStorage.setItem(key, JSON.stringify(rows));
 }
 
+function loadCharacterEssencePins() {
+  const fallback = Object.fromEntries(essencePinCharacters.map((character) => [character, []]));
+  try {
+    const parsed = JSON.parse(localStorage.getItem(storageKeys.characterEssencePins) || "{}");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return fallback;
+    essencePinCharacters.forEach((character) => {
+      fallback[character] = unique((Array.isArray(parsed[character]) ? parsed[character] : [])
+        .map(textOf)
+        .filter(Boolean));
+    });
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveCharacterEssencePins() {
+  const normalized = {};
+  essencePinCharacters.forEach((character) => {
+    normalized[character] = unique((characterEssencePins[character] || []).map(textOf).filter(Boolean));
+  });
+  characterEssencePins = normalized;
+  localStorage.setItem(storageKeys.characterEssencePins, JSON.stringify(characterEssencePins));
+}
+
 function monsterKey(value) {
   return textOf(value).toLowerCase();
 }
@@ -626,6 +654,52 @@ function compactSearchText(value) {
 
 function isPinnedEssence(row) {
   return pinnedEssenceNames.map(monsterKey).includes(monsterKey(row?.["몬스터"]));
+}
+
+function pinnedCharactersForEssence(row) {
+  const key = monsterKey(row?.["몬스터"]);
+  if (!key) return [];
+  return essencePinCharacters.filter((character) => (characterEssencePins[character] || [])
+    .some((name) => monsterKey(name) === key));
+}
+
+function isCharacterPinnedEssence(row) {
+  return pinnedCharactersForEssence(row).length > 0;
+}
+
+function characterPinnedRows(character) {
+  return (characterEssencePins[character] || [])
+    .map((name) => findMonsterRow(name))
+    .filter(Boolean);
+}
+
+function characterPinCount(character) {
+  return characterPinnedRows(character).length;
+}
+
+function addCharacterEssencePin(character, monsterName) {
+  if (!essencePinCharacters.includes(character)) return;
+  const name = textOf(monsterName);
+  if (!name) return;
+  const current = characterEssencePins[character] || [];
+  if (!current.some((item) => monsterKey(item) === monsterKey(name))) {
+    characterEssencePins[character] = [...current, name];
+    saveCharacterEssencePins();
+  }
+}
+
+function removeCharacterEssencePin(character, monsterName) {
+  if (!essencePinCharacters.includes(character)) return;
+  const key = monsterKey(monsterName);
+  characterEssencePins[character] = (characterEssencePins[character] || [])
+    .filter((item) => monsterKey(item) !== key);
+  saveCharacterEssencePins();
+}
+
+function clearCharacterEssencePins(character) {
+  if (!essencePinCharacters.includes(character)) return;
+  characterEssencePins[character] = [];
+  saveCharacterEssencePins();
 }
 
 function savePinnedEssences() {
@@ -1571,7 +1645,6 @@ function initEssences() {
     el.addEventListener("change", render);
   });
 
-  els.results.addEventListener("change", handleEssenceResultChange);
   els.results.addEventListener("click", handleEssenceResultClick);
   initQuickEditModal();
   render();
@@ -3893,24 +3966,53 @@ function closeQuickEditModal() {
   }
 }
 
-function handleEssenceResultChange(event) {
-  const checkbox = event.target.closest(".pin-essence-checkbox");
-  if (!checkbox) return;
-  const name = checkbox.dataset.monster;
-  if (checkbox.checked) {
-    if (!pinnedEssenceNames.map(monsterKey).includes(monsterKey(name))) pinnedEssenceNames.push(name);
-  } else {
-    pinnedEssenceNames = pinnedEssenceNames.filter((item) => monsterKey(item) !== monsterKey(name));
-  }
-  savePinnedEssences();
-  render();
-}
-
 function handleEssenceResultClick(event) {
+  const pinButton = event.target.closest("button[data-character-pin]");
+  if (pinButton) {
+    addCharacterEssencePin(pinButton.dataset.characterPin, pinButton.dataset.monster);
+    render();
+    return;
+  }
+
+  const unpinButton = event.target.closest("button[data-character-unpin]");
+  if (unpinButton) {
+    removeCharacterEssencePin(unpinButton.dataset.characterUnpin, unpinButton.dataset.monster);
+    render();
+    return;
+  }
+
+  const clearButton = event.target.closest("button[data-character-clear]");
+  if (clearButton) {
+    clearCharacterEssencePins(clearButton.dataset.characterClear);
+    render();
+    return;
+  }
+
+  const jumpButton = event.target.closest("button[data-character-jump]");
+  if (jumpButton) {
+    focusEssenceByMonster(jumpButton.dataset.characterJump);
+    return;
+  }
+
   const button = event.target.closest("button[data-edit-monster]");
   if (!button) return;
   const row = findMonsterRow(button.dataset.editMonster);
   openQuickEditModal(row);
+}
+
+function focusEssenceByMonster(monsterName) {
+  if (els.search) els.search.value = textOf(monsterName);
+  render();
+  requestAnimationFrame(() => {
+    const row = els.results?.querySelector(`[data-essence-monster="${cssEscape(monsterName)}"]`);
+    if (row) {
+      row.scrollIntoView({ block: "center", behavior: "smooth" });
+      row.classList.add("is-focused");
+      setTimeout(() => row.classList.remove("is-focused"), 1400);
+    } else {
+      els.results?.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+  });
 }
 
 async function submitQuickEditReport(event) {
@@ -4388,7 +4490,7 @@ function floorAreaMonsterSortDescending(a, b) {
 }
 
 function render() {
-  const rows = pinEssenceRows(collectEssenceRows());
+  const rows = collectEssenceRows();
   const selectedStats = selectedStatNames();
   const selectedEffect = selectedEffectSort();
   const recommendedSortCharacter = els.sort.value.startsWith("recommend:") ? els.sort.value.slice("recommend:".length) : "";
@@ -4400,41 +4502,104 @@ function render() {
       : recommendedSortCharacter ? `${recommendedSortCharacter} 추천 정수`
         : "정수 목록";
   els.resultCount.textContent = `${rows.length}건`;
-  els.results.innerHTML = rows.length
+  els.results.innerHTML = `${characterEssenceBoardTemplate()}${rows.length
     ? essenceTemplate(rows)
-    : `<div class="empty">조건에 맞는 정수가 없습니다. 필터를 조금 넓혀보세요.</div>`;
+    : `<div class="empty">조건에 맞는 정수가 없습니다. 필터를 조금 넓혀보세요.</div>`}`;
 
 }
 
-function pinEssenceRows(rows) {
-  if (!pinnedEssenceNames.length) return rows;
-  const pinnedKeys = pinnedEssenceNames.map(monsterKey);
-  const pinnedRows = pinnedEssenceNames
-    .map((name) => essenceRows.find((row) => monsterKey(row["몬스터"]) === monsterKey(name)))
+function characterEssenceBoardTemplate() {
+  const totalPinned = essencePinCharacters.reduce((sum, character) => sum + characterPinCount(character), 0);
+  const summary = essencePinCharacters
+    .map((character) => `<span>${escapeHtml(character)} ${characterPinCount(character)}</span>`)
+    .join("");
+  return `
+    <details class="character-essence-board panel" ${totalPinned ? "open" : ""}>
+      <summary>
+        <div>
+          <strong>내 캐릭터 정수</strong>
+          <span>이 브라우저에 자동 저장됩니다.</span>
+        </div>
+        <div class="character-pin-summary">${summary}</div>
+      </summary>
+      <div class="character-board-grid">
+        ${essencePinCharacters.map(characterEssenceColumnTemplate).join("")}
+      </div>
+    </details>
+  `;
+}
+
+function characterEssenceColumnTemplate(character) {
+  const rows = characterPinnedRows(character);
+  return `
+    <section class="character-pin-column">
+      <div class="character-pin-head">
+        <div>
+          <h3>${escapeHtml(character)}</h3>
+          <span>${rows.length}개 고정</span>
+        </div>
+        ${rows.length ? `<button type="button" data-character-clear="${escapeHtml(character)}">비우기</button>` : ""}
+      </div>
+      ${rows.length
+        ? `<div class="character-stat-summary">${characterStatSummaryTemplate(rows)}</div>
+          <ul class="character-pin-list">
+            ${rows.map((row) => characterPinnedEssenceItemTemplate(character, row)).join("")}
+          </ul>`
+        : `<p class="character-pin-empty">아직 고정한 정수가 없습니다.</p>`}
+    </section>
+  `;
+}
+
+function characterPinnedEssenceItemTemplate(character, row) {
+  return `
+    <li>
+      <div>
+        <strong>${escapeHtml(row["몬스터"])}</strong>
+        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"] || "-")}</span>
+      </div>
+      <div class="character-pin-actions">
+        <button type="button" data-character-jump="${escapeHtml(row["몬스터"])}">보기</button>
+        <button type="button" data-character-unpin="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}">제거</button>
+      </div>
+    </li>
+  `;
+}
+
+function characterStatSummaryTemplate(rows) {
+  const stats = new Map();
+  rows.forEach((row) => {
+    parseStatParts(row["주요 스탯"]).forEach(({ name, value }) => {
+      stats.set(name, (stats.get(name) || 0) + value);
+    });
+  });
+  const items = [...stats.entries()]
+    .filter(([, value]) => value !== 0)
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+    .slice(0, 8);
+  if (!items.length) return `<span>합산 스탯 없음</span>`;
+  return items.map(([name, value]) => `<span><b>${escapeHtml(name)}</b> ${escapeHtml(formatSignedNumber(value))}</span>`).join("");
+}
+
+function parseStatParts(value) {
+  return textOf(value)
+    .split(",")
+    .map((part) => part.trim().match(/^(.+?)\s+([+-]?\d+(?:\.\d+)?)/))
     .filter(Boolean)
-    .map((row) => ({ type: "정수", row }));
-  const rest = rows.filter(({ row }) => !pinnedKeys.includes(monsterKey(row["몬스터"])));
-  return [...pinnedRows, ...rest];
+    .map((match) => ({ name: cleanStatName(match[1]), value: Number(match[2]) }))
+    .filter((item) => item.name && Number.isFinite(item.value) && !excludedStatName(item.name));
+}
+
+function formatSignedNumber(value) {
+  const rounded = Number.isInteger(value) ? value : Math.round(value * 10) / 10;
+  return rounded > 0 ? `+${rounded}` : String(rounded);
+}
+
+function cssEscape(value) {
+  if (window.CSS?.escape) return window.CSS.escape(textOf(value));
+  return textOf(value).replace(/["\\]/g, "\\$&");
 }
 
 function essenceTemplate(rows) {
-  const pinnedRows = rows.filter(({ row }) => isPinnedEssence(row));
-  const regularRows = rows.filter(({ row }) => !isPinnedEssence(row));
-  if (pinnedRows.length) {
-    const pinnedSection = `
-      <section class="essence-group pinned-essence-group">
-        <div class="group-title pinned-title">
-          <h3>정수 비교하기</h3>
-          <span>${pinnedRows.length}마리 비교 중</span>
-        </div>
-        <div class="essence-table-wrap">${essenceTable(pinnedRows)}</div>
-      </section>
-    `;
-    if (hasStatSort() || selectedEffectSort()) {
-      return `${pinnedSection}<div class="essence-table-wrap">${essenceTable(regularRows)}</div>`;
-    }
-    return `${pinnedSection}${essenceTemplateWithoutPinned(regularRows)}`;
-  }
   return essenceTemplateWithoutPinned(rows);
 }
 
@@ -4469,7 +4634,7 @@ function essenceTable(items) {
     <table class="essence-table">
       <thead>
         <tr>
-          <th>고정</th>
+          <th>캐릭터</th>
           <th>몬스터</th>
           <th>등급</th>
           <th>추천</th>
@@ -4488,15 +4653,23 @@ function essenceRowTemplate(row) {
   const activeStats = hasStatSort() ? selectedStatNames() : [];
   const selectedEffect = selectedEffectSort();
   const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
+  const pinnedCharacters = pinnedCharactersForEssence(row);
   const highlightText = activeStats.length
     ? activeStats.map((statName) => `${statName} ${statValue(row, statName)}`).join(" · ")
     : "";
   return `
-    <tr>
-      <td data-label="고정" class="pin-cell">
-        <label class="pin-essence-control">
-          <input class="pin-essence-checkbox" type="checkbox" data-monster="${escapeHtml(row["몬스터"])}" ${isPinnedEssence(row) ? "checked" : ""}>
-        </label>
+    <tr data-essence-monster="${escapeHtml(row["몬스터"])}">
+      <td data-label="캐릭터" class="pin-cell">
+        <details class="character-pin-menu">
+          <summary>고정</summary>
+          <div>
+            ${essencePinCharacters.map((character) => {
+              const pinned = pinnedCharacters.includes(character);
+              return `<button type="button" data-character-pin="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}" ${pinned ? "disabled" : ""}>${escapeHtml(character)}${pinned ? " ✓" : ""}</button>`;
+            }).join("")}
+          </div>
+        </details>
+        ${pinnedCharacters.length ? `<div class="character-pin-badges">${pinnedCharacters.map((character) => `<span>${escapeHtml(character)}</span>`).join("")}</div>` : ""}
       </td>
       <td data-label="몬스터">
         <div class="monster-title-line">
