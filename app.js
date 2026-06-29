@@ -4687,7 +4687,7 @@ function essenceRowTemplate(row) {
       <td data-label="담기" class="pin-cell">
         <label class="character-pin-check" title="${escapeHtml(activeEssencePinCharacter)} 정수로 담기">
           <input class="character-pin-checkbox" type="checkbox" data-monster="${escapeHtml(row["몬스터"])}" ${isActiveCharacterPinned(row) ? "checked" : ""}>
-          <span>${isActiveCharacterPinned(row) ? "담김" : "담기"}</span>
+          <span class="sr-only">${isActiveCharacterPinned(row) ? "담김" : "담기"}</span>
         </label>
       </td>
       <td data-label="몬스터">

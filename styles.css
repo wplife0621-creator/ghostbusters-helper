@@ -5287,19 +5287,15 @@ select[multiple] option:checked {
 .active-character-summary button,
 .character-pin-actions button,
 .character-pin-check {
-  border: 1px solid #d7e4f5;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--brand-dark);
-  font-size: 12px;
-  font-weight: 900;
-  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 4px;
   cursor: pointer;
 }
 
 .active-character-summary button:hover,
-.character-pin-actions button:hover,
-.character-pin-check:hover {
+.character-pin-actions button:hover {
   background: #edf4ff;
 }
 
@@ -5355,18 +5351,18 @@ select[multiple] option:checked {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 6px 10px;
+  width: 30px;
+  height: 30px;
 }
 
 .character-pin-check input {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   accent-color: var(--brand);
+  cursor: pointer;
 }
 
 .character-pin-check:has(input:checked) {
-  border-color: #8bb9f4;
   background: #edf4ff;
 }
 
