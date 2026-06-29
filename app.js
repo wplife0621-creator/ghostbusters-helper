@@ -29,6 +29,25 @@ const storageKeys = {
 const adminCode = "0621";
 const siteConfig = window.DUKHUBUSTERS_CONFIG || {};
 const essencePinCharacters = ["비요른", "에르웬", "미샤", "아이나르", "아우옌", "아브만"];
+const essencePinColorChoices = [
+  ["", "색 없음"],
+  ["빨강", "빨강"],
+  ["주황", "주황"],
+  ["노랑", "노랑"],
+  ["초록", "초록"],
+  ["청록", "청록"],
+  ["파랑", "파랑"],
+  ["심청", "심청"],
+  ["보라", "보라"],
+  ["검정", "검정"],
+  ["갈색", "갈색"],
+  ["무색", "무색"],
+  ["백색", "백색"],
+  ["황금", "황금"],
+  ["은색", "은색"],
+  ["황동", "황동"],
+  ["무지개", "무지개"],
+];
 const staticDataVersion = textOf(siteConfig.staticDataVersion) || "20260607-static-index";
 const visitorCountersEnabled = String(siteConfig.enableVisitorCounters || "").toLowerCase() === "true";
 const adminAutoLoadEnabled = String(siteConfig.enableAdminAutoLoad || "").toLowerCase() === "true";
@@ -602,15 +621,44 @@ function saveStoredRows(key, rows) {
   localStorage.setItem(key, JSON.stringify(rows));
 }
 
+function normalizeEssencePinColor(value) {
+  const color = textOf(value);
+  return essencePinColorChoices.some(([choice]) => choice === color) ? color : "";
+}
+
+function normalizeCharacterPinEntry(entry) {
+  if (typeof entry === "string") {
+    const monster = textOf(entry);
+    return monster ? { monster, color: "" } : null;
+  }
+  if (!entry || typeof entry !== "object") return null;
+  const monster = textOf(entry.monster || entry.name || entry["몬스터"]);
+  if (!monster) return null;
+  return {
+    monster,
+    color: normalizeEssencePinColor(entry.color || entry["색상"]),
+  };
+}
+
+function normalizeCharacterPinEntries(entries) {
+  const byMonster = new Map();
+  (Array.isArray(entries) ? entries : []).forEach((entry) => {
+    const normalized = normalizeCharacterPinEntry(entry);
+    if (!normalized) return;
+    const key = monsterKey(normalized.monster);
+    if (!key || byMonster.has(key)) return;
+    byMonster.set(key, normalized);
+  });
+  return [...byMonster.values()];
+}
+
 function loadCharacterEssencePins() {
   const fallback = Object.fromEntries(essencePinCharacters.map((character) => [character, []]));
   try {
     const parsed = JSON.parse(localStorage.getItem(storageKeys.characterEssencePins) || "{}");
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return fallback;
     essencePinCharacters.forEach((character) => {
-      fallback[character] = unique((Array.isArray(parsed[character]) ? parsed[character] : [])
-        .map(textOf)
-        .filter(Boolean));
+      fallback[character] = normalizeCharacterPinEntries(parsed[character]);
     });
     return fallback;
   } catch {
@@ -621,7 +669,7 @@ function loadCharacterEssencePins() {
 function saveCharacterEssencePins() {
   const normalized = {};
   essencePinCharacters.forEach((character) => {
-    normalized[character] = unique((characterEssencePins[character] || []).map(textOf).filter(Boolean));
+    normalized[character] = normalizeCharacterPinEntries(characterEssencePins[character]);
   });
   characterEssencePins = normalized;
   localStorage.setItem(storageKeys.characterEssencePins, JSON.stringify(characterEssencePins));
@@ -673,7 +721,7 @@ function pinnedCharactersForEssence(row) {
   const key = monsterKey(row?.["몬스터"]);
   if (!key) return [];
   return essencePinCharacters.filter((character) => (characterEssencePins[character] || [])
-    .some((name) => monsterKey(name) === key));
+    .some((entry) => monsterKey(normalizeCharacterPinEntry(entry)?.monster) === key));
 }
 
 function isCharacterPinnedEssence(row) {
@@ -681,9 +729,48 @@ function isCharacterPinnedEssence(row) {
 }
 
 function characterPinnedRows(character) {
-  return (characterEssencePins[character] || [])
-    .map((name) => findMonsterRow(name))
-    .filter(Boolean);
+  return characterPinnedItems(character).map((item) => item.row);
+}
+
+function characterPinnedItems(character) {
+  return normalizeCharacterPinEntries(characterEssencePins[character])
+    .map((entry) => ({ entry, row: findMonsterRow(entry.monster) }))
+    .filter((item) => item.row);
+}
+
+function characterPinEntry(character, monsterName) {
+  const key = monsterKey(monsterName);
+  if (!key) return null;
+  return normalizeCharacterPinEntries(characterEssencePins[character])
+    .find((entry) => monsterKey(entry.monster) === key) || null;
+}
+
+function characterPinColor(character, monsterName) {
+  return characterPinEntry(character, monsterName)?.color || "";
+}
+
+function characterPinColorOptions(selected = "") {
+  const normalized = normalizeEssencePinColor(selected);
+  return essencePinColorChoices
+    .map(([value, label]) => `<option value="${escapeHtml(value)}"${value === normalized ? " selected" : ""}>${escapeHtml(label)}</option>`)
+    .join("");
+}
+
+function setCharacterEssencePinColor(character, monsterName, color) {
+  if (!essencePinCharacters.includes(character)) return;
+  const key = monsterKey(monsterName);
+  if (!key) return;
+  characterEssencePins[character] = normalizeCharacterPinEntries(characterEssencePins[character])
+    .map((entry) => monsterKey(entry.monster) === key
+      ? { ...entry, color: normalizeEssencePinColor(color) }
+      : entry);
+  saveCharacterEssencePins();
+}
+
+function selectedColorPill(color) {
+  const normalized = normalizeEssencePinColor(color);
+  if (!normalized) return "";
+  return `<i class="essence-color-pill color-${escapeHtml(normalized)}">${escapeHtml(normalized)}</i>`;
 }
 
 function characterPinCount(character) {
@@ -692,17 +779,16 @@ function characterPinCount(character) {
 
 function isActiveCharacterPinned(row) {
   const key = monsterKey(row?.["몬스터"]);
-  return Boolean(key && (characterEssencePins[activeEssencePinCharacter] || [])
-    .some((name) => monsterKey(name) === key));
+  return Boolean(key && characterPinEntry(activeEssencePinCharacter, key));
 }
 
 function addCharacterEssencePin(character, monsterName) {
   if (!essencePinCharacters.includes(character)) return;
   const name = textOf(monsterName);
   if (!name) return;
-  const current = characterEssencePins[character] || [];
-  if (!current.some((item) => monsterKey(item) === monsterKey(name))) {
-    characterEssencePins[character] = [...current, name];
+  const current = normalizeCharacterPinEntries(characterEssencePins[character]);
+  if (!current.some((item) => monsterKey(item.monster) === monsterKey(name))) {
+    characterEssencePins[character] = [...current, { monster: name, color: "" }];
     saveCharacterEssencePins();
   }
 }
@@ -710,8 +796,8 @@ function addCharacterEssencePin(character, monsterName) {
 function removeCharacterEssencePin(character, monsterName) {
   if (!essencePinCharacters.includes(character)) return;
   const key = monsterKey(monsterName);
-  characterEssencePins[character] = (characterEssencePins[character] || [])
-    .filter((item) => monsterKey(item) !== key);
+  characterEssencePins[character] = normalizeCharacterPinEntries(characterEssencePins[character])
+    .filter((item) => monsterKey(item.monster) !== key);
   saveCharacterEssencePins();
 }
 
@@ -2068,7 +2154,7 @@ function activeSkillsForEssence(name) {
   return row ? splitSkills(activeSkillsWithoutSailing(row["액티브"])) : [];
 }
 
-const activeColorPattern = /^\(?\s*(빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|남색|보라|보라색|검정|검은색|갈색|회색|무색|백색|흰색|황동|황금|금색|은색|암흑|무지개|공통|미확인)\s*\)?\s*(?:-|:|：|\)|\s+)\s*/;
+const activeColorPattern = /^\(?\s*(빨강|빨간색|주황|주황색|노랑|노란색|초록|초록색|청록|청록색|파랑|파란색|심청|진파랑|보라|보라색|검정|검은색|갈색|회색|무색|백색|흰색|황동|brass|황금|금색|은색|무지개)\s*\)?\s*(?:-|:|：|\)|\s+)\s*/;
 const activeColorAliases = {
   빨간색: "빨강",
   주황색: "주황",
@@ -2076,10 +2162,12 @@ const activeColorAliases = {
   초록색: "초록",
   청록색: "청록",
   파란색: "파랑",
+  진파랑: "심청",
   회색: "무색",
   보라색: "보라",
   검은색: "검정",
   흰색: "백색",
+  brass: "황동",
   금색: "황금",
 };
 
@@ -3992,6 +4080,12 @@ function closeQuickEditModal() {
 }
 
 function handleEssenceResultChange(event) {
+  const colorSelect = event.target.closest(".character-pin-color-select");
+  if (colorSelect) {
+    setCharacterEssencePinColor(colorSelect.dataset.characterColor, colorSelect.dataset.monster, colorSelect.value);
+    render();
+    return;
+  }
   const checkbox = event.target.closest(".character-pin-checkbox");
   if (!checkbox) return;
   toggleActiveCharacterEssencePin(checkbox.dataset.monster, checkbox.checked);
@@ -4541,7 +4635,8 @@ function render() {
 }
 
 function characterEssenceBoardTemplate() {
-  const rows = characterPinnedRows(activeEssencePinCharacter);
+  const items = characterPinnedItems(activeEssencePinCharacter);
+  const rows = items.map((item) => item.row);
   return `
     <section class="character-essence-board panel">
       <div class="character-board-head">
@@ -4568,7 +4663,7 @@ function characterEssenceBoardTemplate() {
         ${rows.length
           ? `<div class="character-stat-summary">${characterStatSummaryTemplate(rows)}</div>
             <ul class="character-pin-list">
-              ${rows.map((row) => characterPinnedEssenceItemTemplate(activeEssencePinCharacter, row)).join("")}
+              ${items.map((item) => characterPinnedEssenceItemTemplate(activeEssencePinCharacter, item)).join("")}
             </ul>`
           : `<p class="character-pin-empty">아래 정수 목록에서 체크하면 ${escapeHtml(activeEssencePinCharacter)} 정수로 담깁니다.</p>`}
       </div>
@@ -4576,12 +4671,39 @@ function characterEssenceBoardTemplate() {
   `;
 }
 
-function characterPinnedEssenceItemTemplate(character, row) {
+function characterPinnedEssenceItemTemplate(character, item) {
+  const { row, entry } = item;
+  const color = characterPinColor(character, entry.monster);
   return `
-    <li>
-      <div>
-        <strong>${escapeHtml(row["몬스터"])}</strong>
-        <span>${escapeHtml(row["층"])} · ${escapeHtml(row["구역"])} · ${escapeHtml(row["등급"] || "-")}</span>
+    <li class="${color ? `has-pin-color pin-color-${escapeHtml(color)}` : ""}">
+      <div class="character-pin-card-head">
+        <div>
+          <strong>${escapeHtml(row["몬스터"])}</strong>
+          <div class="character-pin-meta">
+            <span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span>
+            ${selectedColorPill(color)}
+          </div>
+        </div>
+        <label class="character-pin-color">
+          <span>색상</span>
+          <select class="character-pin-color-select" data-character-color="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}">
+            ${characterPinColorOptions(color)}
+          </select>
+        </label>
+      </div>
+      <div class="character-pin-info">
+        <div class="character-pin-info-row">
+          <b>주요스탯</b>
+          <div class="stat-list">${statBadges(row["주요 스탯"]) || `<span>-</span>`}</div>
+        </div>
+        <div class="character-pin-info-row">
+          <b>패시브</b>
+          <div class="skill-cell">${skillText(row["패시브"])}</div>
+        </div>
+        <div class="character-pin-info-row">
+          <b>액티브</b>
+          <div class="skill-cell">${skillText(row["액티브"], { colorMarkers: true })}</div>
+        </div>
       </div>
       <div class="character-pin-actions">
         <button type="button" data-character-jump="${escapeHtml(row["몬스터"])}">보기</button>

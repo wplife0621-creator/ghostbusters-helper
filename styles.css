@@ -3457,6 +3457,7 @@ select[multiple] option:checked {
 .color-회색 { background: #6b7280; }
 .color-황동 { background: #9a6b2f; }
 .color-남색 { background: #1e3a8a; }
+.color-심청 { background: #164e9b; }
 .color-은색 { background: #8492a6; }
 .color-암흑 { background: #221b35; }
 .color-무지개 {
@@ -5209,6 +5210,12 @@ select[multiple] option:checked {
   }
 
   .character-pin-list li {
+    padding: 12px;
+  }
+
+  .character-pin-card-head,
+  .character-pin-actions {
+    align-items: flex-start;
     flex-direction: column;
   }
 }
@@ -5328,12 +5335,13 @@ select[multiple] option:checked {
 }
 
 .character-pin-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  gap: 10px;
   align-items: flex-start;
-  border-top: 1px solid var(--line);
-  padding-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fbfdff;
+  padding: 12px;
 }
 
 .character-pin-list li strong,
@@ -5341,10 +5349,79 @@ select[multiple] option:checked {
   display: block;
 }
 
+.character-pin-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.character-pin-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.character-pin-meta .grade-pill,
+.character-pin-meta .essence-color-pill {
+  display: inline-flex;
+}
+
+.character-pin-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.character-pin-color select {
+  min-width: 92px;
+  border: 1px solid #d7e4f5;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 900;
+  padding: 6px 8px;
+}
+
+.character-pin-info {
+  display: grid;
+  gap: 8px;
+}
+
+.character-pin-info-row {
+  display: grid;
+  gap: 4px;
+}
+
+.character-pin-info-row > b {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.character-pin-info .stat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.character-pin-info .skill-list {
+  gap: 4px;
+}
+
+.character-pin-info .skill-list span {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .character-pin-actions {
   display: inline-flex;
   gap: 5px;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  justify-self: end;
 }
 
 .character-pin-check {
