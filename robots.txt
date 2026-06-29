@@ -4,5 +4,8 @@ Disallow: /admin.html
 Disallow: /search.html
 Disallow: /library.html
 Disallow: /changelog.html
+Disallow: /builds.html
+Disallow: /guides.html
+Disallow: /report.html
 
 Sitemap: https://busters.kr/sitemap.xml
