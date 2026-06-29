@@ -749,11 +749,35 @@ function characterPinColor(character, monsterName) {
   return characterPinEntry(character, monsterName)?.color || "";
 }
 
-function characterPinColorOptions(selected = "") {
-  const normalized = normalizeEssencePinColor(selected);
-  return essencePinColorChoices
-    .map(([value, label]) => `<option value="${escapeHtml(value)}"${value === normalized ? " selected" : ""}>${escapeHtml(label)}</option>`)
-    .join("");
+function activeSkillEntries(row) {
+  return splitSkills(row?.["액티브"])
+    .map((skill) => ({
+      skill,
+      color: normalizeEssencePinColor(activeSkillColor(skill)),
+    }));
+}
+
+function activeColorsForEssence(row) {
+  return unique(activeSkillEntries(row)
+    .map((entry) => entry.color)
+    .filter(Boolean));
+}
+
+function effectiveCharacterPinColor(row, savedColor = "") {
+  const colors = activeColorsForEssence(row);
+  const normalized = normalizeEssencePinColor(savedColor);
+  if (normalized && colors.includes(normalized)) return normalized;
+  return colors.length === 1 ? colors[0] : "";
+}
+
+function characterPinColorOptions(row, selected = "") {
+  const colors = activeColorsForEssence(row);
+  const effective = effectiveCharacterPinColor(row, selected);
+  if (!colors.length) return `<option value="">색상 없음</option>`;
+  return [
+    `<option value=""${effective ? "" : " selected"}>${colors.length > 1 ? "색상 선택" : "색상"}</option>`,
+    ...colors.map((color) => `<option value="${escapeHtml(color)}"${color === effective ? " selected" : ""}>${escapeHtml(color)}</option>`),
+  ].join("");
 }
 
 function setCharacterEssencePinColor(character, monsterName, color) {
@@ -771,6 +795,17 @@ function selectedColorPill(color) {
   const normalized = normalizeEssencePinColor(color);
   if (!normalized) return "";
   return `<i class="essence-color-pill color-${escapeHtml(normalized)}">${escapeHtml(normalized)}</i>`;
+}
+
+function selectedActiveSkillText(row, selectedColor = "") {
+  const colors = activeColorsForEssence(row);
+  const effective = effectiveCharacterPinColor(row, selectedColor);
+  if (!colors.length) return skillText(row["액티브"], { colorMarkers: true });
+  if (!effective) return `<span class="muted">색상을 선택하면 해당 액티브만 표시됩니다.</span>`;
+  const skills = activeSkillEntries(row)
+    .filter((entry) => entry.color === effective)
+    .map((entry) => entry.skill);
+  return skillText(skills.join("\n"), { colorMarkers: true });
 }
 
 function characterPinCount(character) {
@@ -4673,10 +4708,12 @@ function characterEssenceBoardTemplate() {
 
 function characterPinnedEssenceItemTemplate(character, item) {
   const { row, entry } = item;
-  const color = characterPinColor(character, entry.monster);
+  const color = effectiveCharacterPinColor(row, characterPinColor(character, entry.monster));
+  const hasColorChoices = activeColorsForEssence(row).length > 0;
   return `
     <li class="${color ? `has-pin-color pin-color-${escapeHtml(color)}` : ""}">
-      <div class="character-pin-card-head">
+      <div class="character-pin-cell character-pin-main">
+        <b>몬스터</b>
         <div>
           <strong>${escapeHtml(row["몬스터"])}</strong>
           <div class="character-pin-meta">
@@ -4686,24 +4723,22 @@ function characterPinnedEssenceItemTemplate(character, item) {
         </div>
         <label class="character-pin-color">
           <span>색상</span>
-          <select class="character-pin-color-select" data-character-color="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}">
-            ${characterPinColorOptions(color)}
+          <select class="character-pin-color-select" data-character-color="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}" ${hasColorChoices ? "" : "disabled"}>
+            ${characterPinColorOptions(row, color)}
           </select>
         </label>
       </div>
-      <div class="character-pin-info">
-        <div class="character-pin-info-row">
-          <b>주요스탯</b>
-          <div class="stat-list">${statBadges(row["주요 스탯"]) || `<span>-</span>`}</div>
-        </div>
-        <div class="character-pin-info-row">
-          <b>패시브</b>
-          <div class="skill-cell">${skillText(row["패시브"])}</div>
-        </div>
-        <div class="character-pin-info-row">
-          <b>액티브</b>
-          <div class="skill-cell">${skillText(row["액티브"], { colorMarkers: true })}</div>
-        </div>
+      <div class="character-pin-cell character-pin-stats">
+        <b>주요스탯</b>
+        <div class="stat-list">${statBadges(row["주요 스탯"]) || `<span>-</span>`}</div>
+      </div>
+      <div class="character-pin-cell character-pin-passive">
+        <b>패시브</b>
+        <div class="skill-cell">${skillText(row["패시브"])}</div>
+      </div>
+      <div class="character-pin-cell character-pin-active">
+        <b>액티브</b>
+        <div class="skill-cell">${selectedActiveSkillText(row, color)}</div>
       </div>
       <div class="character-pin-actions">
         <button type="button" data-character-jump="${escapeHtml(row["몬스터"])}">보기</button>
