@@ -5331,7 +5331,7 @@ select[multiple] option:checked {
 
 .character-pin-list {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -5339,13 +5339,13 @@ select[multiple] option:checked {
 
 .character-pin-list li {
   display: grid;
-  grid-template-columns: minmax(160px, 0.85fr) minmax(190px, 1fr) minmax(220px, 1.15fr) minmax(220px, 1.15fr) auto;
-  gap: 10px;
+  grid-template-columns: minmax(170px, 0.9fr) minmax(210px, 1fr) minmax(230px, 1.12fr) minmax(230px, 1.12fr) auto;
+  gap: 8px;
   align-items: stretch;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 10px;
   background: #fbfdff;
-  padding: 12px;
+  padding: 8px 10px;
 }
 
 .character-pin-list li strong,
@@ -5356,8 +5356,9 @@ select[multiple] option:checked {
 .character-pin-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
 }
 
 .character-pin-meta .grade-pill,
@@ -5367,23 +5368,23 @@ select[multiple] option:checked {
 
 .character-pin-color {
   display: inline-flex;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 8px;
+  align-items: center;
+  gap: 4px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
 }
 
 .character-pin-color select {
-  min-width: 92px;
+  min-width: 86px;
+  min-height: 28px;
   border: 1px solid #d7e4f5;
-  border-radius: 8px;
+  border-radius: 999px;
   background: #fff;
   color: var(--text);
+  font-size: 12px;
   font-weight: 900;
-  padding: 6px 8px;
+  padding: 2px 8px;
 }
 
 .character-pin-color select:disabled {
@@ -5395,10 +5396,10 @@ select[multiple] option:checked {
 .character-pin-cell {
   display: grid;
   align-content: start;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
   border-left: 1px solid #edf2f8;
-  padding-left: 10px;
+  padding-left: 8px;
 }
 
 .character-pin-main {
@@ -5408,31 +5409,48 @@ select[multiple] option:checked {
 
 .character-pin-cell > b {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
 }
 
 .character-pin-cell .stat-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
+}
+
+.character-pin-cell .stat-list span {
+  font-size: 11px;
+  padding: 3px 6px;
 }
 
 .character-pin-cell .skill-list {
-  gap: 4px;
+  gap: 3px;
 }
 
 .character-pin-cell .skill-list span {
   color: var(--text);
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1.45;
+}
+
+.character-pin-passive .skill-list,
+.character-pin-active .skill-list {
+  max-height: 38px;
+  overflow: hidden;
 }
 
 .character-pin-actions {
   display: inline-flex;
-  gap: 5px;
+  gap: 4px;
   justify-content: flex-end;
   justify-self: end;
   align-self: start;
+}
+
+.character-pin-actions button {
+  font-size: 12px;
 }
 
 .character-pin-check {

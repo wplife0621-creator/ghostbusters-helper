@@ -808,6 +808,20 @@ function selectedActiveSkillText(row, selectedColor = "") {
   return skillText(skills.join("\n"), { colorMarkers: true });
 }
 
+function compactStatBadges(value, limit = 4) {
+  return textOf(value)
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, limit)
+    .map((part) => {
+      const match = part.match(/^(.+?)\s+(-?\d+)/);
+      if (!match) return `<span>${escapeHtml(part)}</span>`;
+      return `<span><b>${escapeHtml(cleanStatName(match[1]))}</b> ${escapeHtml(match[2])}</span>`;
+    })
+    .join("");
+}
+
 function characterPinCount(character) {
   return characterPinnedRows(character).length;
 }
@@ -4718,19 +4732,18 @@ function characterPinnedEssenceItemTemplate(character, item) {
           <strong>${escapeHtml(row["몬스터"])}</strong>
           <div class="character-pin-meta">
             <span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span>
-            ${selectedColorPill(color)}
+            <label class="character-pin-color">
+              <span class="sr-only">색상</span>
+              <select class="character-pin-color-select" data-character-color="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}" ${hasColorChoices ? "" : "disabled"}>
+                ${characterPinColorOptions(row, color)}
+              </select>
+            </label>
           </div>
         </div>
-        <label class="character-pin-color">
-          <span>색상</span>
-          <select class="character-pin-color-select" data-character-color="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}" ${hasColorChoices ? "" : "disabled"}>
-            ${characterPinColorOptions(row, color)}
-          </select>
-        </label>
       </div>
       <div class="character-pin-cell character-pin-stats">
         <b>주요스탯</b>
-        <div class="stat-list">${statBadges(row["주요 스탯"]) || `<span>-</span>`}</div>
+        <div class="stat-list">${compactStatBadges(row["주요 스탯"]) || `<span>-</span>`}</div>
       </div>
       <div class="character-pin-cell character-pin-passive">
         <b>패시브</b>
