@@ -19,6 +19,7 @@ const storageKeys = {
   approvedVersion: "dukhubusters.approvedReportsVersion",
   pinnedEssences: "dukhubusters.pinnedEssences",
   characterEssencePins: "dukhubusters.characterEssencePins.v1",
+  activeEssencePinCharacter: "dukhubusters.activeEssencePinCharacter.v1",
   adminUnlocked: "dukhubusters.adminUnlocked",
   builds: "dukhubusters.sharedBuilds",
   visitorId: "dukhubusters.visitorId",
@@ -398,6 +399,7 @@ let activeStatNames = [];
 let activeEffectSortKey = "";
 let pinnedEssenceNames = loadStoredRows(storageKeys.pinnedEssences);
 let characterEssencePins = loadCharacterEssencePins();
+let activeEssencePinCharacter = loadActiveEssencePinCharacter();
 let activeAdminTab = "dashboard";
 let adminApprovedSearch = "";
 let adminApprovedKind = "all";
@@ -625,6 +627,17 @@ function saveCharacterEssencePins() {
   localStorage.setItem(storageKeys.characterEssencePins, JSON.stringify(characterEssencePins));
 }
 
+function loadActiveEssencePinCharacter() {
+  const saved = textOf(localStorage.getItem(storageKeys.activeEssencePinCharacter));
+  return essencePinCharacters.includes(saved) ? saved : essencePinCharacters[0];
+}
+
+function setActiveEssencePinCharacter(character) {
+  if (!essencePinCharacters.includes(character)) return;
+  activeEssencePinCharacter = character;
+  localStorage.setItem(storageKeys.activeEssencePinCharacter, character);
+}
+
 function monsterKey(value) {
   return textOf(value).toLowerCase();
 }
@@ -677,6 +690,12 @@ function characterPinCount(character) {
   return characterPinnedRows(character).length;
 }
 
+function isActiveCharacterPinned(row) {
+  const key = monsterKey(row?.["몬스터"]);
+  return Boolean(key && (characterEssencePins[activeEssencePinCharacter] || [])
+    .some((name) => monsterKey(name) === key));
+}
+
 function addCharacterEssencePin(character, monsterName) {
   if (!essencePinCharacters.includes(character)) return;
   const name = textOf(monsterName);
@@ -700,6 +719,11 @@ function clearCharacterEssencePins(character) {
   if (!essencePinCharacters.includes(character)) return;
   characterEssencePins[character] = [];
   saveCharacterEssencePins();
+}
+
+function toggleActiveCharacterEssencePin(monsterName, pinned) {
+  if (pinned) addCharacterEssencePin(activeEssencePinCharacter, monsterName);
+  else removeCharacterEssencePin(activeEssencePinCharacter, monsterName);
 }
 
 function savePinnedEssences() {
@@ -1645,6 +1669,7 @@ function initEssences() {
     el.addEventListener("change", render);
   });
 
+  els.results.addEventListener("change", handleEssenceResultChange);
   els.results.addEventListener("click", handleEssenceResultClick);
   initQuickEditModal();
   render();
@@ -3966,10 +3991,17 @@ function closeQuickEditModal() {
   }
 }
 
+function handleEssenceResultChange(event) {
+  const checkbox = event.target.closest(".character-pin-checkbox");
+  if (!checkbox) return;
+  toggleActiveCharacterEssencePin(checkbox.dataset.monster, checkbox.checked);
+  render();
+}
+
 function handleEssenceResultClick(event) {
-  const pinButton = event.target.closest("button[data-character-pin]");
-  if (pinButton) {
-    addCharacterEssencePin(pinButton.dataset.characterPin, pinButton.dataset.monster);
+  const tabButton = event.target.closest("button[data-character-tab]");
+  if (tabButton) {
+    setActiveEssencePinCharacter(tabButton.dataset.characterTab);
     render();
     return;
   }
@@ -4509,43 +4541,37 @@ function render() {
 }
 
 function characterEssenceBoardTemplate() {
-  const totalPinned = essencePinCharacters.reduce((sum, character) => sum + characterPinCount(character), 0);
-  const summary = essencePinCharacters
-    .map((character) => `<span>${escapeHtml(character)} ${characterPinCount(character)}</span>`)
-    .join("");
+  const rows = characterPinnedRows(activeEssencePinCharacter);
   return `
-    <details class="character-essence-board panel" ${totalPinned ? "open" : ""}>
-      <summary>
+    <section class="character-essence-board panel">
+      <div class="character-board-head">
         <div>
           <strong>내 캐릭터 정수</strong>
-          <span>이 브라우저에 자동 저장됩니다.</span>
+          <span>${escapeHtml(activeEssencePinCharacter)} 탭에서 체크한 정수는 이 브라우저에 자동 저장됩니다.</span>
         </div>
-        <div class="character-pin-summary">${summary}</div>
-      </summary>
-      <div class="character-board-grid">
-        ${essencePinCharacters.map(characterEssenceColumnTemplate).join("")}
       </div>
-    </details>
-  `;
-}
-
-function characterEssenceColumnTemplate(character) {
-  const rows = characterPinnedRows(character);
-  return `
-    <section class="character-pin-column">
-      <div class="character-pin-head">
-        <div>
-          <h3>${escapeHtml(character)}</h3>
-          <span>${rows.length}개 고정</span>
+      <div class="character-tabs" role="tablist" aria-label="캐릭터 선택">
+        ${essencePinCharacters.map((character) => `
+          <button type="button" role="tab" data-character-tab="${escapeHtml(character)}" class="${character === activeEssencePinCharacter ? "is-active" : ""}" aria-selected="${character === activeEssencePinCharacter ? "true" : "false"}">
+            ${escapeHtml(character)} <span>${characterPinCount(character)}</span>
+          </button>
+        `).join("")}
+      </div>
+      <div class="active-character-panel">
+        <div class="active-character-summary">
+          <div>
+            <h3>${escapeHtml(activeEssencePinCharacter)} 정수</h3>
+            <span>${rows.length}개 담김</span>
+          </div>
+          ${rows.length ? `<button type="button" data-character-clear="${escapeHtml(activeEssencePinCharacter)}">비우기</button>` : ""}
         </div>
-        ${rows.length ? `<button type="button" data-character-clear="${escapeHtml(character)}">비우기</button>` : ""}
+        ${rows.length
+          ? `<div class="character-stat-summary">${characterStatSummaryTemplate(rows)}</div>
+            <ul class="character-pin-list">
+              ${rows.map((row) => characterPinnedEssenceItemTemplate(activeEssencePinCharacter, row)).join("")}
+            </ul>`
+          : `<p class="character-pin-empty">아래 정수 목록에서 체크하면 ${escapeHtml(activeEssencePinCharacter)} 정수로 담깁니다.</p>`}
       </div>
-      ${rows.length
-        ? `<div class="character-stat-summary">${characterStatSummaryTemplate(rows)}</div>
-          <ul class="character-pin-list">
-            ${rows.map((row) => characterPinnedEssenceItemTemplate(character, row)).join("")}
-          </ul>`
-        : `<p class="character-pin-empty">아직 고정한 정수가 없습니다.</p>`}
     </section>
   `;
 }
@@ -4634,7 +4660,7 @@ function essenceTable(items) {
     <table class="essence-table">
       <thead>
         <tr>
-          <th>캐릭터</th>
+          <th>담기</th>
           <th>몬스터</th>
           <th>등급</th>
           <th>추천</th>
@@ -4653,23 +4679,16 @@ function essenceRowTemplate(row) {
   const activeStats = hasStatSort() ? selectedStatNames() : [];
   const selectedEffect = selectedEffectSort();
   const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
-  const pinnedCharacters = pinnedCharactersForEssence(row);
   const highlightText = activeStats.length
     ? activeStats.map((statName) => `${statName} ${statValue(row, statName)}`).join(" · ")
     : "";
   return `
     <tr data-essence-monster="${escapeHtml(row["몬스터"])}">
-      <td data-label="캐릭터" class="pin-cell">
-        <details class="character-pin-menu">
-          <summary>고정</summary>
-          <div>
-            ${essencePinCharacters.map((character) => {
-              const pinned = pinnedCharacters.includes(character);
-              return `<button type="button" data-character-pin="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}" ${pinned ? "disabled" : ""}>${escapeHtml(character)}${pinned ? " ✓" : ""}</button>`;
-            }).join("")}
-          </div>
-        </details>
-        ${pinnedCharacters.length ? `<div class="character-pin-badges">${pinnedCharacters.map((character) => `<span>${escapeHtml(character)}</span>`).join("")}</div>` : ""}
+      <td data-label="담기" class="pin-cell">
+        <label class="character-pin-check" title="${escapeHtml(activeEssencePinCharacter)} 정수로 담기">
+          <input class="character-pin-checkbox" type="checkbox" data-monster="${escapeHtml(row["몬스터"])}" ${isActiveCharacterPinned(row) ? "checked" : ""}>
+          <span>${isActiveCharacterPinned(row) ? "담김" : "담기"}</span>
+        </label>
       </td>
       <td data-label="몬스터">
         <div class="monster-title-line">

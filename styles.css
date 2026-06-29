@@ -5178,91 +5178,99 @@ select[multiple] option:checked {
   text-align: center;
 }
 
+.character-essence-board {
+  margin: 0;
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  overflow: hidden;
+}
+
 @media (max-width: 720px) {
-  .character-essence-board summary {
+  .character-essence-board {
+    padding: 14px 12px;
+  }
+
+  .character-board-head,
+  .active-character-summary {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .character-pin-summary {
-    justify-content: flex-start;
+  .character-tabs {
+    flex-wrap: nowrap;
+    margin: 0 -2px;
+    overflow-x: auto;
+    padding-bottom: 4px;
   }
 
-  .character-board-grid {
-    grid-template-columns: 1fr;
-    padding: 0 12px 14px;
+  .character-tabs button {
+    flex: 0 0 auto;
   }
 
   .character-pin-list li {
     flex-direction: column;
   }
-
-  .character-pin-menu > div {
-    position: static;
-    margin-top: 6px;
-    box-shadow: none;
-  }
 }
 
-.character-essence-board {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-.character-essence-board summary {
+.character-board-head,
+.active-character-summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 14px;
-  padding: 16px 18px;
-  cursor: pointer;
-  list-style: none;
 }
 
-.character-essence-board summary::-webkit-details-marker {
-  display: none;
-}
-
-.character-essence-board summary strong {
+.character-board-head strong {
   display: block;
   font-size: 17px;
 }
 
-.character-essence-board summary span {
+.character-board-head span,
+.active-character-summary span,
+.character-pin-empty,
+.character-pin-list li span {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
 }
 
-.character-pin-summary {
+.character-tabs {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 
-.character-pin-summary span,
-.character-pin-badges span,
-.character-stat-summary span {
+.character-tabs button {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
+  border: 1px solid #d7e4f5;
   border-radius: 999px;
+  background: #fff;
+  color: var(--brand-dark);
+  font-size: 13px;
+  font-weight: 900;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.character-tabs button:hover,
+.character-tabs button.is-active {
+  border-color: #8bb9f4;
   background: #edf4ff;
+  box-shadow: 0 8px 18px rgba(51, 119, 219, 0.12);
+}
+
+.character-tabs button span {
+  border-radius: 999px;
+  background: #dcecff;
   color: var(--brand-dark);
   font-size: 11px;
-  font-weight: 900;
-  padding: 4px 8px;
+  padding: 2px 7px;
 }
 
-.character-board-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  padding: 0 18px 18px;
-}
-
-.character-pin-column {
+.active-character-panel {
   display: grid;
   gap: 10px;
   border: 1px solid var(--line);
@@ -5271,29 +5279,14 @@ select[multiple] option:checked {
   padding: 12px;
 }
 
-.character-pin-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.character-pin-head h3 {
+.active-character-summary h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
 }
 
-.character-pin-head span,
-.character-pin-empty,
-.character-pin-list li span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.character-pin-head button,
+.active-character-summary button,
 .character-pin-actions button,
-.character-pin-menu button {
+.character-pin-check {
   border: 1px solid #d7e4f5;
   border-radius: 999px;
   background: #fff;
@@ -5304,9 +5297,9 @@ select[multiple] option:checked {
   cursor: pointer;
 }
 
-.character-pin-head button:hover,
+.active-character-summary button:hover,
 .character-pin-actions button:hover,
-.character-pin-menu button:hover {
+.character-pin-check:hover {
   background: #edf4ff;
 }
 
@@ -5319,6 +5312,15 @@ select[multiple] option:checked {
 .character-stat-summary span {
   background: #f3f7fb;
   color: #44516a;
+}
+
+.character-stat-summary span {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 8px;
 }
 
 .character-pin-list {
@@ -5349,60 +5351,23 @@ select[multiple] option:checked {
   flex-shrink: 0;
 }
 
-.character-pin-menu {
-  position: relative;
-}
-
-.character-pin-menu summary {
+.character-pin-check {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #cfe0f7;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--brand-dark);
-  font-size: 12px;
-  font-weight: 900;
-  padding: 6px 10px;
-  cursor: pointer;
-  list-style: none;
-}
-
-.character-pin-menu summary::-webkit-details-marker {
-  display: none;
-}
-
-.character-pin-menu[open] summary {
-  background: #edf4ff;
-}
-
-.character-pin-menu > div {
-  display: grid;
-  gap: 5px;
-  min-width: 112px;
-  margin-top: 6px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fff;
-  padding: 8px;
-}
-
-.character-pin-menu button {
-  width: 100%;
-  text-align: left;
-}
-
-.character-pin-menu button:disabled {
-  background: #f3f7fb;
-  color: #7c8aa3;
-  cursor: default;
-}
-
-.character-pin-badges {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 4px;
-  margin-top: 6px;
+  gap: 5px;
+  padding: 6px 10px;
+}
+
+.character-pin-check input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--brand);
+}
+
+.character-pin-check:has(input:checked) {
+  border-color: #8bb9f4;
+  background: #edf4ff;
 }
 
 .essence-table tr.is-focused {
