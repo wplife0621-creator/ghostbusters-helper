@@ -1542,7 +1542,7 @@ function statNames() {
   essenceRows.forEach((row) => {
     textOf(row["주요 스탯"])
       .split(",")
-      .map((part) => cleanStatName(part.trim().match(/^(.+?)\s+\d+/)?.[1]))
+      .map((part) => cleanStatName(part.trim().match(/^(.+?)\s+[+-]?\d+(?:\.\d+)?/)?.[1]))
       .filter(Boolean)
       .forEach((name) => fromEssence.push(name));
   });
@@ -1553,7 +1553,7 @@ function statValue(row, statName) {
   if (!statName || statName === statNoneLabel) return 0;
   const parts = textOf(row["주요 스탯"]).split(",");
   for (const part of parts) {
-    const match = part.trim().match(/^(.+?)\s+(-?\d+)/);
+    const match = part.trim().match(/^(.+?)\s+([+-]?\d+(?:\.\d+)?)/);
     if (match && cleanStatName(match[1]) === statName) return Number(match[2]);
   }
   return 0;
