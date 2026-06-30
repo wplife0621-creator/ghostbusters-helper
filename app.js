@@ -1575,15 +1575,22 @@ async function init() {
 }
 
 function resetPublicCodexLocalCache() {
-  if (!isPublicCodexPage() || String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return;
+  if (!isPublicCodexPage()) return;
+  if (publicCodexApprovedReadsEnabled() && String(siteConfig.backendMode || "").toLowerCase() !== "firebase") return;
   approvedReports = [];
   approvedReportItems = [];
+  saveStoredRows(storageKeys.approvedReportItems, []);
+  saveStoredRows(storageKeys.approved, []);
   essenceRows = mergeApprovedRows(data["정수"] || [], []);
   numbersRows = mergeNumbersRows(data["넘버스"] || [], []);
 }
 
 function isPublicCodexPage() {
   return Boolean((els.search || els.numbersResults) && !els.reportForm && !els.pendingReports && !els.adminDetailModal);
+}
+
+function publicCodexApprovedReadsEnabled() {
+  return String(siteConfig.publicCodexRemoteReadsEnabled || "").toLowerCase() === "true";
 }
 
 function notifyApprovedDataChanged() {
@@ -1593,7 +1600,7 @@ function notifyApprovedDataChanged() {
 }
 
 function refreshPublicApprovedData(options = {}) {
-  if (!isPublicCodexPage() || !hasPublicReportStore()) return Promise.resolve();
+  if (!isPublicCodexPage() || !publicCodexApprovedReadsEnabled() || !hasPublicReportStore()) return Promise.resolve();
   const now = Date.now();
   if (!options.force && now - lastApprovedReloadAt < 3000) return Promise.resolve();
   if (approvedReloadPromise) return approvedReloadPromise;
@@ -1607,7 +1614,7 @@ function refreshPublicApprovedData(options = {}) {
 }
 
 function initPublicApprovedRefresh() {
-  if (!isPublicCodexPage()) return;
+  if (!isPublicCodexPage() || !publicCodexApprovedReadsEnabled()) return;
   window.addEventListener("storage", (event) => {
     if (event.key === storageKeys.approvedVersion) refreshPublicApprovedData({ force: true });
   });
@@ -5539,6 +5546,7 @@ function updateApprovedFromReports(reports) {
 }
 
 async function loadPublicApprovedReports() {
+  if (isPublicCodexPage() && !publicCodexApprovedReadsEnabled()) return;
   if (isPublicCodexPage()) {
     await loadStaticApprovedReports();
     return;
