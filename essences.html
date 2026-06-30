@@ -6,7 +6,7 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <title>정수 확인하기 · 겜바바 버스터즈</title>
   <meta name="description" content="몬스터 정수의 스탯, 패시브, 액티브, 추천 캐릭터, 층과 구역 정보를 검색하고 비교합니다.">
-  <link rel="stylesheet" href="./styles.css?v=20260630-multi-filter">
+  <link rel="stylesheet" href="./styles.css?v=20260630-filter-modal">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
   <!-- Google tag (gtag.js) -->
@@ -77,41 +77,26 @@
       </label>
       <label class="field filter-field">
         <span>층</span>
-        <button id="floorFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="floorFilterPanel">전체 층</button>
-        <div id="floorFilterPanel" class="filter-popover" hidden>
-          <div id="floorFilterOptions" class="filter-option-list"></div>
-        </div>
+        <button id="floorFilterButton" class="filter-modal-button" type="button" aria-haspopup="dialog">전체 층</button>
       </label>
       <label class="field filter-field">
         <span>구역</span>
-        <button id="areaFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="areaFilterPanel">전체 구역</button>
-        <div id="areaFilterPanel" class="filter-popover" hidden>
-          <div id="areaFilterOptions" class="filter-option-list"></div>
-        </div>
+        <button id="areaFilterButton" class="filter-modal-button" type="button" aria-haspopup="dialog">전체 구역</button>
       </label>
       <label class="field filter-field">
         <span>등급</span>
-        <button id="gradeFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="gradeFilterPanel">전체 등급</button>
-        <div id="gradeFilterPanel" class="filter-popover" hidden>
-          <div id="gradeFilterOptions" class="filter-option-list"></div>
-        </div>
+        <button id="gradeFilterButton" class="filter-modal-button" type="button" aria-haspopup="dialog">전체 등급</button>
       </label>
       <label class="field filter-field">
         <span>추천 캐릭터</span>
-        <button id="characterFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="characterFilterPanel">전체 캐릭터</button>
-        <div id="characterFilterPanel" class="filter-popover" hidden>
-          <div id="characterFilterOptions" class="filter-option-list"></div>
-        </div>
+        <button id="characterFilterButton" class="filter-modal-button" type="button" aria-haspopup="dialog">전체 캐릭터</button>
       </label>
-      <label class="field filter-field sailing-filter">
+      <label class="field check-field sailing-filter">
         <span>항해 정수</span>
-        <button id="sailingFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="sailingFilterPanel">전체</button>
-        <div id="sailingFilterPanel" class="filter-popover" hidden>
-          <div id="sailingFilterOptions" class="filter-option-list">
-            <label class="filter-option"><input type="checkbox" data-sailing-filter="only"> 항해 정수만 보기</label>
-            <label class="filter-option"><input type="checkbox" data-sailing-filter="exclude"> 항해 제외하고 보기</label>
-          </div>
-        </div>
+        <span class="check-control">
+          <input id="sailingFilter" type="checkbox">
+          <strong>항해정수만 보기</strong>
+        </span>
       </label>
       <label class="field">
         <span>정렬</span>
@@ -134,6 +119,23 @@
       </label>
       <div id="activeFilterChips" class="active-filter-chips" aria-label="선택된 필터"></div>
     </section>
+    <div id="filterModal" class="filter-modal" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle" hidden>
+      <div class="filter-modal-backdrop" data-close-filter-modal></div>
+      <section class="filter-modal-card" aria-describedby="filterModalDescription">
+        <div class="filter-modal-head">
+          <div>
+            <h2 id="filterModalTitle">필터 선택</h2>
+            <p id="filterModalDescription">여러 항목을 체크해서 정수 목록을 좁힐 수 있습니다.</p>
+          </div>
+          <button id="filterModalClose" class="filter-modal-close" type="button" aria-label="팝업 닫기">×</button>
+        </div>
+        <div id="filterModalOptions" class="filter-modal-options"></div>
+        <div class="filter-modal-actions">
+          <button id="filterModalClear" class="ghost-button" type="button">선택 해제</button>
+          <button id="filterModalDone" class="primary-button" type="button">완료</button>
+        </div>
+      </section>
+    </div>
     <section class="panel effect-panel">
       <div class="section-title compact-title">
         <h2>효과 정렬</h2>
@@ -263,6 +265,6 @@
     };
   </script>
   <script src="./config.js?v=20260627-firestore-off"></script>
-  <script src="./app.js?v=20260630-multi-filter"></script>
+  <script src="./app.js?v=20260630-filter-modal"></script>
 </body>
 </html>

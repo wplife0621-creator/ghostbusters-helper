@@ -9521,7 +9521,7 @@ body {
 
 .essence-controls input,
 .essence-controls select,
-.essence-controls .filter-popover-button,
+.essence-controls .filter-modal-button,
 .essence-controls .check-control {
   border-color: rgba(7, 21, 38, 0.14);
   background: #ffffff;
@@ -9531,7 +9531,7 @@ body {
 
 .essence-controls input:focus,
 .essence-controls select:focus,
-.essence-controls .filter-popover-button:focus {
+.essence-controls .filter-modal-button:focus {
   border-color: rgba(8, 183, 131, 0.56);
   box-shadow: 0 0 0 4px rgba(8, 183, 131, 0.12);
 }
@@ -9540,7 +9540,7 @@ body {
   position: relative;
 }
 
-.filter-popover-button {
+.filter-modal-button {
   position: relative;
   display: flex;
   align-items: center;
@@ -9555,61 +9555,12 @@ body {
   cursor: pointer;
 }
 
-.filter-popover-button::after {
+.filter-modal-button::after {
   content: "▾";
   position: absolute;
   right: 12px;
   color: #5c6878;
   font-size: 11px;
-}
-
-.filter-popover {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 6px);
-  left: 0;
-  width: min(280px, 92vw);
-  max-height: 320px;
-  overflow: auto;
-  border: 1px solid rgba(7, 21, 38, 0.14);
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 18px 44px rgba(7, 21, 38, 0.16);
-  padding: 8px;
-}
-
-.filter-option-list {
-  display: grid;
-  gap: 4px;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 34px;
-  border-radius: 9px;
-  padding: 6px 8px;
-  color: #071526;
-  cursor: pointer;
-}
-
-.filter-option:hover {
-  background: rgba(8, 183, 131, 0.08);
-}
-
-.filter-option input {
-  width: 16px;
-  min-height: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--brand);
-}
-
-.essence-controls .filter-option span {
-  color: #071526;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 .filter-option-empty {
@@ -9639,6 +9590,149 @@ body {
 
 .active-filter-chip:hover {
   background: rgba(8, 183, 131, 0.14);
+}
+
+.filter-modal-open {
+  overflow: hidden;
+}
+
+.filter-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.filter-modal[hidden] {
+  display: none;
+}
+
+.filter-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 21, 38, 0.56);
+  backdrop-filter: blur(2px);
+}
+
+.filter-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 100%);
+  max-height: min(680px, calc(100vh - 40px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid rgba(8, 183, 131, 0.2);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 26px 80px rgba(7, 21, 38, 0.28);
+}
+
+.filter-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(7, 21, 38, 0.08);
+  padding: 20px 22px 14px;
+}
+
+.filter-modal-head h2 {
+  margin: 0;
+  color: #071526;
+  font-size: 21px;
+  letter-spacing: -0.04em;
+}
+
+.filter-modal-head p {
+  margin: 6px 0 0;
+  color: #5c6878;
+  font-size: 13px;
+}
+
+.filter-modal-close {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(7, 21, 38, 0.06);
+  color: #071526;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.filter-modal-close:hover {
+  background: rgba(7, 21, 38, 0.1);
+}
+
+.filter-modal-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  overflow: auto;
+  padding: 16px 22px;
+}
+
+.filter-modal-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  border: 1px solid rgba(7, 21, 38, 0.1);
+  border-radius: 12px;
+  background: #f8fbfa;
+  padding: 8px 10px;
+  color: #071526;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.filter-modal-option:hover {
+  border-color: rgba(8, 183, 131, 0.35);
+  background: rgba(8, 183, 131, 0.08);
+}
+
+.filter-modal-option input {
+  width: 17px;
+  min-height: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+.filter-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid rgba(7, 21, 38, 0.08);
+  padding: 14px 22px 18px;
+}
+
+.ghost-button,
+.primary-button {
+  min-height: 38px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.ghost-button {
+  border: 1px solid rgba(7, 21, 38, 0.14);
+  background: #ffffff;
+  color: #263244;
+}
+
+.primary-button {
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: #ffffff;
 }
 
 .effect-panel .section-title h2,

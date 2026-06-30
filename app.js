@@ -194,21 +194,18 @@ refreshLocationLookups();
 const els = {
   search: document.querySelector("#searchInput"),
   floorFilterButton: document.querySelector("#floorFilterButton"),
-  floorFilterPanel: document.querySelector("#floorFilterPanel"),
-  floorFilterOptions: document.querySelector("#floorFilterOptions"),
   areaFilterButton: document.querySelector("#areaFilterButton"),
-  areaFilterPanel: document.querySelector("#areaFilterPanel"),
-  areaFilterOptions: document.querySelector("#areaFilterOptions"),
   gradeFilterButton: document.querySelector("#gradeFilterButton"),
-  gradeFilterPanel: document.querySelector("#gradeFilterPanel"),
-  gradeFilterOptions: document.querySelector("#gradeFilterOptions"),
   characterFilterButton: document.querySelector("#characterFilterButton"),
-  characterFilterPanel: document.querySelector("#characterFilterPanel"),
-  characterFilterOptions: document.querySelector("#characterFilterOptions"),
-  sailingFilterButton: document.querySelector("#sailingFilterButton"),
-  sailingFilterPanel: document.querySelector("#sailingFilterPanel"),
-  sailingFilterOptions: document.querySelector("#sailingFilterOptions"),
+  sailingFilter: document.querySelector("#sailingFilter"),
   activeFilterChips: document.querySelector("#activeFilterChips"),
+  filterModal: document.querySelector("#filterModal"),
+  filterModalTitle: document.querySelector("#filterModalTitle"),
+  filterModalDescription: document.querySelector("#filterModalDescription"),
+  filterModalOptions: document.querySelector("#filterModalOptions"),
+  filterModalClose: document.querySelector("#filterModalClose"),
+  filterModalClear: document.querySelector("#filterModalClear"),
+  filterModalDone: document.querySelector("#filterModalDone"),
   sort: document.querySelector("#sortFilter"),
   effectSortChips: document.querySelector("#effectSortChips"),
   effectSortSummary: document.querySelector("#effectSortSummary"),
@@ -432,8 +429,8 @@ const essenceMultiFilters = {
   areas: new Set(),
   grades: new Set(),
   characters: new Set(),
-  sailing: "",
 };
+let activeFilterModalKey = "";
 let pinnedEssenceNames = loadStoredRows(storageKeys.pinnedEssences);
 let characterEssencePins = loadCharacterEssencePins();
 let activeEssencePinCharacter = loadActiveEssencePinCharacter();
@@ -1267,6 +1264,33 @@ function selectedEssenceFilterValues(key) {
   return [...(essenceMultiFilters[key] || new Set())];
 }
 
+function essenceFilterDefinitions() {
+  return {
+    floors: {
+      title: "층 선택",
+      description: "정수를 찾을 층을 하나 이상 선택하세요.",
+      values: floorOptionValues(essenceRows),
+    },
+    areas: {
+      title: "구역 선택",
+      description: essenceMultiFilters.floors.size
+        ? "선택한 층에 해당하는 구역만 보여줍니다."
+        : "정수를 찾을 구역을 하나 이상 선택하세요.",
+      values: essenceAreaOptionsForSelectedFloors(),
+    },
+    grades: {
+      title: "등급 선택",
+      description: "정수 등급을 하나 이상 선택하세요.",
+      values: gradeFilterOptions(),
+    },
+    characters: {
+      title: "추천 캐릭터 선택",
+      description: "추천 캐릭터 기준으로 정수를 좁힙니다.",
+      values: unique(allRecommendedCharacters(essenceRows)),
+    },
+  };
+}
+
 function clearHiddenAreaFilters() {
   const availableAreas = new Set(essenceAreaOptionsForSelectedFloors());
   essenceMultiFilters.areas.forEach((area) => {
@@ -1282,22 +1306,18 @@ function toggleEssenceFilter(key, value, checked) {
   if (key === "floors") clearHiddenAreaFilters();
 }
 
-function setSailingEssenceFilter(value, checked) {
-  essenceMultiFilters.sailing = checked && essenceMultiFilters.sailing !== value ? value : "";
-}
-
 function filterButtonLabel(defaultLabel, values) {
   if (!values.length) return defaultLabel;
   if (values.length === 1) return values[0];
   return `${values[0]} 외 ${values.length - 1}`;
 }
 
-function renderFilterOptionList(container, key, values) {
+function renderFilterOptionList(container, key, values, className = "filter-option") {
   if (!container) return;
   const selected = essenceMultiFilters[key] || new Set();
   container.innerHTML = values.length
     ? values.map((value) => `
-      <label class="filter-option">
+      <label class="${escapeHtml(className)}">
         <input type="checkbox" data-filter-key="${escapeHtml(key)}" value="${escapeHtml(value)}" ${selected.has(value) ? "checked" : ""}>
         <span>${escapeHtml(value)}</span>
       </label>
@@ -1305,10 +1325,13 @@ function renderFilterOptionList(container, key, values) {
     : `<p class="filter-option-empty">선택 가능한 항목이 없습니다.</p>`;
 }
 
-function renderSailingFilterOptions() {
-  els.sailingFilterOptions?.querySelectorAll("[data-sailing-filter]").forEach((input) => {
-    input.checked = essenceMultiFilters.sailing === input.dataset.sailingFilter;
-  });
+function renderFilterModalOptions() {
+  if (!activeFilterModalKey || !els.filterModalOptions) return;
+  const definition = essenceFilterDefinitions()[activeFilterModalKey];
+  if (!definition) return;
+  if (els.filterModalTitle) els.filterModalTitle.textContent = definition.title;
+  if (els.filterModalDescription) els.filterModalDescription.textContent = definition.description;
+  renderFilterOptionList(els.filterModalOptions, activeFilterModalKey, definition.values, "filter-modal-option");
 }
 
 function renderActiveFilterChips() {
@@ -1319,9 +1342,6 @@ function renderActiveFilterChips() {
     ...selectedEssenceFilterValues("grades").map((value) => ["grades", value]),
     ...selectedEssenceFilterValues("characters").map((value) => ["characters", value]),
   ];
-  if (essenceMultiFilters.sailing) {
-    chips.push(["sailing", essenceMultiFilters.sailing === "only" ? "항해만" : "항해 제외"]);
-  }
   els.activeFilterChips.hidden = chips.length === 0;
   els.activeFilterChips.innerHTML = chips.map(([key, value]) => `
     <button class="active-filter-chip" type="button" data-clear-filter="${escapeHtml(key)}" data-value="${escapeHtml(value)}">
@@ -1332,28 +1352,12 @@ function renderActiveFilterChips() {
 
 function renderEssenceFilterControls() {
   clearHiddenAreaFilters();
-  const floorValues = floorOptionValues(essenceRows);
-  const areaValues = essenceAreaOptionsForSelectedFloors();
-  const gradeValues = gradeFilterOptions();
-  const characterValues = unique(allRecommendedCharacters(essenceRows));
-
-  renderFilterOptionList(els.floorFilterOptions, "floors", floorValues);
-  renderFilterOptionList(els.areaFilterOptions, "areas", areaValues);
-  renderFilterOptionList(els.gradeFilterOptions, "grades", gradeValues);
-  renderFilterOptionList(els.characterFilterOptions, "characters", characterValues);
-  renderSailingFilterOptions();
 
   if (els.floorFilterButton) els.floorFilterButton.textContent = filterButtonLabel("전체 층", selectedEssenceFilterValues("floors"));
   if (els.areaFilterButton) els.areaFilterButton.textContent = filterButtonLabel("전체 구역", selectedEssenceFilterValues("areas"));
   if (els.gradeFilterButton) els.gradeFilterButton.textContent = filterButtonLabel("전체 등급", selectedEssenceFilterValues("grades"));
   if (els.characterFilterButton) els.characterFilterButton.textContent = filterButtonLabel("전체 캐릭터", selectedEssenceFilterValues("characters"));
-  if (els.sailingFilterButton) {
-    els.sailingFilterButton.textContent = essenceMultiFilters.sailing === "only"
-      ? "항해만"
-      : essenceMultiFilters.sailing === "exclude"
-        ? "항해 제외"
-        : "전체";
-  }
+  renderFilterModalOptions();
   renderActiveFilterChips();
 }
 
@@ -1919,84 +1923,72 @@ async function adminDeleteNumber(row) {
   notifyApprovedDataChanged();
 }
 
-function closeEssenceFilterPopovers(exceptPanel = null) {
-  [
-    [els.floorFilterButton, els.floorFilterPanel],
-    [els.areaFilterButton, els.areaFilterPanel],
-    [els.gradeFilterButton, els.gradeFilterPanel],
-    [els.characterFilterButton, els.characterFilterPanel],
-    [els.sailingFilterButton, els.sailingFilterPanel],
-  ].forEach(([button, panel]) => {
-    if (!panel || panel === exceptPanel) return;
-    panel.hidden = true;
-    button?.setAttribute("aria-expanded", "false");
-  });
+function openEssenceFilterModal(key) {
+  const definition = essenceFilterDefinitions()[key];
+  if (!definition || !els.filterModal) return;
+  activeFilterModalKey = key;
+  renderFilterModalOptions();
+  els.filterModal.hidden = false;
+  document.body.classList.add("filter-modal-open");
 }
 
-function toggleEssenceFilterPopover(button, panel) {
-  if (!button || !panel) return;
-  const willOpen = panel.hidden;
-  closeEssenceFilterPopovers(willOpen ? panel : null);
-  panel.hidden = !willOpen;
-  button.setAttribute("aria-expanded", String(willOpen));
+function closeEssenceFilterModal() {
+  if (!els.filterModal) return;
+  els.filterModal.hidden = true;
+  activeFilterModalKey = "";
+  document.body.classList.remove("filter-modal-open");
 }
 
-function initEssenceFilterPopovers() {
+function clearActiveEssenceFilterModal() {
+  if (!activeFilterModalKey) return;
+  essenceMultiFilters[activeFilterModalKey]?.clear();
+  if (activeFilterModalKey === "floors") clearHiddenAreaFilters();
+  renderEssenceFilterControls();
+  render();
+}
+
+function initEssenceFilterPopups() {
   [
-    [els.floorFilterButton, els.floorFilterPanel],
-    [els.areaFilterButton, els.areaFilterPanel],
-    [els.gradeFilterButton, els.gradeFilterPanel],
-    [els.characterFilterButton, els.characterFilterPanel],
-    [els.sailingFilterButton, els.sailingFilterPanel],
-  ].forEach(([button, panel]) => {
+    [els.floorFilterButton, "floors"],
+    [els.areaFilterButton, "areas"],
+    [els.gradeFilterButton, "grades"],
+    [els.characterFilterButton, "characters"],
+  ].forEach(([button, key]) => {
     button?.addEventListener("click", (event) => {
       event.preventDefault();
-      event.stopPropagation();
-      toggleEssenceFilterPopover(button, panel);
-    });
-    panel?.addEventListener("click", (event) => event.stopPropagation());
-  });
-
-  [
-    els.floorFilterOptions,
-    els.areaFilterOptions,
-    els.gradeFilterOptions,
-    els.characterFilterOptions,
-  ].forEach((container) => {
-    container?.addEventListener("change", (event) => {
-      const input = event.target.closest("[data-filter-key]");
-      if (!input) return;
-      toggleEssenceFilter(input.dataset.filterKey, input.value, input.checked);
-      renderEssenceFilterControls();
-      render();
+      openEssenceFilterModal(key);
     });
   });
 
-  els.sailingFilterOptions?.addEventListener("change", (event) => {
-    const input = event.target.closest("[data-sailing-filter]");
+  els.filterModalOptions?.addEventListener("change", (event) => {
+    const input = event.target.closest("[data-filter-key]");
     if (!input) return;
-    setSailingEssenceFilter(input.dataset.sailingFilter, input.checked);
+    toggleEssenceFilter(input.dataset.filterKey, input.value, input.checked);
     renderEssenceFilterControls();
     render();
   });
+
+  els.filterModalClose?.addEventListener("click", closeEssenceFilterModal);
+  els.filterModalDone?.addEventListener("click", closeEssenceFilterModal);
+  els.filterModalClear?.addEventListener("click", clearActiveEssenceFilterModal);
+  els.filterModal?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-filter-modal]")) closeEssenceFilterModal();
+  });
+
+  els.sailingFilter?.addEventListener("change", render);
 
   els.activeFilterChips?.addEventListener("click", (event) => {
     const chip = event.target.closest("[data-clear-filter]");
     if (!chip) return;
     const key = chip.dataset.clearFilter;
-    if (key === "sailing") {
-      essenceMultiFilters.sailing = "";
-    } else {
-      essenceMultiFilters[key]?.delete(chip.dataset.value);
-      if (key === "floors") clearHiddenAreaFilters();
-    }
+    essenceMultiFilters[key]?.delete(chip.dataset.value);
+    if (key === "floors") clearHiddenAreaFilters();
     renderEssenceFilterControls();
     render();
   });
 
-  document.addEventListener("click", () => closeEssenceFilterPopovers());
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeEssenceFilterPopovers();
+    if (event.key === "Escape") closeEssenceFilterModal();
   });
 }
 
@@ -2023,7 +2015,7 @@ function initEssences() {
     render();
   });
 
-  initEssenceFilterPopovers();
+  initEssenceFilterPopups();
 
   els.search?.addEventListener("input", render);
   [els.sort, els.statSort].forEach((el) => {
@@ -4814,10 +4806,8 @@ function applyFilters(rows) {
     ));
   }
 
-  if (essenceMultiFilters.sailing === "only") {
+  if (els.sailingFilter?.checked) {
     rows = rows.filter(({ row }) => isSailingRow(row));
-  } else if (essenceMultiFilters.sailing === "exclude") {
-    rows = rows.filter(({ row }) => !isSailingRow(row));
   }
 
   if (query) {
