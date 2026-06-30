@@ -193,11 +193,22 @@ refreshLocationLookups();
 
 const els = {
   search: document.querySelector("#searchInput"),
-  floor: document.querySelector("#floorFilter"),
-  area: document.querySelector("#areaFilter"),
-  grade: document.querySelector("#gradeFilter"),
-  character: document.querySelector("#characterFilter"),
-  sailingFilter: document.querySelector("#sailingFilter"),
+  floorFilterButton: document.querySelector("#floorFilterButton"),
+  floorFilterPanel: document.querySelector("#floorFilterPanel"),
+  floorFilterOptions: document.querySelector("#floorFilterOptions"),
+  areaFilterButton: document.querySelector("#areaFilterButton"),
+  areaFilterPanel: document.querySelector("#areaFilterPanel"),
+  areaFilterOptions: document.querySelector("#areaFilterOptions"),
+  gradeFilterButton: document.querySelector("#gradeFilterButton"),
+  gradeFilterPanel: document.querySelector("#gradeFilterPanel"),
+  gradeFilterOptions: document.querySelector("#gradeFilterOptions"),
+  characterFilterButton: document.querySelector("#characterFilterButton"),
+  characterFilterPanel: document.querySelector("#characterFilterPanel"),
+  characterFilterOptions: document.querySelector("#characterFilterOptions"),
+  sailingFilterButton: document.querySelector("#sailingFilterButton"),
+  sailingFilterPanel: document.querySelector("#sailingFilterPanel"),
+  sailingFilterOptions: document.querySelector("#sailingFilterOptions"),
+  activeFilterChips: document.querySelector("#activeFilterChips"),
   sort: document.querySelector("#sortFilter"),
   effectSortChips: document.querySelector("#effectSortChips"),
   effectSortSummary: document.querySelector("#effectSortSummary"),
@@ -416,6 +427,13 @@ let adminStatsExcludeAdmin = false;
 let activeEssenceInput = null;
 let activeStatNames = [];
 let activeEffectSortKey = "";
+const essenceMultiFilters = {
+  floors: new Set(),
+  areas: new Set(),
+  grades: new Set(),
+  characters: new Set(),
+  sailing: "",
+};
 let pinnedEssenceNames = loadStoredRows(storageKeys.pinnedEssences);
 let characterEssencePins = loadCharacterEssencePins();
 let activeEssencePinCharacter = loadActiveEssencePinCharacter();
@@ -1208,8 +1226,135 @@ function areaOptionsForFloor(floor, rows = []) {
   return unique([...allConfiguredAreas(), ...rowAreas]);
 }
 
-function refreshEssenceAreaOptions() {
-  optionList(els.area, areaOptionsForFloor(els.floor?.value, essenceRows), "전체 구역");
+function splitFilterValues(value) {
+  return textOf(value)
+    .split(/[,/\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function rowFloorMatches(row, selectedFloors) {
+  if (!selectedFloors.size) return true;
+  const rowFloors = splitFilterValues(row["층"]);
+  return [...selectedFloors].some((floor) => rowFloors.some((item) => sameLocationName(item, floor)));
+}
+
+function essenceAreaOptionsForSelectedFloors() {
+  const selectedFloors = essenceMultiFilters.floors;
+  if (!selectedFloors.size) return areaOptionsForFloor("", essenceRows);
+  const areas = [];
+  [...selectedFloors].forEach((floor) => {
+    areaOptionsForFloor(floor, essenceRows).forEach((area) => areas.push(area));
+  });
+  essenceRows
+    .filter((row) => rowFloorMatches(row, selectedFloors))
+    .forEach((row) => essenceAreaLabels(row["구역"]).forEach((area) => areas.push(area)));
+  return unique(areas);
+}
+
+function gradeFilterOptions() {
+  return ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급", "수호자"];
+}
+
+function gradeMatchesFilter(rowGrade, selectedGrade) {
+  const grade = textOf(rowGrade);
+  return selectedGrade === "수호자"
+    ? grade.includes("수호자")
+    : `${numberFrom(grade)}등급` === selectedGrade;
+}
+
+function selectedEssenceFilterValues(key) {
+  return [...(essenceMultiFilters[key] || new Set())];
+}
+
+function clearHiddenAreaFilters() {
+  const availableAreas = new Set(essenceAreaOptionsForSelectedFloors());
+  essenceMultiFilters.areas.forEach((area) => {
+    if (!availableAreas.has(area)) essenceMultiFilters.areas.delete(area);
+  });
+}
+
+function toggleEssenceFilter(key, value, checked) {
+  const target = essenceMultiFilters[key];
+  if (!target) return;
+  if (checked) target.add(value);
+  else target.delete(value);
+  if (key === "floors") clearHiddenAreaFilters();
+}
+
+function setSailingEssenceFilter(value, checked) {
+  essenceMultiFilters.sailing = checked && essenceMultiFilters.sailing !== value ? value : "";
+}
+
+function filterButtonLabel(defaultLabel, values) {
+  if (!values.length) return defaultLabel;
+  if (values.length === 1) return values[0];
+  return `${values[0]} 외 ${values.length - 1}`;
+}
+
+function renderFilterOptionList(container, key, values) {
+  if (!container) return;
+  const selected = essenceMultiFilters[key] || new Set();
+  container.innerHTML = values.length
+    ? values.map((value) => `
+      <label class="filter-option">
+        <input type="checkbox" data-filter-key="${escapeHtml(key)}" value="${escapeHtml(value)}" ${selected.has(value) ? "checked" : ""}>
+        <span>${escapeHtml(value)}</span>
+      </label>
+    `).join("")
+    : `<p class="filter-option-empty">선택 가능한 항목이 없습니다.</p>`;
+}
+
+function renderSailingFilterOptions() {
+  els.sailingFilterOptions?.querySelectorAll("[data-sailing-filter]").forEach((input) => {
+    input.checked = essenceMultiFilters.sailing === input.dataset.sailingFilter;
+  });
+}
+
+function renderActiveFilterChips() {
+  if (!els.activeFilterChips) return;
+  const chips = [
+    ...selectedEssenceFilterValues("floors").map((value) => ["floors", value]),
+    ...selectedEssenceFilterValues("areas").map((value) => ["areas", value]),
+    ...selectedEssenceFilterValues("grades").map((value) => ["grades", value]),
+    ...selectedEssenceFilterValues("characters").map((value) => ["characters", value]),
+  ];
+  if (essenceMultiFilters.sailing) {
+    chips.push(["sailing", essenceMultiFilters.sailing === "only" ? "항해만" : "항해 제외"]);
+  }
+  els.activeFilterChips.hidden = chips.length === 0;
+  els.activeFilterChips.innerHTML = chips.map(([key, value]) => `
+    <button class="active-filter-chip" type="button" data-clear-filter="${escapeHtml(key)}" data-value="${escapeHtml(value)}">
+      ${escapeHtml(value)} <span aria-hidden="true">×</span>
+    </button>
+  `).join("");
+}
+
+function renderEssenceFilterControls() {
+  clearHiddenAreaFilters();
+  const floorValues = floorOptionValues(essenceRows);
+  const areaValues = essenceAreaOptionsForSelectedFloors();
+  const gradeValues = gradeFilterOptions();
+  const characterValues = unique(allRecommendedCharacters(essenceRows));
+
+  renderFilterOptionList(els.floorFilterOptions, "floors", floorValues);
+  renderFilterOptionList(els.areaFilterOptions, "areas", areaValues);
+  renderFilterOptionList(els.gradeFilterOptions, "grades", gradeValues);
+  renderFilterOptionList(els.characterFilterOptions, "characters", characterValues);
+  renderSailingFilterOptions();
+
+  if (els.floorFilterButton) els.floorFilterButton.textContent = filterButtonLabel("전체 층", selectedEssenceFilterValues("floors"));
+  if (els.areaFilterButton) els.areaFilterButton.textContent = filterButtonLabel("전체 구역", selectedEssenceFilterValues("areas"));
+  if (els.gradeFilterButton) els.gradeFilterButton.textContent = filterButtonLabel("전체 등급", selectedEssenceFilterValues("grades"));
+  if (els.characterFilterButton) els.characterFilterButton.textContent = filterButtonLabel("전체 캐릭터", selectedEssenceFilterValues("characters"));
+  if (els.sailingFilterButton) {
+    els.sailingFilterButton.textContent = essenceMultiFilters.sailing === "only"
+      ? "항해만"
+      : essenceMultiFilters.sailing === "exclude"
+        ? "항해 제외"
+        : "전체";
+  }
+  renderActiveFilterChips();
 }
 
 function essenceAreaLabels(value) {
@@ -1774,6 +1919,87 @@ async function adminDeleteNumber(row) {
   notifyApprovedDataChanged();
 }
 
+function closeEssenceFilterPopovers(exceptPanel = null) {
+  [
+    [els.floorFilterButton, els.floorFilterPanel],
+    [els.areaFilterButton, els.areaFilterPanel],
+    [els.gradeFilterButton, els.gradeFilterPanel],
+    [els.characterFilterButton, els.characterFilterPanel],
+    [els.sailingFilterButton, els.sailingFilterPanel],
+  ].forEach(([button, panel]) => {
+    if (!panel || panel === exceptPanel) return;
+    panel.hidden = true;
+    button?.setAttribute("aria-expanded", "false");
+  });
+}
+
+function toggleEssenceFilterPopover(button, panel) {
+  if (!button || !panel) return;
+  const willOpen = panel.hidden;
+  closeEssenceFilterPopovers(willOpen ? panel : null);
+  panel.hidden = !willOpen;
+  button.setAttribute("aria-expanded", String(willOpen));
+}
+
+function initEssenceFilterPopovers() {
+  [
+    [els.floorFilterButton, els.floorFilterPanel],
+    [els.areaFilterButton, els.areaFilterPanel],
+    [els.gradeFilterButton, els.gradeFilterPanel],
+    [els.characterFilterButton, els.characterFilterPanel],
+    [els.sailingFilterButton, els.sailingFilterPanel],
+  ].forEach(([button, panel]) => {
+    button?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleEssenceFilterPopover(button, panel);
+    });
+    panel?.addEventListener("click", (event) => event.stopPropagation());
+  });
+
+  [
+    els.floorFilterOptions,
+    els.areaFilterOptions,
+    els.gradeFilterOptions,
+    els.characterFilterOptions,
+  ].forEach((container) => {
+    container?.addEventListener("change", (event) => {
+      const input = event.target.closest("[data-filter-key]");
+      if (!input) return;
+      toggleEssenceFilter(input.dataset.filterKey, input.value, input.checked);
+      renderEssenceFilterControls();
+      render();
+    });
+  });
+
+  els.sailingFilterOptions?.addEventListener("change", (event) => {
+    const input = event.target.closest("[data-sailing-filter]");
+    if (!input) return;
+    setSailingEssenceFilter(input.dataset.sailingFilter, input.checked);
+    renderEssenceFilterControls();
+    render();
+  });
+
+  els.activeFilterChips?.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-clear-filter]");
+    if (!chip) return;
+    const key = chip.dataset.clearFilter;
+    if (key === "sailing") {
+      essenceMultiFilters.sailing = "";
+    } else {
+      essenceMultiFilters[key]?.delete(chip.dataset.value);
+      if (key === "floors") clearHiddenAreaFilters();
+    }
+    renderEssenceFilterControls();
+    render();
+  });
+
+  document.addEventListener("click", () => closeEssenceFilterPopovers());
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeEssenceFilterPopovers();
+  });
+}
+
 function initEssences() {
   els.search.value = new URLSearchParams(location.search).get("search") || "";
   refreshControls();
@@ -1797,11 +2023,12 @@ function initEssences() {
     render();
   });
 
-  els.floor.addEventListener("change", refreshEssenceAreaOptions);
+  initEssenceFilterPopovers();
 
-  document.querySelectorAll(".compact-layout input, .compact-layout select").forEach((el) => {
-    el.addEventListener("input", render);
-    el.addEventListener("change", render);
+  els.search?.addEventListener("input", render);
+  [els.sort, els.statSort].forEach((el) => {
+    el?.addEventListener("input", render);
+    el?.addEventListener("change", render);
   });
 
   els.results.addEventListener("change", handleEssenceResultChange);
@@ -4425,10 +4652,7 @@ function renderEditNumberMatches() {
 }
 
 function refreshControls() {
-  optionList(els.floor, floorOptionValues(essenceRows), "전체 층");
-  refreshEssenceAreaOptions();
-  optionList(els.grade, ["4등급", "5등급", "6등급", "7등급", "8등급", "9등급", "수호자"], "전체 등급");
-  optionList(els.character, unique(allRecommendedCharacters(essenceRows)), "전체 캐릭터");
+  renderEssenceFilterControls();
   optionList(els.statSort, statNames(), statNoneLabel);
 }
 
@@ -4563,30 +4787,37 @@ function collectEssenceRows() {
 
 function applyFilters(rows) {
   const query = compactSearchText(els.search.value);
+  const selectedFloors = essenceMultiFilters.floors;
+  const selectedAreas = essenceMultiFilters.areas;
+  const selectedGrades = essenceMultiFilters.grades;
+  const selectedCharacters = essenceMultiFilters.characters;
 
-  if (els.floor.value !== "전체 층") {
-    rows = rows.filter(({ row }) => sameLocationName(row["층"], els.floor.value));
+  if (selectedFloors.size) {
+    rows = rows.filter(({ row }) => rowFloorMatches(row, selectedFloors));
   }
 
-  if (els.area.value !== "전체 구역") {
-    rows = rows.filter(({ row }) => essenceAreaMatches(row["구역"], els.area.value));
-  }
-
-  if (els.grade.value !== "전체 등급") {
-    const selectedGrade = els.grade.value;
+  if (selectedAreas.size) {
     rows = rows.filter(({ row }) => (
-      selectedGrade === "수호자"
-        ? textOf(row["등급"]).includes("수호자")
-        : `${numberFrom(row["등급"])}등급` === selectedGrade
+      [...selectedAreas].some((area) => essenceAreaMatches(row["구역"], area))
     ));
   }
 
-  if (els.character.value !== "전체 캐릭터") {
-    rows = rows.filter(({ row }) => isRecommendedFor(row, els.character.value));
+  if (selectedGrades.size) {
+    rows = rows.filter(({ row }) => (
+      [...selectedGrades].some((grade) => gradeMatchesFilter(row["등급"], grade))
+    ));
   }
 
-  if (els.sailingFilter?.checked) {
+  if (selectedCharacters.size) {
+    rows = rows.filter(({ row }) => (
+      [...selectedCharacters].some((character) => isRecommendedFor(row, character))
+    ));
+  }
+
+  if (essenceMultiFilters.sailing === "only") {
     rows = rows.filter(({ row }) => isSailingRow(row));
+  } else if (essenceMultiFilters.sailing === "exclude") {
+    rows = rows.filter(({ row }) => !isSailingRow(row));
   }
 
   if (query) {

@@ -6,7 +6,7 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <title>정수 확인하기 · 겜바바 버스터즈</title>
   <meta name="description" content="몬스터 정수의 스탯, 패시브, 액티브, 추천 캐릭터, 층과 구역 정보를 검색하고 비교합니다.">
-  <link rel="stylesheet" href="./styles.css?v=20260629-pin-compact">
+  <link rel="stylesheet" href="./styles.css?v=20260630-multi-filter">
   <meta name="naver-site-verification" content="d128dcbe8c036b698098881ea9336cf3236fe12a">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2554460072468872" crossorigin="anonymous"></script>
   <!-- Google tag (gtag.js) -->
@@ -75,28 +75,43 @@
         <span>정수 검색</span>
         <input id="searchInput" type="search" placeholder="몬스터명 검색 (띄어쓰기 없이도 가능)">
       </label>
-      <label class="field">
+      <label class="field filter-field">
         <span>층</span>
-        <select id="floorFilter"></select>
+        <button id="floorFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="floorFilterPanel">전체 층</button>
+        <div id="floorFilterPanel" class="filter-popover" hidden>
+          <div id="floorFilterOptions" class="filter-option-list"></div>
+        </div>
       </label>
-      <label class="field">
+      <label class="field filter-field">
         <span>구역</span>
-        <select id="areaFilter"></select>
+        <button id="areaFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="areaFilterPanel">전체 구역</button>
+        <div id="areaFilterPanel" class="filter-popover" hidden>
+          <div id="areaFilterOptions" class="filter-option-list"></div>
+        </div>
       </label>
-      <label class="field">
+      <label class="field filter-field">
         <span>등급</span>
-        <select id="gradeFilter"></select>
+        <button id="gradeFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="gradeFilterPanel">전체 등급</button>
+        <div id="gradeFilterPanel" class="filter-popover" hidden>
+          <div id="gradeFilterOptions" class="filter-option-list"></div>
+        </div>
       </label>
-      <label class="field">
+      <label class="field filter-field">
         <span>추천 캐릭터</span>
-        <select id="characterFilter"></select>
+        <button id="characterFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="characterFilterPanel">전체 캐릭터</button>
+        <div id="characterFilterPanel" class="filter-popover" hidden>
+          <div id="characterFilterOptions" class="filter-option-list"></div>
+        </div>
       </label>
-      <label class="field check-field sailing-filter">
+      <label class="field filter-field sailing-filter">
         <span>항해 정수</span>
-        <span class="check-control">
-          <input id="sailingFilter" type="checkbox">
-          <strong>항해만 보기</strong>
-        </span>
+        <button id="sailingFilterButton" class="filter-popover-button" type="button" aria-expanded="false" aria-controls="sailingFilterPanel">전체</button>
+        <div id="sailingFilterPanel" class="filter-popover" hidden>
+          <div id="sailingFilterOptions" class="filter-option-list">
+            <label class="filter-option"><input type="checkbox" data-sailing-filter="only"> 항해 정수만 보기</label>
+            <label class="filter-option"><input type="checkbox" data-sailing-filter="exclude"> 항해 제외하고 보기</label>
+          </div>
+        </div>
       </label>
       <label class="field">
         <span>정렬</span>
@@ -117,6 +132,7 @@
         <span>스탯 선택</span>
         <select id="statSortFilter"></select>
       </label>
+      <div id="activeFilterChips" class="active-filter-chips" aria-label="선택된 필터"></div>
     </section>
     <section class="panel effect-panel">
       <div class="section-title compact-title">
@@ -247,6 +263,6 @@
     };
   </script>
   <script src="./config.js?v=20260627-firestore-off"></script>
-<script src="./app.js?v=20260629-pin-compact"></script>
+  <script src="./app.js?v=20260630-multi-filter"></script>
 </body>
 </html>
