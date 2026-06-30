@@ -9802,6 +9802,122 @@ body {
   color: #ffffff;
 }
 
+@media (max-width: 720px) {
+  .compact-layout:has(#searchInput) {
+    width: min(100% - 16px, 720px);
+  }
+
+  .essence-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .essence-controls .wide {
+    grid-column: 1 / -1;
+  }
+
+  .essence-controls .field {
+    min-width: 0;
+  }
+
+  .essence-controls .field span {
+    font-size: 10.5px;
+  }
+
+  .essence-controls input,
+  .essence-controls select,
+  .essence-controls .check-control,
+  .filter-modal-button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  .filter-modal-button {
+    justify-content: flex-start;
+    padding-left: 12px;
+    padding-right: 30px;
+  }
+
+  .sailing-filter {
+    grid-column: 1 / -1;
+  }
+
+  .sailing-filter .check-control {
+    justify-content: center;
+  }
+
+  .active-filter-chips {
+    gap: 5px;
+    margin-top: 0;
+  }
+
+  .active-filter-chip {
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+
+  .filter-modal {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .filter-modal-card {
+    width: 100%;
+    max-height: min(82vh, 680px);
+    border-radius: 20px 20px 16px 16px;
+  }
+
+  .filter-modal-head {
+    padding: 16px 16px 12px;
+  }
+
+  .filter-modal-head h2 {
+    font-size: 19px;
+  }
+
+  .filter-modal-head p {
+    font-size: 12px;
+  }
+
+  .filter-modal-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    padding: 12px 16px;
+  }
+
+  .filter-modal-option {
+    min-height: 44px;
+    padding: 8px 9px;
+    font-size: 12px;
+  }
+
+  .filter-modal-actions {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 12px 16px 14px;
+    background: #ffffff;
+  }
+
+  .ghost-button,
+  .primary-button {
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 420px) {
+  .essence-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-modal-options {
+    grid-template-columns: 1fr;
+  }
+}
+
 .effect-panel .section-title h2,
 .results-panel .section-title h2,
 .stat-sort-toggle strong {
