@@ -1312,6 +1312,13 @@ function filterButtonLabel(defaultLabel, values) {
   return `${values[0]} 외 ${values.length - 1}`;
 }
 
+function updateFilterButton(button, defaultLabel, values) {
+  if (!button) return;
+  button.textContent = filterButtonLabel(defaultLabel, values);
+  button.classList.toggle("is-selected", values.length > 0);
+  button.setAttribute("aria-label", values.length ? `${defaultLabel} 필터 선택됨: ${values.join(", ")}` : `${defaultLabel} 필터 선택`);
+}
+
 function renderFilterOptionList(container, key, values, className = "filter-option") {
   if (!container) return;
   const selected = essenceMultiFilters[key] || new Set();
@@ -1353,10 +1360,10 @@ function renderActiveFilterChips() {
 function renderEssenceFilterControls() {
   clearHiddenAreaFilters();
 
-  if (els.floorFilterButton) els.floorFilterButton.textContent = filterButtonLabel("전체 층", selectedEssenceFilterValues("floors"));
-  if (els.areaFilterButton) els.areaFilterButton.textContent = filterButtonLabel("전체 구역", selectedEssenceFilterValues("areas"));
-  if (els.gradeFilterButton) els.gradeFilterButton.textContent = filterButtonLabel("전체 등급", selectedEssenceFilterValues("grades"));
-  if (els.characterFilterButton) els.characterFilterButton.textContent = filterButtonLabel("전체 캐릭터", selectedEssenceFilterValues("characters"));
+  updateFilterButton(els.floorFilterButton, "전체 층", selectedEssenceFilterValues("floors"));
+  updateFilterButton(els.areaFilterButton, "전체 구역", selectedEssenceFilterValues("areas"));
+  updateFilterButton(els.gradeFilterButton, "전체 등급", selectedEssenceFilterValues("grades"));
+  updateFilterButton(els.characterFilterButton, "전체 캐릭터", selectedEssenceFilterValues("characters"));
   renderFilterModalOptions();
   renderActiveFilterChips();
 }

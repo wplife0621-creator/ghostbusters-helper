@@ -9521,7 +9521,6 @@ body {
 
 .essence-controls input,
 .essence-controls select,
-.essence-controls .filter-modal-button,
 .essence-controls .check-control {
   border-color: rgba(7, 21, 38, 0.14);
   background: #ffffff;
@@ -9544,23 +9543,62 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  min-height: 39px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  padding: 0 34px 0 10px;
+  min-height: 42px;
+  border: 1px solid rgba(8, 183, 131, 0.28);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 252, 248, 0.92));
+  color: #075f49;
   font: inherit;
-  text-align: left;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 32px 0 14px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(8, 183, 131, 0.08);
   cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.filter-modal-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(8, 183, 131, 0.52);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(225, 249, 242, 0.96));
+  box-shadow: 0 12px 22px rgba(8, 183, 131, 0.14);
+}
+
+.filter-modal-button.is-selected {
+  border-color: rgba(8, 183, 131, 0.7);
+  background:
+    linear-gradient(180deg, rgba(8, 183, 131, 0.16), rgba(8, 183, 131, 0.08));
+  color: #044f3e;
 }
 
 .filter-modal-button::after {
-  content: "▾";
+  content: "+";
   position: absolute;
   right: 12px;
-  color: #5c6878;
-  font-size: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(8, 183, 131, 0.14);
+  color: #075f49;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.filter-modal-button.is-selected::after {
+  content: "✓";
+  background: #08b783;
+  color: #ffffff;
 }
 
 .filter-option-empty {
