@@ -26,7 +26,6 @@ const storageKeys = {
   lastVisitDate: "dukhubusters.lastVisitDate",
 };
 
-const adminCode = "0621";
 const siteConfig = window.DUKHUBUSTERS_CONFIG || {};
 const essencePinCharacters = ["비요른", "에르웬", "미샤", "아이나르", "아우옌", "아브만"];
 const essencePinColorChoices = [
@@ -48,9 +47,13 @@ const essencePinColorChoices = [
   ["황동", "황동"],
   ["무지개", "무지개"],
 ];
+const publicCodexStateTable = "public_state";
+const publicCodexStateId = "codex";
+const publicCodexStateMaxBytes = 800 * 1024;
 const staticDataVersion = textOf(siteConfig.staticDataVersion) || "20260607-static-index";
 const visitorCountersEnabled = String(siteConfig.enableVisitorCounters || "").toLowerCase() === "true";
 const adminAutoLoadEnabled = String(siteConfig.enableAdminAutoLoad || "").toLowerCase() === "true";
+const publicCodexRemoteReadsEnabled = siteConfig.publicCodexRemoteReadsEnabled === true;
 const buildBackend = {
   url: textOf(siteConfig.supabaseUrl).replace(/\/$/, ""),
   anonKey: textOf(siteConfig.supabaseAnonKey),
@@ -441,6 +444,7 @@ let adminApprovedLimit = "10";
 let activeNumbersPage = 1;
 let approvedReloadPromise = null;
 let lastApprovedReloadAt = 0;
+let staticApprovedGeneratedAt = "";
 const numbersPageSize = 10;
 const statNoneLabel = "스탯 선택 안 함";
 
@@ -456,6 +460,10 @@ function textOf(value) {
 
 function currentAuthNickname() {
   return textOf(window.DUKHUBUSTERS_AUTH?.getDisplayName?.());
+}
+
+function currentAuthUid() {
+  return textOf(window.DUKHUBUSTERS_AUTH?.getUser?.()?.uid || window.DUKHUBUSTERS_AUTH?.getUser?.()?.id);
 }
 
 function isAdminUser(user = window.DUKHUBUSTERS_AUTH?.getUser?.()) {
@@ -1599,6 +1607,19 @@ function notifyApprovedDataChanged() {
   } catch {}
 }
 
+async function publishApprovedDataChanged() {
+  let published = true;
+  if (String(siteConfig.backendMode || "").toLowerCase() === "firebase" && isAdminUser()) {
+    try {
+      await publishPublicCodexState();
+    } catch {
+      published = false;
+    }
+  }
+  notifyApprovedDataChanged();
+  return published;
+}
+
 function refreshPublicApprovedData(options = {}) {
   if (!isPublicCodexPage() || !publicCodexApprovedReadsEnabled() || !hasPublicReportStore()) return Promise.resolve();
   const now = Date.now();
@@ -1743,6 +1764,81 @@ function fromFirestoreValue(value) {
     return Object.fromEntries(Object.entries(value.mapValue.fields || {}).map(([key, item]) => [key, fromFirestoreValue(item)]));
   }
   return null;
+}
+
+function publicCodexStateUrl() {
+  return firestoreDocumentUrl(publicCodexStateTable, publicCodexStateId);
+}
+
+function publicReportSnapshotRow(report) {
+  return {
+    id: report.id,
+    mode: report.mode || "new",
+    monster: report.monster || "",
+    original_monster: report.originalMonster || "",
+    grade: report.grade || "",
+    floor: report.floor || "",
+    area: report.area || "",
+    stats: report.stats || "",
+    passive: report.passive || "",
+    active: reportActiveForStorage(report),
+    author_nickname: report.authorNickname || "",
+    status: "approved",
+    created_at: report.createdAt || "",
+    reviewed_at: report.reviewedAt || "",
+  };
+}
+
+async function loadPublicCodexState() {
+  if (!publicCodexRemoteReadsEnabled) return null;
+  const url = publicCodexStateUrl();
+  if (!url) return null;
+  const response = await fetchWithTimeout(url, { cache: "no-store" }, 8000);
+  if (response.status === 404 || response.status === 403) return null;
+  if (!response.ok) throw new Error(`public codex state read failed: ${response.status}`);
+  const document = await response.json();
+  return Object.fromEntries(Object.entries(document.fields || {}).map(([key, value]) => [key, fromFirestoreValue(value)]));
+}
+
+async function applyPublicCodexState() {
+  try {
+    const state = await loadPublicCodexState();
+    if (!state || !Array.isArray(state.reports)) return false;
+    const stateTime = Date.parse(state.updated_at || 0) || 0;
+    const staticTime = Date.parse(staticApprovedGeneratedAt || 0) || 0;
+    if (staticTime && stateTime && stateTime < staticTime) return false;
+    updateApprovedFromReports(state.reports.map(normalizeRemoteReport));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function publishPublicCodexState() {
+  const url = publicCodexStateUrl();
+  if (!url) throw new Error("Firebase 공개 상태 문서 설정이 비어 있습니다.");
+  const reports = approvedReportItems.map(publicReportSnapshotRow);
+  const state = {
+    id: publicCodexStateId,
+    kind: "codex-public-state",
+    updated_at: new Date().toISOString(),
+    reports,
+  };
+  const bytes = new TextEncoder().encode(JSON.stringify(state)).byteLength;
+  if (bytes > publicCodexStateMaxBytes) throw new Error("공개 도감 상태 문서가 안전 크기를 초과했습니다.");
+  const token = await firebaseCurrentUserToken();
+  const response = await fetchWithTimeout(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fields: Object.fromEntries(Object.entries(state).map(([key, value]) => [key, toFirestoreValue(value)])),
+    }),
+  }, 10000);
+  if (!response.ok) throw new Error(`public codex state publish failed: ${response.status}`);
+  return state;
 }
 
 async function loadLocationSettingsFromFirebase() {
@@ -1934,7 +2030,7 @@ async function adminDeleteNumber(row) {
     : report;
   approvedReportItems = sortReportsByDate([saved, ...approvedReportItems.filter((item) => item.id !== saved.id)]);
   updateApprovedFromReports([...approvedReportItems]);
-  notifyApprovedDataChanged();
+  await publishApprovedDataChanged();
 }
 
 function openEssenceFilterModal(key) {
@@ -2125,7 +2221,7 @@ function initReport() {
   els.copyApproved.addEventListener("click", copyApprovedRows);
   els.adminUnlock.addEventListener("click", unlockAdmin);
   els.adminLock.addEventListener("click", lockAdmin);
-  els.adminCodeInput.addEventListener("keydown", (event) => {
+  els.adminCodeInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") unlockAdmin();
   });
   applyReportQueryParams();
@@ -2575,6 +2671,7 @@ function normalizeBuild(build) {
   }];
   return {
     ...build,
+    ownerUid: textOf(build.ownerUid || build.owner_uid),
     members: members.map((member) => ({
       ...member,
       essences: Array.isArray(member.essences) ? member.essences : [],
@@ -2671,6 +2768,7 @@ function normalizeRemoteBuild(row) {
     id: row.id,
     title: row.title,
     author: row.author || "익명",
+    ownerUid: row.owner_uid || row.ownerUid || "",
     members: Array.isArray(row.members) ? row.members : [],
     note: row.note || "",
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
@@ -2806,6 +2904,7 @@ async function markLikedBuildsForVisitor() {
 }
 
 async function savePublicBuildLike(build) {
+  if (!requireLoggedInNickname(els.buildSyncStatus, "좋아요")) return;
   const likeId = await buildLikeId(build.id);
   if (buildLikeRecordIds.has(likeId)) {
     likedBuildIds.add(build.id);
@@ -2819,6 +2918,7 @@ async function savePublicBuildLike(build) {
       id: likeId,
       title: buildLikeMarker,
       author: "like",
+      owner_uid: currentAuthUid(),
       members: [],
       note: build.id,
       created_at: new Date().toISOString(),
@@ -2851,6 +2951,7 @@ async function savePublicBuildReview(build, content) {
         id: review.id,
         title: review.title,
         author: review.author,
+        owner_uid: currentAuthUid(),
         members: review.members,
         note: review.note,
         created_at: review.createdAt,
@@ -2877,6 +2978,7 @@ async function savePublicBuildReport(build) {
           id: `build-report-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
           title: buildReportMarker,
           author: currentAuthNickname(),
+          owner_uid: currentAuthUid(),
           members: [],
           note: JSON.stringify({ buildId: build.id, reason: reason.trim().slice(0, 500) }),
           created_at: new Date().toISOString(),
@@ -2901,6 +3003,7 @@ async function savePublicBuild(build) {
       id: build.id,
       title: build.title,
       author: build.author,
+      owner_uid: build.ownerUid || currentAuthUid(),
       members,
       note: build.note,
       created_at: build.createdAt,
@@ -2923,6 +3026,7 @@ function readBuildForm() {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     title: textOf(els.buildTitle.value),
     author: currentAuthNickname(),
+    ownerUid: currentAuthUid(),
     members,
     note: textOf(els.buildNote.value),
     createdAt: new Date().toISOString(),
@@ -2934,7 +3038,7 @@ async function submitBuild(event) {
   if (!requireLoggedInNickname(els.buildSyncStatus, "빌드 만들기")) return;
   els.buildAuthor.value = currentAuthNickname();
   const build = readBuildForm();
-  build.deleteHash = await buildDeleteHash(build.id, textOf(els.buildPassword.value));
+  build.deleteHash = "";
   const submitButton = els.buildForm.querySelector("[type='submit']");
   if (submitButton) submitButton.disabled = true;
   try {
@@ -3037,9 +3141,12 @@ function copyCurrentBuildLink() {
 
 function openBuildDeleteModal(build) {
   pendingDeleteBuild = build;
-  els.buildDeleteGuide.textContent = build.deleteHash
-    ? "등록할 때 입력한 삭제용 비밀번호를 입력하세요."
-    : "기존에 등록된 공개 빌드입니다. 운영자 비밀번호를 입력하면 삭제할 수 있습니다.";
+  const ownsBuild = Boolean(build.ownerUid && currentAuthUid() && build.ownerUid === currentAuthUid());
+  els.buildDeleteGuide.textContent = ownsBuild || isAdminUser()
+    ? "작성자 또는 관리자 계정이 확인되었습니다. 삭제를 진행할 수 있습니다."
+    : build.deleteHash
+      ? "기존 빌드는 등록할 때 입력한 삭제용 비밀번호로 삭제할 수 있습니다."
+      : "작성자 또는 관리자 계정으로 로그인해야 삭제할 수 있습니다.";
   els.buildDeletePassword.value = "";
   els.buildDeleteStatus.textContent = "";
   els.buildDeleteModal.hidden = false;
@@ -3055,13 +3162,14 @@ function closeBuildDeleteModal() {
 
 async function deleteBuild(build, password) {
   const enteredPassword = textOf(password);
+  const ownsBuild = Boolean(build.ownerUid && currentAuthUid() && build.ownerUid === currentAuthUid());
   const matchesOwnerPassword = Boolean(build.deleteHash)
     && await buildDeleteHash(build.id, enteredPassword) === build.deleteHash;
-  const matchesAdminPassword = enteredPassword === adminCode;
-  if (!matchesOwnerPassword && !matchesAdminPassword) {
+  const hasAdminAccess = isAdminUser();
+  if (!ownsBuild && !matchesOwnerPassword && !hasAdminAccess) {
     els.buildDeleteStatus.textContent = build.deleteHash
       ? "삭제용 비밀번호가 맞지 않습니다."
-      : "운영자 비밀번호가 맞지 않습니다.";
+      : "작성자 또는 관리자 계정으로 로그인해야 합니다.";
     els.buildDeleteStatus.className = "build-sync-status is-offline";
     return false;
   }
@@ -3070,6 +3178,7 @@ async function deleteBuild(build, password) {
       id: `deleted-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
       title: buildDeleteMarker,
       author: "delete",
+      ownerUid: currentAuthUid(),
       members: [],
       note: build.id,
       createdAt: new Date().toISOString(),
@@ -3389,16 +3498,7 @@ function buildCard(build, shared) {
 }
 
 function unlockAdmin() {
-  if (textOf(els.adminCodeInput.value) !== adminCode) {
-    els.adminStatus.textContent = "관리자 코드가 맞지 않습니다.";
-    return;
-  }
-  adminUnlocked = true;
-  localStorage.setItem(storageKeys.adminUnlocked, "1");
-  els.adminCodeInput.value = "";
-  updateAdminUi();
-  renderPendingReports();
-  renderApprovedReports();
+  window.DUKHUBUSTERS_AUTH?.signIn?.();
 }
 
 function lockAdmin() {
@@ -5191,7 +5291,7 @@ function renderNumbers() {
     if (area !== "전체 구역" && !numberSourceMatchesArea(row, area)) return false;
     if (level !== "전체 레벨" && textOf(row["아이템 레벨(Lv)"]) !== level) return false;
     if (!query) return true;
-    return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"], row["착용부위"], row["획득처"]]
+    return [row["번호"], row["이름"], row["효과"], row["아이템 레벨(Lv)"], row["착용부위"], row["계열"], row["획득처"]]
       .some((value) => textOf(value).toLowerCase().includes(query));
   });
   const selectedEffect = selectedEffectSort();
@@ -5236,6 +5336,7 @@ function renderNumbers() {
             </div>
             <div class="number-card-meta">
               <span><b>착용부위</b>${escapeHtml(row["착용부위"] || "-")}</span>
+              <span><b>계열</b>${escapeHtml(row["계열"] || "-")}</span>
             </div>
             <div class="number-card-meta number-source-block">
               <b>획득처</b>
@@ -5462,6 +5563,7 @@ function normalizeRemoteReport(row) {
     _rawActive: rawActive,
     _deleteRequested: deleteRequested,
     authorNickname: row.author_nickname || row.authorNickname || authorNicknameFromActive(rawActive),
+    ownerUid: row.owner_uid || row.ownerUid || "",
     sailing: activeSkills.includes(sailingMarker),
     recommendedCharacters: recommendedCharacterFromActive(rawActive),
     status: row.status || "pending",
@@ -5483,6 +5585,7 @@ function reportPayloadFromReport(report, status = "pending") {
     passive: report.passive,
     active: reportActiveForStorage(report),
     author_nickname: report.authorNickname || "",
+    owner_uid: report.ownerUid || currentAuthUid(),
     status,
     created_at: report.createdAt,
     reviewed_at: report.reviewedAt || "",
@@ -5549,6 +5652,7 @@ async function loadPublicApprovedReports() {
   if (isPublicCodexPage() && !publicCodexApprovedReadsEnabled()) return;
   if (isPublicCodexPage()) {
     await loadStaticApprovedReports();
+    if (publicCodexRemoteReadsEnabled) await applyPublicCodexState();
     return;
   }
   if (!hasPublicReportStore()) return;
@@ -5565,7 +5669,9 @@ async function loadPublicApprovedReports() {
 
 async function loadStaticApprovedReports() {
   try {
-    const rows = await fetchStaticRows("reports-index");
+    const payload = await fetchStaticPayload("reports-index");
+    staticApprovedGeneratedAt = textOf(payload?.generatedAt);
+    const rows = staticPayloadRows(payload);
     updateApprovedFromReports(rows.map(normalizeRemoteReport));
   } catch {
     if (els.reportSyncStatus) setReportSyncStatus("정적 승인 정보를 불러오지 못했습니다.", "is-offline");
@@ -5574,6 +5680,7 @@ async function loadStaticApprovedReports() {
 
 async function loadPublicReports() {
   await loadStaticApprovedReports();
+  if (publicCodexRemoteReadsEnabled) await applyPublicCodexState();
   pendingReports = sortReportsByDate(loadStoredRows(storageKeys.pending).filter((report) => report.status !== "approved"));
   renderPendingReports();
   renderMyReports();
@@ -5858,7 +5965,7 @@ async function handlePendingAction(event) {
     }
     approvedReportItems = sortReportsByDate([approvedReport, ...nextApprovedItems]);
     syncApprovedRows();
-    if (publicStatusUpdated) notifyApprovedDataChanged();
+    if (publicStatusUpdated) await publishApprovedDataChanged();
     if (els.search) {
       refreshControls();
       renderStatChips();
@@ -5974,7 +6081,7 @@ async function handleApprovedAction(event) {
     if (hasPublicReportStore()) await updatePublicReportStatus(id, "deleted");
     approvedReportItems = approvedReportItems.filter((item) => item.id !== id);
     syncApprovedRows();
-    notifyApprovedDataChanged();
+    await publishApprovedDataChanged();
     if (els.search) {
       refreshControls();
       renderStatChips();
@@ -6100,7 +6207,7 @@ async function submitAdminDetailEdit(event) {
     const saved = hasPublicReportStore() ? await updatePublicReportDetail(next) : next;
     approvedReportItems = sortReportsByDate(approvedReportItems.map((item) => item.id === id ? { ...next, ...saved } : item));
     syncApprovedRows();
-    notifyApprovedDataChanged();
+    await publishApprovedDataChanged();
     renderApprovedReports();
     renderAdminCenter();
     if (els.search) {
