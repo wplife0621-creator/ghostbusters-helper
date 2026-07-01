@@ -28,6 +28,8 @@ const storageKeys = {
 
 const siteConfig = window.DUKHUBUSTERS_CONFIG || {};
 const essencePinCharacters = ["비요른", "에르웬", "미샤", "아이나르", "아우옌", "아브만"];
+const defaultCharacterPinBuildId = "build-1";
+const maxCharacterPinBuilds = 5;
 const essencePinColorChoices = [
   ["", "색 없음"],
   ["빨강", "빨강"],
@@ -675,13 +677,73 @@ function normalizeCharacterPinEntries(entries) {
   return [...byMonster.values()];
 }
 
+function defaultCharacterPinBuild(items = []) {
+  return {
+    id: defaultCharacterPinBuildId,
+    name: "빌드 1",
+    items: normalizeCharacterPinEntries(items),
+  };
+}
+
+function normalizeCharacterPinBuild(build, index = 0) {
+  const fallbackId = `build-${index + 1}`;
+  if (Array.isArray(build)) return defaultCharacterPinBuild(build);
+  if (!build || typeof build !== "object") return defaultCharacterPinBuild();
+  const id = textOf(build.id) || fallbackId;
+  const name = textOf(build.name || build.label || build["이름"]) || `빌드 ${index + 1}`;
+  return {
+    id,
+    name,
+    items: normalizeCharacterPinEntries(build.items || build.entries || build.pins || []),
+  };
+}
+
+function normalizeCharacterPinState(value) {
+  if (Array.isArray(value)) {
+    return {
+      activeBuildId: defaultCharacterPinBuildId,
+      builds: [defaultCharacterPinBuild(value)],
+    };
+  }
+  if (!value || typeof value !== "object") {
+    return {
+      activeBuildId: defaultCharacterPinBuildId,
+      builds: [defaultCharacterPinBuild()],
+    };
+  }
+  const sourceBuilds = Array.isArray(value.builds)
+    ? value.builds
+    : Array.isArray(value.items)
+      ? [value]
+      : Array.isArray(value.pins)
+        ? [{ ...value, items: value.pins }]
+        : [];
+  let builds = sourceBuilds.map(normalizeCharacterPinBuild).filter(Boolean).slice(0, maxCharacterPinBuilds);
+  if (!builds.length) builds = [defaultCharacterPinBuild()];
+  const knownIds = new Set();
+  builds = builds.map((build, index) => {
+    let id = build.id || `build-${index + 1}`;
+    let fallbackIndex = index + 1;
+    while (knownIds.has(id)) {
+      fallbackIndex += 1;
+      id = `build-${fallbackIndex}`;
+    }
+    knownIds.add(id);
+    return { ...build, id };
+  });
+  const activeBuildId = builds.some((build) => build.id === value.activeBuildId)
+    ? value.activeBuildId
+    : builds[0].id;
+  return { activeBuildId, builds };
+}
+
 function loadCharacterEssencePins() {
-  const fallback = Object.fromEntries(essencePinCharacters.map((character) => [character, []]));
+  const fallback = Object.fromEntries(essencePinCharacters.map((character) => [character, normalizeCharacterPinState(null)]));
   try {
     const parsed = JSON.parse(localStorage.getItem(storageKeys.characterEssencePins) || "{}");
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return fallback;
     essencePinCharacters.forEach((character) => {
-      fallback[character] = normalizeCharacterPinEntries(parsed[character]);
+      fallback[character] = normalizeCharacterPinState(parsed[character]);
     });
     return fallback;
   } catch {
@@ -692,7 +754,7 @@ function loadCharacterEssencePins() {
 function saveCharacterEssencePins() {
   const normalized = {};
   essencePinCharacters.forEach((character) => {
-    normalized[character] = normalizeCharacterPinEntries(characterEssencePins[character]);
+    normalized[character] = normalizeCharacterPinState(characterEssencePins[character]);
   });
   characterEssencePins = normalized;
   localStorage.setItem(storageKeys.characterEssencePins, JSON.stringify(characterEssencePins));
@@ -707,6 +769,52 @@ function setActiveEssencePinCharacter(character) {
   if (!essencePinCharacters.includes(character)) return;
   activeEssencePinCharacter = character;
   localStorage.setItem(storageKeys.activeEssencePinCharacter, character);
+}
+
+function characterPinState(character) {
+  if (!essencePinCharacters.includes(character)) return normalizeCharacterPinState(null);
+  const state = normalizeCharacterPinState(characterEssencePins[character]);
+  characterEssencePins[character] = state;
+  return state;
+}
+
+function characterPinBuilds(character) {
+  return characterPinState(character).builds;
+}
+
+function activeCharacterPinBuildId(character = activeEssencePinCharacter) {
+  return characterPinState(character).activeBuildId;
+}
+
+function activeCharacterPinBuild(character = activeEssencePinCharacter) {
+  const state = characterPinState(character);
+  return state.builds.find((build) => build.id === state.activeBuildId) || state.builds[0] || defaultCharacterPinBuild();
+}
+
+function setActiveCharacterPinBuild(character, buildId) {
+  if (!essencePinCharacters.includes(character)) return;
+  const state = characterPinState(character);
+  if (!state.builds.some((build) => build.id === buildId)) return;
+  characterEssencePins[character] = { ...state, activeBuildId: buildId };
+  saveCharacterEssencePins();
+}
+
+function addCharacterPinBuild(character) {
+  if (!essencePinCharacters.includes(character)) return;
+  const state = characterPinState(character);
+  if (state.builds.length >= maxCharacterPinBuilds) return;
+  let nextNumber = state.builds.length + 1;
+  while (state.builds.some((build) => build.id === `build-${nextNumber}`)) nextNumber += 1;
+  const build = {
+    id: `build-${nextNumber}`,
+    name: `빌드 ${nextNumber}`,
+    items: [],
+  };
+  characterEssencePins[character] = {
+    activeBuildId: build.id,
+    builds: [...state.builds, build],
+  };
+  saveCharacterEssencePins();
 }
 
 function monsterKey(value) {
@@ -743,33 +851,36 @@ function isPinnedEssence(row) {
 function pinnedCharactersForEssence(row) {
   const key = monsterKey(row?.["몬스터"]);
   if (!key) return [];
-  return essencePinCharacters.filter((character) => (characterEssencePins[character] || [])
-    .some((entry) => monsterKey(normalizeCharacterPinEntry(entry)?.monster) === key));
+  return essencePinCharacters.filter((character) => characterPinBuilds(character)
+    .some((build) => normalizeCharacterPinEntries(build.items)
+      .some((entry) => monsterKey(entry.monster) === key)));
 }
 
 function isCharacterPinnedEssence(row) {
   return pinnedCharactersForEssence(row).length > 0;
 }
 
-function characterPinnedRows(character) {
-  return characterPinnedItems(character).map((item) => item.row);
+function characterPinnedRows(character, buildId = activeCharacterPinBuildId(character)) {
+  return characterPinnedItems(character, buildId).map((item) => item.row);
 }
 
-function characterPinnedItems(character) {
-  return normalizeCharacterPinEntries(characterEssencePins[character])
+function characterPinnedItems(character, buildId = activeCharacterPinBuildId(character)) {
+  const build = characterPinBuilds(character).find((item) => item.id === buildId) || activeCharacterPinBuild(character);
+  return normalizeCharacterPinEntries(build.items)
     .map((entry) => ({ entry, row: findMonsterRow(entry.monster) }))
     .filter((item) => item.row);
 }
 
-function characterPinEntry(character, monsterName) {
+function characterPinEntry(character, monsterName, buildId = activeCharacterPinBuildId(character)) {
   const key = monsterKey(monsterName);
   if (!key) return null;
-  return normalizeCharacterPinEntries(characterEssencePins[character])
+  const build = characterPinBuilds(character).find((item) => item.id === buildId) || activeCharacterPinBuild(character);
+  return normalizeCharacterPinEntries(build.items)
     .find((entry) => monsterKey(entry.monster) === key) || null;
 }
 
-function characterPinColor(character, monsterName) {
-  return characterPinEntry(character, monsterName)?.color || "";
+function characterPinColor(character, monsterName, buildId = activeCharacterPinBuildId(character)) {
+  return characterPinEntry(character, monsterName, buildId)?.color || "";
 }
 
 function activeSkillEntries(row) {
@@ -803,14 +914,23 @@ function characterPinColorOptions(row, selected = "") {
   ].join("");
 }
 
-function setCharacterEssencePinColor(character, monsterName, color) {
+function setCharacterEssencePinColor(character, monsterName, color, buildId = activeCharacterPinBuildId(character)) {
   if (!essencePinCharacters.includes(character)) return;
   const key = monsterKey(monsterName);
   if (!key) return;
-  characterEssencePins[character] = normalizeCharacterPinEntries(characterEssencePins[character])
-    .map((entry) => monsterKey(entry.monster) === key
-      ? { ...entry, color: normalizeEssencePinColor(color) }
-      : entry);
+  const state = characterPinState(character);
+  characterEssencePins[character] = {
+    ...state,
+    builds: state.builds.map((build) => build.id === buildId
+      ? {
+          ...build,
+          items: normalizeCharacterPinEntries(build.items)
+            .map((entry) => monsterKey(entry.monster) === key
+              ? { ...entry, color: normalizeEssencePinColor(color) }
+              : entry),
+        }
+      : build),
+  };
   saveCharacterEssencePins();
 }
 
@@ -846,7 +966,8 @@ function compactStatBadges(value, limit = 4) {
 }
 
 function characterPinCount(character) {
-  return characterPinnedRows(character).length;
+  return characterPinBuilds(character)
+    .reduce((sum, build) => sum + normalizeCharacterPinEntries(build.items).length, 0);
 }
 
 function isActiveCharacterPinned(row) {
@@ -854,28 +975,44 @@ function isActiveCharacterPinned(row) {
   return Boolean(key && characterPinEntry(activeEssencePinCharacter, key));
 }
 
-function addCharacterEssencePin(character, monsterName) {
+function addCharacterEssencePin(character, monsterName, buildId = activeCharacterPinBuildId(character)) {
   if (!essencePinCharacters.includes(character)) return;
   const name = textOf(monsterName);
   if (!name) return;
-  const current = normalizeCharacterPinEntries(characterEssencePins[character]);
+  const state = characterPinState(character);
+  const currentBuild = state.builds.find((build) => build.id === buildId) || activeCharacterPinBuild(character);
+  const current = normalizeCharacterPinEntries(currentBuild.items);
   if (!current.some((item) => monsterKey(item.monster) === monsterKey(name))) {
-    characterEssencePins[character] = [...current, { monster: name, color: "" }];
+    characterEssencePins[character] = {
+      ...state,
+      builds: state.builds.map((build) => build.id === currentBuild.id
+        ? { ...build, items: [...current, { monster: name, color: "" }] }
+        : build),
+    };
     saveCharacterEssencePins();
   }
 }
 
-function removeCharacterEssencePin(character, monsterName) {
+function removeCharacterEssencePin(character, monsterName, buildId = activeCharacterPinBuildId(character)) {
   if (!essencePinCharacters.includes(character)) return;
   const key = monsterKey(monsterName);
-  characterEssencePins[character] = normalizeCharacterPinEntries(characterEssencePins[character])
-    .filter((item) => monsterKey(item.monster) !== key);
+  const state = characterPinState(character);
+  characterEssencePins[character] = {
+    ...state,
+    builds: state.builds.map((build) => build.id === buildId
+      ? { ...build, items: normalizeCharacterPinEntries(build.items).filter((item) => monsterKey(item.monster) !== key) }
+      : build),
+  };
   saveCharacterEssencePins();
 }
 
-function clearCharacterEssencePins(character) {
+function clearCharacterEssencePins(character, buildId = activeCharacterPinBuildId(character)) {
   if (!essencePinCharacters.includes(character)) return;
-  characterEssencePins[character] = [];
+  const state = characterPinState(character);
+  characterEssencePins[character] = {
+    ...state,
+    builds: state.builds.map((build) => build.id === buildId ? { ...build, items: [] } : build),
+  };
   saveCharacterEssencePins();
 }
 
@@ -4464,7 +4601,12 @@ function closeQuickEditModal() {
 function handleEssenceResultChange(event) {
   const colorSelect = event.target.closest(".character-pin-color-select");
   if (colorSelect) {
-    setCharacterEssencePinColor(colorSelect.dataset.characterColor, colorSelect.dataset.monster, colorSelect.value);
+    setCharacterEssencePinColor(
+      colorSelect.dataset.characterColor,
+      colorSelect.dataset.monster,
+      colorSelect.value,
+      colorSelect.dataset.characterBuild,
+    );
     render();
     return;
   }
@@ -4482,16 +4624,30 @@ function handleEssenceResultClick(event) {
     return;
   }
 
+  const buildTabButton = event.target.closest("button[data-character-build-tab]");
+  if (buildTabButton) {
+    setActiveCharacterPinBuild(buildTabButton.dataset.characterBuildCharacter, buildTabButton.dataset.characterBuildTab);
+    render();
+    return;
+  }
+
+  const buildAddButton = event.target.closest("button[data-character-build-add]");
+  if (buildAddButton) {
+    addCharacterPinBuild(buildAddButton.dataset.characterBuildAdd);
+    render();
+    return;
+  }
+
   const unpinButton = event.target.closest("button[data-character-unpin]");
   if (unpinButton) {
-    removeCharacterEssencePin(unpinButton.dataset.characterUnpin, unpinButton.dataset.monster);
+    removeCharacterEssencePin(unpinButton.dataset.characterUnpin, unpinButton.dataset.monster, unpinButton.dataset.characterBuild);
     render();
     return;
   }
 
   const clearButton = event.target.closest("button[data-character-clear]");
   if (clearButton) {
-    clearCharacterEssencePins(clearButton.dataset.characterClear);
+    clearCharacterEssencePins(clearButton.dataset.characterClear, clearButton.dataset.characterBuild);
     render();
     return;
   }
@@ -5019,14 +5175,17 @@ function render() {
 }
 
 function characterEssenceBoardTemplate() {
-  const items = characterPinnedItems(activeEssencePinCharacter);
+  const activeBuild = activeCharacterPinBuild(activeEssencePinCharacter);
+  const activeBuildId = activeBuild.id;
+  const builds = characterPinBuilds(activeEssencePinCharacter);
+  const items = characterPinnedItems(activeEssencePinCharacter, activeBuildId);
   const rows = items.map((item) => item.row);
   return `
     <section class="character-essence-board panel">
       <div class="character-board-head">
         <div>
           <strong>내 캐릭터 정수</strong>
-          <span>${escapeHtml(activeEssencePinCharacter)} 탭에서 체크한 정수는 이 브라우저에 자동 저장됩니다.</span>
+          <span>${escapeHtml(activeEssencePinCharacter)} · ${escapeHtml(activeBuild.name)}에 체크한 정수는 이 브라우저에 자동 저장됩니다.</span>
         </div>
       </div>
       <div class="character-tabs" role="tablist" aria-label="캐릭터 선택">
@@ -5038,26 +5197,36 @@ function characterEssenceBoardTemplate() {
       </div>
       <div class="active-character-panel">
         <div class="active-character-summary">
-          <div>
-            <h3>${escapeHtml(activeEssencePinCharacter)} 정수</h3>
-            <span>${rows.length}개 담김</span>
+          <div class="active-character-title-group">
+            <div class="active-character-title-row">
+              <h3>${escapeHtml(activeEssencePinCharacter)} 정수</h3>
+              <div class="character-build-tabs" role="tablist" aria-label="${escapeHtml(activeEssencePinCharacter)} 빌드 선택">
+                ${builds.map((build) => `
+                  <button type="button" role="tab" data-character-build-character="${escapeHtml(activeEssencePinCharacter)}" data-character-build-tab="${escapeHtml(build.id)}" class="${build.id === activeBuildId ? "is-active" : ""}" aria-selected="${build.id === activeBuildId ? "true" : "false"}">
+                    ${escapeHtml(build.name)} <span>${normalizeCharacterPinEntries(build.items).length}</span>
+                  </button>
+                `).join("")}
+                ${builds.length < maxCharacterPinBuilds ? `<button type="button" class="build-add" data-character-build-add="${escapeHtml(activeEssencePinCharacter)}" aria-label="빌드 추가">+</button>` : ""}
+              </div>
+            </div>
+            <span>${escapeHtml(activeBuild.name)} · ${rows.length}개 담김</span>
           </div>
-          ${rows.length ? `<button type="button" data-character-clear="${escapeHtml(activeEssencePinCharacter)}">비우기</button>` : ""}
+          ${rows.length ? `<button type="button" data-character-clear="${escapeHtml(activeEssencePinCharacter)}" data-character-build="${escapeHtml(activeBuildId)}">비우기</button>` : ""}
         </div>
         ${rows.length
           ? `<div class="character-stat-summary">${characterStatSummaryTemplate(rows)}</div>
             <ul class="character-pin-list">
-              ${items.map((item) => characterPinnedEssenceItemTemplate(activeEssencePinCharacter, item)).join("")}
+              ${items.map((item) => characterPinnedEssenceItemTemplate(activeEssencePinCharacter, item, activeBuildId)).join("")}
             </ul>`
-          : `<p class="character-pin-empty">아래 정수 목록에서 체크하면 ${escapeHtml(activeEssencePinCharacter)} 정수로 담깁니다.</p>`}
+          : `<p class="character-pin-empty">아래 정수 목록에서 체크하면 ${escapeHtml(activeEssencePinCharacter)} ${escapeHtml(activeBuild.name)} 정수로 담깁니다.</p>`}
       </div>
     </section>
   `;
 }
 
-function characterPinnedEssenceItemTemplate(character, item) {
+function characterPinnedEssenceItemTemplate(character, item, buildId = activeCharacterPinBuildId(character)) {
   const { row, entry } = item;
-  const color = effectiveCharacterPinColor(row, characterPinColor(character, entry.monster));
+  const color = effectiveCharacterPinColor(row, characterPinColor(character, entry.monster, buildId));
   const hasColorChoices = activeColorsForEssence(row).length > 0;
   return `
     <li class="${color ? `has-pin-color pin-color-${escapeHtml(color)}` : ""}">
@@ -5069,7 +5238,7 @@ function characterPinnedEssenceItemTemplate(character, item) {
             <span class="grade-pill">${escapeHtml(row["등급"] || "-")}</span>
             <label class="character-pin-color">
               <span class="sr-only">색상</span>
-              <select class="character-pin-color-select" data-character-color="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}" ${hasColorChoices ? "" : "disabled"}>
+              <select class="character-pin-color-select" data-character-color="${escapeHtml(character)}" data-character-build="${escapeHtml(buildId)}" data-monster="${escapeHtml(row["몬스터"])}" ${hasColorChoices ? "" : "disabled"}>
                 ${characterPinColorOptions(row, color)}
               </select>
             </label>
@@ -5090,7 +5259,7 @@ function characterPinnedEssenceItemTemplate(character, item) {
       </div>
       <div class="character-pin-actions">
         <button type="button" data-character-jump="${escapeHtml(row["몬스터"])}">보기</button>
-        <button type="button" data-character-unpin="${escapeHtml(character)}" data-monster="${escapeHtml(row["몬스터"])}">제거</button>
+        <button type="button" data-character-unpin="${escapeHtml(character)}" data-character-build="${escapeHtml(buildId)}" data-monster="${escapeHtml(row["몬스터"])}">제거</button>
       </div>
     </li>
   `;
@@ -5184,13 +5353,14 @@ function essenceRowTemplate(row) {
   const activeStats = hasStatSort() ? selectedStatNames() : [];
   const selectedEffect = selectedEffectSort();
   const effectScore = selectedEffect ? effectSortScore(row, selectedEffect) : null;
+  const activeBuild = activeCharacterPinBuild(activeEssencePinCharacter);
   const highlightText = activeStats.length
     ? activeStats.map((statName) => `${statName} ${statValue(row, statName)}`).join(" · ")
     : "";
   return `
     <tr data-essence-monster="${escapeHtml(row["몬스터"])}">
       <td data-label="담기" class="pin-cell">
-        <label class="character-pin-check" title="${escapeHtml(activeEssencePinCharacter)} 정수로 담기">
+        <label class="character-pin-check" title="${escapeHtml(activeEssencePinCharacter)} ${escapeHtml(activeBuild.name)} 정수로 담기">
           <input class="character-pin-checkbox" type="checkbox" data-monster="${escapeHtml(row["몬스터"])}" ${isActiveCharacterPinned(row) ? "checked" : ""}>
           <span class="sr-only">${isActiveCharacterPinned(row) ? "담김" : "담기"}</span>
         </label>

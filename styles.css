@@ -5209,6 +5209,22 @@ select[multiple] option:checked {
     flex: 0 0 auto;
   }
 
+  .active-character-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .character-build-tabs {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 3px;
+  }
+
+  .character-build-tabs button {
+    flex: 0 0 auto;
+  }
+
   .character-pin-list li {
     padding: 12px;
   }
@@ -5294,6 +5310,60 @@ select[multiple] option:checked {
   font-size: 16px;
 }
 
+.active-character-title-group {
+  min-width: 0;
+}
+
+.active-character-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.character-build-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.character-build-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #d8e7f1;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #356174;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 6px 9px;
+  cursor: pointer;
+}
+
+.character-build-tabs button:hover,
+.character-build-tabs button.is-active {
+  border-color: #77d3c0;
+  background: #ecfff9;
+  color: #007e68;
+}
+
+.character-build-tabs button span {
+  border-radius: 999px;
+  background: #dff7f1;
+  color: #007e68;
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+.character-build-tabs .build-add {
+  width: 28px;
+  justify-content: center;
+  padding-inline: 0;
+}
+
 .active-character-summary button,
 .character-pin-actions button,
 .character-pin-check {
@@ -5307,6 +5377,25 @@ select[multiple] option:checked {
 .active-character-summary button:hover,
 .character-pin-actions button:hover {
   background: #edf4ff;
+}
+
+.active-character-summary .character-build-tabs button {
+  border: 1px solid #d8e7f1;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #356174;
+  padding: 6px 9px;
+}
+
+.active-character-summary .character-build-tabs button:hover,
+.active-character-summary .character-build-tabs button.is-active {
+  border-color: #77d3c0;
+  background: #ecfff9;
+  color: #007e68;
+}
+
+.active-character-summary .character-build-tabs .build-add {
+  padding-inline: 0;
 }
 
 .character-stat-summary {
