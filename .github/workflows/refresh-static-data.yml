@@ -1,10 +1,12 @@
 name: Refresh static public data
 
 on:
-  schedule:
-    # Daily at 03:10 KST. GitHub Actions cron uses UTC.
-    - cron: "10 18 * * *"
   workflow_dispatch:
+    inputs:
+      confirm_firestore_read:
+        description: "Type FIRESTORE_READ to intentionally refresh static data from Firestore."
+        required: true
+        default: ""
 
 permissions:
   contents: write
@@ -15,6 +17,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Guard Firestore reads
+        run: |
+          if [ "${{ github.event.inputs.confirm_firestore_read }}" != "FIRESTORE_READ" ]; then
+            echo "Firestore refresh is disabled for static-only operations."
+            echo "Use the site data JSON files and ghost-data.js as the source of truth."
+            exit 0
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

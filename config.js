@@ -1,8 +1,8 @@
 window.DUKHUBUSTERS_CONFIG = {
   supabaseUrl: "https://bjlykfxfminmjfgilowj.supabase.co",
   supabaseAnonKey: "sb_publishable_JyUVYzb2vZoQiyLSasTNYg_P-LoaJrx",
-  // Temporary quota-safe mode: keep public pages on static/local data and prevent
-  // Firebase bridge/auth from consuming Firestore reads until backups can run.
+  // Static-only operations mode: keep public pages on static/local data and prevent
+  // Firebase bridge/auth from consuming Firestore reads.
   backendMode: "static",
   communityRemoteReadsEnabled: false,
   guideRemoteReadsEnabled: false,
